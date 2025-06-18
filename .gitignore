@@ -4,3 +4,56 @@ documents*
 *.venv*
 */.venv/
 *.bak
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE / Editor
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Python test & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Docker overrides
+docker-compose.override.yml
+
+# Environment files
+.env
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Database & backups
+*.db
+*.sqlite3
+*.bak
+mssql_backups/
+
+# Static / generated assets (si tu en as)
+staticfiles/
+node_modules/

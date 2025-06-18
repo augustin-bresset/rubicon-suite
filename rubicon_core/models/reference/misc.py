@@ -1,4 +1,4 @@
-# rubicon_core/models/stone.py
+# rubicon_core/models/misc.py
 
 from sqlalchemy import (
     Table, Column, CHAR, String, Numeric, SmallInteger, ForeignKey, Boolean, Integer
@@ -13,3 +13,7 @@ class Currency(Base):
     code        = Column(CHAR(3), primary_key=True)   # ex. "EUR", "USD"
     name        = Column(String(50), nullable=False)  # "Euro", "US Dollar"
     symbol      = Column(String(5), nullable=True)    # "€", "$"
+    rate        = Column(Numeric(10, 3), nullable=False, doc="Rate to dollar")
+    
+    
+    

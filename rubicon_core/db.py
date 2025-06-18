@@ -2,6 +2,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
+from .models.reference.metal import *
+from .models.reference.misc import *
+from .models.reference.parts import *
+from .models.reference.prices import *
+from .models.reference.stone import *
+from .models.transaction.stock import *
+from .models.transaction.stone import *
+
 # URL de connexion PostgreSQL (à adapter selon tes credentials)
 DATABASE_URL = "postgresql+psycopg2://odoo:odoo@localhost:5432/rubicon"
 
