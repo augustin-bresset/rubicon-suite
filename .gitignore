@@ -1,0 +1,6 @@
+data/*
+mssql_backups*
+documents*
+*.venv*
+*/.venv/
+*.bak
