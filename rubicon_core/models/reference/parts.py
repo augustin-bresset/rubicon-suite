@@ -30,7 +30,7 @@ class PartCost(Base):
     part_id      = Column(CHAR(5), ForeignKey("parts.id"), nullable=False)
     purity_name  = Column(
         CHAR(3),
-        ForeignKey("gold_purities.purity_name"),
+        ForeignKey("gold_purities.name"),
         nullable=False,
         doc="Gold purity 18K, ..."
     )
