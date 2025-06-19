@@ -6,7 +6,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from rubicon_core.db import Base
 
-from ..reference.stone import StoneType, StoneShade, StoneShape, StoneSize
 
 class Stone(Base):
     __tablename__ = "stones"

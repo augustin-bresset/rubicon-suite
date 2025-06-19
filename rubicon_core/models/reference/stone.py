@@ -6,8 +6,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from rubicon_core.db import Base
 
-from ..transaction.stone import Stone
-from ..transaction.stock import Item
 
 class StoneCategory(Base):
     __tablename__ = "stone_categories"

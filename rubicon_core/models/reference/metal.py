@@ -13,7 +13,7 @@ class Metal(Base):
     id       = Column(CHAR(2), primary_key=True)
     name     = Column(String(50), nullable=False)    
     ucost    = Column(Numeric(18), nullable=False, doc="Cost per kg")
-    currency       = Column(Column(CHAR(3), "currencies.code"), nullable=False, default="USD")
+    currency       = Column(CHAR(3), ForeignKey("currencies.code"), nullable=False)
     apply_plating  = Column(Boolean, nullable=True)         # BIT
 
     is_gold        = Column(Boolean, default=True)
