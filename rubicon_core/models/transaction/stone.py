@@ -10,16 +10,19 @@ from rubicon_core.db import Base
 class Stone(Base):
     __tablename__ = "stones"
     
-    type_id     = Column(CHAR(5), ForeignKey("stone_types.id"), nullable=False)
+    id          = Column(Integer, primary_key=True)
     
-    id    = Column(Integer, primary_key=True)
-    shape       = Column(CHAR(5), ForeignKey("stone_shapes.shape"), nullable=False)
-    shade       = Column(CHAR(5), ForeignKey("stone_shades.shade"), nullable=False)
+    type_id     = Column(Integer, ForeignKey("stone_types.id"), nullable=False)
+    
+    shape_id    = Column(Integer, ForeignKey("stone_shapes.id"), nullable=False)
+    shade_id    = Column(Integer, ForeignKey("stone_shades.id"), nullable=False)
     size        = Column(String(10), ForeignKey("stone_sizes.size"), nullable=False)
+    
     weight      = Column(Numeric(5, 2), doc="Weight in carat (=0.2g)")
     cost        = Column(Numeric(10, 2), nullable=False)
     currency    = Column(CHAR(3), ForeignKey("currencies.code"), nullable=False, default="USD")
-    item_id    = Column(String(40), ForeignKey("items.id"))
+    
+    item_id     = Column(Integer, ForeignKey("items.id"))
     
     stone_type  = relationship("StoneType", back_populates="stones")
 

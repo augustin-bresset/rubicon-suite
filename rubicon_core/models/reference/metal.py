@@ -10,11 +10,12 @@ from rubicon_core.db import Base
 class Metal(Base):
     __tablename__ = "metals"
     
-    id       = Column(CHAR(2), primary_key=True)
-    name     = Column(String(50), nullable=False)    
-    ucost    = Column(Numeric(18), nullable=False, doc="Cost per kg")
+    id             = Column(Integer, primary_key=True, autoincrement=True)
+    code           = Column(CHAR(2), nullable=False, unique=True)
+    name           = Column(String(50), nullable=False)    
+    unit_cost      = Column(Numeric(18), nullable=False, doc="Cost per kg")
     currency       = Column(CHAR(3), ForeignKey("currencies.code"), nullable=False)
-    apply_plating  = Column(Boolean, nullable=True)         # BIT
+    plating        = Column(Boolean, nullable=True)         # BIT
 
     is_gold        = Column(Boolean, default=True)
     purity         = Column(String(3), ForeignKey("gold_purities.name"), default=None)
@@ -26,7 +27,8 @@ class Metal(Base):
 class GoldPurity(Base):
     __tablename__ = "gold_purities"
     
-    name     = Column(String(3), primary_key=True)
-    percent  = Column(Numeric(3, 1))
+    id       = Column(Integer, primary_key=True, autoincrement=True)
+    name     = Column(String(3), nullable=False, unique=True)
+    percent  = Column(Numeric(4, 1))
 
 

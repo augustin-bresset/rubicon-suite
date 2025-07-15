@@ -65,7 +65,7 @@ rubicon-suite/
 Lancer PostgreSQL + Odoo :
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 * PostgreSQL écoute sur `localhost:5432`
@@ -107,42 +107,21 @@ docker-compose run --rm web alembic upgrade head
 1. Copier/monter `rubicon_addons` via `docker-compose` (voir `volumes`)
 2. Redémarrer le service Odoo :
 
-   ```bash
-   ```
+```bash
 
-docker-compose restart odoo
+docker compose restart odoo
 
 ```
+
 3. Connectez-vous à `http://localhost:8069`, et installez votre addon `pdp`.
+```
 
----
 
-## 🔍 Tests et données d’exemple
+## Database
 
-Les jeux d’exemples se trouvent dans `data/examples/` :
-- `client_order.json` : format JSON d’une commande client
-- `client_order_table.csv` : même données au format tabulaire
 
-Vous pouvez importer ces données via un script Python SQLAlchemy dans `rubicon_core/`.
+Recreer les tables odoo
 
----
-
-## 📚 Bonnes pratiques
-
-- **Monorepo** : pour l’instant, tout est dans un seul dépôt. Si la taille ou l’indépendance devient critique, envisagez des sous-modules Git.
-- **.env** : centraliser toutes vos variables d’env.
-- **.gitignore** : ignorer `db-data/`, `__pycache__/`, `.venv/`, `.env`, etc.
-
----
-
-## 🤝 Contribuer
-
-1. Forkez le dépôt
-2. Créez une branche `feature/ma-fonctionnalite`
-3. Commit & PR
-
----
-
-*README généré le* `$(date +"%Y-%m-%d")`
-
+```
+docker compose run --rm odoo   odoo     --db_host=db     --db_port=5432     --db_user=rubicondev     --db_password=passwd     -d rubicon -i base     --stop-after-init
 ```

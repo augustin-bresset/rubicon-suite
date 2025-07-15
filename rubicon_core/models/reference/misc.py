@@ -7,13 +7,29 @@ from sqlalchemy.orm import relationship
 from rubicon_core.db import Base
 
 
-# rubicon_core/models/currency.py
 class Currency(Base):
     __tablename__ = "currencies"
-    code        = Column(CHAR(3), primary_key=True)   # ex. "EUR", "USD"
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    code        = Column(CHAR(3), nullable=False, unique=True)   # ex. "EUR", "USD"
     name        = Column(String(50), nullable=False)  # "Euro", "US Dollar"
     symbol      = Column(String(5), nullable=True)    # "€", "$"
-    rate        = Column(Numeric(10, 3), nullable=False, doc="Rate to dollar")
     
+class Region(Base):
+    __tablename__ = "regions"
     
+    id      = Column(Integer, primary_key=True, autoincrement=True)
+    code    = Column(CHAR(2), nullable=False, unique=True)
+    name    = Column(String(40), nullable=False)
+    
+    countries = relationship("Country")
+    
+class Country(Base):
+    __tablename__ = "countries"
+    
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    code        = Column(CHAR(2), nullable=False, unique=True)
+    name        = Column(String(40), nullable=False)
+    region_id   = Column(Integer, ForeignKey("regions.id"))
+    
+    region = relationship("Region", back_populates="countries")
     

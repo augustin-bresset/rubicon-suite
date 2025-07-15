@@ -2,13 +2,14 @@ from sqlalchemy import (
     Column, CHAR, String, Numeric, ForeignKey,
     Boolean, Integer, UniqueConstraint
 )
-from sqlalchemy.orm import relationship
+
 from rubicon_core.db import Base
 
 class Margin(Base):
     __tablename__ = "margins"
     
-    id          = Column(String(10), primary_key=True)
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    code        = Column(String(10), nullable=False, unique=True)
     name        = Column(String(40), nullable=False)
     percent     = Column(Numeric(5, 2), nullable=False)
     

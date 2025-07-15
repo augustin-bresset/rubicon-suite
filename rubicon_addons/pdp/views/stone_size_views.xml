@@ -1,0 +1,21 @@
+<odoo>
+
+  <menuitem id="menu_pdp_root" name="PDP" sequence="10"/>
+
+  <!-- 2. Sous-menu Catalogue -->
+  <menuitem id="menu_pdp_catalog"
+            name="Catalogue"
+            parent="menu_pdp_root"
+            sequence="10"/>
+  <!-- Action générique pour les catégories -->
+  <record id="action_pdp_stone_size" model="ir.actions.act_window">
+    <field name="name">Sizes</field>
+    <field name="res_model">pdp.stone.size</field>
+    <field name="view_mode">tree,form</field>
+    <!-- pas de <field name="view_id"> ni de <field name="views"> -->
+  </record>
+  <menuitem id="menu_pdp_size"
+            name="Sizes"
+            parent="menu_pdp_catalog"
+            action="action_pdp_stone_size"/>
+</odoo>

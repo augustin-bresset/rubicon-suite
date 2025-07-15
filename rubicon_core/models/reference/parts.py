@@ -8,11 +8,10 @@ from rubicon_core.db import Base
 class Part(Base):
     __tablename__ = "parts"
 
-    id      = Column(CHAR(5), primary_key=True)
-    name    = Column(String(50), nullable=False, unique=True)
-    is_gold = Column(Boolean, nullable=False, default=True)
+    id           = Column(Integer, primary_key=True, autoincrement=True)
+    code         = Column(CHAR(5), nullable=False, unique=True)
+    name         = Column(String(50), nullable=False, unique=True)
 
-    # Tous les coûts selon pureté
     costs   = relationship(
         "PartCost",
         back_populates="part",
@@ -22,19 +21,13 @@ class Part(Base):
 
 class PartCost(Base):
     __tablename__   = "part_costs"
-    __table_args__  = (
-        UniqueConstraint("part_id", "purity_name", name="uq_part_costs_purity"),
-    )
-
+    
     id           = Column(Integer, primary_key=True, autoincrement=True)
-    part_id      = Column(CHAR(5), ForeignKey("parts.id"), nullable=False)
-    purity_name  = Column(
-        CHAR(3),
-        ForeignKey("gold_purities.name"),
-        nullable=False,
-        doc="Gold purity 18K, ..."
-    )
-    amount       = Column(Numeric(10, 2), nullable=False, doc="Unit Cost")
+    part_id      = Column(Integer, ForeignKey("parts.id"))
+    purity_id    = Column(Integer, ForeignKey("gold_purities.id"), nullable=False, 
+                          doc="Gold purity 18K, ...")
+    
+    cost         = Column(Numeric(10, 2), nullable=False, doc="Unit Cost")
     currency_code= Column(
         CHAR(3),
         ForeignKey("currencies.code"),

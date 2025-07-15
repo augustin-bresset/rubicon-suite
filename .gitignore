@@ -56,6 +56,7 @@ logs/
 *.sqlite3
 *.bak
 mssql_backups/
+*.csv
 
 # Static / generated assets (si tu en as)
 staticfiles/

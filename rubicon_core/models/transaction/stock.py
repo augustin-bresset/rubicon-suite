@@ -8,6 +8,8 @@ from rubicon_core.db import Base
 
 class Item(Base):
     __tablename__ = "items"
-    id = Column(String(40), primary_key=True)
+    
+    id       = Column(Integer, primary_key=True, autoincrement=True)
+    code     = Column(String(40), nullable=False, unique=True)
     quantity = Column(Integer, nullable=False, default=1)
     
