@@ -114,7 +114,7 @@ docker compose restart odoo
 ```
 
 3. Connectez-vous à `http://localhost:8069`, et installez votre addon `pdp`.
-```
+
 
 
 ## Database
@@ -122,6 +122,6 @@ docker compose restart odoo
 
 Recreer les tables odoo
 
-```
+```bash
 docker compose run --rm odoo   odoo     --db_host=db     --db_port=5432     --db_user=rubicondev     --db_password=passwd     -d rubicon -i base     --stop-after-init
 ```
