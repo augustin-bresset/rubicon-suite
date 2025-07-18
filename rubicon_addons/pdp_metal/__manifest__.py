@@ -1,5 +1,5 @@
 {
-    'name': 'PDP',
+    'name': 'PDP Metal',
     'version': '0.01',
     'license': 'LGPL-3',
     'category': 'Product',
@@ -9,14 +9,10 @@
         # Security
         'security/ir.model.access.csv',
         # Data
-        'data/stone/pdp.stone.category.csv',
-        'data/stone/pdp.stone.type.csv',
-        'data/stone/pdp.stone.shape.csv',
-        'data/stone/pdp.stone.size.csv',
-        'data/stone/pdp.stone.shade.csv',
-        'data/stone/pdp.stone.weight.csv',
-        'data/stone/pdp.stone.item.csv',
-        
+        'data/pdp.metal.purity.csv',
+        'data/pdp.metal.csv',
+        'data/pdp.part.csv',
+        'data/pdp.part.cost.csv',
         
         # Views
         'views/pdp_views.xml',

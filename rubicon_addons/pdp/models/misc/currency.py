@@ -1,7 +1,7 @@
 from odoo import models, fields
 
 class Currency(models.Model):
-    _name = 'rubicon.currency'
+    _name = 'rubicon.misc.currency'
     _table = 'currencies'
     _description = 'Currency'
     _sql_constraints = [

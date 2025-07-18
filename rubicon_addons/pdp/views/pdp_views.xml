@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Stone Category -->
+  <record id="view_pdp_stone_category_list" model="ir.ui.view">
+    <field name="name">pdp.stone.category.list</field>
+    <field name="model">pdp.stone.category</field>
+    <field name="arch" type="xml">
+      <list string="Stone Categories">
+        <field name="code"/>
+        <field name="name"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Stone Type -->
+  <record id="view_pdp_stone_type_list" model="ir.ui.view">
+    <field name="name">pdp.stone.type.list</field>
+    <field name="model">pdp.stone.type</field>
+    <field name="arch" type="xml">
+      <list string="Stone Types">
+        <field name="code"/>
+        <field name="name"/>
+        <field name="density"/>
+        <field name="category_code"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Stone Size -->
+  <record id="view_pdp_stone_size_list" model="ir.ui.view">
+    <field name="name">pdp.stone.size.list</field>
+    <field name="model">pdp.stone.size</field>
+    <field name="arch" type="xml">
+      <list string="Stone Sizes">
+        <field name="size"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Stone Shape -->
+  <record id="view_pdp_stone_shape_list" model="ir.ui.view">
+    <field name="name">pdp.stone.shape.list</field>
+    <field name="model">pdp.stone.shape</field>
+    <field name="arch" type="xml">
+      <list string="Stone Shapes">
+        <field name="code"/>
+        <field name="shape"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Stone Shade -->
+  <record id="view_pdp_stone_shade_list" model="ir.ui.view">
+    <field name="name">pdp.stone.shade.list</field>
+    <field name="model">pdp.stone.shade</field>
+    <field name="arch" type="xml">
+      <list string="Stone Shades">
+        <field name="code"/>
+        <field name="shade"/>
+      </list>
+    </field>
+  </record>
+
+    <!-- Stone Weight -->
+  <record id="view_pdp_stone_weight_list" model="ir.ui.view">
+    <field name="name">pdp.stone.weight.list</field>
+    <field name="model">pdp.stone.weight</field>
+    <field name="arch" type="xml">
+      <list string="Stone Weights">
+        <field name="type_code"/>
+        <field name="shape_code"/>
+        <field name="shade_code"/>
+        <field name="size"/>
+        <field name="weight"/>
+      </list>
+    </field>
+  </record>
+
+    <!-- Stone Item -->
+  <record id="view_pdp_stone_item_list" model="ir.ui.view">
+    <field name="name">pdp.stone.item.list</field>
+    <field name="model">pdp.stone.item</field>
+    <field name="arch" type="xml">
+      <list string="Stone Items">
+        <field name="stock_item_id"/>
+        <field name="type_code"/>
+        <field name="shape_code"/>
+        <field name="shade_code"/>
+        <field name="size"/>
+        <field name="cost"/>
+      </list>
+    </field>
+  </record>
+
+
+</odoo>

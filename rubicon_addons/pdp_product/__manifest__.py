@@ -1,5 +1,5 @@
 {
-    'name': 'PDP',
+    'name': 'PDP Product',
     'version': '0.01',
     'license': 'LGPL-3',
     'category': 'Product',
@@ -9,13 +9,9 @@
         # Security
         'security/ir.model.access.csv',
         # Data
-        'data/stone/pdp.stone.category.csv',
-        'data/stone/pdp.stone.type.csv',
-        'data/stone/pdp.stone.shape.csv',
-        'data/stone/pdp.stone.size.csv',
-        'data/stone/pdp.stone.shade.csv',
-        'data/stone/pdp.stone.weight.csv',
-        'data/stone/pdp.stone.item.csv',
+        'data/pdp.product.category.csv',
+        'data/pdp.product.model.csv',
+        'data/pdp.product.model.matching.csv',
         
         
         # Views

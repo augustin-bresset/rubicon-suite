@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Root menu for PDP -->
+  <menuitem id="menu_pdp_root" name="PDP Product" sequence="10"/>
+
+  <!-- product  -->
+  <record id="action_pdp_product_category" model="ir.actions.act_window">
+    <field name="name">Product Category</field>
+    <field name="res_model">pdp.product.category</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_product_category"
+            name="Categories"
+            parent="menu_pdp_root"
+            action="action_pdp_product_category"
+            sequence="1"/>
+
+  <!-- model  -->
+  <record id="action_pdp_product_model" model="ir.actions.act_window">
+    <field name="name">Product Model</field>
+    <field name="res_model">pdp.product.model</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_product_model"
+            name="Models"
+            parent="menu_pdp_root"
+            action="action_pdp_product_model"
+            sequence="1"/>
+
+  <!-- model matching  -->
+  <record id="action_pdp_product_model_matching" model="ir.actions.act_window">
+    <field name="name">Product Model Matching</field>
+    <field name="res_model">pdp.product.model.matching</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_product_model_matching"
+            name="Model Matching"
+            parent="menu_pdp_root"
+            action="action_pdp_product_model_matching"
+            sequence="1"/>
+
+
+</odoo>

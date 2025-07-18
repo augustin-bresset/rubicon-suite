@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Stone Category -->
+  <record id="view_pdp_product_category_list" model="ir.ui.view">
+    <field name="name">pdp.product.category.list</field>
+    <field name="model">pdp.product.category</field>
+    <field name="arch" type="xml">
+      <list string="Product Categories">
+        <field name="code"/>
+        <field name="name"/>
+        <field name="waste"/>
+      </list>
+    </field>
+  </record>
+
+ <!-- Stone Models -->
+  <record id="view_pdp_product_model_list" model="ir.ui.view">
+    <field name="name">pdp.product.model.list</field>
+    <field name="model">pdp.product.model</field>
+    <field name="arch" type="xml">
+      <list string="Product Models">
+        <field name="code"/>
+        <field name="drawing"/>
+        <field name="quotation"/>
+
+      </list>
+    </field>
+  </record>
+
+
+   <!-- Stone Matching -->
+  <record id="view_pdp_product_model_matching_list" model="ir.ui.view">
+    <field name="name">pdp.product.model.matching.list</field>
+    <field name="model">pdp.product.model.matching</field>
+    <field name="arch" type="xml">
+      <list string="Matching Models">
+        <field name="model_code_one"/>
+        <field name="model_code_two"/>
+      </list>
+    </field>
+  </record>
+
+</odoo>

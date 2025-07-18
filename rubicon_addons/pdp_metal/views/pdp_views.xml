@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Stone Category -->
+  <record id="view_pdp_metal_purity_list" model="ir.ui.view">
+    <field name="name">pdp.metal.purity.list</field>
+    <field name="model">pdp.metal.purity</field>
+    <field name="arch" type="xml">
+      <list string="Metal Purities">
+        <field name="code"/>
+        <field name="percent"/>
+      </list>
+    </field>
+  </record>
+
+</odoo>
