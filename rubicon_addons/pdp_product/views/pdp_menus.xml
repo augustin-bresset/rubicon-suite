@@ -4,7 +4,7 @@
   <!-- Root menu for PDP -->
   <menuitem id="menu_pdp_root" name="PDP Product" sequence="10"/>
 
-  <!-- product  -->
+  <!-- product category -->
   <record id="action_pdp_product_category" model="ir.actions.act_window">
     <field name="name">Product Category</field>
     <field name="res_model">pdp.product.category</field>
@@ -40,5 +40,57 @@
             action="action_pdp_product_model_matching"
             sequence="1"/>
 
+  <!-- model metal  -->
+  <record id="action_pdp_product_model_metal" model="ir.actions.act_window">
+    <field name="name">Product Model Metal</field>
+    <field name="res_model">pdp.product.model.metal</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_product_model_metal"
+            name="Model metal"
+            parent="menu_pdp_root"
+            action="action_pdp_product_model_metal"
+            sequence="1"/>
+
+
+  <!-- Product Parts -->
+  <record id="action_pdp_product_part" model="ir.actions.act_window">
+    <field name="name">Product Part</field>
+    <field name="res_model">pdp.product.part</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_product_part"
+            name="Parts"
+            parent="menu_pdp_root"
+            action="action_pdp_product_part"
+            sequence="1"/>
+
+
+
+  <!-- Product Stone -->
+  <record id="action_pdp_product_stone" model="ir.actions.act_window">
+    <field name="name">Product Stones</field>
+    <field name="res_model">pdp.product.stone</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_product_stone"
+            name="Stones"
+            parent="menu_pdp_root"
+            action="action_pdp_product_stone"
+            sequence="1"/>
+
+
+
+  <!-- Products -->
+  <record id="action_pdp_product" model="ir.actions.act_window">
+    <field name="name">Product </field>
+    <field name="res_model">pdp.product</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_product"
+            name="Products"
+            parent="menu_pdp_root"
+            action="action_pdp_product"
+            sequence="1"/>
 
 </odoo>

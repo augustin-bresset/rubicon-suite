@@ -89,7 +89,7 @@ if __name__ == '__main__':
                 gold = True 
             return {
                 "id": func_index(row[0], model_name),
-                "code": row[0],
+                "code": row[0].replace(' ', ''),
                 "name": row[1],
                 "cost": float(row[2]),
                 "gold": gold,

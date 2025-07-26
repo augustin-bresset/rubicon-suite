@@ -1,0 +1,15 @@
+<odoo>
+    <menuitem id="menu_pdfg_root" name="PDF Generator" sequence="10"/>
+
+    <record id="action_pdfg_template" model="ir.actions.act_window">
+        <field name="name">Templates</field>
+        <field name="res_model">pdfg.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_pdfg_template"
+              name="Templates"
+              parent="menu_pdfg_root"
+              action="action_pdfg_template"
+              sequence="1"/>
+</odoo>

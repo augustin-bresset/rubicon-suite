@@ -156,9 +156,9 @@ if __name__ == '__main__':
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=True)
         
     if everything or "stone" in sys.argv:
-        model_name = "pdp.stone.item"
+        model_name = "pdp.stone"
         csv_name = "StoneLots.csv"
-        fieldnames = ["id", "stock_item_id", "type_code", "shape_code", "shade_code", "size", "cost"]
+        fieldnames = ["id", "code", "type_code", "shape_code", "shade_code", "size", "cost"]
         def row_to_dict(row):
             if row[5] == "":
                 row[5] = 0.0
@@ -168,7 +168,7 @@ if __name__ == '__main__':
             
             return {
                 "id" : func_index(row[7], model_name),
-                "stock_item_id" : row[7],
+                "code" : row[7],
                 "type_code": row[0].upper(),
                 "shape_code" : row[1].upper(),
                 "shade_code" : row[2].upper(),

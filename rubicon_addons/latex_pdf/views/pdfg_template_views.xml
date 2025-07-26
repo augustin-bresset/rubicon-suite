@@ -1,0 +1,32 @@
+<odoo>
+    <record id="view_pdfg_template_form" model="ir.ui.view">
+        <field name="name">pdfg.template.form</field>
+        <field name="model">pdfg.template</field>
+        <field name="arch" type="xml">
+            <form string="PDF Template">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="latex_template" widget="text"/>
+                        <field name="variables" readonly="1"/>
+                        <field name="preview_pdf" widget="pdf_viewer"/>
+                    </group>
+                    <footer>
+                        <button name="update_variables_info" type="object" string="Scan Variables" class="btn-primary"/>
+                        <button name="generate_preview_pdf" type="object" string="Generate Preview" class="btn-secondary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pdfg_template_list" model="ir.ui.view">
+        <field name="name">pdfg.template.list</field>
+        <field name="model">pdfg.template</field>
+        <field name="arch" type="xml">
+            <list string="PDF Templates">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+</odoo>

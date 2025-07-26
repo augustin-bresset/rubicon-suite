@@ -7,7 +7,8 @@ class Metal(models.Model):
     _sql_constraints = [
         ('code_unique', 'unique(code)', 'The code must be unique!'),
     ]
-
+    _rec_name='code'
+    
     code         = fields.Char(string='Code', required=True, size=2)
     name         = fields.Char(string='Name', required=True, size=50)
     cost         = fields.Float(
@@ -19,4 +20,6 @@ class Metal(models.Model):
     gold         = fields.Boolean(string='Is Gold', default=True)
     reference    = fields.Boolean(string='Reference (18K gold)', default=False)
     
-     
+    
+    
+    

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-  <!-- Stone Category -->
+  <!-- Product Category -->
   <record id="view_pdp_product_category_list" model="ir.ui.view">
     <field name="name">pdp.product.category.list</field>
     <field name="model">pdp.product.category</field>
@@ -14,13 +14,14 @@
     </field>
   </record>
 
- <!-- Stone Models -->
+ <!-- Product Models -->
   <record id="view_pdp_product_model_list" model="ir.ui.view">
     <field name="name">pdp.product.model.list</field>
     <field name="model">pdp.product.model</field>
     <field name="arch" type="xml">
       <list string="Product Models">
         <field name="code"/>
+        <field name="parent_model_code"/>
         <field name="drawing"/>
         <field name="quotation"/>
 
@@ -29,7 +30,7 @@
   </record>
 
 
-   <!-- Stone Matching -->
+   <!-- Product Matching -->
   <record id="view_pdp_product_model_matching_list" model="ir.ui.view">
     <field name="name">pdp.product.model.matching.list</field>
     <field name="model">pdp.product.model.matching</field>
@@ -40,5 +41,71 @@
       </list>
     </field>
   </record>
+
+  <!-- Model Metal -->
+  <record id="view_pdp_product_model_metal_list" model="ir.ui.view">
+    <field name="name">pdp.product.model.metal.list</field>
+    <field name="model">pdp.product.model.metal</field>
+    <field name="arch" type="xml">
+      <list string="Metal Models">
+        <field name="model_code"/>
+        <field name="metal_code"/>
+        <field name="metal_version"/>
+        <field name="purity"/>
+        <field name="weight"/>
+        
+      </list>
+    </field>
+  </record>
+
+  <!-- Product -->
+  <record id="view_pdp_product_list" model="ir.ui.view">
+    <field name="name">pdp.product.list</field>
+    <field name="model">pdp.product</field>
+    <field name="arch" type="xml">
+      <list string="Products">
+        <field name="code"/>
+        <field name="category_code"/>
+        <field name="model_code"/>
+        <field name="stone_composition"/>
+        <field name="metal_code"/>
+        <field name="active"/>
+        <field name="in_collection"/>
+        <field name="create_date"/>
+        <field name="remark"/>
+        <field name="parts"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Product Part -->
+  <record id="view_pdp_product_part_list" model="ir.ui.view">
+    <field name="name">pdp.product.part.list</field>
+    <field name="model">pdp.product.part</field>
+    <field name="arch" type="xml">
+      <list string="Product Part">
+        <field name="product_code"/>
+        <field name="part_code"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Product Stone -->
+  <record id="view_pdp_product_stone_list" model="ir.ui.view">
+    <field name="name">pdp.product.stone.list</field>
+    <field name="model">pdp.product.stone</field>
+    <field name="arch" type="xml">
+      <list string="Product Stone">
+        <field name="product_code"/>
+        <field name="stone_code"/>
+        <field name="pieces"/>
+        <field name="weight"/>
+        
+      </list>
+    </field>
+  </record>
+
+
+
 
 </odoo>

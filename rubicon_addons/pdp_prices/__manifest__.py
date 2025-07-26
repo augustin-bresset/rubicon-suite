@@ -15,7 +15,7 @@
         # 'data/pdp.stone.size.csv',
         # 'data/pdp.stone.shade.csv',
         # 'data/pdp.stone.weight.csv',
-        # 'data/pdp.stone.csv',
+        # 'data/pdp.stone.item.csv',
         
         
         # Views

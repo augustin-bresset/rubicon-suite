@@ -1,3 +1,4 @@
+
 # Remarks
 
 Ce document contient les changements que j'aurais fais vers Rubicon Suite et leur justification
@@ -19,3 +20,10 @@ Not sure yet
     This change come from the fact that Model is used in a technical way to describe a table (Model/View)
 
 
+* DEL ProductCatagories  
+    This table was only used by Products and in Products, all the fields were one `1` wich means all. So this table is useless.
+    
+* DEL Grades 
+    Used only in the StoneLots table, only the grade A is used and appeared on PDP only on `Stone Cost Chart`.
+
+    

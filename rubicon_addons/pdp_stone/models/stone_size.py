@@ -7,4 +7,5 @@ class StoneSize(models.Model):
     # _auto  = False
     _rec_name = "size"
 
-    size        = fields.Char(string="Size", readonly=False)
+    size = fields.Char(string="Size", required=True)
+    

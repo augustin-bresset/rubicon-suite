@@ -10,28 +10,25 @@ class StoneWeight(models.Model):
 
     weight = fields.Float(
         string='Weight (carat)',
-        digits=(5, 2),
+        digits=(7, 4),
+        required=True
     )
     type_code = fields.Many2one(        
         comodel_name="pdp.stone.type",
-        string="Type",
-        readonly=False,
+        string="Type",    
     )
     
     shape_code = fields.Many2one(
         comodel_name="pdp.stone.shape",
         string="Shape",
-        readonly=False,
     )
 
     shade_code = fields.Many2one(
         comodel_name="pdp.stone.shade",
-        string="Shade",
-        readonly=False,
+        string="Shade"
     )
 
     size = fields.Many2one(
         comodel_name="pdp.stone.size",
-        string="Size",
-        readonly=False,
+        string="Size"
     )

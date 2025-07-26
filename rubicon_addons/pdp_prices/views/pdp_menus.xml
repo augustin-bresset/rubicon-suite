@@ -77,16 +77,16 @@
             sequence="5"/>
 
 
-  <!-- Stone  -->
-  <record id="action_pdp_stone" model="ir.actions.act_window">
-    <field name="name">Stones</field>
-    <field name="res_model">pdp.stone</field>
+  <!-- Stone Item -->
+  <record id="action_pdp_stone_item" model="ir.actions.act_window">
+    <field name="name">Stone Items</field>
+    <field name="res_model">pdp.stone.item</field>
     <field name="view_mode">list,form</field>
   </record>
-  <menuitem id="menu_pdp_stone"
-            name="Stones"
+  <menuitem id="menu_pdp_stone_item"
+            name="Items"
             parent="menu_pdp_root"
-            action="action_pdp_stone"
+            action="action_pdp_stone_item"
             sequence="5"/>
 
 </odoo>

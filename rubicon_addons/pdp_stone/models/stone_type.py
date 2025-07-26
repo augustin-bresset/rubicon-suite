@@ -11,12 +11,11 @@ class StoneType(models.Model):
     _rec_name = "code"
     
 
-    code        = fields.Char(string="Code", readonly=False)
-    name        = fields.Char(string="Name", readonly=False)
-    density     = fields.Float(string="Density (g/cm³)", readonly=False)
+    code        = fields.Char(string="Code", size=5, required=True)
+    name        = fields.Char(string="Name", size=20, required=True)
+    density     = fields.Float(string="Density (g/cm³)")
     category_code = fields.Many2one(
         comodel_name="pdp.stone.category",
         string="Category",
-        readonly=False,
     )
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-  <!-- Stone Category -->
+  <!-- Metal Purity -->
   <record id="view_pdp_metal_purity_list" model="ir.ui.view">
     <field name="name">pdp.metal.purity.list</field>
     <field name="model">pdp.metal.purity</field>
@@ -12,5 +12,47 @@
       </list>
     </field>
   </record>
+
+  <!-- Metal -->
+  <record id="view_pdp_metal_list" model="ir.ui.view">
+    <field name="name">pdp.metal.list</field>
+    <field name="model">pdp.metal</field>
+    <field name="arch" type="xml">
+      <list string="Metals">
+        <field name="code"/>
+        <field name="name"/>
+        <field name="cost"/>
+        <field name="plating"/>
+        <field name="gold"/>
+        <field name="reference"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Part -->
+  <record id="view_pdp_part_list" model="ir.ui.view">
+    <field name="name">pdp.part.list</field>
+    <field name="model">pdp.part</field>
+    <field name="arch" type="xml">
+      <list string="Parts">
+        <field name="code"/>
+        <field name="name"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Part costs -->
+  <record id="view_pdp_part_cost_list" model="ir.ui.view">
+    <field name="name">pdp.part.cost.list</field>
+    <field name="model">pdp.part.cost</field>
+    <field name="arch" type="xml">
+      <list string="Part Costs">
+        <field name="part_code"/>
+        <field name="purity_code"/>
+        <field name="cost"/>
+      </list>
+    </field>
+  </record>
+
 
 </odoo>

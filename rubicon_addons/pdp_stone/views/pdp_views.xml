@@ -77,13 +77,13 @@
     </field>
   </record>
 
-    <!-- Stone Item -->
-  <record id="view_pdp_stone_item_list" model="ir.ui.view">
-    <field name="name">pdp.stone.item.list</field>
-    <field name="model">pdp.stone.item</field>
+    <!-- Stone -->
+  <record id="view_pdp_stone_list" model="ir.ui.view">
+    <field name="name">pdp.stone.list</field>
+    <field name="model">pdp.stone</field>
     <field name="arch" type="xml">
-      <list string="Stone Items">
-        <field name="stock_item_id"/>
+      <list string="Stones">
+        <field name="code"/>
         <field name="type_code"/>
         <field name="shape_code"/>
         <field name="shade_code"/>

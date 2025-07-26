@@ -9,10 +9,10 @@
         # Security
         'security/ir.model.access.csv',
         # Data
-        'data/pdp.metal.purity.csv',
-        'data/pdp.metal.csv',
-        'data/pdp.part.csv',
-        'data/pdp.part.cost.csv',
+        # 'data/pdp.metal.purity.csv',
+        # 'data/pdp.metal.csv',
+        # 'data/pdp.part.csv',
+        # 'data/pdp.part.cost.csv',
         
         # Views
         'views/pdp_views.xml',

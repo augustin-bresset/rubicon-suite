@@ -5,8 +5,8 @@ class StoneCategory(models.Model):
     _description = "Stone Category"
     _rec_name = "code"
 
-    code = fields.Char(string="Code", readonly=False)
-    name = fields.Char(string="Name", readonly=False)
+    code = fields.Char(string="Code", required=True)
+    name = fields.Char(string="Name", required=True)
 
     type_codes = fields.One2many(
         comodel_name="pdp.stone.type",

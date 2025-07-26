@@ -15,4 +15,42 @@
             parent="menu_pdp_root"
             action="action_pdp_metal_purity"
             sequence="1"/>
+
+<!-- Metal -->
+  <record id="action_pdp_metal" model="ir.actions.act_window">
+    <field name="name">Metals</field>
+    <field name="res_model">pdp.metal</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_metal"
+            name="Metals"
+            parent="menu_pdp_root"
+            action="action_pdp_metal"
+            sequence="1"/>
+
+<!-- Part -->
+  <record id="action_pdp_part" model="ir.actions.act_window">
+    <field name="name">Parts</field>
+    <field name="res_model">pdp.part</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_part"
+            name="Parts"
+            parent="menu_pdp_root"
+            action="action_pdp_part"
+            sequence="1"/>
+
+<!-- Part Costs -->
+  <record id="action_pdp_part_cost" model="ir.actions.act_window">
+    <field name="name">Part Costs</field>
+    <field name="res_model">pdp.part.cost</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_part_cost"
+            name="Part Costs"
+            parent="menu_pdp_root"
+            action="action_pdp_part_cost"
+            sequence="1"/>
+
+
 </odoo>

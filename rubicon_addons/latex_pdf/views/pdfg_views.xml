@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <!-- Template -->
+  <record id="view_pdfg_template_list" model="ir.ui.view">
+    <field name="name">pdfg.template.list</field>
+    <field name="model">pdfg.template</field>
+    <field name="arch" type="xml">
+      <list string="Product Categories">
+        <field name="name"/>
+      </list>
+    </field>
+  </record>
+
+</odoo>
