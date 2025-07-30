@@ -1,0 +1,35 @@
+import os
+import csv
+
+from rubicon_import.tools.standard import func_index
+
+root_folder = os.path.join(os.path.dirname(__file__), '../../..')
+# Folders
+backup_folder = os.path.join(root_folder, 'data', 'backup_pdp')
+data_folder = os.path.join(root_folder, 'data', 'odoo')
+
+def raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=False):
+    
+    dest_name = os.path.join(data_folder, f"{model_name}.csv")
+    
+    file_name = os.path.join(backup_folder, csv_name)
+
+    if fieldnames[0] != "id":
+        fieldnames = ["id"] + fieldnames
+
+    with open(file_name, newline='', encoding='utf-8') as src_file:
+        reader = csv.reader(src_file)
+        # Prepare header: external id + model_fields
+        
+        with open(dest_name, 'w', newline="", encoding='utf-8') as dst_file:
+            writer = csv.DictWriter(dst_file, fieldnames=fieldnames)
+            writer.writeheader()
+            
+            for i, row in enumerate(reader):
+                out = row_to_dict(row)
+                if out is not None:                    
+                    if index_auto:
+                        out["id"] = func_index(str(i), model_name)
+                    writer.writerow(out)
+    print(f"Generated {dest_name}")
+

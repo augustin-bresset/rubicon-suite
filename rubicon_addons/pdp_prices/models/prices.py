@@ -7,3 +7,4 @@ class PdpPrice(models.Model):
     design = fields.Char()
     purity = fields.Char()
     price_lines = fields.One2many('pdp.price.line', 'price_id')
+

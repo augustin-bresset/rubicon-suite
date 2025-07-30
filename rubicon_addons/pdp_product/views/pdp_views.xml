@@ -67,7 +67,7 @@
         <field name="code"/>
         <field name="category_code"/>
         <field name="model_code"/>
-        <field name="stone_composition"/>
+        <field name="stone_composition_code"/>
         <field name="metal_code"/>
         <field name="active"/>
         <field name="in_collection"/>
@@ -96,16 +96,27 @@
     <field name="model">pdp.product.stone</field>
     <field name="arch" type="xml">
       <list string="Product Stone">
-        <field name="product_code"/>
-        <field name="stone_code"/>
         <field name="pieces"/>
+        <field name="composition_code"/>
+        <field name="stone_code"/>
         <field name="weight"/>
-        
+        <field name="reshaped_shape"/>
+        <field name="reshaped_size"/>
+        <field name="reshaped_weight"/>
       </list>
     </field>
   </record>
 
-
-
+  <!-- Product Stone Composition -->
+  <record id="view_pdp_product_stone_composition_list" model="ir.ui.view">
+    <field name="name">pdp.product.stone.composition.list</field>
+    <field name="model">pdp.product.stone.composition</field>
+    <field name="arch" type="xml">
+      <list string="Product Stone Composition">
+        <field name="code"/>
+        <field name="stone_lines"/>
+      </list>
+    </field>
+  </record>
 
 </odoo>

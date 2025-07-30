@@ -21,13 +21,9 @@ class Product(models.Model):
         string='Model',
     )
     
-    product_stone_code = fields.Char(
-        string='Produc Stones Code',
-    )
-    
-    stone_composition = fields.Char(
-        string='Stone Composition',
-        size=40
+    stone_composition_code = fields.Many2one(
+        comodel_name='pdp.product.stone.composition',
+        string='Stone Composition'
     )
     
     metal_code = fields.Char(

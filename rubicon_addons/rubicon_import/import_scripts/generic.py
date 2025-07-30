@@ -1,10 +1,17 @@
 import csv
 import os
 import time
+import re
 
 from odoo import fields as odoo_fields
 
+from ..tools.standard import create_stone_code
+
 many2one_cache = {}
+
+def is_empty(value):
+    return value is None or str(value).strip() in ('', '\x00')
+
 
 def resolve_many2one(env, field, raw_value):
     comodel = field.comodel_name
@@ -23,6 +30,7 @@ def resolve_many2one(env, field, raw_value):
     result = many2one_cache[comodel].get(raw_value)
     if result is None:
         print(f"[WARN] Unresolved Many2one: {field.name} = '{raw_value}' in {comodel} using {rec_name}")
+        return ''
     return result
 
 
@@ -35,8 +43,11 @@ def fields_type_to_func(env, field, value):
         return int(value)
     if field.type == 'many2one':
         return resolve_many2one(env, field, value)
+    # if isinstance(field, odoo_fields.Char) and not field.name == "name":
+    #     value = value.replace('  ', '')
+    #     value = value.replace(' ', '_')
+    #     return value
     return value
-
 
 
 def import_csv(
@@ -84,7 +95,7 @@ def import_csv(
             return
 
         headers = rows[0][1:]  # skip XML ID
-
+        
         for row in rows[1:]:
             logs['total'] += 1
             xml_id = row[0]
@@ -92,18 +103,28 @@ def import_csv(
 
             vals = {}
             deferred = {}
-
+            skipped = False
             for field_name, raw_value in zip(headers, field_values):
+ 
                 if not field_name:
                     continue
                 field = Model._fields.get(field_name)
                 if not field:
                     continue
+                if field.required and is_empty(raw_value):
+                    print(f"[WARN] Row Skipped {row}")
+                    skipped = True
+                    break
                 if fields_maj and field_name in fields_maj:
                     deferred[field_name] = raw_value
                 else:
                     vals[field_name] = fields_type_to_func(env, field, raw_value)
-
+                    if field.required and is_empty(vals[field_name]):
+                        skipped = True
+                        break
+            if skipped:
+                logs['skipped']+=1
+                continue
             ref = ref_cache.get(xml_id)
             if ref is None:
                 ref = env.ref(f"{module}.{xml_id}", raise_if_not_found=False)
@@ -165,68 +186,10 @@ def import_csv(
 
     if verbose:
         print(f"Import for {model._name}:")
-        print(f"  → Total rows    : {logs['total']}")
-        print(f"  → Created       : {logs['created']}")
-        print(f"  → Updated       : {logs['updated']}")
-        print(f"  → Time elapsed  : {duration:.2f} seconds")
+        print(f"  => Total rows    : {logs['total']}")
+        print(f"  => Created       : {logs['created']}")
+        print(f"  => Updated       : {logs['updated']}")
+        print(f"  => Time elapsed  : {duration:.2f} seconds")
 
     return logs
 
-
-
-
-def import_csv_old(env, model, module='pdp_product', verbose=False):
-    """
-    Import a CSV file for a given model.
-    The CSV must:
-    - have the filename matching the model name (e.g., pdp.product.model.metal.csv)
-    - use first column as XML ID
-    - use the second line as field names
-    - one row per record
-    """
-    Model = env[model._name]
-    model_name = model._name.replace('.', '_')
-    module_path = os.path.dirname(__file__)
-    data_path = os.path.join(module_path, '../..', module, 'data', f'{model._name}.csv')
-    logs = {
-        "number_imports" : 0
-    }
-    with open(data_path, newline='', encoding='utf-8') as csvfile:
-        reader = csv.reader(csvfile)
-        rows = list(reader)
-
-        if not rows:
-            return
-
-        headers = rows[0][1:]  # skip XML ID column
-        for row in rows[1:]:
-            logs['number_imports'] +=1
-            xml_id = row[0]
-            field_values = row[1:]
-
-            vals = {}
-            for field_name, raw_value in zip(headers, field_values):
-                if not field_name:
-                    continue
-                field = Model._fields.get(field_name)
-                if not field:
-                    continue  # ignore unknown fields
-
-                converted = fields_type_to_func(env, field, raw_value)
-                vals[field_name] = converted
-
-            existing = env.ref(f"{module}.{xml_id}", raise_if_not_found=False)
-            if existing:
-                existing.write(vals)
-            else:
-                
-                record = Model.create(vals)
-                env['ir.model.data'].create({
-                    'module': module,
-                    'name': xml_id,
-                    'model': Model._name,
-                    'res_id': record.id,
-                })
-    if verbose:
-        print(**logs)
-        

@@ -26,4 +26,21 @@ Not sure yet
 * DEL Grades 
     Used only in the StoneLots table, only the grade A is used and appeared on PDP only on `Stone Cost Chart`.
 
-    
+## Standards 
+
+### Model
+
+AAXXXXB : 
+* AA : Category 
+* XXXX : Model id 
+* B (opt): Model variation
+
+### Stone Composition
+S+A.S1+S2
+* Si : stone
+* A (opt) : color
+
+### Product
+AAXXXXB-STONES/M :
+* AAXXXXB : Model code
+* STONES : stone composition code

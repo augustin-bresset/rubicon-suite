@@ -4,61 +4,18 @@ import csv
 import sys
 import re
 
-def func_index(code:str, model_name:str):
-    model_name = model_name.split(".")[-1]
-    code = re.sub(r".-/ ", '_', code)
-    return f"{model_name}_{code}"
+from rubicon_import.tools.parsing import safe_float, safe_int, safe_str
+from rubicon_import.tools.standard import func_index, size_field
+from rubicon_import.raw_to_data.raw_to_data import raw_to_data
+     
 
-
-root_folder = os.path.join(os.path.dirname(__file__), 'rubicon-suite')
-# Folders
-backup_folder = os.path.join('data', 'backup_pdp')
-data_folder = os.path.join('data', 'odoo')
-
-model_name = "stone.type"
-
-csv_name = "StoneTypes.csv"
-
-def row_to_dict_ex(row):
-    return {
-        "id" : func_index(row[0], model_name),        
-    }
-
-
-
-def raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=False):
-    
-    dest_name = os.path.join(data_folder, f"{model_name}.csv")
-    
-    file_name = os.path.join(backup_folder, csv_name)
-
-    if fieldnames[0] != "id":
-        fieldnames = ["id"] + fieldnames
-
-    with open(file_name, newline='', encoding='utf-8') as src_file:
-        reader = csv.reader(src_file)
-        # Prepare header: external id + model_fields
-        
-        with open(dest_name, 'w', newline="", encoding='utf-8') as dst_file:
-            writer = csv.DictWriter(dst_file, fieldnames=fieldnames)
-            writer.writeheader()
-            
-            for i, row in enumerate(reader):
-                out = row_to_dict(row)
-                if index_auto:
-                    out["id"] = func_index(str(i), model_name)
-                writer.writerow(out)
-    print(f"Generated {dest_name}")
-
-        
-
+     
 if __name__ == '__main__':
     # Examples for pdp module
     everything = True
     if len(sys.argv) > 1:
         everything = False
         print(f"Begin generation for {sys.argv[1:]}")
-    
     
     
     # Type
@@ -104,7 +61,7 @@ if __name__ == '__main__':
         def row_to_dict(row):
             return {
                 "id": func_index(row[0], model_name),
-                "size": row[0]
+                "size": size_field(row[0])
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
     
@@ -141,13 +98,14 @@ if __name__ == '__main__':
         model_name = "pdp.stone.weight"
         csv_name = "StoneWeights.csv"
         fieldnames = ["weight", "type_code", "shape_code", "shade_code", "size"]
+        
         def row_to_dict(row):
             return {
                 "id" : 0,
                 "type_code": row[0],
                 "shape_code" : row[1],
                 "shade_code" : row[2],
-                "size" : row[3],
+                "size" : size_field(row[3]),
                 "weight": row[4]
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=True)
@@ -169,7 +127,7 @@ if __name__ == '__main__':
                 "type_code": row[0].upper(),
                 "shape_code" : row[1].upper(),
                 "shade_code" : row[2].upper(),
-                "size" : row[3],
+                "size" : size_field(row[3]),
                 "cost" : row[5],
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)

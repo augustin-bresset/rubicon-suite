@@ -6,3 +6,5 @@ from .product_category import ModelCategory
 from .product_stone import ProductStone 
 from .product_parts import ProductPart
 from .product import Product
+
+from .product_stone_composition import ProductStoneComposition 

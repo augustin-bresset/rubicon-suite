@@ -10,7 +10,7 @@ class Metal(models.Model):
     _rec_name='code'
     
     code         = fields.Char(string='Code', required=True, size=2)
-    name         = fields.Char(string='Name', required=True, size=50)
+    name         = fields.Char(string='Name', required=True, size=20)
     cost         = fields.Float(
         string='Unit Cost (per kg)',
         digits=(18, 2),
@@ -19,7 +19,3 @@ class Metal(models.Model):
     plating      = fields.Boolean(string='Plating')
     gold         = fields.Boolean(string='Is Gold', default=True)
     reference    = fields.Boolean(string='Reference (18K gold)', default=False)
-    
-    
-    
-    

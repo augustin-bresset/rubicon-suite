@@ -14,6 +14,7 @@
         # 'data/pdp.product.model.matching.csv',
         # 'data/pdp.product.model.metal.csv',
         # 'data/pdp.product.csv',
+        # 'data/pdp.product.composition.csv',
         # 'data/pdp.product.stone.csv',
         # 'data/pdp.product.part.csv',
         

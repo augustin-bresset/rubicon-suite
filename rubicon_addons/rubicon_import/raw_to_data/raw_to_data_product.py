@@ -4,74 +4,19 @@ import csv
 import sys
 import re
 
-def func_index(code:str, model_name:str):
-    model_name = model_name.split(".")[-1]
-    code = re.sub(r"[ .-/+-]", "_", code)
-    return f"{model_name}_{code}"
-
-def safe_float(val):
-    try:
-        return float(val)
-    except (ValueError, TypeError):
-        return 0.0
-
-def safe_int(val):
-    try:
-        return int(val)
-    except (ValueError, TypeError):
-        return 0
-
-
-def safe_str(val):
-    if val in {'\x00', None}:
-        return ''
-    return val
+from rubicon_import.tools.parsing import safe_float, safe_int, safe_str
+from rubicon_import.tools.standard import (
+    func_index, create_model_code, 
+    create_product_composition_code, 
+    create_stone_code,
+    size_field
+    )
+from rubicon_import.raw_to_data.raw_to_data import raw_to_data, backup_folder, data_folder
+     
     
-def standard_field(value):
-    value = value.replace(" ", "_")
-    value = value.upper()
-    return value
-
-root_folder = os.path.join(os.path.dirname(__file__), 'rubicon-suite')
+root_folder = os.path.join(os.path.dirname(__file__), '../../..')
 # Folders
-backup_folder = os.path.join('data', 'backup_pdp')
-data_folder = os.path.join('data', 'odoo')
-tmp_folder = os.path.join('data', 'tmp')
-
-model_name = "stone.type"
-
-csv_name = "StoneTypes.csv"
-
-def row_to_dict_ex(row):
-    return {
-        "id" : func_index(row[0], model_name),        
-    }
-
-def raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=False):
-    
-    dest_name = os.path.join(data_folder, f"{model_name}.csv")
-    
-    file_name = os.path.join(backup_folder, csv_name)
-
-    if fieldnames[0] != "id":
-        fieldnames = ["id"] + fieldnames
-
-    with open(file_name, newline='', encoding='utf-8') as src_file:
-        reader = csv.reader(src_file)
-        # Prepare header: external id + model_fields
-        
-        with open(dest_name, 'w', newline="", encoding='utf-8') as dst_file:
-            writer = csv.DictWriter(dst_file, fieldnames=fieldnames)
-            writer.writeheader()
-            
-            for i, row in enumerate(reader):
-                out = row_to_dict(row)
-                if out is not None:                    
-                    if index_auto:
-                        out["id"] = func_index(str(i), model_name)
-                    writer.writerow(out)
-    print(f"Generated {dest_name}")
-
+tmp_folder = os.path.join(root_folder, 'data', 'tmp')
 
 def two_lines_manager(csv_name):
     """Manage files with one row on two lines."""
@@ -93,26 +38,6 @@ def two_lines_manager(csv_name):
                 writer.writerow(row)
     print(f"Generated {dest_name}")
 
-
-def create_model_code(category, code):
-    model_code_ = ''.join((category, code.zfill(3)))
-    model_code_ = re.sub(r'[ ]', '', model_code_).upper()
-    return model_code_
-
-def create_product_composition_code(category, code, stones):
-    product_code = f"{category}{code.zfill(3)}-{stones}"    
-    return re.sub(r'[ ]', '', product_code)
-
-
-def create_stone_code(stone_type, stone_shade, stone_shape, size):
-    stone_type = stone_type.replace(' ', '')
-    stone_shade = stone_shade.replace(' ', '')
-    if stone_shade == '1':
-        stone_shade = ''
-    stone_shape = stone_shape.replace(' ', '')
-    if stone_shape == '1':
-        stone_shape = ''
-    return f"{stone_type}{stone_shade}-{stone_shape}-{size}"
 
 if __name__ == '__main__':
     # Examples for pdp module
@@ -195,7 +120,7 @@ if __name__ == '__main__':
             row_str = ','.join(row)
             for case in cases:
                 if case in row_str:
-                    rect_case = case.replace(",", "+")
+                    rect_case = case.replace(",", ".")
                     row_str = row_str.replace(case, rect_case)
                     return row_str.split(",")
             return row
@@ -210,20 +135,20 @@ if __name__ == '__main__':
             if len(row[1]) > 2:
                 stones=row[1].split("/")[0]
                 old = f"{row[0][-1]},{stones}"
-                new = f"{row[0][-1]}+{stones}"
+                new = f"{row[0][-1]}.{stones}"
                 row_str = ','.join(row)
                 row_str = row_str.replace(old, new)
                 row = row_str.split(",")
                 print(f"[INFO] Rectif {old} -> {new} in {row[0]}")
                 print(f"{row_str}")
             code = create_model_code(row[1], row[2])
-            stone_code = row[0].split("/")[0]
+            composition_code = row[0].split("/")[0]
             return {
                 "id":func_index(row[0], model_name),
                 "code": row[0],
                 "category_code"             : row[1],
                 "model_code"                : code,
-                "stone_composition_code"    : stone_code, 
+                "stone_composition_code"    : composition_code, 
                 "stone_type"                : safe_str(row[3]),
                 "metal_code"                : safe_str(row[4]),
                 "active"                    : safe_str(row[5]),
@@ -270,7 +195,7 @@ if __name__ == '__main__':
             row_str = ','.join(row)
             for case in cases:
                 if case in row_str:
-                    rect_case = case.replace(",", "+")
+                    rect_case = case.replace(",", ".")
                     row_str = row_str.replace(case, rect_case)
                     return row_str.split(",")
             return row
@@ -284,19 +209,19 @@ if __name__ == '__main__':
             if len(row[1]) > 2:
                 stones=row[1].split("/")[0]
                 old = f"{row[0][-1]},{stones}"
-                new = f"{row[0][-1]}+{stones}"
+                new = f"{row[0][-1]}.{stones}"
                 row_str = ','.join(row)
                 row_str = row_str.replace(old, new)
                 row = row_str.split(",")
                 print(f"[INFO] Rectif {old} -> {new} in {row[0]}")
                 print(f"{row_str}")
-            stone_code = row[0].split('/')[0]
-            if stone_code in compositions:
+            composition_code = row[0].split('/')[0]
+            if composition_code in compositions:
                 return
-            compositions.add(stone_code)
+            compositions.add(composition_code)
             return {
-                "id":func_index(stone_code, model_name),
-                "code": re.sub(r"[ ]", '', stone_code),
+                "id":func_index(composition_code, model_name),
+                "code": composition_code,
             }
             
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
@@ -319,16 +244,57 @@ if __name__ == '__main__':
             "shape_code_2", "size_2", "shade_2", "weight_2", "line_num" 
         ]
         fieldnames = [
-            "id", "composition_code", "stone_code", "pieces", "weight", "reshaped_stone_code", "reshaped_weight" 
+            "id", "composition_code", "stone_code", "stone_type_code", "stone_shade_code",
+            "stone_shape_code", "stone_size", "pieces", "weight",
+            "reshaped_shape", "reshaped_size", "reshaped_weight" 
         ]
         
-        
+        def case_management(row):
+            if row[2] in {'P', 'W'}:
+                row[2] = f"{row[2]}.{row[3]}"
+                for i in range(3, len(row)-1):
+                    row[i] = row[i+1]
+                del row[-1]
+            return
+            cases = {
+                "LARIS" : "LAPIS"
+            }
+            for case, repl in cases.keys():
+                if case in row[2]:
+                    row[2].replace(case, repl) 
+                    
+            cases = {
+                "BA054-PER+LABRADORIT" : "BA054-PER+LABRADORITE",
+                "BROWN DTS+W.DT" : "BROWN DTS+W.DTS",
+                "BR003-MABE+CITAAA+IO" : "BR003-MABE+CITAAA+IOL",
+                "BA241-RDF+LIOL+POP" : '', # TEMPORAIRE
+                "BR023-W.PEARL+BTA+IO": "BR023-W.PEARL+BTA+IOL",
+                "BR088-BTA+B2A+B3A" : "BR088-BTA+2A+3A",
+                "CF064-DTS+LARIS" : "CF064-DTS+LAPIS",
+                "E036-CIT2ABR+CIT3AB" : "E036-CIT2ABR+CIT3ABR",
+                "E036-CIT2ABR+PER+SA": "", # TEMPORAIRE,
+                "E036-CIT2BR+CIT3BR": "E036-CIT2BR+CIT3BR+PER",
+                "E036-CIT2BR+CIT3BR+" : "E036-CIT2BR+CIT3BR+PER",
+                "E036-CT3A+GA+RHO+Y":"E036-C3A+GA+RHO+YL",
+                "E039C-BT3A 17" : "",
+                "E039C-WMS 19X19": "",
+                "E039C-WMS 19X17": "",
+                
+            }    
+            v = cases.get(row[2]) 
+            if v:
+                row[2] = v
+            
+            
+
         def row_to_dict(row):
+            case_management(row)
+            
             try:
                 row[8] = int(row[8])
                 row[9] = float(row[9])
             except:
-                if len(row) > 20:
+                if len(row) > 19:
                     row[2] = f"{row[2]}+{row[3]}"
                     for i in range(3, len(row)-1):
                         row[i] = row[i+1]
@@ -341,9 +307,7 @@ if __name__ == '__main__':
                 row[i] = str(row[i])
                 if row[i] is None or re.sub(r"['.0/ ]", '', row[i].upper()) in {'', '\x00', "NONE", "NON"}:
                     row[i] = ''
-                row[i] = row[i].upper().replace("NONE", '')
-                    
-                    
+
             if len(row) < 10:
                 print(f"[WARNING] This row was not imported because of {len(row)} too short : {'|'.join(row)}")
                 return
@@ -353,35 +317,34 @@ if __name__ == '__main__':
                 row.append(row[7])
                 row.append(row[9])    
             
-            # Shape
-            if row[16] == '':
-                row[16] = row[5]
-
+            
             # Size
+            row[6] = size_field(row[6])
+            row[17] = size_field(row[17])
+            
             if row[17] == '':
                 row[17] = row[6]
             
-            # Shade
-            if row[18] == '':
-                row[18] = row[7]
-            
             product_composition_code = create_product_composition_code(row[0], row[1], row[2])
             stone_code = create_stone_code(row[3], row[7], row[5], row[6])
-            reshaped_stone_code = create_stone_code(row[3], row[18], row[16], row[17])
+            # reshaped_stone_code = create_stone_code(row[3], row[18], row[16], row[17])
              
-            
-            
-            
             
             return {
                 "id": func_index(f"{product_composition_code}_{stone_code}", model_name),
-                "composition_code": product_composition_code,
-                "pieces": safe_int(row[8]),
-                "stone_code": stone_code,
-                "weight": safe_float(row[9]), 
-                "reshaped_stone_code": reshaped_stone_code,
-                "reshaped_weight": safe_float(row[19])
+                "composition_code"  : product_composition_code,
+                "pieces"            : safe_int(row[8]),
+                "stone_code"        : stone_code,
+                "stone_type_code"   : row[3],
+                "stone_shade_code"  : row[7],
+                "stone_shape_code"  : row[5],
+                "stone_size"        : row[6],
+                "weight"            : safe_float(row[9]), 
+                "reshaped_shape"    : row[16],
+                "reshaped_size"     : row[17],
+                "reshaped_weight"   : safe_float(row[19])
             }
+            
         two_lines_manager(csv_name)
         csv_name = os.path.join("../tmp", csv_name)
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)

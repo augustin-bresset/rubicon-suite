@@ -93,4 +93,16 @@
             action="action_pdp_product"
             sequence="1"/>
 
+  <!-- Product Stone Composition -->
+  <record id="action_pdp_product_stone_composition" model="ir.actions.act_window">
+    <field name="name">Product </field>
+    <field name="res_model">pdp.product.stone.composition</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_product_stone_composition"
+            name="Product Stone Composition"
+            parent="menu_pdp_root"
+            action="action_pdp_product_stone_composition"
+            sequence="1"/>
+
 </odoo>
