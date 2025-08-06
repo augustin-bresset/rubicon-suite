@@ -1,6 +1,6 @@
 from odoo import models, fields
 
-class PdpPriceLine(models.Model):
+class PriceLine(models.Model):
     _name = 'pdp.price.line'
 
     price_id = fields.Many2one('pdp.price', required=True)
@@ -27,3 +27,5 @@ class PdpPriceLine(models.Model):
     ])
     
     value = fields.Float()
+    
+    

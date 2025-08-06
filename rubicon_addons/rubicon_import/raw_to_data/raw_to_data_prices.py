@@ -14,14 +14,6 @@ def func_index(code:str, model_name:str):
     return f"{model_name}_{code}"
 
 
-root_folder = os.path.join(os.path.dirname(__file__), 'rubicon-suite')
-# Folders
-backup_folder = os.path.join('data', 'backup_pdp')
-data_folder = os.path.join('data', 'odoo')
-
-model_name = "stone.type"
-
-csv_name = "StoneTypes.csv"
 
 if __name__ == '__main__':
     # Examples for pdp module
@@ -31,21 +23,7 @@ if __name__ == '__main__':
         print(f"Begin generation for {sys.argv[1:]}")
     
     models = set()
-    # Labor Types
-    if everything or "labor_type" in sys.argv:
-        model_name="pdp.labor.type"
-        csv_name = "LaborTypes.csv"
-        fieldnames = ["id", "code", "name", "cost"]
-        def row_to_dict(row):
-            return {
-                "id": func_index(row[0], model_name),
-                "code": row[0],
-                "name": row[1],
-                "cost": float(row[2])
-            }
-            
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
-    
+
     # Margins
     if everything or "margin" in sys.argv:
 
@@ -96,26 +74,55 @@ if __name__ == '__main__':
             }              
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
 
-    # Misc Margin
-    if everything or "misc" in sys.argv:
-        model_name="pdp.margin.misc"
-        csv_name="MiscMargins.csv"
+
+    # Stone Margins
+    if everything or "stone" in sys.argv:
+        model_name="pdp.margin.stone"
+        csv_name="StoneMargins.csv"
+        actual_field=[
+            "margin_code", "prod_cat_id(toDEL)", "purity", "margin"
+        ]
         fieldnames=[
-            "id", "misc_code", "margin_code", "margin"
+            "id", "margin_code", "purity", "margin"
         ]
         
         def row_to_dict(row):
             
             return {
                 "id": func_index(f"{row[0]}_{row[1]}", model_name),
-                "misc_code": row[0], 
-                "margin_code": row[1], 
-                "margin": float(row[2])
+                "margin_code": row[0], 
+                "purity": row[2], 
+                "margin": float(row[3])
             }              
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
 
+
+
+    # Addon Margin
+    
+    if everything or "addon_margin" in sys.argv:
+        model_name = "pdp.margin.addon"
+        csv_name = "MiscMargins.csv"
+
+        fieldnames = [
+            "id", "type_code", "margin_code", "cost"
+            ]
+        
+        def row_to_dict(row):
+            return {
+                "id": func_index(f"{row[0]}_{row[1]}", model_name),
+                "type_code": row[0],
+                "margin_code": row[1],
+                "cost": safe_float(row[2]),
+            }
+
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+
+
+    # ADDON, Metal, Stone, Parts, labor
+
     # Prices
-    if everything or "price" in sys.argv:
+    if (everything or "price" in sys.argv) and False:
         model_name = "pdp.price"
         csv_name = "Prices.csv"
 
@@ -209,3 +216,5 @@ if __name__ == '__main__':
             }
 
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+
+

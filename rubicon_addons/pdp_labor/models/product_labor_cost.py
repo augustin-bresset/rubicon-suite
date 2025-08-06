@@ -1,0 +1,29 @@
+from odoo import fields, models
+
+class ProductLaborCost(models.Model):
+    """
+    B009-PLAIN GOLD/W,CAS,TH,.00
+    B009-PLAIN GOLD/W,FIL,TH,.00
+    B009-PLAIN GOLD/W,LAB,TH,.00
+    """
+    _name="pdp.labor.cost.product"
+    _description="Link table product-addon cost"
+    
+    product_code = fields.Many2one(
+        comodel_name="pdp.product",
+        ondelete="restrict",
+        required=True
+    )
+    
+    labor_code = fields.Many2one(
+        comodel_name="pdp.labor.type",
+        ondelete="restrict",
+        required=True
+        
+    )
+    
+    cost = fields.Float(
+        string="Cost",
+        digits=(5, 3)
+    )
+    

@@ -26,6 +26,12 @@ Not sure yet
 * DEL Grades 
     Used only in the StoneLots table, only the grade A is used and appeared on PDP only on `Stone Cost Chart`.
 
+
+* MiscType (laser, plating, ...) -> Addon (more explicit word)
+
+* Labor (LAB) -> Assembly (ASS)
+
+
 ## Standards 
 
 ### Model

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Root menu for PDP -->
+  <menuitem id="menu_pdp_root" name="PDP Labor" sequence="10"/>
+
+  <!-- Labor Type  -->
+  <record id="action_pdp_labor_type" model="ir.actions.act_window">
+    <field name="name">Labor Type</field>
+    <field name="res_model">pdp.labor.type</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_labor_type"
+            name="Labor Types"
+            parent="menu_pdp_root"
+            action="action_pdp_labor_type"
+            sequence="1"/>
+
+  
+  <!-- Labor Cost (MODEL) -->
+  <record id="action_pdp_labor_cost_model" model="ir.actions.act_window">
+    <field name="name">Labor Costs (Model)</field>
+    <field name="res_model">pdp.labor.cost.model</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_labor_cost_model"
+            name="Labor Costs (Model)"
+            parent="menu_pdp_root"
+            action="action_pdp_labor_cost_model"
+            sequence="1"/>
+
+  <!-- Labor Cost (product) -->
+  <record id="action_pdp_labor_cost_product" model="ir.actions.act_window">
+    <field name="name">Labor Costs (Product)</field>
+    <field name="res_model">pdp.labor.cost.product</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_labor_cost_product"
+            name="Labor Costs (Product)"
+            parent="menu_pdp_root"
+            action="action_pdp_labor_cost_product"
+            sequence="1"/>
+
+
+
+  <!-- Addon Type  -->
+  <record id="action_pdp_addon_type" model="ir.actions.act_window">
+    <field name="name">Addon Type</field>
+    <field name="res_model">pdp.addon.type</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_addon_type"
+            name="Addon Types"
+            parent="menu_pdp_root"
+            action="action_pdp_addon_type"
+            sequence="1"/>
+
+  <!-- Addon Costs-->
+  <record id="action_pdp_addon_cost" model="ir.actions.act_window">
+    <field name="name">Addon Type</field>
+    <field name="res_model">pdp.addon.cost</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_addon_cost"
+            name="Addon Costs"
+            parent="menu_pdp_root"
+            action="action_pdp_addon_cost"
+            sequence="1"/>
+
+</odoo>

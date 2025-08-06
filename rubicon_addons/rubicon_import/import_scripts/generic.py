@@ -12,7 +12,6 @@ many2one_cache = {}
 def is_empty(value):
     return value is None or str(value).strip() in ('', '\x00')
 
-
 def resolve_many2one(env, field, raw_value):
     comodel = field.comodel_name
     rec_name = env[comodel]._rec_name
@@ -51,10 +50,14 @@ def fields_type_to_func(env, field, value):
 
 
 def import_csv(
-    env, model, module='pdp_product',
-    verbose=True, batch_size=1000,
+    env, 
+    model, 
+    module='pdp_product',
+    verbose=True, 
+    batch_size=1000,
     register_xml_id=False, 
-    fields_maj=None):
+    fields_maj=None
+    ):
     """
     Import CSV into a model with optional deferred write phase for specific fields.
 
@@ -73,8 +76,7 @@ def import_csv(
     global many2one_cache
     many2one_cache = {}
 
-    Model = env[model._name]
-    model_name = model._name.replace('.', '_')
+    # Model = env[model._name]
     module_path = os.path.dirname(__file__)
     data_path = os.path.join(module_path, '../..', module, 'data', f'{model._name}.csv')
 
@@ -108,7 +110,7 @@ def import_csv(
  
                 if not field_name:
                     continue
-                field = Model._fields.get(field_name)
+                field = model._fields.get(field_name)
                 if not field:
                     continue
                 if field.required and is_empty(raw_value):
@@ -134,7 +136,7 @@ def import_csv(
                 ref.write(vals)
                 if deferred:
                     for field_name in deferred.keys():
-                        field = Model._fields.get(field_name)
+                        field = model._fields.get(field_name)
                         deferred[field_name] = fields_type_to_func(env, field, deferred[field_name])
                     ref.write(deferred)
                 logs['updated'] += 1
@@ -143,13 +145,13 @@ def import_csv(
                 new_xml_ids.append((xml_id, deferred))
                 
                 if len(new_records) >= batch_size:
-                    created = Model.create(new_records)
+                    created = model.create(new_records)
                     for rec, (xid, deferred) in zip(created, new_xml_ids):
                         if register_xml_id:
                             env['ir.model.data'].create({
                                 'module': module,
                                 'name': xid,
-                                'model': Model._name,
+                                'model': model._name,
                                 'res_id': rec.id,
                             })
                         if deferred:
@@ -160,13 +162,13 @@ def import_csv(
 
     # final flush
     if new_records:
-        created = Model.create(new_records)
+        created = model.create(new_records)
         for rec, (xid, deferred) in zip(created, new_xml_ids):
             if register_xml_id:
                 env['ir.model.data'].create({
                     'module': module,
                     'name': xid,
-                    'model': Model._name,
+                    'model': model._name,
                     'res_id': rec.id,
                 })
             if deferred:
@@ -178,7 +180,7 @@ def import_csv(
     for rec, deferred in deferred_updates:
         # print(f"[INFO] {rec.id} updated with {deferred_vals}")
         for field_name in deferred.keys():
-            field = Model._fields.get(field_name)    
+            field = model._fields.get(field_name)    
             deferred[field_name] = fields_type_to_func(env, field, deferred[field_name])
         rec.write(deferred)
 
@@ -189,6 +191,7 @@ def import_csv(
         print(f"  => Total rows    : {logs['total']}")
         print(f"  => Created       : {logs['created']}")
         print(f"  => Updated       : {logs['updated']}")
+        print(f"  => Skipped       : {logs['skipped']}")
         print(f"  => Time elapsed  : {duration:.2f} seconds")
 
     return logs

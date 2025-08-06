@@ -13,7 +13,6 @@ from rubicon_import.tools.standard import (
     )
 from rubicon_import.raw_to_data.raw_to_data import raw_to_data, backup_folder, data_folder
      
-    
 root_folder = os.path.join(os.path.dirname(__file__), '../../..')
 # Folders
 tmp_folder = os.path.join(root_folder, 'data', 'tmp')
@@ -90,7 +89,7 @@ if __name__ == '__main__':
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
         
-        
+
     # Matching
     if everything or "matching" in sys.argv:
         print("[WARNING] Be sure to have also import model to create models set")
@@ -343,7 +342,7 @@ if __name__ == '__main__':
                 "reshaped_shape"    : row[16],
                 "reshaped_size"     : row[17],
                 "reshaped_weight"   : safe_float(row[19])
-            }
+                }
             
         two_lines_manager(csv_name)
         csv_name = os.path.join("../tmp", csv_name)

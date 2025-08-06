@@ -1,5 +1,5 @@
 {
-    'name': 'PDP Stone',
+    'name': 'PDP Margin',
     'version': '0.01',
     'license': 'LGPL-3',
     'category': 'Product',

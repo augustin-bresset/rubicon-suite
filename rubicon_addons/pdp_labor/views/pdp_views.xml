@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Labor Types -->
+  <record id="view_pdp_labor_list" model="ir.ui.view">
+    <field name="name">pdp.labor.type.list</field>
+    <field name="model">pdp.labor.type</field>
+    <field name="arch" type="xml">
+      <list string="Labor Types">
+        <field name="code"/>
+        <field name="name"/>
+      </list>
+    </field>
+  </record>
+
+ <!-- Addon Types  -->
+ <record id="view_pdp_addon_list" model="ir.ui.view">
+    <field name="name">pdp.addon.type.list</field>
+    <field name="model">pdp.addon.type</field>
+    <field name="arch" type="xml">
+      <list string="Addon Types">
+        <field name="code"/>
+        <field name="name"/>
+      </list>
+    </field>
+  </record>
+
+ <!-- Addon Costs  -->
+ <record id="view_pdp_addon_cost_list" model="ir.ui.view">
+    <field name="name">pdp.addon.cost.list</field>
+    <field name="model">pdp.addon.cost</field>
+    <field name="arch" type="xml">
+      <list string="Addon Costs">
+        <field name="product_code"/>
+        <field name="addon_code"/>
+        <field name="cost" />
+      </list>
+    </field>
+  </record>
+
+ <!-- Labor Costs (Model)  -->
+ <record id="view_pdp_labor_cost_model_list" model="ir.ui.view">
+    <field name="name">pdp.labor.cost.model.list</field>
+    <field name="model">pdp.labor.cost.model</field>
+    <field name="arch" type="xml">
+      <list string="Labor Costs (Model)">
+        <field name="model_code"/>
+        <field name="labor_code"/>
+        <field name="cost" />
+      </list>
+    </field>
+  </record>
+
+  <!-- Labor Costs (Product)  -->
+ <record id="view_pdp_labor_cost_product_list" model="ir.ui.view">
+    <field name="name">pdp.labor.cost.product.list</field>
+    <field name="model">pdp.labor.cost.product</field>
+    <field name="arch" type="xml">
+      <list string="Labor Costs (Product)">
+        <field name="product_code"/>
+        <field name="labor_code"/>
+        <field name="cost" />
+      </list>
+    </field>
+  </record>
+
+
+</odoo>

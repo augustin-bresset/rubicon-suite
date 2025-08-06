@@ -1,5 +1,6 @@
 import os
 import csv
+import types
 
 from rubicon_import.tools.standard import func_index
 
@@ -8,14 +9,27 @@ root_folder = os.path.join(os.path.dirname(__file__), '../../..')
 backup_folder = os.path.join(root_folder, 'data', 'backup_pdp')
 data_folder = os.path.join(root_folder, 'data', 'odoo')
 
-def raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=False):
+def raw_to_data(
+    model_name, 
+    csv_name, 
+    fieldnames, 
+    row_to_dict, 
+    index_auto=False,
+    xml_idx=True):
     
     dest_name = os.path.join(data_folder, f"{model_name}.csv")
     
     file_name = os.path.join(backup_folder, csv_name)
 
+    if index_auto and xml_idx:
+        print(f'[WARN] Know what you want ! an auto index but no index... weirdooo, so no index for YOU ! index_auto is False')
+        index_auto = False
+    
     if fieldnames[0] != "id":
-        fieldnames = ["id"] + fieldnames
+        if xml_idx:
+            fieldnames = ["id"] + fieldnames
+    elif not xml_idx:
+        del fieldnames[0]
 
     with open(file_name, newline='', encoding='utf-8') as src_file:
         reader = csv.reader(src_file)
@@ -27,7 +41,19 @@ def raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=False)
             
             for i, row in enumerate(reader):
                 out = row_to_dict(row)
-                if out is not None:                    
+                
+                if isinstance(out, types.GeneratorType):
+                    for d in out:
+                        if d.get("id") and not xml_idx:
+                            del d["id"]
+                        if out is not None:
+                            if index_auto:
+                                d["id"] = func_index(str(i), model_name)
+                            writer.writerow(d)
+                
+                elif out is not None:  
+                    if out.get("id") and not xml_idx:
+                        del out["id"]                  
                     if index_auto:
                         out["id"] = func_index(str(i), model_name)
                     writer.writerow(out)

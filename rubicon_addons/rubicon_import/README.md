@@ -67,6 +67,15 @@ update_from_csv(
 
 import_csv(env, env['pdp.product.stone'], 'pdp_product')
 
+
+
+import_csv(env, env['pdp.labor.type'], 'pdp_labor')
+import_csv(env, env['pdp.addon.type'], 'pdp_labor')
+
+import_csv(env, env['pdp.addon.cost'], 'pdp_labor')
+import_csv(env, env['pdp.labor.cost.product'], 'pdp_labor')
+import_csv(env, env['pdp.labor.cost.model'], 'pdp_labor')
+
 env.cr.rollback()
 
 ```
