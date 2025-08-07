@@ -4,7 +4,7 @@
     'license': 'LGPL-3',
     'category': 'Product',
     'author': 'Rubicon',
-    'depends': ['base'],           
+    'depends': ['pdp_stone', 'pdp_metal', 'pdp_labor', 'pdp_labor'],           
     'data': [
         # Security
         'security/ir.model.access.csv',

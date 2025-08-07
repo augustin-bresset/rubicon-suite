@@ -1,27 +1,20 @@
 
-from odoo import fields, Model
+from odoo import fields, models
 
 
-class MarginStone(Model):
-    """
-    MarginID : varchar(5) [PK, FK → Margins.MarginID]
-    StoneCatID : char(1) [PK]
-    TypeID : char(5) [PK, FK → StoneTypes.TypeID]
-    ShapeID : char(5) [PK, FK → StoneShapes.ShapeID]
-    StoneSize : varchar(10) [PK, FK → StoneSizes.StoneSize]
-    ShadeID : char(5) [PK, FK → StoneShades.ShadeID]
-    StoneMargin : decimal(18)
-    """
+class MarginStone(models.Model):
+    _name="pdp.margin.stone"
+    _description="Stone Margin"
     
     margin_code = fields.Many2one(
         string="Margin Code",
-        comodel_name="pdp.margin.stone",
+        comodel_name="pdp.margin",
         required=True
     )
     
-    stone = fields.Many2one(
-        string="Stone",
-        comodel_name="pdp.stone",
+    stone_type_code = fields.Many2one(
+        string="Stone Type Code",
+        comodel_name="pdp.stone.type",
         required=True
     )
     

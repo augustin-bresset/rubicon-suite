@@ -1,8 +1,8 @@
 
-from odoo import fields, Model
+from odoo import fields, models
 
 
-class MarginStone(Model):
+class MarginStone(models.Model):
     """
     MarginID : varchar(5) [PK, FK → Margins.MarginID]
     StoneCatID : char(1) [PK]

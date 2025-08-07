@@ -76,7 +76,15 @@ import_csv(env, env['pdp.addon.cost'], 'pdp_labor')
 import_csv(env, env['pdp.labor.cost.product'], 'pdp_labor')
 import_csv(env, env['pdp.labor.cost.model'], 'pdp_labor')
 
-env.cr.rollback()
 
+# Margin
+
+import_csv(env, env['pdp.margin'], 'pdp_margin')
+import_csv(env, env['pdp.margin.labor'], 'pdp_margin')
+import_csv(env, env['pdp.margin.stone'], 'pdp_margin')
+import_csv(env, env['pdp.margin.metal'], 'pdp_margin')
+import_csv(env, env['pdp.margin.addon'], 'pdp_margin')
+
+env.cr.rollback()
 ```
 

@@ -17,3 +17,8 @@ def safe_str(val):
         return ''
     return val
     
+def safe_bool(val, default=True):
+    try:
+        return bool(val)
+    except:
+        return default

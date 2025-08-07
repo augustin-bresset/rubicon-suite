@@ -3,18 +3,67 @@
 
   <!-- Margin -->
   <record id="view_pdp_margin_list" model="ir.ui.view">
-    <field name="name">pdp.stone.margin.list</field>
-    <field name="model">pdp.stone.margin</field>
+    <field name="name">pdp.margin.list</field>
+    <field name="model">pdp.margin</field>
     <field name="arch" type="xml">
       <list string="Margins">
         <field name="code"/>
         <field name="name"/>
-        <field name="overall_margin"/>
-        <field name="parts_margin"/>
-        <field name="labor_margin"/>
-        <field name="casting_margin"/>
-        <field name="stone_margin"/>
       </list>
     </field>
   </record>
+
+  <!-- Margin Labor -->
+  <record id="view_pdp_margin_labor_list" model="ir.ui.view">
+    <field name="name">pdp.margin.labor.list</field>
+    <field name="model">pdp.margin.labor</field>
+    <field name="arch" type="xml">
+      <list string="Margin Labor">
+        <field name="margin_code"/>
+        <field name="margin_parts"/>
+        <field name="margin_stone"/>
+        <field name="margin_metal"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Margin Addon -->
+  <record id="view_pdp_margin_addon_list" model="ir.ui.view">
+    <field name="name">pdp.margin.addon.list</field>
+    <field name="model">pdp.margin.addon</field>
+    <field name="arch" type="xml">
+      <list string="Margin Addon">
+        <field name="margin_code"/>
+        <field name="addon_code"/>
+        <field name="margin"/>
+      </list>
+    </field>
+  </record>
+  
+  <!-- Margin Stone -->
+  <record id="view_pdp_margin_stone_list" model="ir.ui.view">
+    <field name="name">pdp.margin.stone.list</field>
+    <field name="model">pdp.margin.stone</field>
+    <field name="arch" type="xml">
+      <list string="Margin Stone">
+        <field name="margin_code"/>
+        <field name="stone_type_code"/>
+        <field name="margin"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Margin Metal -->
+  <record id="view_pdp_margin_metal_list" model="ir.ui.view">
+    <field name="name">pdp.margin.metal.list</field>
+    <field name="model">pdp.margin.metal</field>
+    <field name="arch" type="xml">
+      <list string="Margin Metal">
+        <field name="margin_code"/>
+        <field name="metal_purity_code"/>
+        <field name="margin"/>
+      </list>
+    </field>
+  </record>
+
 </odoo>

@@ -2,7 +2,7 @@
 <odoo>
 
   <!-- Root menu for PDP -->
-  <menuitem id="menu_pdp_root" name="PDP Price | Margin" sequence="10"/>
+  <menuitem id="menu_pdp_root" name="PDP Margin" sequence="10"/>
 
   <!--  -->
   <record id="action_pdp_margin" model="ir.actions.act_window">
@@ -15,5 +15,52 @@
             parent="menu_pdp_root"
             action="action_pdp_margin"
             sequence="1"/>
+
+  <!--  -->
+  <record id="action_pdp_margin_labor" model="ir.actions.act_window">
+    <field name="name">Margin Labor</field>
+    <field name="res_model">pdp.margin.labor</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_margin_labor"
+            name="Margin Labor"
+            parent="menu_pdp_root"
+            action="action_pdp_margin_labor"
+            sequence="1"/>
+
+  <record id="action_pdp_margin_addon" model="ir.actions.act_window">
+    <field name="name">Margin Addon</field>
+    <field name="res_model">pdp.margin.addon</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_margin_addon"
+            name="Margin Addon"
+            parent="menu_pdp_root"
+            action="action_pdp_margin_addon"
+            sequence="1"/>
+
+  <record id="action_pdp_margin_metal" model="ir.actions.act_window">
+    <field name="name">Margin Metal</field>
+    <field name="res_model">pdp.margin.metal</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_margin_metal"
+            name="Margin Metal"
+            parent="menu_pdp_root"
+            action="action_pdp_margin_metal"
+            sequence="1"/>
+
+
+  <record id="action_pdp_margin_stone" model="ir.actions.act_window">
+    <field name="name">Margin Stone</field>
+    <field name="res_model">pdp.margin.stone</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_margin_stone"
+            name="Margin Stone"
+            parent="menu_pdp_root"
+            action="action_pdp_margin_stone"
+            sequence="1"/>
+
 
 </odoo>

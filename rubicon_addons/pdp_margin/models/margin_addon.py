@@ -5,6 +5,7 @@ class MarginAddon(models.Model):
     Labor addon. 
     """
     _name="pdp.margin.addon"
+    _description="Addon Margin"
     
     margin = fields.Float(
         string="Margin",
@@ -16,6 +17,7 @@ class MarginAddon(models.Model):
         string="Addon Code",
         comodel_name="pdp.addon.type"
     )
+    
     margin_code = fields.Many2one(
         string="Margin Code",
         comodel_name="pdp.margin")

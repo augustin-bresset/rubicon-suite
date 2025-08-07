@@ -4,4 +4,5 @@
     'license': 'LGPL-3',
     'depends': ['pdp_metal', 'pdp_stone', 'pdp_product'],
     'installable': True,
+    'test': ['tests/test_import_csv.py'],
 }

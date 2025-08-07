@@ -56,7 +56,8 @@ def import_csv(
     verbose=True, 
     batch_size=1000,
     register_xml_id=False, 
-    fields_maj=None
+    fields_maj=None,
+    csv_path=None # Useful for testing
     ):
     """
     Import CSV into a model with optional deferred write phase for specific fields.
@@ -77,8 +78,11 @@ def import_csv(
     many2one_cache = {}
 
     # Model = env[model._name]
-    module_path = os.path.dirname(__file__)
-    data_path = os.path.join(module_path, '../..', module, 'data', f'{model._name}.csv')
+    if csv_path:
+        data_path = csv_path
+    else:
+        module_path = os.path.dirname(__file__)
+        data_path = os.path.join(module_path, '../..', module, 'data', f'{model._name}.csv')
 
     start = time.time()
     logs = {"created": 0, "updated": 0, "skipped": 0, "total": 0}
