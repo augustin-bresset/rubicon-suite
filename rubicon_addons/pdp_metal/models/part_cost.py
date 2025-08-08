@@ -14,9 +14,15 @@ class PartCost(models.Model):
         comodel_name='pdp.metal.purity',
         required=True,
     )
-    cost         = fields.Float(
-        string='Unit Cost (USD)',
-        digits=(10, 2),
-        required=True,
+    
+    cost         = fields.Monetary(
+        string='Unit Cost',
+        currency_field="currency",
+        required=True
     )
 
+    currency_id  =  fields.Many2one(
+        'res.currency',
+        string='Currency'
+    )
+    

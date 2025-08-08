@@ -11,11 +11,18 @@ class Metal(models.Model):
     
     code         = fields.Char(string='Code', required=True, size=2)
     name         = fields.Char(string='Name', required=True, size=20)
-    cost         = fields.Float(
-        string='Unit Cost (per kg)',
-        digits=(18, 2),
-        required=True,
+    
+    cost         = fields.Monetary(
+        string='Unit Cost ($/kg)',
+        currency_field = "currency"
     )
+
+    currency_id =  fields.Many2one(
+        'res.currency',
+        string='Currency',
+        default='USD'
+    )
+    
     plating      = fields.Boolean(string='Plating')
     gold         = fields.Boolean(string='Is Gold', default=True)
     reference    = fields.Boolean(string='Reference (18K gold)', default=False)

@@ -1,0 +1,13 @@
+<odoo>
+    <record id="main_company" model="res.company">
+        <field name="name">Rubicon</field>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="country_id" ref="base.th"/>
+        <field name="phone">+66 02 236 7043</field>
+        <field name="email">contact@rubicon.com</field>
+        <field name="website">https://www.rubicon.co.th/</field>
+        <field name="city">Bangkok</field>
+        <field name="zip">10500</field>
+        <field name="street">17 Si Lom Rd</field>
+    </record>
+</odoo>

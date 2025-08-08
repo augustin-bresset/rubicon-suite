@@ -20,9 +20,9 @@
     <field name="arch" type="xml">
       <list string="Margin Labor">
         <field name="margin_code"/>
-        <field name="margin_parts"/>
-        <field name="margin_stone"/>
-        <field name="margin_metal"/>
+        <field name="rate_parts"/>
+        <field name="rate_stone"/>
+        <field name="rate_metal"/>
       </list>
     </field>
   </record>
@@ -35,7 +35,7 @@
       <list string="Margin Addon">
         <field name="margin_code"/>
         <field name="addon_code"/>
-        <field name="margin"/>
+        <field name="rate"/>
       </list>
     </field>
   </record>
@@ -48,7 +48,7 @@
       <list string="Margin Stone">
         <field name="margin_code"/>
         <field name="stone_type_code"/>
-        <field name="margin"/>
+        <field name="rate"/>
       </list>
     </field>
   </record>
@@ -61,7 +61,7 @@
       <list string="Margin Metal">
         <field name="margin_code"/>
         <field name="metal_purity_code"/>
-        <field name="margin"/>
+        <field name="rate"/>
       </list>
     </field>
   </record>

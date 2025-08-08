@@ -30,11 +30,12 @@ services:
       DB_USER : ${DB_USER}
       DB_PASSWORD : ${DB_PASS}
       DB_NAME : ${DB_NAME}
-      ODOO_ADDONS_PATH : /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+      ODOO_ADDONS_PATH : /mnt/extra-addons,/mnt/external-addons,/usr/lib/python3/dist-packages/odoo/addons
 
     volumes:
     - ./odoo_conf/odoo.conf:/etc/odoo/odoo.conf:ro
     - ./rubicon_addons:/mnt/extra-addons
+    - ./external_addons:/mnt/external-addons
 
 
 volumes:

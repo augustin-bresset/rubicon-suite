@@ -1,0 +1,15 @@
+<odoo>
+    <menuitem
+        id="menu_root_pdp_price"
+        name="PDP Price"
+        sequence="10"
+    />
+
+   <menuitem id="menu_pdp_price_preview"
+            name="Price Preview"
+            parent="menu_root_pdp_price"
+            action="action_pdp_price_preview_wizard"
+            sequence="10"/>
+
+
+</odoo>

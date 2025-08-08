@@ -11,9 +11,20 @@ class MarginLabor(models.Model):
         required=True
         )
 
-    margin_parts = fields.Float(digits=(5, 3))
-    margin_stone = fields.Float(digits=(5, 3))
-    margin_metal = fields.Float(digits=(5, 3))
+    rate_parts = fields.Float(
+        string="Margin Parts Factor, e.g. 1.10 for 10%",
+        digits=(5, 3),
+        required=True,
+    )
     
-
-    
+    rate_stone = fields.Float(
+        string="Margin Stone Factor, e.g. 1.10 for 10%",
+        digits=(5, 3),
+        required=True,
+    )
+        
+    rate_metal = fields.Float(
+        string="Margin Metal Factor, e.g. 1.10 for 10%",
+        digits=(5, 3),
+        required=True,
+    )

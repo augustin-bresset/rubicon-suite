@@ -8,8 +8,3 @@ class LaborTypes(models.Model):
     code = fields.Char(string='Labor Types Code', required=True, size=3)
     name = fields.Char(string='Labor Types Name', required=True, size=50)
 
-    cost = fields.Float(
-        string="Unit Cost (THB)",
-        digits=(10, 2),
-        required=True,
-    )

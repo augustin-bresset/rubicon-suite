@@ -19,7 +19,20 @@ def create_product_composition_code(category, code, stones):
 
 
 
-def strip_code_space(code):
+def mapping_currency(currency, default="USD"):
+    if currency == '':
+        return default
+    currency = currency.upper()
+    currency = currency.strip()
+    map_ = {
+        "US" : "USD",
+        "TH" : "THB",
+    }    
+    new_curr = map_.get(currency) 
+    return  new_curr if new_curr is not None else currency 
+
+
+def strip_code_space(code, upper=True):
     """Strip space but not the one used.
     :example::
      > code_space("AA   ")
@@ -28,9 +41,11 @@ def strip_code_space(code):
      >>> "AA B"
     """
     code = code.replace('  ', '') # Del double space
+    if code == '':
+        return ''
     if code[-1] == ' ':
         return code[:-1]
-    return code
+    return code.upper()
 
 def create_stone_code(stone_type, stone_shade, stone_shape, size):
     stone_type = stone_type.rstrip(' ')

@@ -11,30 +11,34 @@ class Stone(models.Model):
 
     _rec_name = 'code'
 
-    code = fields.Char(
+    code        = fields.Char(
         string="Stock Code", 
         required=True,
     )
 
-    type_code = fields.Many2one(
+    type_code   = fields.Many2one(
         comodel_name='pdp.stone.type',
         string='Stone Type',
     )
-    shape_code = fields.Many2one(
+    shape_code  = fields.Many2one(
         comodel_name='pdp.stone.shape',
         string='Stone Shape',
     )
-    shade_code = fields.Many2one(
+    shade_code  = fields.Many2one(
         comodel_name='pdp.stone.shade',
         string='Stone Shade',
     )
-    size = fields.Many2one(
+    size        = fields.Many2one(
         comodel_name='pdp.stone.size',
         string='Stone Size',
     )
-    cost = fields.Float(
-        string='Cost USD',
-        digits=(10, 2),
+    cost        = fields.Monetary(
+        string='Cost',
+        currency_field="currency",
+    )
+    currency_id = fields.Many2one(
+        'res.currency',
+        string='Currency',
     )
     
     @staticmethod

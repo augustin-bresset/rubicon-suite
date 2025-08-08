@@ -6,7 +6,7 @@ class ModelMetal(models.Model):
 
     
     weight = fields.Float(
-        string='Weight in reference Metal',
+        string='Weight in reference Metal (g)',
         digits=(6, 3),
         required=True
     )

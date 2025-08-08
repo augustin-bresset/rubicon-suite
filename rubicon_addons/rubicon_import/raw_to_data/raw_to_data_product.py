@@ -9,7 +9,8 @@ from rubicon_import.tools.standard import (
     func_index, create_model_code, 
     create_product_composition_code, 
     create_stone_code,
-    size_field
+    size_field,
+    strip_code_space, mapping_currency
     )
 from rubicon_import.raw_to_data.raw_to_data import raw_to_data, backup_folder, data_folder
      
@@ -53,7 +54,8 @@ if __name__ == '__main__':
         csv_name = "Models.csv"
         fieldnames = ["id", "code", "category_code", "parent_model_code", "drawing", "quotation"]
         def row_to_dict(row):
-            code = create_model_code(row[0], row[1])
+            category_code = strip_code_space(row[0])
+            code = create_model_code(category_code, row[1])
             ref = row[2].zfill(3)
             code_parent = create_model_code(row[0], ref)
             if not code_parent in models:
@@ -66,7 +68,7 @@ if __name__ == '__main__':
             return {
                 "id": func_index(code, model_name),
                 "code": code,
-                "category_code": row[0],
+                "category_code": category_code,
                 "parent_model_code": code_parent,
                 "drawing": row[3],
                 "quotation": row[4],
@@ -81,9 +83,10 @@ if __name__ == '__main__':
         csv_name = "OrnCatagories.csv"
         fieldnames = ["id", "code", "name", "waste"]
         def row_to_dict(row):
+            code = strip_code_space(row[0])
             return {
-                "id": func_index(row[0], model_name),
-                "code": row[0],
+                "id": func_index(code, model_name),
+                "code": code,
                 "name" : row[1],
                 "waste": float(row[3]),
             }
@@ -131,6 +134,7 @@ if __name__ == '__main__':
         
         def row_to_dict(row):
             row = case_management(row)
+            
             if len(row[1]) > 2:
                 stones=row[1].split("/")[0]
                 old = f"{row[0][-1]},{stones}"
@@ -140,16 +144,20 @@ if __name__ == '__main__':
                 row = row_str.split(",")
                 print(f"[INFO] Rectif {old} -> {new} in {row[0]}")
                 print(f"{row_str}")
+            category_code = strip_code_space(row[1])
             code = create_model_code(row[1], row[2])
             composition_code = row[0].split("/")[0]
+            stone_type_code = strip_code_space(row[3])
+            metal_code = strip_code_space(row[4])
+
             return {
                 "id":func_index(row[0], model_name),
                 "code": row[0],
-                "category_code"             : row[1],
+                "category_code"             : category_code,
                 "model_code"                : code,
                 "stone_composition_code"    : composition_code, 
-                "stone_type"                : safe_str(row[3]),
-                "metal_code"                : safe_str(row[4]),
+                "stone_type"                : stone_type_code,
+                "metal_code"                : metal_code,
                 "active"                    : safe_str(row[5]),
                 "create_date"               : safe_str(row[6]),
                 "remark"                    : safe_str(row[7]),
@@ -174,12 +182,13 @@ if __name__ == '__main__':
             
             if row[1] in {'', None}:
                 return
-            
+            product_code = strip_code_space(row[0])
+            part_code = strip_code_space(row[1])
             
             return {
-                "id": func_index(f"{row[0]}_{row[1]}", model_name),
-                "product_code": row[0],
-                "part_code": row[1], 
+                "id": func_index(f"{product_code}_{part_code}", model_name),
+                "product_code": product_code,
+                "part_code": part_code, 
                 "quantity": int(row[2])
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
@@ -217,6 +226,7 @@ if __name__ == '__main__':
             composition_code = row[0].split('/')[0]
             if composition_code in compositions:
                 return
+            composition_code = strip_code_space(composition_code)
             compositions.add(composition_code)
             return {
                 "id":func_index(composition_code, model_name),
@@ -245,6 +255,7 @@ if __name__ == '__main__':
         fieldnames = [
             "id", "composition_code", "stone_code", "stone_type_code", "stone_shade_code",
             "stone_shape_code", "stone_size", "pieces", "weight",
+            "cost", "currency",
             "reshaped_shape", "reshaped_size", "reshaped_weight" 
         ]
         
@@ -292,6 +303,7 @@ if __name__ == '__main__':
             try:
                 row[8] = int(row[8])
                 row[9] = float(row[9])
+                assert row[12].isalpha() is True
             except:
                 if len(row) > 19:
                     row[2] = f"{row[2]}+{row[3]}"
@@ -316,31 +328,47 @@ if __name__ == '__main__':
                 row.append(row[7])
                 row.append(row[9])    
             
+            category_code = strip_code_space(row[0])
+            reference_code = strip_code_space(row[1])
+            stone_colors_code = strip_code_space(row[2])
             
-            # Size
-            row[6] = size_field(row[6])
-            row[17] = size_field(row[17])
+            stone_type_code = strip_code_space(row[3])
+            stone_shade_code = strip_code_space(row[7])
+            stone_shape_code = strip_code_space(row[5])
+            stone_size = size_field(row[6])
             
-            if row[17] == '':
-                row[17] = row[6]
+            reshaped_stone_shape_code = strip_code_space(row[16])
+            reshaped_stone_size = size_field(row[17])
             
-            product_composition_code = create_product_composition_code(row[0], row[1], row[2])
-            stone_code = create_stone_code(row[3], row[7], row[5], row[6])
+            
+                        
+            product_composition_code = create_product_composition_code(
+                category_code, reference_code, stone_colors_code
+                )
+            
+
+            
+            stone_code = create_stone_code(
+                stone_type_code, stone_shade_code, stone_shape_code, stone_size
+                )
             # reshaped_stone_code = create_stone_code(row[3], row[18], row[16], row[17])
              
+            
             
             return {
                 "id": func_index(f"{product_composition_code}_{stone_code}", model_name),
                 "composition_code"  : product_composition_code,
                 "pieces"            : safe_int(row[8]),
                 "stone_code"        : stone_code,
-                "stone_type_code"   : row[3],
-                "stone_shade_code"  : row[7],
-                "stone_shape_code"  : row[5],
-                "stone_size"        : row[6],
+                "stone_type_code"   : stone_type_code,
+                "stone_shade_code"  : stone_shade_code,
+                "stone_shape_code"  : stone_shape_code,
+                "stone_size"        : stone_size,
                 "weight"            : safe_float(row[9]), 
-                "reshaped_shape"    : row[16],
-                "reshaped_size"     : row[17],
+                "cost"              : safe_float(row[10]),
+                "currency"          : mapping_currency(row[12]),
+                "reshaped_shape"    : reshaped_stone_shape_code,
+                "reshaped_size"     : reshaped_stone_size,
                 "reshaped_weight"   : safe_float(row[19])
                 }
             
@@ -366,14 +394,16 @@ if __name__ == '__main__':
             row[3] = re.sub(r'[0-9 ]','',row[3])
             if len(models) > 0 and not model_code in models:
                 print(f"[WARNING] {model_code} NOT IN MODELS")
-                
+            metal_code = strip_code_space(row[3])
+            purity_code = strip_code_space(row[4])
+            
             row[4] = row[4].replace(" ", "").upper()
             return {
                 "id": func_index(f"{model_code}{row[2]}_{row[3]}_{row[4]}", model_name),
                 "model_code": model_code,
                 "metal_version": row[2],
-                "metal_code": row[3],
-                "purity": row[4], 
+                "metal_code": metal_code,
+                "purity": purity_code, 
                 "weight": safe_float(row[5])
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)

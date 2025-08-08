@@ -9,7 +9,8 @@ class MarginStone(models.Model):
     margin_code = fields.Many2one(
         string="Margin Code",
         comodel_name="pdp.margin",
-        required=True
+        required=True,
+
     )
     
     stone_type_code = fields.Many2one(
@@ -18,8 +19,8 @@ class MarginStone(models.Model):
         required=True
     )
     
-    margin = fields.Float(
-        string="Margin",
+    rate = fields.Float(
+        string="Factor, e.g. 1.10 for 10%",
         digits=(5, 3),
         required=True,
     )

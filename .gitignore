@@ -63,3 +63,8 @@ staticfiles/
 node_modules/
 
 migrations/versions/*.pyc
+
+
+# External addons
+
+external_addons/*

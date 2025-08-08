@@ -2,7 +2,7 @@
     'name': 'PDP Labor',
     'version': '1.0',
     'license': 'LGPL-3',
-    'depends': ['base', 'pdp_product',],
+    'depends': ['rubicon_env', 'pdp_product'],
     'data': [
         './security/ir.model.access.csv',
         # Views

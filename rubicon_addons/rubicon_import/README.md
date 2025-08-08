@@ -5,6 +5,7 @@
 
 from odoo.addons.rubicon_import.import_scripts.generic import import_csv
 
+# STONE
 import_csv(env, env['pdp.stone.category'], 'pdp_stone')
 import_csv(env, env['pdp.stone.type'], 'pdp_stone')
 import_csv(env, env['pdp.stone.shape'], 'pdp_stone')
@@ -13,12 +14,15 @@ import_csv(env, env['pdp.stone.size'], 'pdp_stone')
 import_csv(env, env['pdp.stone.weight'], 'pdp_stone')
 import_csv(env, env['pdp.stone'], 'pdp_stone')
 
+
+# METAL
 import_csv(env, env['pdp.metal.purity'], 'pdp_metal')
 import_csv(env, env['pdp.metal'], 'pdp_metal')
-
+## Part
 import_csv(env, env['pdp.part'], 'pdp_metal')
 import_csv(env, env['pdp.part.cost'], 'pdp_metal')
 
+# PRODUCT
 import_csv(env, env['pdp.product.category'], 'pdp_product')
 import_csv(env, env['pdp.product.model'], 'pdp_product', fields_maj=['parent_model_code'])
 
@@ -26,9 +30,11 @@ import_csv(env, env['pdp.product.model.matching'], 'pdp_product')
 import_csv(env, env['pdp.product.model.metal'], 'pdp_product')
 
 import_csv(env, env['pdp.product.stone.composition'], 'pdp_product')
+
 import_csv(env, env['pdp.product'], 'pdp_product')
 
 from odoo.addons.rubicon_import.import_scripts.update import update_from_csv
+import re
 
 update_from_csv(
     env,
@@ -67,8 +73,7 @@ update_from_csv(
 
 import_csv(env, env['pdp.product.stone'], 'pdp_product')
 
-
-
+# Labor
 import_csv(env, env['pdp.labor.type'], 'pdp_labor')
 import_csv(env, env['pdp.addon.type'], 'pdp_labor')
 

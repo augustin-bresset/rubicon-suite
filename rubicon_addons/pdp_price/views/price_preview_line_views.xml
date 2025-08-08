@@ -1,0 +1,17 @@
+<odoo>
+  <record id="view_pdp_price_preview_line_list" model="ir.ui.view">
+    <field name="name">pdp.price.preview.line.list</field>
+    <field name="model">pdp.price.preview.line</field>
+    <field name="type">list</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="sequence" invisible="1"/>
+        <field name="component"/>
+        <field name="label"/>
+        <field name="cost"   sum="Total Cost"/>
+        <field name="margin" sum="Total Margin"/>
+        <field name="price"  sum="Total Price"/>
+      </list>
+    </field>
+  </record>
+</odoo>

@@ -4,7 +4,7 @@
     'license': 'LGPL-3',
     'category': 'Product',
     'author': 'Rubicon',
-    'depends': ['base'],           
+    'depends': ['rubicon_env'],           
     'data': [
         # Security
         'security/ir.model.access.csv',

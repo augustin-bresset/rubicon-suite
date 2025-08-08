@@ -21,8 +21,15 @@ class ProductAddonCost(models.Model):
         required=True
     )
     
-    cost = fields.Float(
-        string="Cost",
-        digits=(5, 3)
+    cost        = fields.Monetary(
+        string='Cost',
+        currency_field="currency",
+        required=True
+    )
+    
+    currency_id = fields.Many2one(
+        'res.currency',
+        string='Currency',
+        required=True
     )
     

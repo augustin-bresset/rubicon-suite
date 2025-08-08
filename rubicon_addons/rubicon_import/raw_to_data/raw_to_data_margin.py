@@ -24,7 +24,7 @@ if __name__ == '__main__':
     
     
     # Margin 
-    if everything or "margin" in sys.argv:
+    if everything or "code" in sys.argv:
 
         model_name="pdp.margin"
         csv_name="Margins.csv"
@@ -44,13 +44,13 @@ if __name__ == '__main__':
 
     
     # Margin Labor
-    if everything or "margin" in sys.argv:
+    if everything or "labor" in sys.argv:
 
         model_name="pdp.margin.labor"
         csv_name="Margins.csv"
 
         fieldnames=[
-            "id", "margin_code", "margin_parts", "margin_metal", "margin_stone"
+            "id", "margin_code", "rate_parts", "rate_metal", "rate_stone"
         ]    
         
         def row_to_dict(row):
@@ -58,9 +58,9 @@ if __name__ == '__main__':
             return {
                 "id": func_index(row[0], model_name),
                 "margin_code": row[0], 
-                "margin_parts": safe_float(row[4]), 
-                "margin_metal": safe_float(row[4]), 
-                "margin_stone": safe_float(row[6])
+                "rate_parts": safe_float(row[4]), 
+                "rate_metal": safe_float(row[4]), 
+                "rate_stone": safe_float(row[6])
             }        
             
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
@@ -72,10 +72,10 @@ if __name__ == '__main__':
         model_name="pdp.margin.metal"
         csv_name="MetalMargins.csv"
         actual_field=[
-            "margin_code", "prod_cat_id(toDEL)", "purity", "margin"
+            "margin_code", "prod_cat_id(toDEL)", "purity", "rate"
         ]
         fieldnames=[
-            "id", "margin_code", "metal_purity_code", "margin"
+            "id", "margin_code", "metal_purity_code", "rate"
         ]
         
         def row_to_dict(row):
@@ -84,7 +84,7 @@ if __name__ == '__main__':
                 "id": func_index(f"{row[0]}_{metal_purity_code}", model_name),
                 "margin_code": row[0], 
                 "metal_purity_code": metal_purity_code, 
-                "margin": safe_float(row[3])
+                "rate": safe_float(row[3])
             }              
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
 
@@ -94,10 +94,10 @@ if __name__ == '__main__':
         model_name="pdp.margin.stone"
         csv_name="StoneMargins.csv"
         actual_field=[
-            "margin_code", "prod_cat_id(toDEL)", "stone_type", "stone_shape", "stone_size", "stone_shade", "margin"
+            "margin_code", "prod_cat_id(toDEL)", "stone_type", "stone_shape", "stone_size", "stone_shade", "rate"
         ]
         fieldnames=[
-            "id", "margin_code", "stone_type_code", "stone_size", "stone_shade", "margin"
+            "id", "margin_code", "stone_type_code", "stone_size", "stone_shade", "rate"
         ]
         
         def row_to_dict(row):
@@ -106,7 +106,7 @@ if __name__ == '__main__':
                 "id": func_index(f"{row[0]}_{stone_type_code}", model_name),
                 "margin_code": row[0], 
                 "stone_type_code": stone_type_code, 
-                "margin": float(row[6])
+                "rate": float(row[6])
             }              
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
 
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         csv_name = "MiscMargins.csv"
 
         fieldnames = [
-            "id", "margin_code", "addon_code", "margin"
+            "id", "margin_code", "addon_code", "rate"
             ]
         
         def row_to_dict(row):
@@ -125,7 +125,7 @@ if __name__ == '__main__':
                 "id": func_index(f"{row[0]}_{row[1]}", model_name),
                 "margin_code": row[1],
                 "addon_code": row[0],
-                "margin": safe_float(row[2]),
+                "rate": safe_float(row[2]),
             }
 
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)

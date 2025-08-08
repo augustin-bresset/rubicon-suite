@@ -5,7 +5,7 @@ import sys
 
 
 from ..tools.parsing import safe_float, safe_int, safe_str
-from ..tools.standard import func_index
+from ..tools.standard import func_index, strip_code_space, mapping_currency
 from .raw_to_data import raw_to_data
         
 
@@ -22,10 +22,11 @@ if __name__ == '__main__':
         csv_name = "MetalPurities.csv"
         fieldnames = ["id", "code", "percent"]
         def row_to_dict(row):
+            code = strip_code_space(row[0])
             return {
-                "id": func_index(row[0], model_name),
-                "code": row[0].replace(" ", "").upper(),
-                "percent": float(row[1] or '0.0')
+                "id": func_index(code, model_name),
+                "code": code,
+                "percent": safe_float(row[1])
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
         
@@ -33,19 +34,24 @@ if __name__ == '__main__':
     if everything or "metal" in sys.argv:
         model_name="pdp.metal"
         csv_name = "Metals.csv"
-        fieldnames = ["id", "code", "name", "cost", "reference", "gold", "plating"]
+        fieldnames = ["id", "code", "name", "cost", "currency", "reference", "gold", "plating"]
         def row_to_dict(row):
+            
+            code = strip_code_space(row[0])
+            
             reference = False
             gold = False
             if row[0] == "W " : 
                 reference = True
             if "gold" in row[1].lower():
                 gold = True 
+            
             return {
-                "id": func_index(row[0], model_name),
-                "code": row[0].replace(' ', ''),
+                "id": func_index(code, model_name),
+                "code": code,
                 "name": row[1],
                 "cost": float(row[2]),
+                "currency": mapping_currency(row[3], default="USD"),
                 "gold": gold,
                 "plating": bool(int(row[4])),
                 "reference": reference,
@@ -58,9 +64,10 @@ if __name__ == '__main__':
         csv_name = "Parts.csv"
         fieldnames = ["id", "code", "name"]
         def row_to_dict(row):
+            code = strip_code_space(row[0])
             return {
-                "id": func_index(row[0], model_name),
-                "code": row[0],
+                "id": func_index(code, model_name),
+                "code": code,
                 "name": row[1],
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
@@ -69,13 +76,17 @@ if __name__ == '__main__':
     if everything or "part_cost" in sys.argv:
         model_name="pdp.part.cost"
         csv_name = "PartsCost.csv"
-        fieldnames = ["id", "part_code", "purity_code", "cost"]
+        fieldnames = ["id", "part_code", "purity_code", "cost", "currency"]
         def row_to_dict(row):
+            part_code = strip_code_space(row[0])
+            purity_code = strip_code_space(row[1])
             return {
-                "id": func_index(f"{row[0]}_{row[1]}", model_name),
-                "part_code": row[0],
-                "purity_code" : row[1].replace(" ", "").upper(),
-                "cost": float(row[2]),
+                "id": func_index(f"{part_code}_{purity_code}", model_name),
+                "part_code": part_code,
+                "purity_code" : purity_code,
+                "cost": safe_float(row[2]),
+                "currency" : mapping_currency(row[3])
+                
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
         

@@ -2,23 +2,25 @@ from odoo import fields, models
 
 class MarginAddon(models.Model):
     """
-    Labor addon. 
+    Addon Margin 
     """
     _name="pdp.margin.addon"
     _description="Addon Margin"
     
-    margin = fields.Float(
-        string="Margin",
-        digits=(5, 3),
-        required=True,
-    )
-
     addon_code = fields.Many2one(
         string="Addon Code",
-        comodel_name="pdp.addon.type"
+        comodel_name="pdp.addon.type",
+        required=True,
     )
     
     margin_code = fields.Many2one(
         string="Margin Code",
-        comodel_name="pdp.margin")
+        comodel_name="pdp.margin",
+        required=True,
+        )
 
+    rate = fields.Float(
+        string="Factor, e.g. 1.10 for 10%",
+        digits=(5, 3),
+        required=True,
+    )

@@ -20,19 +20,21 @@ class ModelLaborCost(models.Model):
         default="W"
     )
     
-    # labor_cost      = fields.Float(string="Labor Cost", digits=(10, 3))
-    # casting_cost    = fields.Float(string="Casting Cost", digits=(10, 3)) 
-    # filing_cost     = fields.Float(string="Filing Cost", digits=(10, 3))
-    # polishing_cost  = fields.Float(string="Polishing Cost", digits=(10, 3))
-    
     labor_code = fields.Many2one(
         comodel_name="pdp.labor.type",
         ondelete="restrict",
         required=True   
     )
     
-    cost = fields.Float(
-        string="Cost (TBH)",
-        digits=(10, 2)
+    cost        = fields.Monetary(
+        string='Cost',
+        currency_field="currency",
+        required=True
+    )
+    
+    currency    = fields.Many2one(
+        'res.currency',
+        string='Currency',
+        required=True
     )
     
