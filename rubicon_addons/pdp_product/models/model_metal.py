@@ -16,7 +16,7 @@ class ModelMetal(models.Model):
         required=True
         )
     
-    metal_code  = fields.Many2one(
+    metal  = fields.Many2one(
         comodel_name='pdp.metal',
         string='Metal Code'
     )
@@ -26,7 +26,7 @@ class ModelMetal(models.Model):
         string='Metal Purity'
     )
 
-    model_code = fields.Many2one(
+    model = fields.Many2one(
         'pdp.product.model', 
         required=True, ondelete='cascade')
 

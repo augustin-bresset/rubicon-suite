@@ -33,10 +33,11 @@ if __name__ == '__main__':
             "id", "code", "name"
             ]    
         
-        def row_to_dict(row):            
+        def row_to_dict(row):     
+            code = strip_code_space(row[0])       
             return {
-                "id": func_index(row[0], model_name),
-                "code": row[0], 
+                "id": func_index(code, model_name),
+                "code": code, 
                 "name": row[1]
             }        
             
@@ -50,14 +51,14 @@ if __name__ == '__main__':
         csv_name="Margins.csv"
 
         fieldnames=[
-            "id", "margin_code", "rate_parts", "rate_metal", "rate_stone"
+            "id", "margin", "rate_parts", "rate_metal", "rate_stone"
         ]    
         
         def row_to_dict(row):
-            
+            margin_code = strip_code_space(row[0])
             return {
                 "id": func_index(row[0], model_name),
-                "margin_code": row[0], 
+                "margin": row[0], 
                 "rate_parts": safe_float(row[4]), 
                 "rate_metal": safe_float(row[4]), 
                 "rate_stone": safe_float(row[6])
@@ -75,15 +76,16 @@ if __name__ == '__main__':
             "margin_code", "prod_cat_id(toDEL)", "purity", "rate"
         ]
         fieldnames=[
-            "id", "margin_code", "metal_purity_code", "rate"
+            "id", "margin", "metal_purity", "rate"
         ]
         
         def row_to_dict(row):
             metal_purity_code = strip_code_space(row[2])
+            margin_code = strip_code_space(row[0])
             return {
-                "id": func_index(f"{row[0]}_{metal_purity_code}", model_name),
-                "margin_code": row[0], 
-                "metal_purity_code": metal_purity_code, 
+                "id": func_index(f"{margin_code}_{metal_purity_code}", model_name),
+                "margin": margin_code, 
+                "metal_purity": metal_purity_code, 
                 "rate": safe_float(row[3])
             }              
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
@@ -97,15 +99,16 @@ if __name__ == '__main__':
             "margin_code", "prod_cat_id(toDEL)", "stone_type", "stone_shape", "stone_size", "stone_shade", "rate"
         ]
         fieldnames=[
-            "id", "margin_code", "stone_type_code", "stone_size", "stone_shade", "rate"
+            "id", "margin", "stone_type", "stone_size", "stone_shade", "rate"
         ]
         
         def row_to_dict(row):
-            stone_type_code = row[2]
+            margin_code = strip_code_space(row[0])
+            stone_type_code = strip_code_space(row[2])
             return {
-                "id": func_index(f"{row[0]}_{stone_type_code}", model_name),
-                "margin_code": row[0], 
-                "stone_type_code": stone_type_code, 
+                "id": func_index(f"{margin_code}_{stone_type_code}", model_name),
+                "margin": margin_code, 
+                "stone_type": stone_type_code, 
                 "rate": float(row[6])
             }              
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
@@ -117,14 +120,16 @@ if __name__ == '__main__':
         csv_name = "MiscMargins.csv"
 
         fieldnames = [
-            "id", "margin_code", "addon_code", "rate"
+            "id", "margin", "addon", "rate"
             ]
         
         def row_to_dict(row):
+            addon_code = strip_code_space(row[0])
+            margin_code = strip_code_space(row[1])
             return {
-                "id": func_index(f"{row[0]}_{row[1]}", model_name),
-                "margin_code": row[1],
-                "addon_code": row[0],
+                "id": func_index(f"{addon_code}_{margin_code}", model_name),
+                "addon": addon_code,
+                "margin": margin_code,
                 "rate": safe_float(row[2]),
             }
 

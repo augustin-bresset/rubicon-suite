@@ -7,14 +7,12 @@ class PriceAddon(models.TransientModel):
 
 
     @api.model
-    def compute(self, *, product_code, margin_code=None, currency, date):
-        cost = 0.0
-        margin = 0.0
-        
+    def compute(self, *, product, margin, currency, date):
+
         groups = self.env['pdp.addon.cost'].read_group(
-            domain=[('product_code', '=', product_code.id)],
-            fields=['cost:sum', 'currency'],
-            groupby=['currency'],
+            domain=[('product_id', '=', product.id)],
+            fields=['cost:sum', 'currency_id', 'addon_id'],
+            groupby=['addon_id', 'currency_id'],
         )
         
         margin_map = {}
@@ -22,7 +20,7 @@ class PriceAddon(models.TransientModel):
             addon_ids = [g['addon_id'][0] for g in groups if g.get('addon_id')]
             if addon_ids:
                 ml = self.env['pdp.margin.addon'].search([
-                    ('margin_id', '=', margin_code.id),
+                    ('margin_id', '=', margin.id),
                     ('addon_id', 'in', addon_ids),
                 ])
                 margin_map = {r.addon_id.id: (r.rate or 1.0) for r in ml}
@@ -32,17 +30,14 @@ class PriceAddon(models.TransientModel):
 
         for g in groups:
             sum_cost = g.get('cost_sum') or 0.0
-            if g.get('currency_id'):
-                from_cur = self.env['res.currency'].browse(g['currency_id'][0])
-            else:
-                from_cur = currency
+            from_cur = g.get('currency_id') and self.env['res.currency'].browse(g['currency_id'][0]) or currency
+            cost_in_cur = self._convert(sum_cost, from_cur, currency, date)
 
-            cost = self._convert(sum_cost, from_cur, currency, date)
-            total_cost += cost
+            total_cost += cost_in_cur
 
             addon_id = g.get('addon_id') and g['addon_id'][0]
             rate = margin_map.get(addon_id, 1.0)
-            total_margin += (rate - 1.0) * cost
+            total_margin += (rate - 1.0) * cost_in_cur
         
 
-        return self.compute_payload('addon', total_cost, total_margin, currency)
+        return self._payload('addon', total_cost, total_margin, currency)

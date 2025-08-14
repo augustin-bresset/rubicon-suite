@@ -1,6 +1,49 @@
 
 
 ## Usecase
+
+### Stone
+Create Stone Tables and Import from CSV
+
+#### Create data
+```sh
+python3 -m rubicon_import.raw_to_data.raw_to_data_stone
+```
+This command will convert the data from raw into a good format for odoo
+
+#### Create Table
+```sh
+docker compose exec odoo odoo -d rubicon -i pdp_stone --stop-after-init
+``` 
+Create the table from the models of the module
+
+
+#### Import Data
+Finally in the (python) shell
+```sh
+docker compose exec odoo odoo shell -d rubicon
+```
+
+Launch the imports scripts 
+```py
+from odoo.addons.rubicon_import.import_scripts.generic import import_csv
+
+# STONE
+import_csv(env, env['pdp.stone.category'], 'pdp_stone')
+import_csv(env, env['pdp.stone.type'], 'pdp_stone')
+import_csv(env, env['pdp.stone.shape'], 'pdp_stone')
+import_csv(env, env['pdp.stone.shade'], 'pdp_stone')
+import_csv(env, env['pdp.stone.size'], 'pdp_stone')
+import_csv(env, env['pdp.stone.weight'], 'pdp_stone')
+import_csv(env, env['pdp.stone'], 'pdp_stone')
+
+env.cr.commit()
+```
+
+
+
+
+
 ```py
 
 from odoo.addons.rubicon_import.import_scripts.generic import import_csv
@@ -18,13 +61,15 @@ import_csv(env, env['pdp.stone'], 'pdp_stone')
 # METAL
 import_csv(env, env['pdp.metal.purity'], 'pdp_metal')
 import_csv(env, env['pdp.metal'], 'pdp_metal')
+
 ## Part
 import_csv(env, env['pdp.part'], 'pdp_metal')
 import_csv(env, env['pdp.part.cost'], 'pdp_metal')
 
+
 # PRODUCT
 import_csv(env, env['pdp.product.category'], 'pdp_product')
-import_csv(env, env['pdp.product.model'], 'pdp_product', fields_maj=['parent_model_code'])
+import_csv(env, env['pdp.product.model'], 'pdp_product', fields_maj=['parent_model'])
 
 import_csv(env, env['pdp.product.model.matching'], 'pdp_product')
 import_csv(env, env['pdp.product.model.metal'], 'pdp_product')
@@ -55,10 +100,10 @@ update_from_csv(
 )
 
 stone_mapping = {
-    "stone_code"        : "code",
-    "stone_type_code"   : "type_code",
-    "stone_shade_code"  : "shade_code",
-    "stone_shape_code"  : "shape_code",
+    "stone"        : "code",
+    "stone_type"   : "type",
+    "stone_shade"  : "shade",
+    "stone_shape"  : "shape",
     "stone_size"        : "size",
 }
 

@@ -8,25 +8,23 @@ class PricePart(models.TransientModel):
 
 
     @api.depends()
-    def compute(self, *, product_code, margin_code=None, currency, date):
-        cost = 0.0
-        margin = 0.0
+    def compute(self, *, product, margin, currency, date):
         
-        groups = self.env['pdp.labor.product.cost'].read_group(
-            domain=[('product_code', '=', product_code.id)],
-            fields=['cost:sum', 'currency'],
-            groupby=['currency'],
+        groups = self.env['pdp.part.cost'].read_group(
+            domain=[('product_code', '=', product.id)],
+            fields=['cost:sum', 'currency_id', 'part_id'],
+            groupby=['currency_id', 'part_id'],
         )
         
         margin_map = {}
         if margin and groups:
-            labor_ids = [g['labor_id'][0] for g in groups if g.get('labor_id')]
-            if labor_ids:
-                ml = self.env['pdp.margin.labor'].search([
-                    ('margin_id', '=', margin_code.id),
-                    ('labor_id', 'in', labor_ids),
+            part_ids = [g['part_id'][0] for g in groups if g.get('part_id')]
+            if part_ids:
+                ml = self.env['pdp.margin.part'].search([
+                    ('margin_id', '=', margin.id),
+                    ('part_id', 'in', part_ids),
                 ])
-                margin_map = {r.labor_id.id: (r.rate or 1.0) for r in ml}
+                margin_map = {r.part_id.id: (r.rate or 1.0) for r in ml}
 
         total_cost = 0.0
         total_margin = 0.0
@@ -41,9 +39,9 @@ class PricePart(models.TransientModel):
             cost = self._convert(sum_cost, from_cur, currency, date)
             total_cost += cost
 
-            labor_id = g.get('labor_id') and g['labor_id'][0]
-            rate = margin_map.get(labor_id, 1.0)
+            part_id = g.get('part_id') and g['part_id'][0]
+            rate = margin_map.get(part_id, 1.0)
             total_margin += (rate - 1.0) * cost
         
 
-        return self.compute_payload('labor', total_cost, total_margin, currency)        
+        return self._payload('part', total_cost, total_margin, currency)        

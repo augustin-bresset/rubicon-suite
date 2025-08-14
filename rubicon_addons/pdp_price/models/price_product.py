@@ -1,45 +1,31 @@
-from odoo import fields, models
+# models/price_product.py
+from odoo import models, fields, api
 
-class PriceComponent(models.Model):
+class PriceProduct(models.Model):
     _name = 'pdp.price.product'
+    _description = 'Stored Product Price'
 
-    _sql_constraints = [
-        ('uniq_product',
-         'unique(product_code)',
-         'Uniq price per product'),
-    ]
-    
-    product_code = fields.Many2one(
-        'pdp.product',
-        string='Product',
-        required=True,
-        ondelete='cascade'
-    )
-    margin_code = fields.Many2one(
-        'pdp.margin',
-        string='Margin'
-    )
+    product_id = fields.Many2one('pdp.product', required=True, ondelete='cascade')
+    margin_id  = fields.Many2one('pdp.margin')
+    date = fields.Date(required=True, default=fields.Date.context_today)
+    currency_id = fields.Many2one('res.currency', required=True,
+                                  default=lambda self: self.env.company.currency_id)
 
-    date = fields.Date(required=True, default=fields.Date.context_today)    
-    
-    currency_id = fields.Many2one(
-        'res.currency',
-        string='Currency',
-        required=True,
-        default=lambda self: self.env.company.currency_id
-    )
-    
-    @api.depends('margin_code', 'currency_id')
-    def _compute_totals(self):
-        for rec in self:
-            comps = [
-                rec.component_stone_id, rec.component_metal_id,
-                rec.component_labor_id, rec.component_addon_id, rec.component_part_id
-            ]
-            total_cost = sum((c.cost or 0.0) for c in comps if c)
-            total_margin = sum((c.margin or 0.0) for c in comps if c)
-            rec.cost = rec.currency_id.round(total_cost)
-            rec.margin = rec.currency_id.round(total_margin)
-            rec.price = rec.cost + rec.margin
-            
-            
+    # Totaux
+    cost = fields.Monetary(currency_field='currency_id')
+    margin = fields.Monetary(currency_field='currency_id')
+    price = fields.Monetary(currency_field='currency_id')
+
+    # Détail JSON (option simple) ou One2many dans un autre modèle persistant
+    detail_json = fields.Json()
+
+    def action_fill_from_preview(self):
+        # ouvre le wizard avec default_…, puis à la fermeture un on_close crée l’enregistrement
+        action = self.env.ref('pdp_price.action_pdp_price_preview').read()[0]
+        action['context'] = {
+            'default_product_id': self.product_id.id,
+            'default_margin_id': self.margin_id.id,
+            'default_currency_id': self.currency_id.id,
+            'default_date': self.date,
+        }
+        return action

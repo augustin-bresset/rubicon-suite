@@ -5,7 +5,7 @@ class MarginLabor(models.Model):
     _name="pdp.margin.labor"
     _description="Labor Margin"
     
-    margin_code = fields.Many2one(
+    margin = fields.Many2one(
         string="Margin Code",
         comodel_name="pdp.margin",
         required=True

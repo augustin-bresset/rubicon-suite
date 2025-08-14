@@ -9,13 +9,13 @@ class ProductLaborCost(models.Model):
     _name="pdp.labor.cost.product"
     _description="Link table product-addon cost"
     
-    product_code = fields.Many2one(
+    product = fields.Many2one(
         comodel_name="pdp.product",
         ondelete="restrict",
         required=True
     )
     
-    labor_code = fields.Many2one(
+    labor = fields.Many2one(
         comodel_name="pdp.labor.type",
         ondelete="restrict",
         required=True
@@ -24,7 +24,7 @@ class ProductLaborCost(models.Model):
     
     cost        = fields.Monetary(
         string='Cost',
-        currency_field="currency",
+        currency_field="currency_id",
         required=True
     )
     

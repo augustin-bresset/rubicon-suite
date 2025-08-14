@@ -13,9 +13,9 @@ class ModelCategory(models.Model):
         required=True
     )
 
-    model_codes = fields.One2many(
+    models = fields.One2many(
         comodel_name="pdp.product.model",
-        inverse_name="category_code",
+        inverse_name="category",
         string="Models",
     )
 

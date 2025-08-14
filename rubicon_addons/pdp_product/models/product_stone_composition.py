@@ -9,6 +9,6 @@ class ProductStoneComposition(models.Model):
     
     stone_lines = fields.One2many(
         comodel_name='pdp.product.stone',
-        inverse_name='composition_code',
+        inverse_name='composition',
         string='Stone Lines'
     )

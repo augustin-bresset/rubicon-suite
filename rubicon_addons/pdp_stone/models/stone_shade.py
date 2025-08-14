@@ -6,5 +6,7 @@ class StoneShade(models.Model):
 
     _rec_name = "code"
 
-    code  = fields.Char(string="Code", required=True, size=5)
+    code  = fields.Char(string="Code", required=True, index=True)
     shade = fields.Char(string="Shade", required=True)
+    
+    _sql_constraints = [("name_uniq","unique(shade)","Shade must be unique.")]

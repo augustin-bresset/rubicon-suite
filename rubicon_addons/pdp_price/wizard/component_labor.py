@@ -8,22 +8,21 @@ class PriceLabor(models.TransientModel):
 
 
     @api.depends()
-    def compute(self, *, product_code, margin_code=None, currency, date):
-        cost = 0.0
-        margin = 0.0
-        
-        groups = self.env['pdp.labor.product.cost'].read_group(
-            domain=[('product_code', '=', product_code.id)],
-            fields=['cost:sum', 'currency'],
-            groupby=['currency'],
+    def compute(self, *, product, margin, currency, date):
+
+        groups = self.env['pdp.labor.cost'].read_group(
+            domain=[('product', '=', product.id)],
+            fields=['cost:sum', 'currency_id', 'labor_id'],
+            groupby=['labor_id', 'currency_id'],
         )
+
         
         margin_map = {}
         if margin and groups:
             labor_ids = [g['labor_id'][0] for g in groups if g.get('labor_id')]
             if labor_ids:
                 ml = self.env['pdp.margin.labor'].search([
-                    ('margin_id', '=', margin_code.id),
+                    ('margin_id', '=', margin.id),
                     ('labor_id', 'in', labor_ids),
                 ])
                 margin_map = {r.labor_id.id: (r.rate or 1.0) for r in ml}
@@ -46,4 +45,4 @@ class PriceLabor(models.TransientModel):
             total_margin += (rate - 1.0) * cost
         
 
-        return self.compute_payload('labor', total_cost, total_margin, currency)        
+        return self._payload('labor', total_cost, total_margin, currency)        

@@ -13,10 +13,10 @@
         'security/ir.model.access.csv',
     
         # Views
-        # 'views/price_preview_line_views.xml',  
         'views/price_preview_views.xml',
-
         'views/pdp_menus.xml',
+        # 'views/price_preview_line_views.xml',  
+
         # 'views/pdp_views.xml',
         ],   
     'installable': True,

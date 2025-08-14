@@ -11,22 +11,22 @@ class Product(models.Model):
         required=True, 
         size=100)
     
-    category_code = fields.Many2one(
+    category = fields.Many2one(
         comodel_name='pdp.product.category',
         string='Category',
     )
     
-    model_code = fields.Many2one(
+    model = fields.Many2one(
         comodel_name='pdp.product.model',
         string='Model',
     )
     
-    stone_composition_code = fields.Many2one(
+    stone_composition = fields.Many2one(
         comodel_name='pdp.product.stone.composition',
         string='Stone Composition'
     )
     
-    metal_code = fields.Char(
+    metal = fields.Char(
         string='Metal code', 
         size=10
     )
@@ -39,6 +39,6 @@ class Product(models.Model):
     
     parts        = fields.One2many(
         comodel_name='pdp.product.part',
-        inverse_name='product_code'
+        inverse_name='product'
     )
 

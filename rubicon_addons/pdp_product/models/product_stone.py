@@ -4,7 +4,7 @@ class ProductStone(models.Model):
     _name = 'pdp.product.stone'
     _description = 'Product Stone'
 
-    stone_code = fields.Many2one(
+    stone = fields.Many2one(
         comodel_name='pdp.stone',
         string='Stone Code Buyed',
         required=True
@@ -33,7 +33,7 @@ class ProductStone(models.Model):
         string="Weight of one stone used",   
     )
     
-    composition_code = fields.Many2one(
+    composition = fields.Many2one(
         comodel_name='pdp.product.stone.composition',
         string='Composition',
         required=True,

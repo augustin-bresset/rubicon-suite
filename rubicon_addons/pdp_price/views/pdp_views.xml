@@ -1,23 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<!-- views/pdp_views.xml -->
 <odoo>
-
-  <!-- Margin -->
-  <record id="view_pdp_margin_list" model="ir.ui.view">
-    <field name="name">pdp.stone.margin.list</field>
-    <field name="model">pdp.stone.margin</field>
+  <record id="pdp_product_form_inherit_price_preview" model="ir.ui.view">
+    <field name="name">pdp.product.form.price.preview.button</field>
+    <field name="model">pdp.product</field>
+    <field name="inherit_id" ref="pdp_product.view_pdp_product_form"/> <!-- adapte l'id -->
     <field name="arch" type="xml">
-      <list string="Margins">
-        <field name="code"/>
-        <field name="name"/>
-        <field name="overall_margin"/>
-        <field name="parts_margin"/>
-        <field name="labor_margin"/>
-        <field name="casting_margin"/>
-        <field name="stone_margin"/>
-      </list>
+      <header position="inside">
+        <button name="%(action_pdp_price_preview)d"
+                type="action"
+                context="{'default_product_id': active_id}"
+                string="Preview Price"
+                class="btn-secondary"/>
+      </header>
     </field>
   </record>
-
-
-  
 </odoo>

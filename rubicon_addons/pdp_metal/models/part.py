@@ -14,8 +14,9 @@ class Part(models.Model):
 
     code      = fields.Char(string='Code', required=True, size=5)
     name      = fields.Char(string='Name', required=True, size=50)
-    cost_codes  = fields.One2many(
+    costs  = fields.One2many(
         comodel_name='pdp.part.cost',
-        inverse_name='part_code',
+        inverse_name='part',
         string='Cost'
     )
+

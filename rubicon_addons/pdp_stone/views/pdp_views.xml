@@ -22,7 +22,7 @@
         <field name="code"/>
         <field name="name"/>
         <field name="density"/>
-        <field name="category_code"/>
+        <field name="category_id"/>
       </list>
     </field>
   </record>
@@ -33,7 +33,7 @@
     <field name="model">pdp.stone.size</field>
     <field name="arch" type="xml">
       <list string="Stone Sizes">
-        <field name="size"/>
+        <field name="name"/>
       </list>
     </field>
   </record>
@@ -68,9 +68,9 @@
     <field name="model">pdp.stone.weight</field>
     <field name="arch" type="xml">
       <list string="Stone Weights">
-        <field name="type_code"/>
-        <field name="shape_code"/>
-        <field name="shade_code"/>
+        <field name="type"/>
+        <field name="shape"/>
+        <field name="shade"/>
         <field name="size"/>
         <field name="weight"/>
       </list>
@@ -84,9 +84,9 @@
     <field name="arch" type="xml">
       <list string="Stones">
         <field name="code"/>
-        <field name="type_code"/>
-        <field name="shape_code"/>
-        <field name="shade_code"/>
+        <field name="type"/>
+        <field name="shape"/>
+        <field name="shade"/>
         <field name="size"/>
         <field name="cost"/>
       </list>

@@ -1,17 +1,35 @@
 <odoo>
+  <!-- Liste des lignes de preview (TransientModel) -->
   <record id="view_pdp_price_preview_line_list" model="ir.ui.view">
     <field name="name">pdp.price.preview.line.list</field>
     <field name="model">pdp.price.preview.line</field>
-    <field name="type">list</field>
     <field name="arch" type="xml">
       <list>
-        <field name="sequence" invisible="1"/>
-        <field name="component"/>
-        <field name="label"/>
-        <field name="cost"   sum="Total Cost"/>
-        <field name="margin" sum="Total Margin"/>
-        <field name="price"  sum="Total Price"/>
+        <field name="preview_id"/>
+        <field name="type"/>
+        <field name="cost"/>
+        <field name="margin"/>
+        <field name="price"/>
+        <field name="currency_id"/>
       </list>
+    </field>
+  </record>
+
+  <!-- Formulaire de ligne -->
+  <record id="view_pdp_price_preview_line_form" model="ir.ui.view">
+    <field name="name">pdp.price.preview.line.form</field>
+    <field name="model">pdp.price.preview.line</field>
+    <field name="arch" type="xml">
+      <form string="Price Preview Line">
+        <group>
+          <field name="preview_id"/>
+          <field name="type"/>
+          <field name="cost"/>
+          <field name="margin"/>
+          <field name="price"/>
+          <field name="currency_id"/>
+        </group>
+      </form>
     </field>
   </record>
 </odoo>

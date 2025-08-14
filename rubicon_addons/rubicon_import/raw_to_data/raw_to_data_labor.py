@@ -68,7 +68,7 @@ if __name__ == '__main__':
     if everything or "product cost" in sys.argv:
         model_name="pdp.labor.cost.product"
         csv_name = "ProductLaborCost.csv"   
-        fieldnames = ["id", "product_code", "labor_code", "cost", "currency_id"]
+        fieldnames = ["id", "product", "labor", "cost", "currency_id"]
         def row_to_dict(row):
             
             while len(row) > 4:
@@ -87,8 +87,8 @@ if __name__ == '__main__':
             currency_id = mapping_currency(row[2])
             return {
                 "id": func_index(f"{product_code}_{labor_code}", model_name),
-                "product_code": product_code,
-                "labor_code": labor_code,
+                "product": product_code,
+                "labor": labor_code,
                 "cost": safe_float(row[3]),
                 "currency_id": currency_id
             }
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     if everything or "model_cost" in sys.argv:
         model_name="pdp.labor.cost.model"
         csv_name = "ModelLabor.csv"
-        fieldnames = ["id", "model_code", "metal_code", "labor_code", "cost", "currency_id"]
+        fieldnames = ["id", "model", "metal", "labor", "cost", "currency_id"]
         def row_to_dict(row):
             if not row[0].isalpha():
                 return
@@ -108,13 +108,13 @@ if __name__ == '__main__':
             currency_id = mapping_currency(row[7], default="THB")
             out = {
                 "id": None,
-                "model_code": model_code,
-                "metal_code": metal_code,
-                "labor_code": None, "cost": 0.0, "currency_id": currency_id
+                "model": model_code,
+                "metal": metal_code,
+                "labor": None, "cost": 0.0, "currency_id": currency_id
                 }
             cost = safe_float(row[3])
             if cost > 0.0:
-                out["labor_code"] = "ASS"
+                out["labor"] = "ASS"
                 out["id"] = func_index(f"{model_code}{metal_code}_ASS", model_name)
                 out["cost"] = cost
                 yield out
@@ -122,7 +122,7 @@ if __name__ == '__main__':
             cost = safe_float(row[4])
             if cost > 0.0:
 
-                out["labor_code"] = "CAS"
+                out["labor"] = "CAS"
                 out["id"] = func_index(f"{model_code}{metal_code}_CAS", model_name)
                 out["cost"] = cost
                 yield out
@@ -130,14 +130,14 @@ if __name__ == '__main__':
             cost = safe_float(row[5])
             if cost > 0.0:
 
-                out["labor_code"] = "FIL"
+                out["labor"] = "FIL"
                 out["id"] = func_index(f"{model_code}{metal_code}_FIL", model_name)
                 out["cost"] = cost
                 yield out
             
             cost = safe_float(row[6])
             if cost > 0.0:
-                out["labor_code"] = "POL"
+                out["labor"] = "POL"
                 out["id"] = func_index(f"{model_code}{metal_code}_POL", model_name)
                 out["cost"] = cost
                 yield out
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     if everything or "product cost" in sys.argv:
         model_name="pdp.addon.cost"
         csv_name = "ProductMiscCost.csv"
-        fieldnames = ["id", "product_code", "addon_code", "cost", "currency_id"]
+        fieldnames = ["id", "product", "addon", "cost", "currency_id"]
         def row_to_dict(row):
             while len(row) > 4:
                 row[0] = f"{row[0]}+{row[1]}"
@@ -165,8 +165,8 @@ if __name__ == '__main__':
             
             return {
                 "id": func_index(f"{product_code}_{addon_code}", model_name),
-                "product_code": product_code,
-                "addon_code": addon_code,
+                "product": product_code,
+                "addon": addon_code,
                 "cost": cost,
                 "currency_id": currency_id
             }

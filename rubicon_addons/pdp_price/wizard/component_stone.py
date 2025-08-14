@@ -1,38 +1,29 @@
-from odoo import models, fields, api
+# wizard/component_stone.py
+from odoo import models, api
 
 class PriceStone(models.TransientModel):
     _name = 'pdp.price.stone'
-    _description = 'Price Base Component'
-    _inherit='pdp.price.component'  
+    _description = 'Stone Price Component'
+    _inherit = 'pdp.price.component'
 
-    @api.depends()
-    def compute(self, *, product_code, margin_code=None, currency, date):
-        total_cost = 0.0
-        total_margin = 0.0
-        
-        product_stones = self.env['pdp.product.stone'].search([
-            ('code', '=', product_code.composition_code)
-        ])
-        
-        for product_stone in product_stones:
-            curr_id = product_stone.stone_code.currency_id
-            stones_cost = self._convert(
-                amount=product_stone.stone_code.cost,
-                from_cur=curr_id,
-                to_cur=currency,
-                date=date)
-            stones_cost *= product_stone.pieces
-            if margin_code:
-                margin_stone = self.env['pdp.margin.stone'].search([
-                    ('margin_code', '=', margin_code.code)
-                    ('stone_type_code', '=', product_stone.stone_code.type_code),
-                ])
-                
-                stones_margin = (margin_stone-1.0)*stones_cost
-            else:
-                stones_margin = 0.0
-            
-            total_cost += stones_cost
-            total_margin += stones_margin
+    @api.model
+    def compute(self, *, product, margin, currency, date):
+        total_cost = total_margin = 0.0
 
-        return self.compute_payload('stone', total_cost, total_margin, currency)        
+        lines = self.env['pdp.product.stone'].search([('product_id', '=', product.id)])
+        for line in lines:
+            cur = line.stone_id.currency_id or currency
+            unit_cost = self._convert(line.stone_id.unit_cost or 0.0, cur, currency, date)
+            cost = unit_cost * (line.pieces or 0.0)
+            total_cost += cost
+
+            rate = 1.0
+            if margin:
+                mline = self.env['pdp.margin.stone'].search([
+                    ('margin_id', '=', margin.id),
+                    ('stone_type_id', '=', line.stone_id.type_id.id),
+                ], limit=1)
+                rate = (mline.rate or 1.0) if mline else 1.0
+            total_margin += (rate - 1.0) * cost
+
+        return self._payload('stone', total_cost, total_margin, currency)

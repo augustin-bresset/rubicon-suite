@@ -77,25 +77,21 @@ rubicon-suite/
    git clone … rubicon-suite
    cd rubicon-suite
    python3.12 -m venv .venv && source .venv/bin/activate
-   pip install -r rubicon_core/requirements.txt
    ```
+
 2. **Lancement des conteneurs**
 
    ```bash
    docker compose down  # détruit anciens conteneurs
    docker compose up -d  # démarre db & odoo
    ```
-3. **Migrations de schéma**
 
-   ```bash
-   cd rubicon_core
-   alembic upgrade head       # crée toutes les tables en PostgreSQL
-   ```
-4. **Démarrage Odoo**
+3. **Démarrage Odoo**
 
    * Odoo lit `odoo_conf/odoo.conf` (interpolé via `.env` si besoin)
    * Les modules `rubicon_addons` sont automatiquement installés
-5. **Utilisation**
+
+4. **Utilisation**
 
    * Toute logique métier complexe (calcul de coût, conversion de devises…) passe par rubicon\_core,
    * Les utilisateurs interagissent via l’interface Odoo.
@@ -107,10 +103,8 @@ rubicon-suite/
 Rubicon Suite offre un **ERP moderne**, découplé en :
 
 1. **Docker** pour l’isolation et la reproductibilité de l’environnement
-2. **PostgreSQL** géré via conteneur + **migrations Alembic**
-3. **SQLAlchemy/Alembic** pour versionner et évoluer le schéma de données
+2. **PostgreSQL** géré via conteneur 
 4. **Odoo 18** pour l’interface utilisateur et les workflows
-5. **rubicon\_core** pour la couche métier pure Python
 6. **rubicon\_addons** pour l’intégration Odoo
 
 Cet empilement garantit une **maintenance simplifiée**, une **scalabilité modulable** et la **séparation claire** entre logique métier et interface.

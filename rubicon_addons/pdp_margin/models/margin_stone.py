@@ -6,14 +6,14 @@ class MarginStone(models.Model):
     _name="pdp.margin.stone"
     _description="Stone Margin"
     
-    margin_code = fields.Many2one(
+    margin = fields.Many2one(
         string="Margin Code",
         comodel_name="pdp.margin",
         required=True,
 
     )
     
-    stone_type_code = fields.Many2one(
+    stone_type = fields.Many2one(
         string="Stone Type Code",
         comodel_name="pdp.stone.type",
         required=True

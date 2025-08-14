@@ -1,0 +1,368 @@
+[info] using grep -E
+
+=== ENVIRONNEMENT ODOO ============================================== ===
+Odoo Server 18.0-20250606
+addons_path: /mnt/extra-addons,/mnt/external-addons/oca_currency,/usr/lib/python3/dist-packages/odoo/addons
+
+=== MODULES LOCAUX (manifest -> name,version,depends,data counts) ============================================== ===
+
+=== ERD ODOO (puml présent ?) ============================================== ===
+odoo_erd.puml: OK (tail -n 5):
+pdp_stone_weight --> pdp_stone_shade : shade
+pdp_stone_weight --> pdp_stone_shape : shape
+pdp_stone_weight --> pdp_stone_size : size
+pdp_stone_weight --> pdp_stone_type : type
+@enduml
+=== MODELES (déclarés dans le code) ============================================== ===
+rubicon_addons/pdp_labor/models/addon_type.py	_name = 'pdp.addon.type'
+rubicon_addons/pdp_labor/models/labor_type.py	_name = 'pdp.labor.type'
+rubicon_addons/pdp_metal/models/metal_purity.py	_name = 'pdp.metal.purity'
+rubicon_addons/pdp_metal/models/metal.py	_name = 'pdp.metal'
+rubicon_addons/pdp_metal/models/part_cost.py	_name='pdp.metal.purity',
+rubicon_addons/pdp_metal/models/part_cost.py	_name='pdp.part',
+rubicon_addons/pdp_metal/models/part_cost.py	_name = 'pdp.part.cost'
+rubicon_addons/pdp_metal/models/part.py	_name = 'pdp.part'
+rubicon_addons/pdp_metal/models/part.py	_name='pdp.part.cost',
+rubicon_addons/pdp_price/models/price_product.py	_name = 'pdp.price.product'
+rubicon_addons/pdp_price/wizard/component_abstract.py	_name = 'pdp.price.component'
+rubicon_addons/pdp_price/wizard/component_labor.py	_name = 'pdp.price.labor'
+rubicon_addons/pdp_price/wizard/component_metal.py	_name = 'pdp.price.metal'
+rubicon_addons/pdp_price/wizard/component_part.py	_name = 'pdp.price.part'
+rubicon_addons/pdp_price/wizard/component_stone.py	_name = 'pdp.price.stone'
+rubicon_addons/pdp_price/wizard/price_preview.py	_name = 'pdp.price.preview'
+rubicon_addons/pdp_price/wizard/price_preview.py	_name = 'pdp.price.preview.line'
+rubicon_addons/pdp_product/models/model_matching.py	_name='pdp.product.model',
+rubicon_addons/pdp_product/models/model_matching.py	_name = 'pdp.product.model.matching'
+rubicon_addons/pdp_product/models/model_metal.py	_name='pdp.metal',
+rubicon_addons/pdp_product/models/model_metal.py	_name='pdp.metal.purity',
+rubicon_addons/pdp_product/models/model_metal.py	_name = 'pdp.product.model.metal'
+rubicon_addons/pdp_product/models/model.py	_name='pdp.product.category',
+rubicon_addons/pdp_product/models/model.py	_name = 'pdp.product.model'
+rubicon_addons/pdp_product/models/model.py	_name='pdp.product.model',
+rubicon_addons/pdp_product/models/model.py	_name='pdp.product.model.metal', 
+rubicon_addons/pdp_product/models/product_category.py	_name = 'pdp.product.category'
+rubicon_addons/pdp_product/models/product_part.py	_name = 'pdp.product.part'
+rubicon_addons/pdp_product/models/product.py	_name = 'pdp.product'
+rubicon_addons/pdp_product/models/product.py	_name='pdp.product.category',
+rubicon_addons/pdp_product/models/product.py	_name='pdp.product.model',
+rubicon_addons/pdp_product/models/product.py	_name='pdp.product.part',
+rubicon_addons/pdp_product/models/product.py	_name='pdp.product.stone.composition',
+rubicon_addons/pdp_product/models/product_stone_composition.py	_name='pdp.product.stone',
+rubicon_addons/pdp_product/models/product_stone_composition.py	_name = 'pdp.product.stone.composition'
+rubicon_addons/pdp_product/models/product_stone.py	_name = 'pdp.product.stone'
+rubicon_addons/pdp_product/models/product_stone.py	_name='pdp.product.stone.composition',
+rubicon_addons/pdp_product/models/product_stone.py	_name='pdp.stone',
+rubicon_addons/pdp_product/models/product_stone.py	_name='pdp.stone.shape',
+rubicon_addons/pdp_product/models/product_stone.py	_name='pdp.stone.size',
+rubicon_addons/pdp_stone/models/stone.py	_name = 'pdp.stone'
+
+=== CHAMPS MONETAIRES (usage 'currency_id' vs 'currency') ============================================== ===
+  rubicon_addons/pdp_metal/models/metal.py:15:    cost         = fields.Monetary(
+  rubicon_addons/pdp_metal/models/metal.py:20:    currency_id =  fields.Many2one(
+  rubicon_addons/pdp_metal/models/part_cost.py:18:    cost         = fields.Monetary(
+  rubicon_addons/pdp_metal/models/part_cost.py:24:    currency_id  =  fields.Many2one(
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data_labor.py:87:            currency_id = mapping_currency(row[2])
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data_labor.py:108:            currency_id = mapping_currency(row[7], default="THB")
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data_labor.py:164:            currency_id = mapping_currency(row[2], default=0.0)
+  rubicon_addons/rubicon_import/tools/standard.py:23:    if currency == '':
+  rubicon_addons/rubicon_import/tools/standard.py:25:    currency = currency.upper()
+  rubicon_addons/rubicon_import/tools/standard.py:26:    currency = currency.strip()
+  rubicon_addons/rubicon_env/hooks.py:8:        currency = env['res.currency'].search([('name', '=', code)], limit=1)
+  rubicon_addons/pdp_price/models/price_product.py:11:    currency_id = fields.Many2one('res.currency', required=True,
+  rubicon_addons/pdp_price/models/price_product.py:15:    cost = fields.Monetary(currency_field='currency_id')
+  rubicon_addons/pdp_price/models/price_product.py:16:    margin = fields.Monetary(currency_field='currency_id')
+  rubicon_addons/pdp_price/models/price_product.py:17:    price = fields.Monetary(currency_field='currency_id')
+  rubicon_addons/pdp_price/wizard/price_preview.py:11:    currency_id = fields.Many2one('res.currency', required=True,
+  rubicon_addons/pdp_price/wizard/price_preview.py:15:    cost = fields.Monetary(currency_field='currency_id', compute='_compute_totals', store=False)
+  rubicon_addons/pdp_price/wizard/price_preview.py:16:    margin = fields.Monetary(currency_field='currency_id', compute='_compute_totals', store=False)
+  rubicon_addons/pdp_price/wizard/price_preview.py:17:    price = fields.Monetary(currency_field='currency_id', compute='_compute_totals', store=False)
+  rubicon_addons/pdp_price/wizard/price_preview.py:44:                currency=self.currency_id,
+  rubicon_addons/pdp_price/wizard/price_preview.py:75:    cost = fields.Monetary(currency_field='currency_id')
+  rubicon_addons/pdp_price/wizard/price_preview.py:76:    margin = fields.Monetary(currency_field='currency_id')
+  rubicon_addons/pdp_price/wizard/price_preview.py:77:    price = fields.Monetary(currency_field='currency_id')
+  rubicon_addons/pdp_price/wizard/price_preview.py:78:    currency_id = fields.Many2one(related='preview_id.currency_id', store=False, readonly=True)
+  rubicon_addons/pdp_price/tests/test_price_component.py:32:                           currency=self.cur, date=date.today())
+  rubicon_addons/pdp_labor/models/product_labor_cost.py:25:    cost        = fields.Monetary(
+  rubicon_addons/pdp_labor/models/product_labor_cost.py:31:    currency_id = fields.Many2one(
+  rubicon_addons/pdp_labor/models/product_addon_cost.py:24:    cost        = fields.Monetary(
+  rubicon_addons/pdp_labor/models/product_addon_cost.py:30:    currency_id = fields.Many2one(
+  rubicon_addons/pdp_labor/models/model_labor_cost.py:29:    cost        = fields.Monetary(
+  rubicon_addons/pdp_labor/models/model_labor_cost.py:35:    currency_id = fields.Many2one(
+  rubicon_addons/pdp_stone/models/stone.py:27:    cost        = fields.Monetary(
+  rubicon_addons/pdp_stone/models/stone.py:31:    currency_id = fields.Many2one(
+
+=== VUES & MENUS (Odoo 18 => <list> au lieu de <tree>) ============================================== ===
+  rubicon_addons/pdp_margin/views/pdp_views.xml:9:      <list string="Margins">
+  rubicon_addons/pdp_margin/views/pdp_views.xml:21:      <list string="Margin Labor">
+  rubicon_addons/pdp_margin/views/pdp_views.xml:35:      <list string="Margin Addon">
+  rubicon_addons/pdp_margin/views/pdp_views.xml:48:      <list string="Margin Stone">
+  rubicon_addons/pdp_margin/views/pdp_views.xml:61:      <list string="Margin Metal">
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Margin" sequence="10"/>
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_margin"
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:25:  <menuitem id="menu_pdp_margin_labor"
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:36:  <menuitem id="menu_pdp_margin_addon"
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:47:  <menuitem id="menu_pdp_margin_metal"
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:59:  <menuitem id="menu_pdp_margin_stone"
+  rubicon_addons/pdp_metal/views/pdp_views.xml:9:      <list string="Metal Purities">
+  rubicon_addons/pdp_metal/views/pdp_views.xml:21:      <list string="Metals">
+  rubicon_addons/pdp_metal/views/pdp_views.xml:37:      <list string="Parts">
+  rubicon_addons/pdp_metal/views/pdp_views.xml:49:      <list string="Part Costs">
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Metal and Part" sequence="10"/>
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_metal_purity"
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:25:  <menuitem id="menu_pdp_metal"
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:37:  <menuitem id="menu_pdp_part"
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:49:  <menuitem id="menu_pdp_part_cost"
+  rubicon_addons/pdp_price/views/pdp_price_addon_views.xml:6:            <list>
+  rubicon_addons/pdp_price/views/pdp_price_addon_views.xml:18:            <form>
+  rubicon_addons/pdp_price/views/price_preview_line_views.xml:7:      <list>
+  rubicon_addons/pdp_price/views/price_preview_line_views.xml:23:      <form string="Price Preview Line">
+  rubicon_addons/pdp_price/views/price_preview_views.xml:7:      <form string="Price Preview" create="false" edit="true">
+  rubicon_addons/pdp_price/views/price_preview_views.xml:24:              <list editable="bottom">
+  rubicon_addons/pdp_price/views/pdp_menus.xml:3:  <menuitem
+  rubicon_addons/pdp_price/views/pdp_menus.xml:9:  <menuitem id="menu_pdp_price_preview"
+  rubicon_addons/pdp_labor/views/pdp_views.xml:9:      <list string="Labor Types">
+  rubicon_addons/pdp_labor/views/pdp_views.xml:21:      <list string="Addon Types">
+  rubicon_addons/pdp_labor/views/pdp_views.xml:33:      <list string="Addon Costs">
+  rubicon_addons/pdp_labor/views/pdp_views.xml:46:      <list string="Labor Costs (Model)">
+  rubicon_addons/pdp_labor/views/pdp_views.xml:59:      <list string="Labor Costs (Product)">
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Labor" sequence="10"/>
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_labor_type"
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:26:  <menuitem id="menu_pdp_labor_cost_model"
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:38:  <menuitem id="menu_pdp_labor_cost_product"
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:52:  <menuitem id="menu_pdp_addon_type"
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:64:  <menuitem id="menu_pdp_addon_cost"
+  rubicon_addons/pdp_product/views/pdp_views.xml:9:      <list string="Product Categories">
+  rubicon_addons/pdp_product/views/pdp_views.xml:22:      <list string="Product Models">
+  rubicon_addons/pdp_product/views/pdp_views.xml:38:      <list string="Matching Models">
+  rubicon_addons/pdp_product/views/pdp_views.xml:50:      <list string="Metal Models">
+  rubicon_addons/pdp_product/views/pdp_views.xml:66:      <list string="Products">
+  rubicon_addons/pdp_product/views/pdp_views.xml:86:      <list string="Product Part">
+  rubicon_addons/pdp_product/views/pdp_views.xml:98:      <list string="Product Stone">
+  rubicon_addons/pdp_product/views/pdp_views.xml:115:      <list string="Product Stone Composition">
+  rubicon_addons/pdp_product/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Product" sequence="10"/>
+  rubicon_addons/pdp_product/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_product_category"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:25:  <menuitem id="menu_pdp_product_model"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:37:  <menuitem id="menu_pdp_product_model_matching"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:49:  <menuitem id="menu_pdp_product_model_metal"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:62:  <menuitem id="menu_pdp_product_part"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:76:  <menuitem id="menu_pdp_product_stone"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:90:  <menuitem id="menu_pdp_product"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:102:  <menuitem id="menu_pdp_product_stone_composition"
+  rubicon_addons/latex_pdf/views/pdfg_menus.xml:2:    <menuitem id="menu_pdfg_root" name="PDF Generator" sequence="10"/>
+  rubicon_addons/latex_pdf/views/pdfg_menus.xml:10:    <menuitem id="menu_pdfg_template"
+  rubicon_addons/latex_pdf/views/pdfg_views.xml:8:      <list string="Product Categories">
+  rubicon_addons/latex_pdf/views/pdfg_template_views.xml:6:            <form string="PDF Template">
+  rubicon_addons/latex_pdf/views/pdfg_template_views.xml:27:            <list string="PDF Templates">
+  rubicon_addons/pdp_stone/views/pdp_views.xml:9:      <list string="Stone Categories">
+  rubicon_addons/pdp_stone/views/pdp_views.xml:21:      <list string="Stone Types">
+  rubicon_addons/pdp_stone/views/pdp_views.xml:35:      <list string="Stone Sizes">
+  rubicon_addons/pdp_stone/views/pdp_views.xml:46:      <list string="Stone Shapes">
+  rubicon_addons/pdp_stone/views/pdp_views.xml:58:      <list string="Stone Shades">
+  rubicon_addons/pdp_stone/views/pdp_views.xml:70:      <list string="Stone Weights">
+  rubicon_addons/pdp_stone/views/pdp_views.xml:85:      <list string="Stones">
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Stone" sequence="10"/>
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_stone_category"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:25:  <menuitem id="menu_pdp_stone_type"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:37:  <menuitem id="menu_pdp_stone_size"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:49:  <menuitem id="menu_pdp_stone_shape"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:61:  <menuitem id="menu_pdp_stone_shade"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:73:  <menuitem id="menu_pdp_stone_weight"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:86:  <menuitem id="menu_pdp_stone"
+
+=== PRICING (wizards & logique) — signatures compute/_convert/round ============================================== ===
+  rubicon_addons/pdp_price/models/price_product.py:4:class PriceProduct(models.Model):
+  rubicon_addons/pdp_price/wizard/component_stone.py:4:class PriceStone(models.TransientModel):
+  rubicon_addons/pdp_price/wizard/component_stone.py:10:    def compute(self, *, product, margin, currency, date):
+  rubicon_addons/pdp_price/wizard/component_part.py:3:class PricePart(models.TransientModel):
+  rubicon_addons/pdp_price/wizard/component_part.py:10:    @api.depends()
+  rubicon_addons/pdp_price/wizard/component_part.py:11:    def compute(self, *, product, margin, currency, date):
+  rubicon_addons/pdp_price/wizard/component_metal.py:4:class PriceMetal(models.TransientModel):
+  rubicon_addons/pdp_price/wizard/component_metal.py:10:    def compute(self, *, product, margin, currency, date):
+  rubicon_addons/pdp_price/wizard/component_labor.py:3:class PriceLabor(models.TransientModel):
+  rubicon_addons/pdp_price/wizard/component_labor.py:10:    @api.depends()
+  rubicon_addons/pdp_price/wizard/component_labor.py:11:    def compute(self, *, product, margin, currency, date):
+  rubicon_addons/pdp_price/wizard/component_abstract.py:4:class PriceComponent(models.TransientModel):
+  rubicon_addons/pdp_price/wizard/component_abstract.py:9:    def compute(self, *, product, margin, currency, date):
+  rubicon_addons/pdp_price/wizard/component_abstract.py:14:    def _convert(self, amount, from_cur, to_cur, date):
+  rubicon_addons/pdp_price/wizard/component_abstract.py:19:        cost = currency.round(cost or 0.0)
+  rubicon_addons/pdp_price/wizard/component_abstract.py:20:        margin = currency.round(margin or 0.0)
+  rubicon_addons/pdp_price/wizard/price_preview.py:4:class PricePreview(models.TransientModel):
+  rubicon_addons/pdp_price/wizard/price_preview.py:19:    @api.depends('line_ids.cost', 'line_ids.margin')
+  rubicon_addons/pdp_price/wizard/price_preview.py:22:            rec.cost = rec.currency_id.round(sum(rec.line_ids.mapped('cost')))
+  rubicon_addons/pdp_price/wizard/price_preview.py:23:            rec.margin = rec.currency_id.round(sum(rec.line_ids.mapped('margin')))
+  rubicon_addons/pdp_price/wizard/price_preview.py:63:class PricePreviewLine(models.TransientModel):
+  rubicon_addons/pdp_price/wizard/component_addon.py:3:class PriceAddon(models.TransientModel):
+  rubicon_addons/pdp_price/wizard/component_addon.py:10:    def compute(self, *, product, margin, currency, date):
+  rubicon_addons/pdp_price/tests/test_price_component.py:38:            self.assertAlmostEqual(out['margin'], round(out['cost']*0.25, 2), places=2)
+
+=== PIPELINE D'IMPORT (structure rapide) ============================================== ===
+[modules]
+  rubicon_addons/rubicon_import/raw_to_data/__init__.py
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data_labor.py
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data_margin.py
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data_metal.py
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data_price.py
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data_product.py
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data.py
+  rubicon_addons/rubicon_import/raw_to_data/raw_to_data_stone.py
+[fonctions clés]
+[entêtes CSV transformés (data/*.csv)]
+  - pdp.addon.cost.csv: id,product,addon,cost,currency_id
+  - pdp.addon.type.csv: id,code,name
+  - pdp.labor.cost.model.csv: id,model,metal,labor,cost,currency_id
+  - pdp.labor.cost.product.csv: id,product,labor,cost,currency_id
+  - pdp.labor.type.csv: id,code,name
+  - pdp.margin.addon.csv: id,margin,addon,rate
+  - pdp.margin.csv: id,code,name
+  - pdp.margin.labor.csv: id,margin,rate_parts,rate_metal,rate_stone
+  - pdp.margin.metal.csv: id,margin,metal_purity,rate
+  - pdp.margin.stone.csv: id,margin,stone_type,stone_size,stone_shade,rate
+  - pdp.metal.csv: id,code,name,cost,currency_id,reference,gold,plating
+  - pdp.metal.purity.csv: id,code,percent
+  - pdp.part.cost.csv: id,part,purity,cost,currency_id
+  - pdp.part.csv: id,code,name
+  - pdp.product.category.csv: id,code,name,waste
+  - pdp.product.csv: id,code,category,model,stone_composition,stone_type,metal,create_date,active,in_collection,remark
+  - pdp.product.model.csv: id,code,category,parent_model,drawing,quotation
+  - pdp.product.model.matching.csv: id,model_one,model_two
+  - pdp.product.model.metal.csv: id,model,metal_version,metal,purity,weight
+  - pdp.product.part.csv: id,product,part,quantity
+  - pdp.product.stone.composition.csv: id,code
+  - pdp.product.stone.csv: id,composition,stone,stone_type,stone_shade,stone_shape,stone_size,pieces,weight,cost,currency_id,reshaped_shape,reshaped_size,reshaped_weight
+  - pdp.stone.category.csv: id,code,name
+  - pdp.stone.csv: id,code,type_id,shape_id,shade_id,size_id,cost,currency_id
+  - pdp.stone.shade.csv: id,code,shade
+  - pdp.stone.shape.csv: id,code,shape
+  - pdp.stone.size.csv: id,name
+  - pdp.stone.type.csv: id,code,name,density,category_id
+  - pdp.stone.weight.csv: id,weight,type_id,shape_id,shade_id,size_id
+
+=== DEVISES/RATES (fixtures & env) ============================================== ===
+[hooks]
+  rubicon_addons/rubicon_env/__manifest__.py:3:    'summary': 'Environment initilizer: currencies, rates, cron, etc.',
+  rubicon_addons/rubicon_env/__manifest__.py:8:        'currency_rate_update',
+  rubicon_addons/rubicon_env/__manifest__.py:12:        'data/res_currency.xml',
+  rubicon_addons/rubicon_env/__manifest__.py:16:    # 'post_init_hook': 'post_init_currency_setup',
+  rubicon_addons/rubicon_env/data/res_company.xml:4:        <field name="currency_id" ref="base.USD"/>
+  rubicon_addons/rubicon_env/data/res_currency.xml:3:  <record id="base.THB" model="res.currency">
+  rubicon_addons/rubicon_env/__init__.py:2:from .hooks import post_init_currency_setup
+  rubicon_addons/rubicon_env/scripts/init_currency.py:5:    env['res.currency'].load_missing_currencies()
+  rubicon_addons/rubicon_env/scripts/init_currency.py:8:        c = env['res.currency'].search([('name', '=', code)], limit=1)
+  rubicon_addons/rubicon_env/scripts/init_currency.py:14:        'currency_provider': 'ecb',
+  rubicon_addons/rubicon_env/scripts/init_currency.py:15:        'currency_id': env.ref('base.THB').id,
+  rubicon_addons/rubicon_env/scripts/init_currency.py:16:        'currency_exchange_journal_id': env['account.journal'].search([], limit=1).id
+  rubicon_addons/rubicon_env/hooks.py:3:def post_init_currency_setup(cr, registry=None):
+  rubicon_addons/rubicon_env/hooks.py:8:        currency = env['res.currency'].search([('name', '=', code)], limit=1)
+  rubicon_addons/rubicon_env/hooks.py:9:        if currency:
+  rubicon_addons/rubicon_env/hooks.py:10:            currency.active = True
+  rubicon_addons/rubicon_env/hooks.py:14:        'currency_provider': 'ecb',
+  rubicon_addons/rubicon_env/hooks.py:15:        'currency_interval_unit': 'daily',
+  rubicon_addons/rubicon_env/hooks.py:16:        'currency_next_execution_date': fields.Date.today(),
+  rubicon_addons/rubicon_env/hooks.py:17:        'currency_id': env['res.currency'].search([('name', '=', 'THB')], limit=1).id,
+  rubicon_addons/rubicon_env/hooks.py:21:    env['res.currency.rate.provider']._cron_fetch_currency_rates()
+[res_currency.xml (5 premières lignes utiles)]
+  <odoo>
+    <!-- Active la devise THB livrée par base -->
+    <record id="base.THB" model="res.currency">
+      <field name="active">True</field>
+    </record>
+  </odoo>
+=== MENUS/ACTIONS/SECURITE ============================================== ===
+[menus]
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Margin" sequence="10"/>
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_margin"
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:25:  <menuitem id="menu_pdp_margin_labor"
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:36:  <menuitem id="menu_pdp_margin_addon"
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:47:  <menuitem id="menu_pdp_margin_metal"
+  rubicon_addons/pdp_margin/views/pdp_menus.xml:59:  <menuitem id="menu_pdp_margin_stone"
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Metal and Part" sequence="10"/>
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_metal_purity"
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:25:  <menuitem id="menu_pdp_metal"
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:37:  <menuitem id="menu_pdp_part"
+  rubicon_addons/pdp_metal/views/pdp_menus.xml:49:  <menuitem id="menu_pdp_part_cost"
+  rubicon_addons/pdp_price/views/pdp_menus.xml:3:  <menuitem
+  rubicon_addons/pdp_price/views/pdp_menus.xml:9:  <menuitem id="menu_pdp_price_preview"
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Labor" sequence="10"/>
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_labor_type"
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:26:  <menuitem id="menu_pdp_labor_cost_model"
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:38:  <menuitem id="menu_pdp_labor_cost_product"
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:52:  <menuitem id="menu_pdp_addon_type"
+  rubicon_addons/pdp_labor/views/pdp_menus.xml:64:  <menuitem id="menu_pdp_addon_cost"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Product" sequence="10"/>
+  rubicon_addons/pdp_product/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_product_category"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:25:  <menuitem id="menu_pdp_product_model"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:37:  <menuitem id="menu_pdp_product_model_matching"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:49:  <menuitem id="menu_pdp_product_model_metal"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:62:  <menuitem id="menu_pdp_product_part"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:76:  <menuitem id="menu_pdp_product_stone"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:90:  <menuitem id="menu_pdp_product"
+  rubicon_addons/pdp_product/views/pdp_menus.xml:102:  <menuitem id="menu_pdp_product_stone_composition"
+  rubicon_addons/latex_pdf/views/pdfg_menus.xml:2:    <menuitem id="menu_pdfg_root" name="PDF Generator" sequence="10"/>
+  rubicon_addons/latex_pdf/views/pdfg_menus.xml:10:    <menuitem id="menu_pdfg_template"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:5:  <menuitem id="menu_pdp_root" name="PDP Stone" sequence="10"/>
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:13:  <menuitem id="menu_pdp_stone_category"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:25:  <menuitem id="menu_pdp_stone_type"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:37:  <menuitem id="menu_pdp_stone_size"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:49:  <menuitem id="menu_pdp_stone_shape"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:61:  <menuitem id="menu_pdp_stone_shade"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:73:  <menuitem id="menu_pdp_stone_weight"
+  rubicon_addons/pdp_stone/views/pdp_menus.xml:86:  <menuitem id="menu_pdp_stone"
+[actions]
+[droits accès]
+  - rubicon_addons/latex_pdf/security/ir.model.access.csv
+     id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+     pdf_generator.access_pdfg_template,access_pdfg_template,pdf_generator.model_pdfg_template,base.group_user,1,1,1,1
+  - rubicon_addons/pdp_labor/security/ir.model.access.csv
+     id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+     pdp_labor.access_pdp_labor_type,access_pdp_labor_type,pdp_labor.model_pdp_labor_type,base.group_user,1,1,1,1
+     pdp_labor.access_pdp_labor_cost_model,access_pdp_labor_cost_model,pdp_labor.model_pdp_labor_cost_model,base.group_user,1,1,1,1
+     pdp_labor.access_pdp_labor_cost_product,access_pdp_labor_cost_product,pdp_labor.model_pdp_labor_cost_product,base.group_user,1,1,1,1
+     pdp_labor.access_pdp_addon_type,access_pdp_addon_type,pdp_labor.model_pdp_addon_type,base.group_user,1,1,1,1
+     pdp_labor.access_pdp_addon_cost,access_pdp_addon_cost,pdp_labor.model_pdp_addon_cost,base.group_user,1,1,1,1
+     
+  - rubicon_addons/pdp_margin/security/ir.model.access.csv
+     id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+     pdp_margin.access_pdp_margin,access_pdp_margin,pdp_margin.model_pdp_margin,base.group_user,1,1,1,1
+     pdp_margin.access_pdp_margin_addon,access_pdp_margin_addon,pdp_margin.model_pdp_margin_addon,base.group_user,1,1,1,1
+     pdp_margin.access_pdp_margin_stone,access_pdp_margin_stone,pdp_margin.model_pdp_margin_stone,base.group_user,1,1,1,1
+     pdp_margin.access_pdp_margin_metal,access_pdp_margin_metal,pdp_margin.model_pdp_margin_metal,base.group_user,1,1,1,1
+     pdp_margin.access_pdp_margin_labor,access_pdp_margin_labor,pdp_margin.model_pdp_margin_labor,base.group_user,1,1,1,1
+  - rubicon_addons/pdp_metal/security/ir.model.access.csv
+     id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+     pdp_metal.access_pdp_metal_purity,access_pdp_metal_purity,pdp_metal.model_pdp_metal_purity,base.group_user,1,1,1,1
+     pdp_metal.access_pdp_metal,access_pdp_metal,pdp_metal.model_pdp_metal,base.group_user,1,1,1,1
+     pdp_metal.access_pdp_part,access_pdp_part,pdp_metal.model_pdp_part,base.group_user,1,1,1,1
+     pdp_metal.access_pdp_part_cost,access_pdp_part_cost,pdp_metal.model_pdp_part_cost,base.group_user,1,1,1,1
+  - rubicon_addons/pdp_price/security/ir.model.access.csv
+     id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+     pdp_price.access_pdp_price_component,access_pdp_price_component,pdp_price.model_pdp_price_component,base.group_user,1,1,1,1
+     pdp_price.access_pdp_price_addon,access_pdp_price_addon,pdp_price.model_pdp_price_addon,base.group_user,1,1,1,1
+     pdp_price.access_pdp_price_stone,access_pdp_price_stone,pdp_price.model_pdp_price_stone,base.group_user,1,1,1,1
+     pdp_price.access_pdp_price_metal,access_pdp_price_metal,pdp_price.model_pdp_price_metal,base.group_user,1,1,1,1
+     pdp_price.access_pdp_price_labor,access_pdp_price_labor,pdp_price.model_pdp_price_labor,base.group_user,1,1,1,1
+     pdp_price.access_pdp_price_part,access_pdp_price_part,pdp_price.model_pdp_price_part,base.group_user,1,1,1,1
+     pdp_price.access_pdp_price_preview,access_pdp_price_preview,pdp_price.model_pdp_price_preview,base.group_user,1,1,1,1
+     pdp_price.access_pdp_price_preview_line,access_pdp_price_preview_line,pdp_price.model_pdp_price_preview_line,base.group_user,1,1,1,1  - rubicon_addons/pdp_product/security/ir.model.access.csv
+     id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+     pdp_product.access_pdp_product_category,access_pdp_product_category,pdp_product.model_pdp_product_category,base.group_user,1,1,1,1
+     pdp_product.access_pdp_model,access_pdp_model,pdp_product.model_pdp_product_model,base.group_user,1,1,1,1
+     pdp_product.access_pdp_product_model_matching,access_pdp_product_model_matching,pdp_product.model_pdp_product_model_matching,base.group_user,1,1,1,1
+     pdp_product.access_pdp_product_model_metal,access_pdp_product_model_metal,pdp_product.model_pdp_product_model_metal,base.group_user,1,1,1,1
+     pdp_product.access_pdp_product_stone,access_pdp_product_stone,pdp_product.model_pdp_product_stone,base.group_user,1,1,1,1
+     pdp_product.access_pdp_product_part,access_pdp_product_part,pdp_product.model_pdp_product_part,base.group_user,1,1,1,1
+     pdp_product.access_pdp_product,access_pdp_product,pdp_product.model_pdp_product,base.group_user,1,1,1,1
+     pdp_product.access_pdp_product_stone_composition,access_pdp_product_stone_composition,pdp_product.model_pdp_product_stone_composition,base.group_user,1,1,1,1
+  - rubicon_addons/pdp_stone/security/ir.model.access.csv
+     id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+     pdp_stone.access_pdp_stone_category,access_pdp_stone_category,pdp_stone.model_pdp_stone_category,base.group_user,1,1,1,1
+     pdp_stone.access_pdp_stone_type,access_pdp_stone_type,pdp_stone.model_pdp_stone_type,base.group_user,1,1,1,1
+     pdp_stone.access_pdp_stone_shape,access_pdp_stone_shape,pdp_stone.model_pdp_stone_shape,base.group_user,1,1,1,1
+     pdp_stone.access_pdp_stone_size,access_pdp_stone_size,pdp_stone.model_pdp_stone_size,base.group_user,1,1,1,1
+     pdp_stone.access_pdp_stone_shade,access_pdp_stone_shade,pdp_stone.model_pdp_stone_shade,base.group_user,1,1,1,1
+     pdp_stone.access_pdp_stone_weight,access_pdp_stone_weight,pdp_stone.model_pdp_stone_weight,base.group_user,1,1,1,1
+     pdp_stone.access_pdp_stone,access_pdp_stone,pdp_stone.model_pdp_stone,base.group_user,1,1,1,1
+
+=== ERD (regen optionnelle via script maison) ============================================== ===
+[SKIP] ERD non regénéré: No module named 'rubicon_import'
+
+[OK] Audit terminé.

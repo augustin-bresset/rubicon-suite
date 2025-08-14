@@ -7,13 +7,13 @@ class MarginAddon(models.Model):
     _name="pdp.margin.addon"
     _description="Addon Margin"
     
-    addon_code = fields.Many2one(
+    addon = fields.Many2one(
         string="Addon Code",
         comodel_name="pdp.addon.type",
         required=True,
     )
     
-    margin_code = fields.Many2one(
+    margin = fields.Many2one(
         string="Margin Code",
         comodel_name="pdp.margin",
         required=True,

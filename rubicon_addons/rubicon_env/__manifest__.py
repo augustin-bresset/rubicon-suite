@@ -6,8 +6,10 @@
     'depends': [
         'base',
         'currency_rate_update',
+        
         ],
     'data': [
+        'data/res_currency.xml',
         'data/res_company.xml',
         ],
 

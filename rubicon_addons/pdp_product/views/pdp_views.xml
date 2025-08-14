@@ -21,7 +21,7 @@
     <field name="arch" type="xml">
       <list string="Product Models">
         <field name="code"/>
-        <field name="parent_model_code"/>
+        <field name="parent_model"/>
         <field name="drawing"/>
         <field name="quotation"/>
 
@@ -36,8 +36,8 @@
     <field name="model">pdp.product.model.matching</field>
     <field name="arch" type="xml">
       <list string="Matching Models">
-        <field name="model_code_one"/>
-        <field name="model_code_two"/>
+        <field name="model_one"/>
+        <field name="model_two"/>
       </list>
     </field>
   </record>
@@ -48,8 +48,8 @@
     <field name="model">pdp.product.model.metal</field>
     <field name="arch" type="xml">
       <list string="Metal Models">
-        <field name="model_code"/>
-        <field name="metal_code"/>
+        <field name="model"/>
+        <field name="metal"/>
         <field name="metal_version"/>
         <field name="purity"/>
         <field name="weight"/>
@@ -65,10 +65,10 @@
     <field name="arch" type="xml">
       <list string="Products">
         <field name="code"/>
-        <field name="category_code"/>
-        <field name="model_code"/>
-        <field name="stone_composition_code"/>
-        <field name="metal_code"/>
+        <field name="category"/>
+        <field name="model"/>
+        <field name="stone_composition"/>
+        <field name="metal"/>
         <field name="active"/>
         <field name="in_collection"/>
         <field name="create_date"/>
@@ -84,8 +84,8 @@
     <field name="model">pdp.product.part</field>
     <field name="arch" type="xml">
       <list string="Product Part">
-        <field name="product_code"/>
-        <field name="part_code"/>
+        <field name="product"/>
+        <field name="part"/>
       </list>
     </field>
   </record>
@@ -97,8 +97,8 @@
     <field name="arch" type="xml">
       <list string="Product Stone">
         <field name="pieces"/>
-        <field name="composition_code"/>
-        <field name="stone_code"/>
+        <field name="composition"/>
+        <field name="stone"/>
         <field name="weight"/>
         <field name="reshaped_shape"/>
         <field name="reshaped_size"/>

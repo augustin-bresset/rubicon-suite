@@ -1,0 +1,6 @@
+<odoo>
+  <!-- Active la devise THB livrée par base -->
+  <record id="base.THB" model="res.currency">
+    <field name="active">True</field>
+  </record>
+</odoo>

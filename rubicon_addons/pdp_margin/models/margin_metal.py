@@ -7,13 +7,13 @@ class MarginMetal(models.Model):
     _description="Metal Margin"
     
     
-    margin_code = fields.Many2one(
+    margin = fields.Many2one(
         string="Margin Code",
         comodel_name="pdp.margin",
         required=True,
         )
     
-    metal_purity_code = fields.Many2one(
+    metal_purity = fields.Many2one(
         string="Metal Purity",
         comodel_name="pdp.metal.purity",
         required=True

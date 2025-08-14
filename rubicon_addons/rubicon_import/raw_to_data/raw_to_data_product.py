@@ -52,7 +52,7 @@ if __name__ == '__main__':
     if everything or "model" in sys.argv:
         model_name="pdp.product.model"
         csv_name = "Models.csv"
-        fieldnames = ["id", "code", "category_code", "parent_model_code", "drawing", "quotation"]
+        fieldnames = ["id", "code", "category", "parent_model", "drawing", "quotation"]
         def row_to_dict(row):
             category_code = strip_code_space(row[0])
             code = create_model_code(category_code, row[1])
@@ -68,8 +68,8 @@ if __name__ == '__main__':
             return {
                 "id": func_index(code, model_name),
                 "code": code,
-                "category_code": category_code,
-                "parent_model_code": code_parent,
+                "category": category_code,
+                "parent_model": code_parent,
                 "drawing": row[3],
                 "quotation": row[4],
             }
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         print("[WARNING] Be sure to have also import model to create models set")
         model_name="pdp.product.model.matching"
         csv_name = "MatchingModels.csv"
-        fieldnames = ["id", "model_code_one", "model_code_two"]
+        fieldnames = ["id", "model_one", "model_two"]
         def row_to_dict(row):
             code_one = create_model_code(row[0], row[1])
             code_two = create_model_code(row[2], row[3])
@@ -106,8 +106,8 @@ if __name__ == '__main__':
                 return
             return {
                 "id": func_index(f"{code_one}_{code_two}", model_name),
-                "model_code_one": code_one,
-                "model_code_two" : code_two,
+                "model_one": code_one,
+                "model_two" : code_two,
             }
                
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
@@ -130,7 +130,7 @@ if __name__ == '__main__':
         model_name="pdp.product"
         csv_name = "Products.csv"
         actual_fields = ["code", "category", "model_code", "stones", "metal", "active", "creation_datetime", "remark", "prod_category", "in_collection", "orn_id_num"]
-        fieldnames = ["id", "code", "category_code", "model_code", "stone_composition_code", "stone_type", "metal_code", "create_date", "active", "in_collection", "remark"]
+        fieldnames = ["id", "code", "category", "model", "stone_composition", "stone_type", "metal", "create_date", "active", "in_collection", "remark"]
         
         def row_to_dict(row):
             row = case_management(row)
@@ -147,17 +147,18 @@ if __name__ == '__main__':
             category_code = strip_code_space(row[1])
             code = create_model_code(row[1], row[2])
             composition_code = row[0].split("/")[0]
+            composition_code = strip_code_space(composition_code)
             stone_type_code = strip_code_space(row[3])
             metal_code = strip_code_space(row[4])
 
             return {
                 "id":func_index(row[0], model_name),
                 "code": row[0],
-                "category_code"             : category_code,
-                "model_code"                : code,
-                "stone_composition_code"    : composition_code, 
+                "category"                  : category_code,
+                "model"                     : code,
+                "stone_composition"         : composition_code, 
                 "stone_type"                : stone_type_code,
-                "metal_code"                : metal_code,
+                "metal"                     : metal_code,
                 "active"                    : safe_str(row[5]),
                 "create_date"               : safe_str(row[6]),
                 "remark"                    : safe_str(row[7]),
@@ -170,7 +171,7 @@ if __name__ == '__main__':
     if everything or "part" in sys.argv:
         model_name = "pdp.product.part"
         csv_name = "ProductParts.csv"
-        fieldnames = ["id", "product_code", "part_code", "quantity"]
+        fieldnames = ["id", "product", "part", "quantity"]
         
         def row_to_dict(row):
             if len(row) > 3:
@@ -187,8 +188,8 @@ if __name__ == '__main__':
             
             return {
                 "id": func_index(f"{product_code}_{part_code}", model_name),
-                "product_code": product_code,
-                "part_code": part_code, 
+                "product": product_code,
+                "part": part_code, 
                 "quantity": int(row[2])
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
@@ -210,7 +211,7 @@ if __name__ == '__main__':
         
         model_name="pdp.product.stone.composition"
         csv_name = "Products.csv"
-        actual_fields = ["code", "category", "model_code", "stones", "metal", "active", "creation_datetime", "remark", "prod_category", "in_collection", "orn_id_num"]
+        actual_fields = ["code", "category", "model", "stones", "metal", "active", "creation_datetime", "remark", "prod_category", "in_collection", "orn_id_num"]
         fieldnames = ["id", "code"]
         def row_to_dict(row):
             row = case_management(row)
@@ -253,9 +254,9 @@ if __name__ == '__main__':
             "shape_code_2", "size_2", "shade_2", "weight_2", "line_num" 
         ]
         fieldnames = [
-            "id", "composition_code", "stone_code", "stone_type_code", "stone_shade_code",
-            "stone_shape_code", "stone_size", "pieces", "weight",
-            "cost", "currency",
+            "id", "composition", "stone", "stone_type", "stone_shade",
+            "stone_shape", "stone_size", "pieces", "weight",
+            "cost", "currency_id",
             "reshaped_shape", "reshaped_size", "reshaped_weight" 
         ]
         
@@ -357,16 +358,16 @@ if __name__ == '__main__':
             
             return {
                 "id": func_index(f"{product_composition_code}_{stone_code}", model_name),
-                "composition_code"  : product_composition_code,
+                "composition"  : product_composition_code,
                 "pieces"            : safe_int(row[8]),
-                "stone_code"        : stone_code,
-                "stone_type_code"   : stone_type_code,
-                "stone_shade_code"  : stone_shade_code,
-                "stone_shape_code"  : stone_shape_code,
+                "stone"             : stone_code,
+                "stone_type"        : stone_type_code,
+                "stone_shade"       : stone_shade_code,
+                "stone_shape"       : stone_shape_code,
                 "stone_size"        : stone_size,
                 "weight"            : safe_float(row[9]), 
                 "cost"              : safe_float(row[10]),
-                "currency"          : mapping_currency(row[12]),
+                "currency_id"       : mapping_currency(row[12]),
                 "reshaped_shape"    : reshaped_stone_shape_code,
                 "reshaped_size"     : reshaped_stone_size,
                 "reshaped_weight"   : safe_float(row[19])
@@ -381,7 +382,7 @@ if __name__ == '__main__':
     if everything or "metal" in sys.argv:
         model_name="pdp.product.model.metal"
         csv_name="ModelMetal.csv"
-        fieldnames=["id", "model_code", "metal_version", "metal_code", "purity", "weight"]
+        fieldnames=["id", "model", "metal_version", "metal", "purity", "weight"]
         
         def row_to_dict(row):
             model_code = create_model_code(row[0], row[1])
@@ -400,9 +401,9 @@ if __name__ == '__main__':
             row[4] = row[4].replace(" ", "").upper()
             return {
                 "id": func_index(f"{model_code}{row[2]}_{row[3]}_{row[4]}", model_name),
-                "model_code": model_code,
+                "model": model_code,
                 "metal_version": row[2],
-                "metal_code": metal_code,
+                "metal": metal_code,
                 "purity": purity_code, 
                 "weight": safe_float(row[5])
             }

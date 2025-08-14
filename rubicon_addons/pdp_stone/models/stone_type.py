@@ -2,20 +2,27 @@ from odoo import models, fields
 
 
 class StoneType(models.Model):
-    """
-    :note::
-     The density was written in reference of the quartz. (2.65gm/cm3)
-    """
     _name = "pdp.stone.type"
     _description = "Stone Type"
     _rec_name = "code"
-    
+    _order = "category_id, code"
 
-    code        = fields.Char(string="Code", size=5, required=True)
-    name        = fields.Char(string="Name", size=20, required=True)
-    density     = fields.Float(string="Density (g/cm³)")
-    category_code = fields.Many2one(
-        comodel_name="pdp.stone.category",
-        string="Category",
-    )
+    active = fields.Boolean(default=True)
+    code = fields.Char(required=True, index=True)
+    name = fields.Char(required=True, translate=True)
+    density = fields.Float(string="Density (g/cm³)", digits=(16,4))
+    category_id = fields.Many2one("pdp.stone.category", string="Category", index=True)
+
+    _sql_constraints = [
+        ("code_uniq","unique(code)","Stone Type code must be unique."),
+        ("density_nonneg","CHECK (density IS NULL OR density >= 0)","Density must be ≥ 0"),
+    ]
+
+    def name_get(self):
+        res=[]
+        for r in self:
+            lbl = f"[{r.code}] {r.name}" if (r.code and r.name) else (r.code or r.name or str(r.id))
+            res.append((r.id, lbl))
+        return res
+
 

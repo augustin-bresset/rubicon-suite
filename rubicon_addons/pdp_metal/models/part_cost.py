@@ -5,19 +5,19 @@ class PartCost(models.Model):
     _description = 'Unit cost of a part'
     
 
-    part_code    = fields.Many2one(
+    part    = fields.Many2one(
         comodel_name='pdp.part',
         required=True,
         ondelete='cascade',
     )
-    purity_code  = fields.Many2one(
+    purity  = fields.Many2one(
         comodel_name='pdp.metal.purity',
         required=True,
     )
     
     cost         = fields.Monetary(
         string='Unit Cost',
-        currency_field="currency",
+        currency_field="currency_id",
         required=True
     )
 

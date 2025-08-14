@@ -35,16 +35,17 @@ def mapping_currency(currency, default="USD"):
 def strip_code_space(code, upper=True):
     """Strip space but not the one used.
     :example::
-     > code_space("AA   ")
+     > strip_code_space("AA   ")
      >>> "AA"
-     > code_space("AA B ")
+     > strip_code_space("AA B ")
      >>> "AA B"
+     > strip_code_space("AA   B ")
+     >>> "AA B"
+     
     """
-    code = code.replace('  ', '') # Del double space
-    if code == '':
-        return ''
-    if code[-1] == ' ':
-        return code[:-1]
+    while '  ' in code:
+        code = code.replace('  ', '')
+    code = code.rstrip()
     return code.upper()
 
 def create_stone_code(stone_type, stone_shade, stone_shape, size):

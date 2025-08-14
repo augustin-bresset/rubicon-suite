@@ -37,7 +37,7 @@ if __name__ == '__main__':
     if everything or "type" in sys.argv:
         model_name = "pdp.stone.type"
         csv_name = "StoneTypes.csv"
-        fieldnames = ["id", "code", "name", "density", "category_code"]
+        fieldnames = ["id", "code", "name", "density", "category_id"]
         def row_to_dict_type(row):
             if row[4] == "": row[4] = 0.0
             density = float(row[4]) * 2.65
@@ -47,8 +47,7 @@ if __name__ == '__main__':
                 "code" : code,
                 "name" : row[1],
                 "density" : density,
-                "category_code" : row[3],
-                # "category_id" : func_index(row[3], "pdp.stone.category"),
+                "category_id" : row[3],
             }
         
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict_type)
@@ -60,11 +59,11 @@ if __name__ == '__main__':
 
         model_name = "pdp.stone.size"
         csv_name = "StoneSizes.csv"
-        fieldnames = ["size"]
+        fieldnames = ["name"]
         def row_to_dict(row):
             return {
                 "id": func_index(row[0], model_name),
-                "size": size_field(row[0])
+                "name": size_field(row[0])
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
     
@@ -102,27 +101,30 @@ if __name__ == '__main__':
     if everything or "weight" in sys.argv:
         model_name = "pdp.stone.weight"
         csv_name = "StoneWeights.csv"
-        fieldnames = ["weight", "type_code", "shape_code", "shade_code", "size"]
+        fieldnames = ["weight", "type_id", "shape_id", "shade_id", "size_id"]
         
         
         def row_to_dict(row):
             type_code = strip_code_space(row[0])
             shape_code = strip_code_space(row[1])
             shade_code = strip_code_space(row[2])
+            weight = safe_float(row[4])
+            if weight == 0.0:
+                return 
             return {
                 "id" : 0,
-                "type_code": type_code,
-                "shape_code" : shape_code,
-                "shade_code" : shade_code,
-                "size" : size_field(row[3]),
-                "weight": row[4]
+                "type_id": type_code,
+                "shape_id" : shape_code,
+                "shade_id" : shade_code,
+                "size_id" : size_field(row[3]),
+                "weight": weight
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=True)
         
     if everything or "stone" in sys.argv:
         model_name = "pdp.stone"
         csv_name = "StoneLots.csv"
-        fieldnames = ["id", "code", "type_code", "shape_code", "shade_code", "size", "cost", "currency"]
+        fieldnames = ["id", "code", "type_id", "shape_id", "shade_id", "size_id", "cost", "currency_id"]
         def row_to_dict(row):
             if row[5] == "":
                 row[5] = 0.0
@@ -136,11 +138,11 @@ if __name__ == '__main__':
             return {
                 "id" : func_index(row[7], model_name),
                 "code" : code.upper(),
-                "type_code": type_code.upper(),
-                "shape_code" : shape_code.upper(),
-                "shade_code" : shade_code.upper(),
-                "size" : size_field(row[3]),
+                "type_id": type_code.upper(),
+                "shape_id" : shape_code.upper(),
+                "shade_id" : shade_code.upper(),
+                "size_id" : size_field(row[3]),
                 "cost" : row[5],
-                "currency": mapping_currency(row[6])
+                "currency_id": mapping_currency(row[6])
             }
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict)

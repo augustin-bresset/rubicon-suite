@@ -14,7 +14,7 @@ class Metal(models.Model):
     
     cost         = fields.Monetary(
         string='Unit Cost ($/kg)',
-        currency_field = "currency"
+        currency_field = "currency_id"
     )
 
     currency_id =  fields.Many2one(

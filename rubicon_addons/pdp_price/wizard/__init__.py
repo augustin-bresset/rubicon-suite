@@ -1,4 +1,3 @@
-from .price_preview import PricePreviewLine, PricePreviewWizard
 
 from .component_abstract import PriceComponent
 from .component_addon import PriceAddon
@@ -7,4 +6,4 @@ from .component_metal import PriceMetal
 from .component_labor import PriceLabor
 from .component_part import PricePart
 
-
+from .price_preview import PricePreview, PricePreviewLine

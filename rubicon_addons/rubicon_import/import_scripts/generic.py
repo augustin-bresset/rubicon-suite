@@ -12,27 +12,99 @@ many2one_cache = {}
 def is_empty(value):
     return value is None or str(value).strip() in ('', '\x00')
 
+# def resolve_many2one(env, field, raw_value):
+#     comodel = field.comodel_name
+#     raw = str(raw_value).strip()
+#     # cache initial
+#     if comodel not in many2one_cache:
+#         many2one_cache[comodel] = {}
+#         for r in env[comodel].search([]):
+#             # indexe par rec_name + code si dispo
+#             many2one_cache[comodel][str(r.display_name).strip()] = r.id
+#             if hasattr(r, 'name'):
+#                 many2one_cache[comodel][str(r.name).strip()] = r.id
+#             if hasattr(r, 'currency_unit_label'):
+#                 many2one_cache[comodel][str(r.currency_unit_label).strip()] = r.id
+#     result = many2one_cache[comodel].get(raw)
+#     if result is None:
+#         # fallback name_search
+#         recs = env[comodel].name_search(raw, operator='=', limit=1)
+#         if recs:
+#             result = recs[0][0]
+#             many2one_cache[comodel][raw] = result
+#     if result is None:
+#         print(f"[WARN] Unresolved Many2one: {field.name} = '{raw}' in {comodel}")
+#         return ''
+#     return result
+    
+    
 def resolve_many2one(env, field, raw_value):
+    """Resolve a M2O by rec_name, with robust fallbacks and inactive records."""
     comodel = field.comodel_name
     rec_name = env[comodel]._rec_name
-    raw_value = str(raw_value).strip()
+    raw = '' if raw_value is None else str(raw_value).strip()
 
-    # Initialiser le cache pour ce comodel
-    if comodel not in many2one_cache:
-        print(f"[INFO] Loading {comodel} references via `{rec_name}`...")
-        many2one_cache[comodel] = {
-            str(r[rec_name]).strip(): r.id
-            for r in env[comodel].search([])
-        }
-
-    # Résolution via cache
-    result = many2one_cache[comodel].get(raw_value)
-    if result is None:
-        print(f"[WARN] Unresolved Many2one: {field.name} = '{raw_value}' in {comodel} using {rec_name}")
+    if not raw:
         return ''
-    return result
 
+    # Normalise (évite les \ufeff, espaces, case)
+    raw_norm = raw.replace('\ufeff', '').strip()
+    raw_key = raw_norm.upper()
 
+    # Init cache (inclut inactifs)
+    if comodel not in many2one_cache:
+        print(f"[INFO] Loading {comodel} references via `{rec_name}` (including inactive)...")
+        m = env[comodel].with_context(active_test=False)
+        cache = {}
+        for r in m.search([]):
+            # clé principale = rec_name
+            key = str(r[rec_name]).strip().upper() if r[rec_name] else ''
+            if key:
+                cache[key] = r.id
+            # cas res.currency : aussi indexer le symbole (฿, $, €)
+            if comodel == 'res.currency':
+                sym = getattr(r, 'symbol', None)
+                if sym:
+                    cache[str(sym).strip().upper()] = r.id
+        many2one_cache[comodel] = cache
+
+    # 1) Hit cache direct
+    hit = many2one_cache[comodel].get(raw_key)
+    if hit:
+        return hit
+
+    # 2) Accepter une valeur en XML-ID (ex: "base.THB")
+    if '.' in raw_norm:
+        try:
+            rec = env.ref(raw_norm, raise_if_not_found=False)
+            if rec and rec._name == comodel:
+                many2one_cache[comodel][raw_key] = rec.id
+                return rec.id
+        except Exception:
+            pass
+
+    # 3) Fallback search strict (=) puis ilike
+    m = env[comodel].with_context(active_test=False)
+    domain_eq = [(rec_name, '=', raw_norm)]
+    if comodel == 'res.currency':
+        domain_eq = ['|', (rec_name, '=', raw_norm), ('symbol', '=', raw_norm)]
+
+    rec = m.search(domain_eq, limit=1)
+    if not rec:
+        # dernier filet: ilike
+        domain_ilike = [(rec_name, 'ilike', raw_norm)]
+        if comodel == 'res.currency':
+            domain_ilike = ['|', (rec_name, 'ilike', raw_norm), ('symbol', 'ilike', raw_norm)]
+        rec = m.search(domain_ilike, limit=1)
+
+    if rec:
+        many2one_cache[comodel][raw_key] = rec.id
+        return rec.id
+
+    print(f"[WARN] Unresolved Many2one: {field.name} = '{raw_value}' in {comodel} using {rec_name}")
+    return ''
+
+    
 def fields_type_to_func(env, field, value):
     if value in ('', None):
         return None
