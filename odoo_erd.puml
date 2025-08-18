@@ -8,10 +8,10 @@ class "pdp.addon.cost" as pdp_addon_cost {
   - create_date : datetime
   - write_date : datetime
   - id : integer
-  - addon : m2o→pdp.addon.type
+  - addon_id : m2o→pdp.addon.type
   - create_uid : m2o→res.users
   - currency_id : m2o→res.currency
-  - product : m2o→pdp.product
+  - product_id : m2o→pdp.product
   - write_uid : m2o→res.users
   - cost : monetary
 }
@@ -35,8 +35,8 @@ class "pdp.labor.cost.model" as pdp_labor_cost_model {
   - id : integer
   - create_uid : m2o→res.users
   - currency_id : m2o→res.currency
-  - labor : m2o→pdp.labor.type
-  - model : m2o→pdp.product.model
+  - labor_id : m2o→pdp.labor.type
+  - model_id : m2o→pdp.product.model
   - write_uid : m2o→res.users
   - cost : monetary
 }
@@ -48,8 +48,8 @@ class "pdp.labor.cost.product" as pdp_labor_cost_product {
   - id : integer
   - create_uid : m2o→res.users
   - currency_id : m2o→res.currency
-  - labor : m2o→pdp.labor.type
-  - product : m2o→pdp.product
+  - labor_id : m2o→pdp.labor.type
+  - product_id : m2o→pdp.product
   - write_uid : m2o→res.users
   - cost : monetary
 }
@@ -82,9 +82,9 @@ class "pdp.margin.addon" as pdp_margin_addon {
   - write_date : datetime
   - rate : float
   - id : integer
-  - addon : m2o→pdp.addon.type
+  - addon_id : m2o→pdp.addon.type
   - create_uid : m2o→res.users
-  - margin : m2o→pdp.margin
+  - margin_id : m2o→pdp.margin
   - write_uid : m2o→res.users
 }
 class "pdp.margin.labor" as pdp_margin_labor {
@@ -97,7 +97,7 @@ class "pdp.margin.labor" as pdp_margin_labor {
   - rate_stone : float
   - id : integer
   - create_uid : m2o→res.users
-  - margin : m2o→pdp.margin
+  - margin_id : m2o→pdp.margin
   - write_uid : m2o→res.users
 }
 class "pdp.margin.metal" as pdp_margin_metal {
@@ -108,8 +108,8 @@ class "pdp.margin.metal" as pdp_margin_metal {
   - rate : float
   - id : integer
   - create_uid : m2o→res.users
-  - margin : m2o→pdp.margin
-  - metal_purity : m2o→pdp.metal.purity
+  - margin_id : m2o→pdp.margin
+  - metal_purity_id : m2o→pdp.metal.purity
   - write_uid : m2o→res.users
 }
 class "pdp.margin.stone" as pdp_margin_stone {
@@ -120,8 +120,8 @@ class "pdp.margin.stone" as pdp_margin_stone {
   - rate : float
   - id : integer
   - create_uid : m2o→res.users
-  - margin : m2o→pdp.margin
-  - stone_type : m2o→pdp.stone.type
+  - margin_id : m2o→pdp.margin
+  - stone_type_id : m2o→pdp.stone.type
   - write_uid : m2o→res.users
 }
 class "pdp.metal" as pdp_metal {
@@ -161,7 +161,7 @@ class "pdp.part" as pdp_part {
   - id : integer
   - create_uid : m2o→res.users
   - write_uid : m2o→res.users
-  - costs : o2m→pdp.part.cost
+  - cost_ids : o2m→pdp.part.cost
 }
 class "pdp.part.cost" as pdp_part_cost {
   + id : integer
@@ -171,8 +171,8 @@ class "pdp.part.cost" as pdp_part_cost {
   - id : integer
   - create_uid : m2o→res.users
   - currency_id : m2o→res.currency
-  - part : m2o→pdp.part
-  - purity : m2o→pdp.metal.purity
+  - part_id : m2o→pdp.part
+  - purity_id : m2o→pdp.metal.purity
   - write_uid : m2o→res.users
   - cost : monetary
 }
@@ -183,16 +183,16 @@ class "pdp.product" as pdp_product {
   - code : char
   - display_name : char
   - metal : char
-  - remark : char
   - create_date : datetime
   - write_date : datetime
   - id : integer
-  - category : m2o→pdp.product.category
+  - category_id : m2o→pdp.product.category
   - create_uid : m2o→res.users
-  - model : m2o→pdp.product.model
-  - stone_composition : m2o→pdp.product.stone.composition
+  - model_id : m2o→pdp.product.model
+  - stone_composition_id : m2o→pdp.product.stone.composition
   - write_uid : m2o→res.users
-  - parts : o2m→pdp.product.part
+  - part_ids : o2m→pdp.product.part
+  - remark : text
 }
 class "pdp.product.category" as pdp_product_category {
   + id : integer
@@ -205,7 +205,7 @@ class "pdp.product.category" as pdp_product_category {
   - id : integer
   - create_uid : m2o→res.users
   - write_uid : m2o→res.users
-  - models : o2m→pdp.product.model
+  - model_ids : o2m→pdp.product.model
 }
 class "pdp.product.model" as pdp_product_model {
   + id : integer
@@ -216,11 +216,11 @@ class "pdp.product.model" as pdp_product_model {
   - create_date : datetime
   - write_date : datetime
   - id : integer
-  - matching_models : m2m→pdp.product.model
+  - matching_model_ids : m2m→pdp.product.model
   - sibling_model_ids : m2m→pdp.product.model
-  - category : m2o→pdp.product.category
+  - category_id : m2o→pdp.product.category
   - create_uid : m2o→res.users
-  - parent_model : m2o→pdp.product.model
+  - parent_model_id : m2o→pdp.product.model
   - write_uid : m2o→res.users
   - metal_weights_ids : o2m→pdp.product.model.metal
 }
@@ -231,8 +231,8 @@ class "pdp.product.model.matching" as pdp_product_model_matching {
   - write_date : datetime
   - id : integer
   - create_uid : m2o→res.users
-  - model_one : m2o→pdp.product.model
-  - model_two : m2o→pdp.product.model
+  - model_one_id : m2o→pdp.product.model
+  - model_two_id : m2o→pdp.product.model
   - write_uid : m2o→res.users
 }
 class "pdp.product.model.metal" as pdp_product_model_metal {
@@ -244,9 +244,9 @@ class "pdp.product.model.metal" as pdp_product_model_metal {
   - weight : float
   - id : integer
   - create_uid : m2o→res.users
-  - metal : m2o→pdp.metal
-  - model : m2o→pdp.product.model
-  - purity : m2o→pdp.metal.purity
+  - metal_id : m2o→pdp.metal
+  - model_id : m2o→pdp.product.model
+  - purity_id : m2o→pdp.metal.purity
   - write_uid : m2o→res.users
 }
 class "pdp.product.part" as pdp_product_part {
@@ -257,8 +257,8 @@ class "pdp.product.part" as pdp_product_part {
   - id : integer
   - quantity : integer
   - create_uid : m2o→res.users
-  - part : m2o→pdp.part
-  - product : m2o→pdp.product
+  - part_id : m2o→pdp.part
+  - product_id : m2o→pdp.product
   - write_uid : m2o→res.users
 }
 class "pdp.product.stone" as pdp_product_stone {
@@ -270,11 +270,11 @@ class "pdp.product.stone" as pdp_product_stone {
   - write_date : datetime
   - id : integer
   - pieces : integer
-  - composition : m2o→pdp.product.stone.composition
+  - composition_id : m2o→pdp.product.stone.composition
   - create_uid : m2o→res.users
-  - reshaped_shape : m2o→pdp.stone.shape
-  - reshaped_size : m2o→pdp.stone.size
-  - stone : m2o→pdp.stone
+  - reshaped_shape_id : m2o→pdp.stone.shape
+  - reshaped_size_id : m2o→pdp.stone.size
+  - stone_id : m2o→pdp.stone
   - write_uid : m2o→res.users
 }
 class "pdp.product.stone.composition" as pdp_product_stone_composition {
@@ -286,7 +286,7 @@ class "pdp.product.stone.composition" as pdp_product_stone_composition {
   - id : integer
   - create_uid : m2o→res.users
   - write_uid : m2o→res.users
-  - stone_lines : o2m→pdp.product.stone
+  - stone_line_ids : o2m→pdp.product.stone
 }
 class "pdp.stone" as pdp_stone {
   + id : integer
@@ -297,15 +297,16 @@ class "pdp.stone" as pdp_stone {
   - id : integer
   - create_uid : m2o→res.users
   - currency_id : m2o→res.currency
-  - shade : m2o→pdp.stone.shade
-  - shape : m2o→pdp.stone.shape
-  - size : m2o→pdp.stone.size
-  - type : m2o→pdp.stone.type
+  - shade_id : m2o→pdp.stone.shade
+  - shape_id : m2o→pdp.stone.shape
+  - size_id : m2o→pdp.stone.size
+  - type_id : m2o→pdp.stone.type
   - write_uid : m2o→res.users
   - cost : monetary
 }
 class "pdp.stone.category" as pdp_stone_category {
   + id : integer
+  - active : boolean
   - code : char
   - display_name : char
   - name : char
@@ -314,7 +315,7 @@ class "pdp.stone.category" as pdp_stone_category {
   - id : integer
   - create_uid : m2o→res.users
   - write_uid : m2o→res.users
-  - types : o2m→pdp.stone.type
+  - type_ids : o2m→pdp.stone.type
 }
 class "pdp.stone.shade" as pdp_stone_shade {
   + id : integer
@@ -341,7 +342,7 @@ class "pdp.stone.shape" as pdp_stone_shape {
 class "pdp.stone.size" as pdp_stone_size {
   + id : integer
   - display_name : char
-  - size : char
+  - name : char
   - create_date : datetime
   - write_date : datetime
   - id : integer
@@ -350,6 +351,7 @@ class "pdp.stone.size" as pdp_stone_size {
 }
 class "pdp.stone.type" as pdp_stone_type {
   + id : integer
+  - active : boolean
   - code : char
   - display_name : char
   - name : char
@@ -357,7 +359,7 @@ class "pdp.stone.type" as pdp_stone_type {
   - write_date : datetime
   - density : float
   - id : integer
-  - category : m2o→pdp.stone.category
+  - category_id : m2o→pdp.stone.category
   - create_uid : m2o→res.users
   - write_uid : m2o→res.users
 }
@@ -369,58 +371,58 @@ class "pdp.stone.weight" as pdp_stone_weight {
   - weight : float
   - id : integer
   - create_uid : m2o→res.users
-  - shade : m2o→pdp.stone.shade
-  - shape : m2o→pdp.stone.shape
-  - size : m2o→pdp.stone.size
-  - type : m2o→pdp.stone.type
+  - shade_id : m2o→pdp.stone.shade
+  - shape_id : m2o→pdp.stone.shape
+  - size_id : m2o→pdp.stone.size
+  - type_id : m2o→pdp.stone.type
   - write_uid : m2o→res.users
 }
-pdp_addon_cost --> pdp_addon_type : addon
-pdp_addon_cost --> pdp_product : product
-pdp_labor_cost_model --> pdp_labor_type : labor
-pdp_labor_cost_model --> pdp_product_model : model
-pdp_labor_cost_product --> pdp_labor_type : labor
-pdp_labor_cost_product --> pdp_product : product
-pdp_margin_addon --> pdp_addon_type : addon
-pdp_margin_addon --> pdp_margin : margin
-pdp_margin_labor --> pdp_margin : margin
-pdp_margin_metal --> pdp_margin : margin
-pdp_margin_metal --> pdp_metal_purity : metal_purity
-pdp_margin_stone --> pdp_margin : margin
-pdp_margin_stone --> pdp_stone_type : stone_type
-pdp_part ..> pdp_part_cost : costs (o2m)
-pdp_part_cost --> pdp_metal_purity : purity
-pdp_part_cost --> pdp_part : part
-pdp_product --> pdp_product_category : category
-pdp_product --> pdp_product_model : model
-pdp_product ..> pdp_product_part : parts (o2m)
-pdp_product --> pdp_product_stone_composition : stone_composition
-pdp_product_category ..> pdp_product_model : models (o2m)
-pdp_product_model --> pdp_product_category : category
-pdp_product_model -- pdp_product_model : matching_models
+pdp_addon_cost --> pdp_addon_type : addon_id
+pdp_addon_cost --> pdp_product : product_id
+pdp_labor_cost_model --> pdp_labor_type : labor_id
+pdp_labor_cost_model --> pdp_product_model : model_id
+pdp_labor_cost_product --> pdp_labor_type : labor_id
+pdp_labor_cost_product --> pdp_product : product_id
+pdp_margin_addon --> pdp_addon_type : addon_id
+pdp_margin_addon --> pdp_margin : margin_id
+pdp_margin_labor --> pdp_margin : margin_id
+pdp_margin_metal --> pdp_margin : margin_id
+pdp_margin_metal --> pdp_metal_purity : metal_purity_id
+pdp_margin_stone --> pdp_margin : margin_id
+pdp_margin_stone --> pdp_stone_type : stone_type_id
+pdp_part ..> pdp_part_cost : cost_ids (o2m)
+pdp_part_cost --> pdp_metal_purity : purity_id
+pdp_part_cost --> pdp_part : part_id
+pdp_product --> pdp_product_category : category_id
+pdp_product --> pdp_product_model : model_id
+pdp_product ..> pdp_product_part : part_ids (o2m)
+pdp_product --> pdp_product_stone_composition : stone_composition_id
+pdp_product_category ..> pdp_product_model : model_ids (o2m)
+pdp_product_model --> pdp_product_category : category_id
+pdp_product_model -- pdp_product_model : matching_model_ids
 pdp_product_model -- pdp_product_model : sibling_model_ids
-pdp_product_model --> pdp_product_model : parent_model
+pdp_product_model --> pdp_product_model : parent_model_id
 pdp_product_model ..> pdp_product_model_metal : metal_weights_ids (o2m)
-pdp_product_model_matching --> pdp_product_model : model_one
-pdp_product_model_matching --> pdp_product_model : model_two
-pdp_product_model_metal --> pdp_metal : metal
-pdp_product_model_metal --> pdp_metal_purity : purity
-pdp_product_model_metal --> pdp_product_model : model
-pdp_product_part --> pdp_part : part
-pdp_product_part --> pdp_product : product
-pdp_product_stone --> pdp_product_stone_composition : composition
-pdp_product_stone --> pdp_stone : stone
-pdp_product_stone --> pdp_stone_shape : reshaped_shape
-pdp_product_stone --> pdp_stone_size : reshaped_size
-pdp_product_stone_composition ..> pdp_product_stone : stone_lines (o2m)
-pdp_stone --> pdp_stone_shade : shade
-pdp_stone --> pdp_stone_shape : shape
-pdp_stone --> pdp_stone_size : size
-pdp_stone --> pdp_stone_type : type
-pdp_stone_category ..> pdp_stone_type : types (o2m)
-pdp_stone_type --> pdp_stone_category : category
-pdp_stone_weight --> pdp_stone_shade : shade
-pdp_stone_weight --> pdp_stone_shape : shape
-pdp_stone_weight --> pdp_stone_size : size
-pdp_stone_weight --> pdp_stone_type : type
+pdp_product_model_matching --> pdp_product_model : model_one_id
+pdp_product_model_matching --> pdp_product_model : model_two_id
+pdp_product_model_metal --> pdp_metal : metal_id
+pdp_product_model_metal --> pdp_metal_purity : purity_id
+pdp_product_model_metal --> pdp_product_model : model_id
+pdp_product_part --> pdp_part : part_id
+pdp_product_part --> pdp_product : product_id
+pdp_product_stone --> pdp_product_stone_composition : composition_id
+pdp_product_stone --> pdp_stone : stone_id
+pdp_product_stone --> pdp_stone_shape : reshaped_shape_id
+pdp_product_stone --> pdp_stone_size : reshaped_size_id
+pdp_product_stone_composition ..> pdp_product_stone : stone_line_ids (o2m)
+pdp_stone --> pdp_stone_shade : shade_id
+pdp_stone --> pdp_stone_shape : shape_id
+pdp_stone --> pdp_stone_size : size_id
+pdp_stone --> pdp_stone_type : type_id
+pdp_stone_category ..> pdp_stone_type : type_ids (o2m)
+pdp_stone_type --> pdp_stone_category : category_id
+pdp_stone_weight --> pdp_stone_shade : shade_id
+pdp_stone_weight --> pdp_stone_shape : shape_id
+pdp_stone_weight --> pdp_stone_size : size_id
+pdp_stone_weight --> pdp_stone_type : type_id
 @enduml

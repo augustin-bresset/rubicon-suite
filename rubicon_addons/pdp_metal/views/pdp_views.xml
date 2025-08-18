@@ -47,8 +47,8 @@
     <field name="model">pdp.part.cost</field>
     <field name="arch" type="xml">
       <list string="Part Costs">
-        <field name="part"/>
-        <field name="purity"/>
+        <field name="part_id"/>
+        <field name="purity_id"/>
         <field name="cost"/>
       </list>
     </field>

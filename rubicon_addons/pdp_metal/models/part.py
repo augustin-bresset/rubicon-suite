@@ -12,11 +12,11 @@ class Part(models.Model):
     ]
     _rec_name = "code"
 
-    code      = fields.Char(string='Code', required=True, size=5)
-    name      = fields.Char(string='Name', required=True, size=50)
-    costs  = fields.One2many(
+    code      = fields.Char(string='Code', required=True, index=True)
+    name      = fields.Char(string='Name', required=True)
+    cost_ids  = fields.One2many(
         comodel_name='pdp.part.cost',
-        inverse_name='part',
-        string='Cost'
+        inverse_name='part_id',
+        string='Cost',        
     )
 

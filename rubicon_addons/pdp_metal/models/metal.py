@@ -9,11 +9,11 @@ class Metal(models.Model):
     ]
     _rec_name='code'
     
-    code         = fields.Char(string='Code', required=True, size=2)
-    name         = fields.Char(string='Name', required=True, size=20)
+    code         = fields.Char(string='Code', required=True, index=True)
+    name         = fields.Char(string='Name', required=True)
     
     cost         = fields.Monetary(
-        string='Unit Cost ($/kg)',
+        string='Unit Cost ($/once)',
         currency_field = "currency_id"
     )
 

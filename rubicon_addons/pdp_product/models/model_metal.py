@@ -16,18 +16,22 @@ class ModelMetal(models.Model):
         required=True
         )
     
-    metal  = fields.Many2one(
+    metal_id  = fields.Many2one(
         comodel_name='pdp.metal',
-        string='Metal Code'
+        string='Metal Code',
+        index=True
     )
     
-    purity  = fields.Many2one(
+    purity_id  = fields.Many2one(
         comodel_name='pdp.metal.purity',
-        string='Metal Purity'
+        string='Metal Purity',
+        index=True
     )
 
-    model = fields.Many2one(
+    model_id = fields.Many2one(
         'pdp.product.model', 
-        required=True, ondelete='cascade')
+        required=True, 
+        index=True,
+        )
 
     

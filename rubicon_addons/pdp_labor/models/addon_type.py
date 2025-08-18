@@ -5,6 +5,6 @@ class AddonType(models.Model):
     _description = 'Addon Type'
     _rec_name = 'code'
 
-    code = fields.Char(string='Code', required=True, size=3)
-    name = fields.Char(string='Name', required=True, size=50)
+    code = fields.Char(string='Code', required=True, index=True)
+    name = fields.Char(string='Name', required=True)
 

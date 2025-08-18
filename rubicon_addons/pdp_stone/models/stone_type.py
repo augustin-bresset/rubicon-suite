@@ -25,4 +25,9 @@ class StoneType(models.Model):
             res.append((r.id, lbl))
         return res
 
-
+    
+    def get_referential_density(self):
+        """
+        Referential with quartz (2.65g/cm3) because of its low variance (~0.005g/cm3)
+        """
+        return self.density / 2.65

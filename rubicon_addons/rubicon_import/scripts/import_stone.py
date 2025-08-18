@@ -4,6 +4,7 @@
 
 # On essaie l'import "propre"...
 if not env:
+    raise "ENV not defined."
     
 try:
     from odoo.addons.rubicon_import.import_scripts.generic import import_csv

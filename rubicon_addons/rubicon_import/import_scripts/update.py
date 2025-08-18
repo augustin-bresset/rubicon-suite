@@ -70,13 +70,15 @@ def update_from_csv(env, model, datafile_path, mapping=None, match_field=None, v
             return
 
         headers = rows[0]
-
-        for row in rows[1:]:
+        records_set = set()
+        for i, row in enumerate(rows[1:]):
             logs['total'] += 1
             raw_dict = dict(zip(headers, row))
             vals = {}
-
+            skipped = True
+            
             for csv_field, raw_value in raw_dict.items():
+                
                 if not csv_field or is_empty(raw_value):
                     continue
 
@@ -86,24 +88,69 @@ def update_from_csv(env, model, datafile_path, mapping=None, match_field=None, v
                 field = Model._fields.get(model_field)
                 if not field:
                     continue
-                if model_field in filter:
+                
+                # Filter
+                if filter and model_field in filter:
                     val = filter[model_field](raw_value)
                 else:
                     val = raw_value
+                    
+                if field.required and is_empty(val):
+                    print(f"[WARN] Required field {field.name} empty : {raw_value} | {val} => no created {row} ")
+                    skipped = True
+                    
                 if is_empty(val): continue
-                vals[model_field] = fields_type_to_func(env, field, raw_value)
+                vals[model_field] = fields_type_to_func(env, field, val)
+            
+            if i == 20:
+                print(match_field)
+                print(vals)
             if vals == {}:
                 continue
-            ref = None
-            if match_field and match_field in vals:
-                ref = Model.search([(match_field, '=', vals[match_field])], limit=1)
+            key = vals.get(match_field)
+            
+            if key is None:
+                continue
 
-            if not ref:
+            # Collision into the batch
+            if key in records_set:
+                logs['skipped'] += 1
+                continue
+
+            # existe déjà en DB ? -> update
+            ref = Model.search([(match_field, '=', key)], limit=1)
+            if ref:
+                ref.write(vals)
+                logs['updated'] += 1
+            elif not skipped:
                 create_batch.append(vals)
-                if len(create_batch) >= batch_size:                    
-                    Model.create(create_batch)
-                    logs['created'] += len(create_batch)
-                    create_batch = []
+            else:
+                logs['skipped'] += 1
+                
+            records_set.add(key)
+            
+            if i == 20:
+                print(match_field)
+                print(vals)
+                print(ref)
+                print(records_set)
+                print(key)
+                        
+            # ref = None
+            # if match_field and match_field in vals:
+            #     ref = Model.search([(match_field, '=', vals[match_field])], limit=1)
+            # elif vals[match_field] in records_set:
+            #     print(f"[DEBUG] {vals} : {match_field}")
+            #     ref = True
+            # else:
+            #     records_set.add(vals[match_field])
+                
+            # if not ref:
+            #     create_batch.append(vals)
+            if len(create_batch) >= batch_size:                    
+                Model.create(create_batch)
+                logs['created'] += len(create_batch)
+                create_batch = []
     if len(create_batch) > 0:
         Model.create(create_batch)
         logs['created'] += len(create_batch)

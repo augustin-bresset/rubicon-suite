@@ -5,7 +5,7 @@ import sys
 import re
 
 from rubicon_import.tools.parsing import safe_float, safe_int, safe_str
-from rubicon_import.tools.standard import func_index, size_field, strip_code_space, mapping_currency
+from rubicon_import.tools.standard import func_index, size_field, strip_code_space, mapping_currency, create_stone_code
 from rubicon_import.raw_to_data.raw_to_data import raw_to_data
      
 
@@ -31,14 +31,14 @@ if __name__ == '__main__':
                 "name" : row[1],
                 }
             
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict_cat)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict_cat, dest_folder='pdp_stone')
     
     # Type
     if everything or "type" in sys.argv:
         model_name = "pdp.stone.type"
         csv_name = "StoneTypes.csv"
         fieldnames = ["id", "code", "name", "density", "category_id"]
-        def row_to_dict_type(row):
+        def row_to_dict(row):
             if row[4] == "": row[4] = 0.0
             density = float(row[4]) * 2.65
             code = strip_code_space(row[0])
@@ -50,7 +50,7 @@ if __name__ == '__main__':
                 "category_id" : row[3],
             }
         
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict_type)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_stone')
     
     
     
@@ -65,7 +65,7 @@ if __name__ == '__main__':
                 "id": func_index(row[0], model_name),
                 "name": size_field(row[0])
             }
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_stone')
     
     # Shade
     if everything or "shade" in sys.argv:
@@ -95,7 +95,7 @@ if __name__ == '__main__':
                 "code" : code,
                 "shape": row[1]
             }
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_stone')
     
     # Weight
     if everything or "weight" in sys.argv:
@@ -119,15 +119,23 @@ if __name__ == '__main__':
                 "size_id" : size_field(row[3]),
                 "weight": weight
             }
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=True)
-        
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, index_auto=True, dest_folder='pdp_stone')
+    
+    # Stone
     if everything or "stone" in sys.argv:
         model_name = "pdp.stone"
         csv_name = "StoneLots.csv"
         fieldnames = ["id", "code", "type_id", "shape_id", "shade_id", "size_id", "cost", "currency_id"]
+    
+        def case_management(row):
+            return row[7] == 'SKLD-RDCAB-4' 
+        
         def row_to_dict(row):
             if row[5] == "":
                 row[5] = 0.0
+            if case_management(row):
+                return 
+            
             row[5] = float(row[5])
             # if row[6] != "US":
             #     row[5] *= 0.031 # conv bath -> dollar
@@ -135,14 +143,19 @@ if __name__ == '__main__':
             type_code = strip_code_space(row[0])
             shape_code = strip_code_space(row[1])
             shade_code = strip_code_space(row[2])
+            
+
+            size = size_field(row[3])
+            
+            stone_code = create_stone_code(type_code, shade_code, shape_code, size)
             return {
                 "id" : func_index(row[7], model_name),
-                "code" : code.upper(),
-                "type_id": type_code.upper(),
-                "shape_id" : shape_code.upper(),
-                "shade_id" : shade_code.upper(),
-                "size_id" : size_field(row[3]),
-                "cost" : row[5],
+                "code" : stone_code,
+                "type_id": type_code,
+                "shape_id" : shape_code,
+                "shade_id" : shade_code,
+                "size_id" : size,
+                "cost" : safe_float(row[5]),
                 "currency_id": mapping_currency(row[6])
             }
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_stone')

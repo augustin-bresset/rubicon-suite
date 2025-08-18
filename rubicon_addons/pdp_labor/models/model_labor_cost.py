@@ -9,10 +9,11 @@ class ModelLaborCost(models.Model):
     _name="pdp.labor.cost.model"
     _description="Link table model-addon cost"
     
-    model = fields.Many2one(
+    model_id = fields.Many2one(
         comodel_name="pdp.product.model",
         ondelete="restrict",
-        required=True
+        required=True,
+        index=True
     )
     metal = fields.Char(
         string="Metal",
@@ -20,10 +21,11 @@ class ModelLaborCost(models.Model):
         default="W"
     )
     
-    labor = fields.Many2one(
+    labor_id = fields.Many2one(
         comodel_name="pdp.labor.type",
         ondelete="restrict",
-        required=True   
+        required=True,
+        index=True
     )
     
     cost        = fields.Monetary(

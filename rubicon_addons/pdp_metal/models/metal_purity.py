@@ -12,7 +12,7 @@ class MetalPurity(models.Model):
 
     _rec_name = "code"
     
-    code    = fields.Char(string='Name (e.g. 18K)', required=True, size=5)
+    code    = fields.Char(string='Name (e.g. 18K)', required=True, index=True)
     percent = fields.Float(
         string='Percentage',
         digits=(4, 1),

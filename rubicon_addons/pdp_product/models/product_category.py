@@ -5,17 +5,17 @@ class ModelCategory(models.Model):
     _description = 'Ornament Category'
     _rec_name = 'code'
 
-    code = fields.Char(string='Category Code', required=True, size=2)
-    name = fields.Char(string='Category Name', required=True, size=50)
+    code = fields.Char(string='Category Code', required=True, index=True)
+    name = fields.Char(string='Category Name', required=True)
     waste = fields.Float(
         string='Metal Waste (%)',
         digits=(3, 2),
         required=True
     )
 
-    models = fields.One2many(
+    model_ids = fields.One2many(
         comodel_name="pdp.product.model",
-        inverse_name="category",
+        inverse_name="category_id",
         string="Models",
     )
 

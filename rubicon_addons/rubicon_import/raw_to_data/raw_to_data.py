@@ -5,9 +5,32 @@ import time
 from rubicon_import.tools.standard import func_index
 
 root_folder = os.path.join(os.path.dirname(__file__), '../../..')
-# Folders
 backup_folder = os.path.join(root_folder, 'data', 'backup_pdp')
 data_folder = os.path.join(root_folder, 'data', 'odoo')
+
+
+
+def _write_out(out, writer, xml_idx, index_auto, i, model_name, logs, last_out):
+        if out.get("id") and not xml_idx:
+            del out["id"]
+        
+        collision = True
+        for k, v in out.items():
+            if k != 'id':
+                if not last_out.get(k) == v:
+                    collision = False
+                    break
+        
+        if out is not None or collision:
+            
+            if index_auto:
+                out["id"] = func_index(str(i), model_name)
+            writer.writerow(out)
+            logs["created"]+=1
+        else:
+            logs["skipped"]+=1
+        
+
 
 def raw_to_data(
     model_name, 
@@ -16,12 +39,20 @@ def raw_to_data(
     row_to_dict, 
     index_auto=False,
     xml_idx=True,
-    verbose=True
+    verbose=True,
+    dest_folder=data_folder,
+    test_collision=False
     ):
     t0 = time.time()
     logs = {"created": 0, "skipped": 0, "total": 0}
+    
+    # Folders
+    if dest_folder.startswith('pdp'):
+        dest_folder = os.path.join(root_folder, 'rubicon_addons', dest_folder, 'data')
+    
+    print(f'[INFO] Import go into {dest_folder}')
 
-    dest_name = os.path.join(data_folder, f"{model_name}.csv")
+    dest_name = os.path.join(dest_folder, f"{model_name}.csv")
     
     file_name = os.path.join(backup_folder, csv_name)
 
@@ -35,6 +66,9 @@ def raw_to_data(
     elif not xml_idx:
         del fieldnames[0]
 
+    # Collision test (assumed they next to each other)
+    last_out = {}
+    
     with open(file_name, newline='', encoding='utf-8') as src_file:
         reader = csv.reader(src_file)
         # Prepare header: external id + model_fields
@@ -48,27 +82,12 @@ def raw_to_data(
                 out = row_to_dict(row)
                 
                 if isinstance(out, types.GeneratorType):
-                    for d in out:
-                        if d.get("id") and not xml_idx:
-                            del d["id"]
-                        if out is not None:
-                            if index_auto:
-                                d["id"] = func_index(str(i), model_name)
-                            writer.writerow(d)
-                            logs["created"]+=1
-                        else:
-                            logs["skipped"]+=1
-                
+                    for d in out:                        
+                        _write_out(d, writer, xml_idx, index_auto, i, model_name, logs, last_out)
+                        last_out = d
                 elif out is not None:  
-                    if out.get("id") and not xml_idx:
-                        del out["id"]                  
-                    if index_auto:
-                        out["id"] = func_index(str(i), model_name)
-                    writer.writerow(out)
-                    logs["created"]+=1
-                else:
-                    logs["skipped"]+=1
-
+                    _write_out(out, writer, xml_idx, index_auto, i, model_name, logs, last_out)
+                    last_out = out
     print(f"Generated {dest_name}")
     duration = time.time() - t0
     if verbose:
@@ -78,3 +97,5 @@ def raw_to_data(
         print(f"  => Time elapsed  : {duration:.2f} seconds")
 
     return logs
+
+

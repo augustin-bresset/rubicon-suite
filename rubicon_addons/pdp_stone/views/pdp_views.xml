@@ -68,10 +68,10 @@
     <field name="model">pdp.stone.weight</field>
     <field name="arch" type="xml">
       <list string="Stone Weights">
-        <field name="type"/>
-        <field name="shape"/>
-        <field name="shade"/>
-        <field name="size"/>
+        <field name="type_id"/>
+        <field name="shape_id"/>
+        <field name="shade_id"/>
+        <field name="size_id"/>
         <field name="weight"/>
       </list>
     </field>
@@ -84,10 +84,10 @@
     <field name="arch" type="xml">
       <list string="Stones">
         <field name="code"/>
-        <field name="type"/>
-        <field name="shape"/>
-        <field name="shade"/>
-        <field name="size"/>
+        <field name="type_id"/>
+        <field name="shape_id"/>
+        <field name="shade_id"/>
+        <field name="size_id"/>
         <field name="cost"/>
       </list>
     </field>

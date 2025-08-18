@@ -41,7 +41,7 @@ if __name__ == '__main__':
                 "name": row[1]
             }        
             
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
 
     
     # Margin Labor
@@ -51,20 +51,20 @@ if __name__ == '__main__':
         csv_name="Margins.csv"
 
         fieldnames=[
-            "id", "margin", "rate_parts", "rate_metal", "rate_stone"
+            "id", "margin_id", "rate_parts", "rate_metal", "rate_stone"
         ]    
         
         def row_to_dict(row):
             margin_code = strip_code_space(row[0])
             return {
-                "id": func_index(row[0], model_name),
-                "margin": row[0], 
+                "id": func_index(margin_code, model_name),
+                "margin_id": margin_code, 
                 "rate_parts": safe_float(row[4]), 
                 "rate_metal": safe_float(row[4]), 
                 "rate_stone": safe_float(row[6])
             }        
             
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
 
 
     # Metal Margins
@@ -73,10 +73,10 @@ if __name__ == '__main__':
         model_name="pdp.margin.metal"
         csv_name="MetalMargins.csv"
         actual_field=[
-            "margin_code", "prod_cat_id(toDEL)", "purity", "rate"
+            "margin_id", "prod_cat_id(toDEL)", "purity_id", "rate"
         ]
         fieldnames=[
-            "id", "margin", "metal_purity", "rate"
+            "id", "margin_id", "metal_purity_id", "rate"
         ]
         
         def row_to_dict(row):
@@ -84,11 +84,11 @@ if __name__ == '__main__':
             margin_code = strip_code_space(row[0])
             return {
                 "id": func_index(f"{margin_code}_{metal_purity_code}", model_name),
-                "margin": margin_code, 
-                "metal_purity": metal_purity_code, 
+                "margin_id": margin_code, 
+                "metal_purity_id": metal_purity_code, 
                 "rate": safe_float(row[3])
             }              
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
 
 
     # Stone Margins
@@ -99,7 +99,7 @@ if __name__ == '__main__':
             "margin_code", "prod_cat_id(toDEL)", "stone_type", "stone_shape", "stone_size", "stone_shade", "rate"
         ]
         fieldnames=[
-            "id", "margin", "stone_type", "stone_size", "stone_shade", "rate"
+            "id", "margin_id", "stone_type_id", "stone_size_id", "stone_shade_id", "rate"
         ]
         
         def row_to_dict(row):
@@ -107,11 +107,11 @@ if __name__ == '__main__':
             stone_type_code = strip_code_space(row[2])
             return {
                 "id": func_index(f"{margin_code}_{stone_type_code}", model_name),
-                "margin": margin_code, 
-                "stone_type": stone_type_code, 
+                "margin_id": margin_code, 
+                "stone_type_id": stone_type_code, 
                 "rate": float(row[6])
             }              
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
 
 
     # Addon Margin    
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         csv_name = "MiscMargins.csv"
 
         fieldnames = [
-            "id", "margin", "addon", "rate"
+            "id", "margin_id", "addon_id", "rate"
             ]
         
         def row_to_dict(row):
@@ -128,11 +128,11 @@ if __name__ == '__main__':
             margin_code = strip_code_space(row[1])
             return {
                 "id": func_index(f"{addon_code}_{margin_code}", model_name),
-                "addon": addon_code,
-                "margin": margin_code,
+                "addon_id": addon_code,
+                "margin_id": margin_code,
                 "rate": safe_float(row[2]),
             }
 
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
 
 

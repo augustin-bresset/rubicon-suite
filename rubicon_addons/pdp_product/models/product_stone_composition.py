@@ -5,10 +5,10 @@ class ProductStoneComposition(models.Model):
     _description = 'Group of stones used in a product (without metal)'
     _rec_name = 'code'
 
-    code = fields.Char(string='Composition Code', required=True)
+    code = fields.Char(string='Composition Code', required=True, index=True)
     
-    stone_lines = fields.One2many(
+    stone_line_ids = fields.One2many(
         comodel_name='pdp.product.stone',
-        inverse_name='composition',
+        inverse_name='composition_id',
         string='Stone Lines'
     )

@@ -28,7 +28,7 @@ if __name__ == '__main__':
                 "code": code,
                 "percent": safe_float(row[1])
             }
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_metal')
         
     # Metal
     if everything or "metal" in sys.argv:
@@ -56,7 +56,7 @@ if __name__ == '__main__':
                 "plating": bool(int(row[4])),
                 "reference": reference,
             }
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_metal')
         
     # Part
     if everything or "part" in sys.argv:
@@ -70,23 +70,23 @@ if __name__ == '__main__':
                 "code": code,
                 "name": row[1],
             }
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_metal')
         
     # Part Cost
     if everything or "part_cost" in sys.argv:
         model_name="pdp.part.cost"
         csv_name = "PartsCost.csv"
-        fieldnames = ["id", "part", "purity", "cost", "currency_id"]
+        fieldnames = ["id", "part_id", "purity_id", "cost", "currency_id"]
         def row_to_dict(row):
             part_code = strip_code_space(row[0])
             purity_code = strip_code_space(row[1])
             return {
                 "id": func_index(f"{part_code}_{purity_code}", model_name),
-                "part": part_code,
-                "purity" : purity_code,
+                "part_id": part_code,
+                "purity_id" : purity_code,
                 "cost": safe_float(row[2]),
                 "currency_id" : mapping_currency(row[3])
                 
             }
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict)
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_metal')
         

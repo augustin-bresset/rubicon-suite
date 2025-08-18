@@ -31,8 +31,8 @@
     <field name="model">pdp.addon.cost</field>
     <field name="arch" type="xml">
       <list string="Addon Costs">
-        <field name="product"/>
-        <field name="addon"/>
+        <field name="product_id"/>
+        <field name="addon_id"/>
         <field name="cost" />
       </list>
     </field>
@@ -44,8 +44,8 @@
     <field name="model">pdp.labor.cost.model</field>
     <field name="arch" type="xml">
       <list string="Labor Costs (Model)">
-        <field name="model"/>
-        <field name="labor"/>
+        <field name="model_id"/>
+        <field name="labor_id"/>
         <field name="cost" />
       </list>
     </field>
@@ -57,8 +57,8 @@
     <field name="model">pdp.labor.cost.product</field>
     <field name="arch" type="xml">
       <list string="Labor Costs (Product)">
-        <field name="product"/>
-        <field name="labor"/>
+        <field name="product_id"/>
+        <field name="labor_id"/>
         <field name="cost" />
       </list>
     </field>

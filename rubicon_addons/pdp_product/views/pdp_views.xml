@@ -21,7 +21,7 @@
     <field name="arch" type="xml">
       <list string="Product Models">
         <field name="code"/>
-        <field name="parent_model"/>
+        <field name="parent_model_id"/>
         <field name="drawing"/>
         <field name="quotation"/>
 
@@ -36,8 +36,8 @@
     <field name="model">pdp.product.model.matching</field>
     <field name="arch" type="xml">
       <list string="Matching Models">
-        <field name="model_one"/>
-        <field name="model_two"/>
+        <field name="model_one_id"/>
+        <field name="model_two_id"/>
       </list>
     </field>
   </record>
@@ -48,10 +48,10 @@
     <field name="model">pdp.product.model.metal</field>
     <field name="arch" type="xml">
       <list string="Metal Models">
-        <field name="model"/>
-        <field name="metal"/>
+        <field name="model_id"/>
+        <field name="metal_id"/>
         <field name="metal_version"/>
-        <field name="purity"/>
+        <field name="purity_id"/>
         <field name="weight"/>
         
       </list>
@@ -65,15 +65,15 @@
     <field name="arch" type="xml">
       <list string="Products">
         <field name="code"/>
-        <field name="category"/>
-        <field name="model"/>
-        <field name="stone_composition"/>
+        <field name="category_id"/>
+        <field name="model_id"/>
+        <field name="stone_composition_id"/>
         <field name="metal"/>
         <field name="active"/>
         <field name="in_collection"/>
         <field name="create_date"/>
         <field name="remark"/>
-        <field name="parts"/>
+        <field name="part_ids"/>
       </list>
     </field>
   </record>
@@ -84,8 +84,8 @@
     <field name="model">pdp.product.part</field>
     <field name="arch" type="xml">
       <list string="Product Part">
-        <field name="product"/>
-        <field name="part"/>
+        <field name="product_id"/>
+        <field name="part_id"/>
       </list>
     </field>
   </record>
@@ -97,11 +97,11 @@
     <field name="arch" type="xml">
       <list string="Product Stone">
         <field name="pieces"/>
-        <field name="composition"/>
-        <field name="stone"/>
+        <field name="composition_id"/>
+        <field name="stone_id"/>
         <field name="weight"/>
-        <field name="reshaped_shape"/>
-        <field name="reshaped_size"/>
+        <field name="reshaped_shape_id"/>
+        <field name="reshaped_size_id"/>
         <field name="reshaped_weight"/>
       </list>
     </field>
@@ -114,7 +114,7 @@
     <field name="arch" type="xml">
       <list string="Product Stone Composition">
         <field name="code"/>
-        <field name="stone_lines"/>
+        <field name="stone_line_ids"/>
       </list>
     </field>
   </record>

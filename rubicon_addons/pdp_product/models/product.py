@@ -9,36 +9,39 @@ class Product(models.Model):
     code = fields.Char(
         string='Design reference code', 
         required=True, 
-        size=100)
+        index=True
+    )
     
-    category = fields.Many2one(
+    category_id = fields.Many2one(
         comodel_name='pdp.product.category',
         string='Category',
+        index=True
     )
     
-    model = fields.Many2one(
+    model_id = fields.Many2one(
         comodel_name='pdp.product.model',
         string='Model',
+        index=True
     )
     
-    stone_composition = fields.Many2one(
+    stone_composition_id = fields.Many2one(
         comodel_name='pdp.product.stone.composition',
-        string='Stone Composition'
+        string='Stone Composition',
+        index=True
     )
     
     metal = fields.Char(
-        string='Metal code', 
-        size=10
+        string='Metal code'
     )
     
     
     active          = fields.Boolean(string="Is active")
     create_date     = fields.Datetime(string="Date of Creation")
     in_collection   = fields.Boolean(string="Is in a collection")
-    remark          = fields.Char(string="Remark", size=100)    
+    remark          = fields.Text(string="Remark")    
     
-    parts        = fields.One2many(
+    part_ids        = fields.One2many(
         comodel_name='pdp.product.part',
-        inverse_name='product'
+        inverse_name='product_id'
     )
 

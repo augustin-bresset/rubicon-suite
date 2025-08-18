@@ -17,8 +17,6 @@ def create_product_composition_code(category, code, stones):
     return f"{category.rstrip(' ')}{code.zfill(3).rstrip(' ')}-{stones}"    
     return re.sub(r'[ ]', '', product_code)
 
-
-
 def mapping_currency(currency, default="USD"):
     if currency == '':
         return default
@@ -68,6 +66,8 @@ def create_stone_code(stone_type, stone_shade, stone_shape, size):
     return '-'.join(stone_code)
 
 def size_field(size):
+    if size.isdigit():
+        size = str(float(size))
     if len(size) == 0 or re.sub(r"[0.]", "", size) == '':
         return ''
 
@@ -80,7 +80,9 @@ def size_field(size):
     if size[0] == '.':
         size = '0'+size
     
+    if size[-1] == '/':
+        return size[:-1]
+    
     return size
-
 
 

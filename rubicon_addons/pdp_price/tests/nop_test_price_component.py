@@ -1,8 +1,9 @@
 # tests/test_price_components.py
-from odoo.tests import SavepointCase
+from odoo.tests import TransactionCase   # <-- remplace SavepointCase
+from odoo import fields
 from datetime import date
 
-class TestPriceComponents(SavepointCase):
+class TestPriceComponents(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -10,8 +11,13 @@ class TestPriceComponents(SavepointCase):
         cls.company = cls.env.company
         cls.cur = cls.company.currency_id
         # Fixtures minimales
-        cls.product = cls.env['pdp.product'].create({'name': 'Test P'})
-        cls.margin = cls.env['pdp.margin'].create({'name': 'Std'})
+        cls.product = cls.env['pdp.product'].create({
+            'code': 'PRODUCT-TEST'
+            })
+        cls.margin = cls.env['pdp.margin'].create({
+            'code': 'MARGIN-TEST',
+            'name': 'Margin test'
+            })
         # Exemple: un addon cost en USD
         addon = cls.env['pdp.addon'].create({'name': 'Clasp'})
         cls.env['pdp.addon.cost'].create({

@@ -8,22 +8,48 @@ class PriceStone(models.TransientModel):
 
     @api.model
     def compute(self, *, product, margin, currency, date):
+
+        if not product.stone_composition_id:
+            return self._payload('stone', 0.0, 0.0, currency)
+
+        clean_ctx = {k: v for k, v in self.env.context.items()
+                     if not str(k).startswith('search_default_')}
+
+        StoneLine = self.env['pdp.product.stone'].with_context(clean_ctx)
+
+
+        lines = StoneLine.search([('composition_id', '=', product.stone_composition_id.id)])
+
+        if not lines:
+            return self.compute_payload('stone', 0.0, 0.0, currency)
+
         total_cost = total_margin = 0.0
+        
+        type_ids = set(lines.mapped('stone_id.type_id').ids)
+        rate_by_type = {}
+        if margin and type_ids:
+            MarginStone = self.env['pdp.margin.stone'].with_context(clean_ctx)
+            mlines = MarginStone.search([
+                ('margin_id', '=', margin.id),
+                ('stone_type_id', 'in', list(type_ids)),
+            ])
+            rate_by_type = {ml.stone_type_id.id: (ml.rate or 1.0) for ml in mlines}
 
-        lines = self.env['pdp.product.stone'].search([('product_id', '=', product.id)])
+        
         for line in lines:
-            cur = line.stone_id.currency_id or currency
-            unit_cost = self._convert(line.stone_id.unit_cost or 0.0, cur, currency, date)
-            cost = unit_cost * (line.pieces or 0.0)
+            stone = line.stone_id
+            if not stone:
+                continue
+            
+            from_cur = stone.currency_id or currency
+            unit_cost = self._convert(stone.cost or 0.0, from_cur, currency, date)
+            cost = unit_cost * (line.pieces or 1.0)
             total_cost += cost
-
-            rate = 1.0
-            if margin:
-                mline = self.env['pdp.margin.stone'].search([
-                    ('margin_id', '=', margin.id),
-                    ('stone_type_id', '=', line.stone_id.type_id.id),
-                ], limit=1)
-                rate = (mline.rate or 1.0) if mline else 1.0
-            total_margin += (rate - 1.0) * cost
+            
+            stype_id = stone.type_id.id if stone.type_id else False
+            rate = rate_by_type.get(stype_id, 1.0)
+            margin_val = (rate - 1.0) * cost
+            total_margin += margin_val
 
         return self._payload('stone', total_cost, total_margin, currency)
+
