@@ -1,6 +1,6 @@
 from odoo import fields, models
 
-class ProductLaborCost(models.Model):
+class LaborCostProduct(models.Model):
     """
     B009-PLAIN GOLD/W,CAS,TH,.00
     B009-PLAIN GOLD/W,FIL,TH,.00

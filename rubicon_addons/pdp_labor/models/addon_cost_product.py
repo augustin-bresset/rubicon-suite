@@ -1,6 +1,6 @@
 from odoo import fields, models
 
-class ProductAddonCost(models.Model):
+class AddonCostProduct(models.Model):
     """
     B002-DTS/W,PNT,US,4.00
     B002-DTS/W,PT2,US,.00

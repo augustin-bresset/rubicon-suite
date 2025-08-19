@@ -5,43 +5,56 @@ class PricePart(models.TransientModel):
     _description = 'Part Price Component'
     _inherit = 'pdp.price.component' 
 
-
-
-    @api.depends()
+    @api.model
     def compute(self, *, product, margin, currency, date):
         
-        groups = self.env['pdp.part.cost'].read_group(
-            domain=[('product_code', '=', product.id)],
-            fields=['cost:sum', 'currency_id', 'part_id'],
-            groupby=['currency_id', 'part_id'],
-        )
+        clean_ctx = {k: v for k, v in self.env.context.items()
+                     if not str(k).startswith('search_default_')}
+
+        ProductPart = self.env['pdp.product.part'].with_context(clean_ctx)
+        MetalModel = self.env['pdp.product.model.metal'].with_context(clean_ctx)
+        PartCost = self.env['pdp.part.cost'].with_context(clean_ctx)
+        MarginPart = self.env['pdp.margin.part'].with_context(clean_ctx)
         
-        margin_map = {}
-        if margin and groups:
-            part_ids = [g['part_id'][0] for g in groups if g.get('part_id')]
-            if part_ids:
-                ml = self.env['pdp.margin.part'].search([
-                    ('margin_id', '=', margin.id),
-                    ('part_id', 'in', part_ids),
-                ])
-                margin_map = {r.part_id.id: (r.rate or 1.0) for r in ml}
-
-        total_cost = 0.0
-        total_margin = 0.0
-
-        for g in groups:
-            sum_cost = g.get('cost_sum') or 0.0
-            if g.get('currency_id'):
-                from_cur = self.env['res.currency'].browse(g['currency_id'][0])
-            else:
-                from_cur = currency
-
-            cost = self._convert(sum_cost, from_cur, currency, date)
+        product_part_ids = ProductPart.search([('product_id', '=', product.id)])
+        
+        if not product_part_ids:
+            return self._payload('part', 0.0, 0.0, currency)
+        
+        metal_purity_id = MetalModel.search([
+            ('model_id', '=', product.model_id.id),
+            ('metal_version', '=', product.metal),
+        ], limit=1).purity_id
+        
+        if not metal_purity_id:
+            metal_purity_id = self.env['pdp.metal.purity'].search([
+                ('code', '=', '18K')
+            ], limit=1)
+        
+        total_cost = total_margin = 0.0
+        
+        for product_part_id in product_part_ids:
+            part_id = product_part_id.part_id
+            part_cost_id = PartCost.search([
+                ('part_id', '=', part_id.id),
+                ('purity_id', '=', metal_purity_id.id),
+            ], limit=1)
+            
+            if not part_cost_id:
+                continue
+            
+            from_cur = part_cost_id.currency_id or currency
+            unit_cost = self._convert(part_cost_id.cost or 0.0, from_cur, currency, date)
+            cost = unit_cost * (product_part_id.quantity or 1.0)
             total_cost += cost
-
-            part_id = g.get('part_id') and g['part_id'][0]
-            rate = margin_map.get(part_id, 1.0)
+            
+            rate = 1.0
+            if margin:
+                margin_rate_id = MarginPart.search([
+                    ('margin_id', '=', margin.id),
+                ], limit=1)
+                rate = margin_rate_id.rate or 1.0
             total_margin += (rate - 1.0) * cost
-        
+                
+        return self._payload('part', total_cost, total_margin, currency)
 
-        return self._payload('part', total_cost, total_margin, currency)        

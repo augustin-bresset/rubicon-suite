@@ -5,44 +5,55 @@ class PriceLabor(models.TransientModel):
     _description = 'Labor Price Component'
     _inherit="pdp.price.component"
 
-
-
-    @api.depends()
+    @api.model        
     def compute(self, *, product, margin, currency, date):
+        clean_ctx = {k: v for k, v in self.env.context.items()
+                     if not str(k).startswith('search_default_')}
 
-        groups = self.env['pdp.labor.cost'].read_group(
-            domain=[('product', '=', product.id)],
-            fields=['cost:sum', 'currency_id', 'labor_id'],
-            groupby=['labor_id', 'currency_id'],
-        )
+        LaborCostModel = self.env['pdp.labor.cost.model'].with_context(clean_ctx)
+        LaborCostProduct = self.env['pdp.labor.cost.product'].with_context(clean_ctx)
+        LaborMargin = self.env['pdp.margin.labor'].with_context(clean_ctx)
 
-        
-        margin_map = {}
-        if margin and groups:
-            labor_ids = [g['labor_id'][0] for g in groups if g.get('labor_id')]
-            if labor_ids:
-                ml = self.env['pdp.margin.labor'].search([
-                    ('margin_id', '=', margin.id),
-                    ('labor_id', 'in', labor_ids),
-                ])
-                margin_map = {r.labor_id.id: (r.rate or 1.0) for r in ml}
+        total_cost = total_margin = 0.0
+        for labor in self.env['pdp.labor.type'].search([]):            
 
-        total_cost = 0.0
-        total_margin = 0.0
+            # Cost model
+            cost_model_id = LaborCostModel.search([
+                ('model_id', '=', product.model_id.id),
+                ('labor_id', '=', labor.id)
+            ], limit=1)
+            
+            # Cost Product
+            cost_product_id = LaborCostProduct.search([
+                ('product_id', '=', product.id),
+                ('labor_id', '=', labor.id)
+            ], limit=1)
+            
+            if not cost_product_id and not cost_model_id:
+                continue
+            cost = 0.0
+            if cost_model_id:
+                model_curr = cost_model_id.currency_id or currency
+                cost_model = self._convert(cost_model_id.cost or 0.0, model_curr, currency, date)
 
-        for g in groups:
-            sum_cost = g.get('cost_sum') or 0.0
-            if g.get('currency_id'):
-                from_cur = self.env['res.currency'].browse(g['currency_id'][0])
-            else:
-                from_cur = currency
-
-            cost = self._convert(sum_cost, from_cur, currency, date)
+            if cost_product_id:               
+                product_curr = cost_product_id.currency_id or currency
+                cost_product = self._convert(cost_product_id.cost or 0.0, product_curr, currency, date)
+                        
+                if not cost_product > 0.0 and cost_model:
+                    cost = cost_model
+                    
+            if cost == 0.0:
+                cost = cost_product
             total_cost += cost
-
-            labor_id = g.get('labor_id') and g['labor_id'][0]
-            rate = margin_map.get(labor_id, 1.0)
+            
+            rate = 1.0
+            if margin:
+                margin_id = LaborMargin.search([
+                    ('margin_id', '=', margin.id),
+                    ('labor_id', '=', labor.id),
+                ], limit=1)
+                rate = margin_id.rate or 1.0
             total_margin += (rate - 1.0) * cost
-        
 
-        return self._payload('labor', total_cost, total_margin, currency)        
+        return self._payload('labor', total_cost, total_margin, currency)

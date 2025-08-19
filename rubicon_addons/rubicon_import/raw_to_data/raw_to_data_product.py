@@ -225,8 +225,7 @@ if __name__ == '__main__':
                 row_str = ','.join(row)
                 row_str = row_str.replace(old, new)
                 row = row_str.split(",")
-                print(f"[INFO] Rectif {old} -> {new} in {row[0]}")
-                print(f"{row_str}")
+                
             composition_code = row[0].split('/')[0]
             if composition_code in compositions:
                 return
@@ -242,7 +241,6 @@ if __name__ == '__main__':
             }
             
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_product', index_auto=True)
-        print(f"[INFO] {len(compositions)} compositions created.")
 
     # Product Stone
     if everything or "stone" in sys.argv:

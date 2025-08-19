@@ -92,11 +92,10 @@ class "pdp.margin.labor" as pdp_margin_labor {
   - display_name : char
   - create_date : datetime
   - write_date : datetime
-  - rate_metal : float
-  - rate_parts : float
-  - rate_stone : float
+  - rate : float
   - id : integer
   - create_uid : m2o→res.users
+  - labor_id : m2o→pdp.labor.type
   - margin_id : m2o→pdp.margin
   - write_uid : m2o→res.users
 }
@@ -110,6 +109,17 @@ class "pdp.margin.metal" as pdp_margin_metal {
   - create_uid : m2o→res.users
   - margin_id : m2o→pdp.margin
   - metal_purity_id : m2o→pdp.metal.purity
+  - write_uid : m2o→res.users
+}
+class "pdp.margin.part" as pdp_margin_part {
+  + id : integer
+  - display_name : char
+  - create_date : datetime
+  - write_date : datetime
+  - rate : float
+  - id : integer
+  - create_uid : m2o→res.users
+  - margin_id : m2o→pdp.margin
   - write_uid : m2o→res.users
 }
 class "pdp.margin.stone" as pdp_margin_stone {
@@ -385,9 +395,11 @@ pdp_labor_cost_product --> pdp_labor_type : labor_id
 pdp_labor_cost_product --> pdp_product : product_id
 pdp_margin_addon --> pdp_addon_type : addon_id
 pdp_margin_addon --> pdp_margin : margin_id
+pdp_margin_labor --> pdp_labor_type : labor_id
 pdp_margin_labor --> pdp_margin : margin_id
 pdp_margin_metal --> pdp_margin : margin_id
 pdp_margin_metal --> pdp_metal_purity : metal_purity_id
+pdp_margin_part --> pdp_margin : margin_id
 pdp_margin_stone --> pdp_margin : margin_id
 pdp_margin_stone --> pdp_stone_type : stone_type_id
 pdp_part ..> pdp_part_cost : cost_ids (o2m)

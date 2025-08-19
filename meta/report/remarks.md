@@ -32,6 +32,9 @@ Not sure yet
 * Labor (LAB) -> Assembly (ASS)
 
 
+
+
+
 ## Standards 
 
 ### Model
@@ -50,3 +53,11 @@ S+A.S1+S2
 AAXXXXB-STONES/M :
 * AAXXXXB : Model code
 * STONES : stone composition code
+
+## Margin | Labor 
+
+### Margin Labor :
+* Parts
+* Metal Labor
+* Stone Labor
+* Addon Labor

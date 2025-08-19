@@ -12,20 +12,16 @@ class MarginLabor(models.Model):
         index=True
         )
 
-    rate_parts = fields.Float(
-        string="Margin Parts Factor, e.g. 1.10 for 10%",
+    labor_id = fields.Many2one(
+        comodel_name="pdp.labor.type",
+        string="Labor Type",
+        required=True,
+        index=True
+    )
+    
+    rate = fields.Float(
+        string="Margin Labor, e.g. 1.10 for 10%",
         digits=(5, 3),
         required=True,
     )
     
-    rate_stone = fields.Float(
-        string="Margin Stone Factor, e.g. 1.10 for 10%",
-        digits=(5, 3),
-        required=True,
-    )
-        
-    rate_metal = fields.Float(
-        string="Margin Metal Factor, e.g. 1.10 for 10%",
-        digits=(5, 3),
-        required=True,
-    )

@@ -42,7 +42,7 @@ init-data-modules:
 update-data-modules:
 	$(ODOO) -u $(CORE_DATA_MODULES) --stop-after-init --workers=0
 
-row_to_data_all:
+raw_to_data_all:
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_stone
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_metal
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_product

@@ -25,6 +25,7 @@ services:
     #   # Monte tout le dossier de config sur /etc/odoo
     #   - ./odoo_conf:/etc/odoo:ro
     environment:
+      PYTHONDONTWRITEBYTECODE : 1
       DB_HOST : ${DB_HOST}
       DB_PORT : ${DB_PORT}
       DB_USER : ${DB_USER}

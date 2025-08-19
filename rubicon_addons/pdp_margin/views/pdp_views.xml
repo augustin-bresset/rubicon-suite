@@ -20,9 +20,8 @@
     <field name="arch" type="xml">
       <list string="Margin Labor">
         <field name="margin_id"/>
-        <field name="rate_parts"/>
-        <field name="rate_stone"/>
-        <field name="rate_metal"/>
+        <field name="labor_id"/>
+        <field name="rate"/>
       </list>
     </field>
   </record>

@@ -27,3 +27,4 @@ class PartCost(models.Model):
         string='Currency'
     )
     
+    

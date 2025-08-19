@@ -19,3 +19,9 @@ class PriceComponent(models.TransientModel):
         cost = currency.round(cost or 0.0)
         margin = currency.round(margin or 0.0)
         return {'type': type_, 'cost': cost, 'margin': margin, 'price': cost + margin}
+
+    # @api.model
+    # def compute_payload(self, *args, **kwargs):
+    #     return self._payload(*args, **kwargs)
+    
+    

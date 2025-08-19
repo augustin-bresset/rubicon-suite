@@ -21,7 +21,7 @@ class PriceStone(models.TransientModel):
         lines = StoneLine.search([('composition_id', '=', product.stone_composition_id.id)])
 
         if not lines:
-            return self.compute_payload('stone', 0.0, 0.0, currency)
+            return self._payload('stone', 0.0, 0.0, currency)
 
         total_cost = total_margin = 0.0
         

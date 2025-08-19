@@ -7,7 +7,7 @@ import re
 
 from ..tools.parsing import safe_bool, safe_float, safe_int, safe_str
 from ..tools.standard import strip_code_space
-from .raw_to_data import raw_to_data
+from .raw_to_data import raw_to_data, backup_folder
 
 def func_index(code:str, model_name:str):
     model_name = model_name.split(".")[-1]
@@ -51,20 +51,55 @@ if __name__ == '__main__':
         csv_name="Margins.csv"
 
         fieldnames=[
-            "id", "margin_id", "rate_parts", "rate_metal", "rate_stone"
+            "id", "margin_id", "labor_id", "rate"
         ]    
+        
+        labor_type_csv = "LaborTypes.csv"
+        labor_types = []
+        file_name = os.path.join(backup_folder, labor_type_csv)
+        with open(file_name, newline='', encoding='utf-8') as src_file:
+            reader = csv.reader(src_file)
+            for row in reader:
+                if row[0] == "LAB":
+                    row[0] = "ASS"
+                labor_types.append(row[0])
+        
+        def row_to_dict(row):
+            margin_code = strip_code_space(row[0])
+            
+            out =  {
+                "id": func_index(margin_code, model_name),
+                "margin_id": margin_code, 
+                "labor_id": '',
+                "rate": safe_float(row[7])
+            }        
+            
+            for labor_type in labor_types:
+                out['labor_id'] = labor_type
+                yield out
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
+    
+    
+    
+    
+    # Margin Part
+    if everything or "part" in sys.argv:
+        model_name="pdp.margin.part"
+        csv_name="Margins.csv"
+
+        fieldnames=[
+            "id", "margin_id", "rate"        ]    
         
         def row_to_dict(row):
             margin_code = strip_code_space(row[0])
             return {
                 "id": func_index(margin_code, model_name),
                 "margin_id": margin_code, 
-                "rate_parts": safe_float(row[4]), 
-                "rate_metal": safe_float(row[4]), 
-                "rate_stone": safe_float(row[6])
-            }        
+                "rate": safe_float(row[4]), 
+                }        
             
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
+
 
 
     # Metal Margins

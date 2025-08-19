@@ -21,6 +21,7 @@ class PriceAddon(models.TransientModel):
             groupby=['addon_id', 'currency_id'],
             lazy=False,
         )
+        
         if not groups:
             return self._payload('addon', 0.0, 0.0, currency)
         
@@ -40,8 +41,8 @@ class PriceAddon(models.TransientModel):
 
 
         for g in groups:
-            sum_cost = g.get('cost_sum') or 0.0
-
+            sum_cost = g.get('cost') or 0.0
+            
             if g.get('currency_id'):
                 from_cur = Currency.browse(g['currency_id'][0])
             else:
