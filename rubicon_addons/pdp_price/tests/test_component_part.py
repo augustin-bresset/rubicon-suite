@@ -58,12 +58,12 @@ class TestPricePart(TransactionCase):
 
         # Base parts
         Part = cls.env['pdp.part']
-        cls.part_a = Part.create({'code': 'CA', 'name': 'Clasp A'})
-        cls.part_b = Part.create({'code': 'CB', 'name': 'Clasp B'})
+        cls.part_a = Part.create({'code': 'CA', 'name': 'Class A'})
+        cls.part_b = Part.create({'code': 'CB', 'name': 'Class B'})
 
         # A margin record to use when needed in tests
         Margin = cls.env['pdp.margin']
-        cls.margin = Margin.search([], limit=1) or Margin.create({'code': 'T', 'name': 'TEST'})
+        cls.margin = Margin.search([], limit=1) or Margin.create({'code': 'TP', 'name': 'TEST'})
 
         # Wizard record
         cls.PricePart = cls.env['pdp.price.part']
@@ -200,14 +200,16 @@ class TestPricePart(TransactionCase):
         self._create_part_cost(self.part_b, self.purity_18k, 5.0, self.cur)
 
         # Configure margin factor = 1.20 (+20%)
-        self._create_margin_part_factor(self.margin, rate_factor=1.20)
-
+        margin = self.env['pdp.margin'].create({'code': 'M05', 'name': 'Margin 05'})
+        self._create_margin_part_factor(margin, 1.20)
+        
         payload = self.wizard.compute(
             product=self.product,
-            margin=self.margin,
+            margin=margin,
             currency=self.cur,
             date=fields.Date.today()
         )
+
         self.assertEqual(payload['type'], 'part')
         self.assertEqual(payload['cost'], 25.0)
         self.assertAlmostEqual(payload['margin'], 5.0, places=6)  # (1.20 - 1.0) * 25 = 5
@@ -222,10 +224,11 @@ class TestPricePart(TransactionCase):
         self._create_product_part(self.part_a, qty=3.0)
         self._create_part_cost(self.part_a, self.purity_18k, 4.0, self.cur)
 
+        margin = self.env['pdp.margin'].create({'code': 'M06', 'name': 'Margin 05'})
         # No pdp.margin.part created on purpose
         payload = self.wizard.compute(
             product=self.product,
-            margin=self.margin,
+            margin=margin,
             currency=self.cur,
             date=fields.Date.today()
         )

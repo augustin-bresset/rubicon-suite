@@ -120,3 +120,66 @@ class TestPriceStone(TransactionCase):
         self.assertEqual(res['cost'], self.currency.round(30.0))
         self.assertEqual(res['margin'], self.currency.round(0.0))
         self.assertEqual(res['price'], self.currency.round(30.0))
+
+    def test_compute_with_conditional_margin_applied(self):
+        """Marge conditionnelle appliquée car cost > comparative_cost"""
+        cond_margin = self.env['pdp.margin.stone.conditional'].create({
+            'margin_id': self.margin.id,
+            'stone_cat_id': self.stone_cat.id,
+            'comparative_cost': 20.0,  # seuil
+            'currency_id': self.currency.id,
+            'operator': '>' ,  # si cost > comparative_cost
+            'rate': 1.5,       # +50%
+        })
+        # notre product: cost=30, donc > 20 → marge conditionnelle 50% * 30 = 15
+        res = self.component.compute(
+            product=self.product,
+            margin=self.margin,
+            currency=self.currency,
+            date=fields.Date.today(),
+        )
+        self.assertEqual(res['cost'], self.currency.round(30.0))
+        self.assertEqual(res['margin'], self.currency.round(15.0))
+        self.assertEqual(res['price'], self.currency.round(45.0))
+
+    def test_compute_with_conditional_margin_not_applied(self):
+        """Marge conditionnelle ignorée car cost <= comparative_cost"""
+        cond_margin = self.env['pdp.margin.stone.conditional'].create({
+            'margin_id': self.margin.id,
+            'stone_cat_id': self.stone_cat.id,
+            'comparative_cost': 50.0,  # seuil trop haut
+            'currency_id': self.currency.id,
+            'operator': '>' ,
+            'rate': 1.5,
+        })
+        # cost=30 ≤ 50 → condition pas remplie → fallback marge type 20%
+        res = self.component.compute(
+            product=self.product,
+            margin=self.margin,
+            currency=self.currency,
+            date=fields.Date.today(),
+        )
+        self.assertEqual(res['cost'], self.currency.round(30.0))
+        self.assertEqual(res['margin'], self.currency.round(6.0))  # fallback type
+        self.assertEqual(res['price'], self.currency.round(36.0))
+
+    def test_compute_with_conditional_margin_operator_less(self):
+        """Marge conditionnelle appliquée avec opérateur '<'"""
+        cond_margin = self.env['pdp.margin.stone.conditional'].create({
+            'margin_id': self.margin.id,
+            'stone_cat_id': self.stone_cat.id,
+            'comparative_cost': 40.0,
+            'currency_id': self.currency.id,
+            'operator': '<',   # si cost < comparative_cost
+            'rate': 1.3,       # +30%
+        })
+        # cost=30 < 40 → condition remplie → 30% * 30 = 9
+        res = self.component.compute(
+            product=self.product,
+            margin=self.margin,
+            currency=self.currency,
+            date=fields.Date.today(),
+        )
+        self.assertEqual(res['cost'], self.currency.round(30.0))
+        self.assertEqual(res['margin'], self.currency.round(9.0))
+        self.assertEqual(res['price'], self.currency.round(39.0))

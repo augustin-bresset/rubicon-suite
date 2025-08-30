@@ -60,7 +60,7 @@ class PriceStone(models.TransientModel):
                     currency,
                     date
                     )
-                if conditional_margin.use_operator(cost, comparative_cost, conditional_margin.operator[0]):
+                if conditional_margin.use_operator(cost, comparative_cost, conditional_margin.operator):
                     rate = conditional_margin.rate 
                     
             if rate == 0.0:
