@@ -1,10 +1,7 @@
 services:
-
   db:
     image: postgres:13
     env_file: .env
-    # ports:
-    #   - "5432:5432"
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -19,25 +16,15 @@ services:
       - db
     ports:
       - "8069:8069"
-    # volumes:
-    #   # Vos modules perso
-    #   - ./rubicon_addons:/mnt/extra-addons
-    #   # Monte tout le dossier de config sur /etc/odoo
-    #   - ./odoo_conf:/etc/odoo:ro
     environment:
-      PYTHONDONTWRITEBYTECODE : 1
-      DB_HOST : ${DB_HOST}
-      DB_PORT : ${DB_PORT}
-      DB_USER : ${DB_USER}
-      DB_PASSWORD : ${DB_PASS}
-      DB_NAME : ${DB_NAME}
-      ODOO_ADDONS_PATH : /mnt/extra-addons,/mnt/external-addons,/usr/lib/python3/dist-packages/odoo/addons
-
+      PYTHONDONTWRITEBYTECODE: "1"
+      # (optionnel) laisse plutôt le host/user/pass dans odoo.conf pour éviter la double source d'info
     volumes:
-    - ./odoo_conf/odoo.conf:/etc/odoo/odoo.conf:ro
-    - ./rubicon_addons:/mnt/extra-addons
-    - ./external_addons:/mnt/external-addons
-
+      - odoo_data:/var/lib/odoo/.local/share/Odoo   # << filestore + sessions
+      - ./rubicon_addons:/mnt/extra-addons
+      - ./external_addons:/mnt/external-addons
+      - ./odoo_conf/odoo.conf:/etc/odoo/odoo.conf:ro
 
 volumes:
   db-data:
+  odoo_data:

@@ -39,4 +39,3 @@ class LaborCostModel(models.Model):
         string='Currency',
         required=True
     )
-    

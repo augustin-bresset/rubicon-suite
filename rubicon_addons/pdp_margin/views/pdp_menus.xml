@@ -62,5 +62,15 @@
             action="action_pdp_margin_stone"
             sequence="1"/>
 
+  <record id="action_pdp_margin_stone_conditional" model="ir.actions.act_window">
+    <field name="name">Margin Stone Conditional</field>
+    <field name="res_model">pdp.margin.stone.conditional</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_margin_stone_conditional"
+            name="Margin Stone Conditional"
+            parent="menu_pdp_root"
+            action="action_pdp_margin_stone_conditional"
+            sequence="1"/>
 
 </odoo>

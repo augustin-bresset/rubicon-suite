@@ -6,7 +6,7 @@
             <list>
                 <field name="product_code"/>
                 <field name="cost"/>
-                <field name="currency"/>
+                <field name="currency_id" />
             </list>
         </field>
     </record>
@@ -21,6 +21,7 @@
                         <field name="product_code"/>
                         <field name="currency"/>
                         <field name="cost" readonly="1"/>
+                        <field name="currency_id" />
                     </group>
                 </sheet>
             </form>

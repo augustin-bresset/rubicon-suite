@@ -6,7 +6,7 @@ import re
 
 
 from ..tools.parsing import safe_bool, safe_float, safe_int, safe_str
-from ..tools.standard import strip_code_space
+from ..tools.standard import strip_code_space, mapping_currency
 from .raw_to_data import raw_to_data, backup_folder
 
 def func_index(code:str, model_name:str):
@@ -76,6 +76,7 @@ if __name__ == '__main__':
             
             for labor_type in labor_types:
                 out['labor_id'] = labor_type
+                out['id'] = func_index(f"{margin_code}_{labor_type}", model_name)
                 yield out
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
     
@@ -171,3 +172,25 @@ if __name__ == '__main__':
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
 
 
+    # Stone Conditional
+    if everything or 'conditional' in sys.argv:
+        model_name = 'pdp.margin.stone.conditional'
+        csv_name = 'StoneMarginsConditional.csv'
+        fieldnames = [
+            'id', 'margin_id', 'stone_cat_id', 'operator', 'comparative_cost', 'currency_id', 'rate'
+        ]
+        
+        def row_to_dict(row):
+            margin_id = strip_code_space(row[0])
+            category_id = strip_code_space(row[1])
+            operator = strip_code_space(row[2])
+            return {
+                'id' : func_index(f"{margin_id}_{category_id}", model_name), 
+                'margin_id': margin_id, 
+                'stone_cat_id': category_id, 
+                'operator': operator, 
+                'comparative_cost' : safe_float(row[3]), 
+                'currency_id': mapping_currency(row[4]),
+                'rate' : safe_float(row[5])
+            }
+        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)

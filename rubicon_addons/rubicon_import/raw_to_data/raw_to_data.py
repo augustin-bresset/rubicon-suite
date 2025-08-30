@@ -29,8 +29,6 @@ def _write_out(out, writer, xml_idx, index_auto, i, model_name, logs, last_out):
             logs["created"]+=1
         else:
             logs["skipped"]+=1
-        
-
 
 def raw_to_data(
     model_name, 

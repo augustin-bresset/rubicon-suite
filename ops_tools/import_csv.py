@@ -80,6 +80,10 @@ if everything or "product" in sys.argv:
 
     import_csv(env, env['pdp.product.stone'], 'pdp_product')
 
+    import_csv(env, env['pdp.product.part'], 'pdp_product')
+
+
+
 # Labor
 if everything or "labor" in sys.argv:
 
@@ -99,5 +103,7 @@ if everything or "margin" in sys.argv:
     import_csv(env, env['pdp.margin.stone'], 'pdp_margin')
     import_csv(env, env['pdp.margin.metal'], 'pdp_margin')
     import_csv(env, env['pdp.margin.addon'], 'pdp_margin')
+    import_csv(env, env['pdp.margin.stone.conditional'], 'pdp_margin')
+    import_csv(env, env['pdp.margin.part'], 'pdp_margin')
 
 env.cr.commit()

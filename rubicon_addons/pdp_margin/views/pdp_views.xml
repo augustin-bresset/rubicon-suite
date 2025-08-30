@@ -52,6 +52,23 @@
     </field>
   </record>
 
+  <!-- Margin Stone Conditional-->
+  <record id="view_pdp_margin_stone_conditional_list" model="ir.ui.view">
+    <field name="name">pdp.margin.stone.conditional.list</field>
+    <field name="model">pdp.margin.stone.conditional</field>
+    <field name="arch" type="xml">
+      <list string="Margin Stone Conditional">
+        <field name="margin_id"/>
+        <field name="stone_cat_id"/>
+        <field name="operator"/>
+        <field name="comparative_cost"/>
+        <field name="currency_id"/>
+        <field name="rate"/>
+      </list>
+    </field>
+  </record>
+
+
   <!-- Margin Metal -->
   <record id="view_pdp_margin_metal_list" model="ir.ui.view">
     <field name="name">pdp.margin.metal.list</field>
@@ -64,5 +81,19 @@
       </list>
     </field>
   </record>
+  
+  <!-- Margin Part -->
+  <record id="view_pdp_margin_part_list" model="ir.ui.view">
+    <field name="name">pdp.margin.part.list</field>
+    <field name="model">pdp.margin.part</field>
+    <field name="arch" type="xml">
+      <list string="Margin part">
+        <field name="margin_id"/>
+        <field name="rate"/>
+      </list>
+    </field>
+  </record>
+
+
 
 </odoo>
