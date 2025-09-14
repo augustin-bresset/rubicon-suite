@@ -1,23 +1,4 @@
 .
-├── alembic
-│   ├── env.py
-│   ├── __pycache__
-│   │   └── env.cpython-312.pyc
-│   ├── README
-│   ├── script.py.mako
-│   └── versions
-│       ├── 3b5a5a348ade_initial_models.py
-│       └── __pycache__
-│           ├── 36a6887f925f_initial_schema_with_integer_ids.cpython-312.pyc
-│           ├── 3b5a5a348ade_initial_models.cpython-312.pyc
-│           ├── 709b36246ae9_field_delete_rate_from_currency.cpython-312.pyc
-│           ├── 7221da7dc787_initial_schema_with_integer_ids.cpython-312.pyc
-│           ├── 727dee78cdf6_initial_models.cpython-312.pyc
-│           ├── 8366d3448a28_normalize_id_integer_autoincrement.cpython-312.pyc
-│           ├── 9f18c7ca38b3_initial_schema_with_integer_ids.cpython-312.pyc
-│           ├── c92f563785e7_initial_schema_with_integer_ids.cpython-312.pyc
-│           └── fbd895d3e4de_initial_schema_with_integer_ids.cpython-312.pyc
-├── alembic.ini
 ├── data
 │   ├── backup_pdp
 │   │   ├── ComponentTree.csv
@@ -84,6 +65,12 @@
 │   │   ├── gold_purities.json
 │   │   └── metals.json
 │   ├── odoo
+│   │   ├── pdp.stone.category.csv
+│   │   ├── pdp.stone.csv
+│   │   ├── pdp.stone.shade.csv
+│   │   ├── pdp.stone.shape.csv
+│   │   ├── pdp.stone.size.csv
+│   │   └── pdp.stone.weight.csv
 │   ├── raw
 │   │   ├── pictures_columns.csv
 │   │   ├── pictures_table_list.txt
@@ -211,9 +198,12 @@
 │       └── setup
 │           └── _metapackage
 │               └── pyproject.toml
+├── Makefile
 ├── meta
 │   ├── doc
-│   │   └── backup.md
+│   │   ├── backup.md
+│   │   ├── errors.md
+│   │   └── test.md
 │   ├── documents
 │   │   ├── 10_stock_card_EMA25114_P761.pdf
 │   │   ├── 11_stock_card_EMA25114_P934.pdf
@@ -228,13 +218,26 @@
 │   │   ├── 7_stone_invoice_confirmed.pdf
 │   │   ├── 8_stock_update_hand.pdf
 │   │   └── 9_stock_update_info.pdf
+│   ├── logs
+│   │   ├── counts_.log
+│   │   ├── diagram.log
+│   │   └── import_.log
+│   ├── modules
+│   │   ├── pdp_metal.md
+│   │   ├── pdp_price.md
+│   │   └── pdp_stone.md
 │   ├── report
 │   │   ├── core.tex
 │   │   ├── main.tex
 │   │   └── remarks.md
-│   └── sandbox
-│       ├── diagram.md
-│       └── diagram.png
+│   ├── roadmap
+│   │   ├── gold_currency.md
+│   │   └── sis.md
+│   ├── sandbox
+│   │   ├── diagram.md
+│   │   └── diagram.png
+│   └── tmp
+│       └── audit_summary_2025-08-14_1141.txt
 ├── meta.md
 ├── mssql_backups
 │   ├── CompanyInfo.csv
@@ -245,6 +248,16 @@
 │   └── test.txt
 ├── odoo_conf
 │   └── odoo.conf
+├── odoo_erd.puml
+├── ops_tools
+│   ├── audit
+│   │   ├── audit_summary.sh
+│   │   └── common.sh
+│   ├── audit_counts.py
+│   ├── audit_model.py
+│   ├── import
+│   │   └── __init__.py
+│   └── import_csv.py
 ├── README.md
 ├── roadmap.md
 ├── rubicon_addons
@@ -289,12 +302,12 @@
 │   │   ├── __init__.py
 │   │   ├── __manifest__.py
 │   │   ├── models
+│   │   │   ├── addon_cost_product.py
 │   │   │   ├── addon_type.py
 │   │   │   ├── __init__.py
-│   │   │   ├── labor_type.py
-│   │   │   ├── model_labor_cost.py
-│   │   │   ├── product_addon_cost.py
-│   │   │   └── product_labor_cost.py
+│   │   │   ├── labor_cost_model.py
+│   │   │   ├── labor_cost_product.py
+│   │   │   └── labor_type.py
 │   │   ├── security
 │   │   │   └── ir.model.access.csv
 │   │   └── views
@@ -306,6 +319,8 @@
 │   │   │   ├── pdp.margin.csv
 │   │   │   ├── pdp.margin.labor.csv
 │   │   │   ├── pdp.margin.metal.csv
+│   │   │   ├── pdp.margin.part.csv
+│   │   │   ├── pdp.margin.stone.conditional.csv
 │   │   │   └── pdp.margin.stone.csv
 │   │   ├── __init__.py
 │   │   ├── __manifest__.py
@@ -314,7 +329,9 @@
 │   │   │   ├── margin_addon.py
 │   │   │   ├── margin_labor.py
 │   │   │   ├── margin_metal.py
+│   │   │   ├── margin_part.py
 │   │   │   ├── margin.py
+│   │   │   ├── margin_stone_conditional.py
 │   │   │   └── margin_stone.py
 │   │   ├── security
 │   │   │   └── ir.model.access.csv
@@ -340,23 +357,44 @@
 │   │   └── views
 │   │       ├── pdp_menus.xml
 │   │       └── pdp_views.xml
-│   ├── pdp_prices
-│   │   ├── data
+│   ├── pdp_metal_market
+│   │   ├── __init__.py
+│   │   ├── __manifest__.py
+│   │   └── models
+│   │       ├── alloy.py
+│   │       ├── market_model.py
+│   │       └── metal_service.py
+│   ├── pdp_price
 │   │   ├── __init__.py
 │   │   ├── __manifest__.py
 │   │   ├── models
 │   │   │   ├── __init__.py
-│   │   │   ├── price_abstract.py
-│   │   │   ├── price_addon.py
-│   │   │   ├── price_labor.py
-│   │   │   ├── price_metal.py
-│   │   │   ├── price.py
-│   │   │   └── price_stone.py
+│   │   │   └── price_product.py
+│   │   ├── README.md
 │   │   ├── security
 │   │   │   └── ir.model.access.csv
-│   │   └── views
-│   │       ├── pdp_menus.xml
-│   │       └── pdp_views.xml
+│   │   ├── tests
+│   │   │   ├── __init__.py
+│   │   │   ├── test_component_addon.py
+│   │   │   ├── test_component_labor.py
+│   │   │   ├── test_component_metal.py
+│   │   │   ├── test_component_part.py
+│   │   │   └── test_component_stone.py
+│   │   ├── views
+│   │   │   ├── pdp_menus.xml
+│   │   │   ├── pdp_price_addon_views.xml
+│   │   │   ├── pdp_views.xml
+│   │   │   ├── price_preview_line_views.xml
+│   │   │   └── price_preview_views.xml
+│   │   └── wizard
+│   │       ├── component_abstract.py
+│   │       ├── component_addon.py
+│   │       ├── component_labor.py
+│   │       ├── component_metal.py
+│   │       ├── component_part.py
+│   │       ├── component_stone.py
+│   │       ├── __init__.py
+│   │       └── price_preview.py
 │   ├── pdp_product
 │   │   ├── data
 │   │   │   ├── pdp.product.category.csv
@@ -410,6 +448,9 @@
 │   │       ├── pdp_menus.xml
 │   │       └── pdp_views.xml
 │   ├── rubicon_env
+│   │   ├── data
+│   │   │   ├── res_company.xml
+│   │   │   └── res_currency.xml
 │   │   ├── hooks.py
 │   │   ├── __init__.py
 │   │   ├── __manifest__.py
@@ -420,8 +461,12 @@
 │   │       └── __init__.py
 │   └── rubicon_import
 │       ├── analysis
+│       │   ├── data_keys.py
+│       │   ├── diagram.py
 │       │   ├── __init__.py
-│       │   └── solder_recutting.py
+│       │   ├── __pycache__
+│       │   ├── solder_recutting.py
+│       │   └── test_values.py
 │       ├── import_scripts
 │       │   ├── generic.py
 │       │   ├── __init__.py
@@ -429,6 +474,12 @@
 │       │   │   └── __init__.cpython-312.pyc
 │       │   └── update.py
 │       ├── __init__.py
+│       ├── lib
+│       │   ├── csvio.py
+│       │   ├── __init__.py
+│       │   ├── m2o.py
+│       │   ├── types.py
+│       │   └── utils.py
 │       ├── __manifest__.py
 │       ├── __pycache__
 │       │   └── __init__.cpython-312.pyc
@@ -440,7 +491,6 @@
 │       │   │   ├── raw_to_data_labor.cpython-312.pyc
 │       │   │   ├── raw_to_data_margin.cpython-312.pyc
 │       │   │   ├── raw_to_data_metal.cpython-312.pyc
-│       │   │   ├── raw_to_data_prices.cpython-312.pyc
 │       │   │   ├── raw_to_data_product.cpython-312.pyc
 │       │   │   └── raw_to_data_stone.cpython-312.pyc
 │       │   ├── raw_to_data_labor.py
@@ -451,11 +501,12 @@
 │       │   ├── raw_to_data.py
 │       │   └── raw_to_data_stone.py
 │       ├── README.md
+│       ├── scripts
+│       │   ├── import_stone.py
+│       │   └── import_stone_standalone.py
 │       ├── tests
 │       │   ├── __init__.py
 │       │   ├── __pycache__
-│       │   │   ├── __init__.cpython-312.pyc
-│       │   │   └── test_import_csv.cpython-312.pyc
 │       │   └── test_import_csv.py
 │       └── tools
 │           ├── __init__.py
@@ -464,57 +515,14 @@
 │           │   ├── __init__.cpython-312.pyc
 │           │   ├── parsing.cpython-312.pyc
 │           │   └── standard.cpython-312.pyc
-│           └── standard.py
-├── rubicon_core
-│   ├── data_import
-│   │   ├── cli.py
-│   │   ├── __init__.py
-│   │   ├── mapping.py
-│   │   ├── processors.py
-│   │   ├── __pycache__
-│   │   │   ├── __init__.cpython-312.pyc
-│   │   │   ├── mapping.cpython-312.pyc
-│   │   │   ├── processors.cpython-312.pyc
-│   │   │   └── tools.cpython-312.pyc
-│   │   └── tools.py
-│   ├── db.py
-│   ├── __init__.py
-│   ├── models
-│   │   ├── __init__.py
-│   │   ├── __pycache__
-│   │   │   └── __init__.cpython-312.pyc
-│   │   ├── reference
-│   │   │   ├── __init__.py
-│   │   │   ├── metal.py
-│   │   │   ├── misc.py
-│   │   │   ├── parts.py
-│   │   │   ├── prices.py
-│   │   │   ├── __pycache__
-│   │   │   │   ├── __init__.cpython-312.pyc
-│   │   │   │   ├── metal.cpython-312.pyc
-│   │   │   │   ├── misc.cpython-312.pyc
-│   │   │   │   ├── parts.cpython-312.pyc
-│   │   │   │   ├── prices.cpython-312.pyc
-│   │   │   │   └── stone.cpython-312.pyc
-│   │   │   └── stone.py
-│   │   └── transaction
-│   │       ├── __init__.py
-│   │       ├── __pycache__
-│   │       │   ├── __init__.cpython-312.pyc
-│   │       │   ├── stock.cpython-312.pyc
-│   │       │   └── stone.cpython-312.pyc
-│   │       ├── stock.py
-│   │       └── stone.py
-│   ├── __pycache__
-│   │   ├── db.cpython-312.pyc
-│   │   └── __init__.cpython-312.pyc
-│   ├── README.md
-│   └── requirements.txt
+│           ├── standard.py
+│           └── utils.py
 ├── tools
 │   ├── export_csv.sh
+│   ├── export_csv_test.sh
 │   ├── export_sqlmd.sh
 │   └── pdp_data.py
 ├── tree.md
 └── workflow.md
 
-99 directories, 419 files
+99 directories, 427 files

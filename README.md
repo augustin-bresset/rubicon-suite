@@ -1,44 +1,19 @@
 # Rubicon Suite
 
-Ce dépôt contient l’ensemble des composants pour **Rubicon**, l’outil de gestion de production de bijoux : la configuration Odoo, les modules Odoo personnalisés (`rubicon_addons`), ainsi que la couche métier indépendante (`rubicon_core`).
 
----
-
-## 📁 Structure du projet
-
-```bash
-rubicon-suite/
-├── .env                   # Variables d'environnement (non versionné)
-├── docker-compose.yml     # Orchestration Docker (PostgreSQL + Odoo)
-├── data/
-│   └── examples/          # Jeux de données d'exemple (JSON, CSV)
-├── odoo_conf/             # Config Odoo (optionnel)
-│   └── odoo.conf
-├── rubicon_addons/        # Addons Odoo personnalisés
-│   └── pdp/
-├── rubicon_core/          # Couche métier SQLAlchemy
-│   ├── db.py
-│   └── models/
-├── alembic/               # Répertoire des migrations Alembic
-├── README.md              # Ce fichier
-└── .gitignore
-```
-
----
-
-## ⚙️ Prérequis
+## Prerequisite
 
 * Docker & Docker Compose
-* Python 3.10+ (localement si vous exécutez les migrations hors Docker)
-* `pip install alembic python-dotenv psycopg2-binary`
+* Python 3.10+ 
 
 ---
 
-## 🔒 Configuration
+
+## Configuration
 
 1. Copier le fichier d'exemple :
 
-   ```bash
+   ```sh
    cp .env.example .env
    ```
 
@@ -60,54 +35,26 @@ rubicon-suite/
 
 ---
 
-## 🚀 Démarrage rapide (Docker)
+## Quick Start
 
-Lancer PostgreSQL + Odoo :
+Launch PostgreSQL + Odoo :
 
-```bash
+```sh
 docker compose up -d
 ```
 
-* PostgreSQL écoute sur `localhost:5432`
-* Odoo disponible sur `http://localhost:8069`
+* PostgreSQL `localhost:5432`
+* Odoo `http://localhost:8069`
 
 ---
 
-## 🛠️ Migrations de la base (Alembic)
 
-> **Note :** exécuter depuis le conteneur ou local avec `.env`
-
-### a) Initialisation (une seule fois)
-
-```bash
-cd rubicon_core
-alembic init alembic
-```
-
-### b) Génération et application
-
-```bash
-# Création d'une révision (modèles SQLAlchemy déjà chargés)
-alembic revision --autogenerate -m "Initial models"
-
-# Appliquer la migration
-alembic upgrade head
-```
-
-Pour exécuter dans le conteneur Docker `web` (si configuré) :
-
-```bash
-docker-compose run --rm web alembic upgrade head
-```
-
----
-
-## 📦 Exécution d’Odoo avec vos modules
+## Installer un addon
 
 1. Copier/monter `rubicon_addons` via `docker-compose` (voir `volumes`)
 2. Redémarrer le service Odoo :
 
-```bash
+```sh
 
 docker compose restart odoo
 
@@ -122,6 +69,57 @@ docker compose restart odoo
 
 Recreer les tables odoo
 
-```bash
+```sh
 docker compose run --rm odoo   odoo     --db_host=db     --db_port=5432     --db_user=rubicondev     --db_password=passwd     -d rubicon -i base     --stop-after-init
 ```
+Dump de la base
+
+```sh
+docker compose exec db pg_dump -U rubicondev rubicon > dump.sql
+```
+
+Restaurer la base
+
+```sh
+cat dump.sql | docker compose exec -T db psql -U rubicondev rubicon
+```   
+
+## Testing modules 
+
+In each modules a **tests** folder will be found. It contains the tests.
+
+You can launch those test by launching 
+```sh
+docker compose exec -T odoo \
+  odoo -d rubicon \
+  -u [INSERT_MODULE_NAME] \
+  --stop-after-init \
+  --test-enable
+```
+
+### Errors handling
+
+1.Port 8069 is in use by another program.
+
+It happens when odoo is already in use, you can add *--no-http* to the command before such as below 
+
+```sh
+docker compose exec -T odoo \
+  odoo -d rubicon \
+  -u [INSERT_MODULE_NAME] \
+  --stop-after-init \
+  --test-enable \
+  --no-http
+```
+
+Or choosing an other port with *--http-port=xxx* such as below :
+```sh
+docker compose exec -T odoo \
+  odoo -d rubicon \
+  -u [INSERT_MODULE_NAME] \
+  --stop-after-init \
+  --test-enable \
+  --http-port=8070
+```
+
+
