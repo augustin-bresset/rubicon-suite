@@ -1,4 +1,4 @@
-# Backup
+## Backup
 
 We got the backup file of the current database from Rubicon's server.
 
@@ -7,10 +7,12 @@ This is three files :
 * JMS-SIS21_20250502.bak
 * Pictures.bak
 
-## Restoring the database
+### Restoring the database
 
 
-### DOCKER
+#### DOCKER
+
+We need the mssql server to restore the database. Here we use docker to run it easily.
 
 ```
 docker pull mcr.microsoft.com/mssql/server:2019-latest
@@ -20,7 +22,8 @@ docker pull mcr.microsoft.com/mssql/server:2019-latest
 docker run -d   --name sqlsrv   -e "ACCEPT_EULA=Y"   -p 1433:1433   -v /INSERT_PATH/TO/mssql_backups:/var/opt/mssql/backup   mcr.microsoft.com/mssql/server:2019-latest
 ```
 
-### RESTORING
+#### RESTORING
+
 Restore file to see what to put where [BACKUP_FILE]:
 ```
 docker exec -it sqlsrv   /opt/mssql-tools18/bin/sqlcmd   -N -C   -S localhost -U SA -P 'Strong@Passw0rd'   -Q "RESTORE FILELISTONLY 
@@ -70,7 +73,7 @@ docker exec -it sqlsrv \
 ```
 
 
-## To csv file
+### To csv file
 
 
 Create the table list

@@ -1,4 +1,6 @@
+# Rubicon Import
 
+Manage the dataflow between csv files to the Postgress Database of Odoo.
 
 ## Usecase
 
@@ -43,8 +45,10 @@ env.cr.commit()
 
 
 
+Full python script to import all the data (stone, metal, product, labor, margin)
+Can take several minutes to run
 
-```py
+```python
 
 from odoo.addons.rubicon_import.import_scripts.generic import import_csv
 

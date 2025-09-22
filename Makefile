@@ -31,7 +31,14 @@ export PYTHONPATH := $(abspath rubicon_addons):$(PYTHONPATH)
 
 LOG_DIR ?= meta/logs
 TIMESTAMP = $(SHELL date +%F_%H%M)
+
+
+
 # --- General ---- 
+
+help: cat README.md
+
+
 reset_odoo_db:
 	docker compose down -v
 	docker compose up -d
@@ -91,3 +98,15 @@ stone-all: stone-data stone-install stone-import
 # 	-$(PSQL) -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='$(DB)';"
 # 	-$(PSQL) -c "DROP DATABASE IF EXISTS $(DB);"
 # 	$(PSQL) -c "CREATE DATABASE $(DB) ENCODING 'UTF8' TEMPLATE template0;"
+
+
+# Restore Backup DB to CSV
+
+backup-help:
+	cat meta/doc/backup.md
+
+backup-restore-init:
+	echo "[INFO] Starting mssql server container"
+	docker pull mcr.microsoft.com/mssql/server:2019-latest
+	docker run -d   --name sqlsrv   -e "ACCEPT_EULA=Y"   -p 1433:1433   -v /INSERT_PATH/TO/mssql_backups:/var/opt/mssql/backup   mcr.microsoft.com/mssql/server:2019-latest
+
