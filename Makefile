@@ -9,7 +9,7 @@ DB_PORT         ?= $(DB_PORT)
 DB_USER         ?= $(DB_USER)
 DB_PASS         ?= $(DB_PASS)
 
-IMPORT_CSV_SCRIPT   ?= ops_tools/import_csv.py
+IMPORT_CSV_SCRIPT   ?= ops/import/import_csv.py
 CREATE_DIAGRAM		?= rubicon_addons/rubicon_import/analysis/diagram.py
 
 LOG_DIR         ?= meta/logs
@@ -62,16 +62,15 @@ import_all:
 	$(ODOO_SHELL) < $(IMPORT_CSV_SCRIPT) 2>&1 | tee $(LOG_DIR)/import_$(TIMESTAMP).log
 
 import_csv:
-	@WHAT=$(WHAT) $(ODOO_SHELL) < ops_tools/import_csv.py
+	@WHAT=$(WHAT) $(ODOO_SHELL) < ops/import/import_csv.py
 
 # ODOO_SHELL = docker compose exec -T odoo odoo shell -d $(DB_NAME) --no-http
 
 audit_counts:
 	@mkdir -p $(LOG_DIR)
-	@$(ODOO_SHELL) < ops_tools/audit_counts.py | tee $(LOG_DIR)/counts_$(TIMESTAMP).log
+	@$(ODOO_SHELL) < ops/audit/audit_counts.py | tee $(LOG_DIR)/counts_$(TIMESTAMP).log
 
 create_diagram:
-
 	@$(ODOO_SHELL) < ${CREATE_DIAGRAM} | tee $(LOG_DIR)/diagram.log
 		@mkdir -p $(LOG_DIR)
 	docker compose cp odoo:/var/lib/odoo/odoo_erd.puml ./odoo_erd.puml
@@ -104,9 +103,4 @@ stone-all: stone-data stone-install stone-import
 
 backup-help:
 	cat meta/doc/backup.md
-
-backup-restore-init:
-	echo "[INFO] Starting mssql server container"
-	docker pull mcr.microsoft.com/mssql/server:2019-latest
-	docker run -d   --name sqlsrv   -e "ACCEPT_EULA=Y"   -p 1433:1433   -v /INSERT_PATH/TO/mssql_backups:/var/opt/mssql/backup   mcr.microsoft.com/mssql/server:2019-latest
 

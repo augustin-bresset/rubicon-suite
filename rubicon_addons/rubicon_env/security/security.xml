@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ========================================================= -->
+    <!--  Rubicon Suite - User Groups -->
+    <!-- ========================================================= -->
+
+    <!-- Director: full access -->
+    <record id="group_rubicon_director" model="res.groups">
+        <field name="name">Director</field>
+        <field name="category_id" ref="base.module_category_administration"/>
+    </record>
+
+    <!-- Manager: team leader, validation rights -->
+    <record id="group_rubicon_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="base.module_category_administration"/>
+    </record>
+
+    <!-- Stone Buyers -->
+    <record id="group_rubicon_stone_buyer" model="res.groups">
+        <field name="name">Stone Buyer</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <!-- Metal Buyers -->
+    <record id="group_rubicon_metal_buyer" model="res.groups">
+        <field name="name">Metal Buyer</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <!-- Quality Controllers -->
+    <record id="group_rubicon_quality_controller" model="res.groups">
+        <field name="name">Quality Controller</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <!-- Product & Model Creators -->
+    <record id="group_rubicon_product_designer" model="res.groups">
+        <field name="name">Product Designer</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+</odoo>

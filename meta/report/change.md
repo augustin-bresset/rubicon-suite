@@ -1,13 +1,17 @@
 
-# Remarks
-
-Ce document contient les changements que j'aurais fais vers Rubicon Suite et leur justification
+# Change
 
 This document contains the different changing from the actual version.
 
 ## Database
 
 * metal Cost/Ounce -> metal cost/kg 
+
+    The cost of metal was in ounce. This is not a good unit for two reasons :
+    1. The ounce is not a metric unit (1 ounce = 28.349523125 grams)
+    2. There is several type of ounce (avoirdupois, troy, ...)
+    
+
     bien que la ounce employe est surement celle de Troy (31,1034768 g), employé une unité de mesure dont 
     on n'est même pas sure de la définition est source d'erreure.
 
