@@ -6,7 +6,7 @@
     <field name="inherit_id" ref="pdp_product.view_pdp_product_form"/> <!-- adapte l'id -->
     <field name="arch" type="xml">
       <header position="inside">
-        <button name="%(action_pdp_price_preview)d"
+        <button name="%(action_pdp_price_preview_wizard)d"
                 type="action"
                 context="{'default_product_id': active_id}"
                 string="Preview Price"

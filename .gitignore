@@ -5,6 +5,10 @@ documents*
 */.venv/
 *.bak
 
+exported_pictures/
+random/
+
+
 # Security
 .env
 

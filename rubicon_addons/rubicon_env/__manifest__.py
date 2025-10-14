@@ -11,6 +11,7 @@
     'data': [
         'data/res_currency.xml',
         'data/res_company.xml',
+        'security/security.xml',
         ],
 
     # 'post_init_hook': 'post_init_currency_setup',

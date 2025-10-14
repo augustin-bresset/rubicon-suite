@@ -1,0 +1,44 @@
+<odoo>
+  <!-- Root menu -->
+  <menuitem id="menu_pdp_frontend_root" name="PDP Frontend" sequence="1"/>
+
+  <!-- Models -->
+  <menuitem id="menu_pdp_frontend_models"
+            name="Models"
+            parent="menu_pdp_frontend_root"
+            action="pdp_product.action_pdp_product"
+            sequence="1"/>
+
+  <!-- Price Preview (wizard défini dans pdp_price) -->
+  <menuitem id="menu_pdp_frontend_price_preview"
+            name="Price Preview"
+            parent="menu_pdp_frontend_root"
+            action="pdp_price.action_pdp_price_preview_wizard"
+            sequence="2"/>
+
+  <!-- Addon Prices (déjà dans pdp_price) -->
+  <menuitem id="menu_pdp_frontend_price_addon"
+            name="Addon Prices"
+            parent="menu_pdp_frontend_root"
+            action="pdp_price.action_price_addon"
+            sequence="3"/>
+
+  <!-- Manage sous-menu -->
+  <menuitem id="menu_pdp_frontend_manage"
+            name="Manage"
+            parent="menu_pdp_frontend_root"
+            sequence="10"/>
+
+  <menuitem id="menu_pdp_manage_stones"
+            name="Stones and Diamonds"
+            parent="menu_pdp_frontend_manage"
+            action="pdp_stone.action_pdp_stone"/>
+  <menuitem id="menu_pdp_manage_metals"
+            name="Metals"
+            parent="menu_pdp_frontend_manage"
+            action="pdp_metal.action_pdp_metal"/>
+  <menuitem id="menu_pdp_manage_margins"
+            name="Margins"
+            parent="menu_pdp_frontend_manage"
+            action="pdp_margin.action_pdp_margin"/>
+</odoo>

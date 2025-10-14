@@ -48,6 +48,11 @@ class ProductModel(models.Model):
         string='Matching Models',
         store=False,
     )
+    
+    # Picture
+    picture_ids = fields.One2many(
+            'pdp.picture', 'model_id', string='Pictures'
+        )
 
     def _compute_related_matching_models(self):
         for record in self:

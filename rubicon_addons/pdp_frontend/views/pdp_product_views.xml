@@ -1,0 +1,42 @@
+<odoo>
+  <record id="view_pdp_product_form_frontend" model="ir.ui.view">
+    <field name="name">pdp.product.form.frontend</field>
+    <field name="model">pdp.product</field>
+    <field name="arch" type="xml">
+      <form string="Product Definition">
+        <header>
+          <button name="action_make_blank" string="Make Blank" type="object" class="btn-primary"/>
+          <button name="action_copy_model" string="Copy" type="object"/>
+        </header>
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="reference"/>
+            <field name="image_1920" widget="image"/>
+          </group>
+
+          <notebook>
+            <page string="Costing Summary">
+              <field name="cost_line_ids"/>
+            </page>
+            <page string="Weight Summary">
+              <field name="weight_line_ids"/>
+            </page>
+            <page string="Stones">
+              <field name="stone_line_ids"/>
+            </page>
+            <page string="Metals">
+              <field name="metal_line_ids"/>
+            </page>
+            <page string="Labor etc.">
+              <field name="labor_line_ids"/>
+            </page>
+            <page string="Matching">
+              <field name="matching_ids"/>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+</odoo>

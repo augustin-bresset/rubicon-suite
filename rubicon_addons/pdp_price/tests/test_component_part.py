@@ -235,3 +235,4 @@ class TestPricePart(TransactionCase):
         self.assertEqual(payload['cost'], 12.0)
         self.assertEqual(payload['margin'], 0.0)
         self.assertEqual(payload['price'], 12.0)
+

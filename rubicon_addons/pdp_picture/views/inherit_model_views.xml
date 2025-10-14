@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Tab on PDP Product Model -->
+  <record id="view_pdp_product_model_form_pictures_inherit" model="ir.ui.view">
+    <field name="name">pdp.product.model.form.pictures.inherit</field>
+    <field name="model">pdp.product.model</field>
+    <field name="inherit_id" ref="pdp_product.view_pdp_product_model_form"/>
+    <field name="arch" type="xml">
+      <notebook position="inside">
+        <page string="Pictures">
+          <field name="picture_ids" context="{'default_model_id': active_id}">
+            <tree editable="bottom">
+              <field name="sequence" widget="handle"/>
+              <field name="name"/>
+              <field name="kind"/>
+              <field name="image" widget="image"/>
+              <field name="filename"/>
+            </tree>
+            <form>
+              <sheet>
+                <group>
+                  <field name="name"/>
+                  <field name="kind"/>
+                  <field name="sequence"/>
+                  <field name="filename"/>
+                </group>
+                <group>
+                  <field name="image" widget="image" class="oe_avatar"/>
+                </group>
+              </sheet>
+            </form>
+          </field>
+        </page>
+      </notebook>
+    </field>
+  </record>
+
+  <!-- Tab on PDP Product -->
+  <record id="view_pdp_product_form_pictures_inherit" model="ir.ui.view">
+    <field name="name">pdp.product.form.pictures.inherit</field>
+    <field name="model">pdp.product</field>
+    <field name="inherit_id" ref="pdp_frontend.view_pdp_product_form_frontend"/>
+    <field name="arch" type="xml">
+      <notebook position="inside">
+        <page string="Model Pictures">
+          <!-- show pictures of linked model -->
+          <field name="model_id" invisible="1"/>
+          <field name="model_id.picture_ids" widget="one2many_list">
+            <tree string="Model Pictures">
+              <field name="sequence" widget="handle"/>
+              <field name="name"/>
+              <field name="kind"/>
+              <field name="image" widget="image"/>
+              <field name="filename"/>
+            </tree>
+          </field>
+        </page>
+      </notebook>
+    </field>
+  </record>
+
+</odoo>
