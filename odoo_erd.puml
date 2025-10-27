@@ -15,6 +15,7 @@ class "pdp.addon.cost" as pdp_addon_cost {
   - write_uid : m2o→res.users
   - cost : monetary
 }
+
 class "pdp.addon.type" as pdp_addon_type {
   + id : integer
   - code : char

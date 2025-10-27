@@ -1,0 +1,75 @@
+<odoo>
+  <record id="view_rubicon_import_log_list" model="ir.ui.view">
+    <field name="name">rubicon.import.log.list</field>
+    <field name="model">rubicon.import.log</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="name"/>
+        <field name="import_type"/>
+        <field name="status"/>
+        <field name="start_at"/>
+        <field name="end_at"/>
+        <field name="total_found"/>
+        <field name="created"/>
+        <field name="updated"/>
+        <field name="skipped"/>
+        <field name="not_found"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_rubicon_import_log_form" model="ir.ui.view">
+    <field name="name">rubicon.import.log.form</field>
+    <field name="model">rubicon.import.log</field>
+    <field name="arch" type="xml">
+      <form string="Import Log">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="import_type"/>
+            <field name="status"/>
+          </group>
+          <group>
+            <field name="start_at"/>
+            <field name="end_at"/>
+          </group>
+          <group>
+            <field name="total_found"/>
+            <field name="created"/>
+            <field name="updated"/>
+            <field name="skipped"/>
+            <field name="not_found"/>
+          </group>
+          <group>
+            <field name="errors"/>
+          </group>
+          <notebook>
+            <page string="Lines">
+              <field name="line_ids">
+                <list>
+                  <field name="filename"/>
+                  <field name="model_code"/>
+                  <field name="checksum"/>
+                  <field name="action"/>
+                  <field name="message"/>
+                  <field name="picture_id"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_rubicon_import_logs" model="ir.actions.act_window">
+    <field name="name">Import Logs</field>
+    <field name="res_model">rubicon.import.log</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="menu_rubicon_import_root" name="Import"
+            parent="pdp_frontend.menu_pdp_root" sequence="90"/>
+  <menuitem id="menu_rubicon_import_logs" name="Logs"
+            parent="menu_rubicon_import_root" action="action_rubicon_import_logs" sequence="10"/>
+</odoo>

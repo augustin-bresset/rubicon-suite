@@ -2,31 +2,26 @@ import os
 import pyodbc
 from tqdm import tqdm
 
-# Configuration de connexion à SQL Server
-server = 'localhost,1433'
-database = 'PICTURES'
-username = 'SA'
-password = 'Strong@Passw0rd'
+# --- Connexion SQL Server (via FreeTDS sans DSN) --------------------
+SERVER   = '127.0.0.1'   # ou 'localhost'
+PORT     = 1433
+DATABASE = 'PICTURES'
+USERNAME = 'SA'
+PASSWORD = 'Strong@Passw0rd'
 
-# Répertoire de sortie pour les photos
 out_dir = 'exported_pictures'
-os.makedirs(out_dir, exist_ok=True)
 
-# Connexion
-conn_str = (
-    f"DRIVER={{FreeTDS}};"
-    f"SERVER={server};DATABASE={database};UID={username};PWD={password};"
-    f"TrustServerCertificate=yes;"
-)
-
+# Chaîne de connexion robuste (pas d'alias de driver, chemin absolu)
 conn = pyodbc.connect(
-    "DSN=sqlsrv;UID=SA;PWD=Strong@Passw0rd;DATABASE=PICTURES;TrustServerCertificate=yes;",
-    attrs_before={1256: '/home/smaug/rubicon-suite/freetds.conf'}
+    "DRIVER=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so;"
+    f"SERVER={SERVER};PORT={PORT};DATABASE={DATABASE};"
+    f"UID={USERNAME};PWD={PASSWORD};"
+    "TDS_Version=7.4;"
+    "Encrypt=no;"                 # ou: Encrypt=yes;TrustServerCertificate=yes
+    "TrustServerCertificate=yes;"
 )
 
-conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
-
 # 🔍 Étape 1 : détecter la table et la colonne image
 cursor.execute("""
 SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE
@@ -51,6 +46,7 @@ cursor.execute(query)
 for row in tqdm(cursor, desc="Exporting pictures"):
     *ids, image_data = row
     name = '_'.join(str(i) for i in ids if i is not None)
+    name = str(ids[-1])
     filename = os.path.join(out_dir, f"{name}.jpg")
     with open(filename, 'wb') as f:
         f.write(image_data)

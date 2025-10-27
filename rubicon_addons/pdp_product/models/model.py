@@ -49,11 +49,6 @@ class ProductModel(models.Model):
         store=False,
     )
     
-    # Picture
-    picture_ids = fields.One2many(
-            'pdp.picture', 'model_id', string='Pictures'
-        )
-
     def _compute_related_matching_models(self):
         for record in self:
             matchings = self.env['pdp.product.model.matching'].search([
@@ -81,3 +76,9 @@ class ProductModel(models.Model):
             ('id', '=', base_model.id),
         ])
         record.sibling_model_ids = siblings
+        
+    
+    def _compute_picture(self):
+        Pic = self.env['pdp.picture']
+        for rec in self:
+            rec.picture_id = Pic.search([('model_id', '=', rec.id)], limit=1)

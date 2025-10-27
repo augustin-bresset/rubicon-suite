@@ -1,3 +1,7 @@
+# Create commands for the project.
+
+
+
 # --- Config ---
 -include .env
 export
@@ -61,8 +65,14 @@ import_all:
 	@echo "→ DB=$(DB)  script=$(IMPORT_CSV_SCRIPT)"
 	$(ODOO_SHELL) < $(IMPORT_CSV_SCRIPT) 2>&1 | tee $(LOG_DIR)/import_$(TIMESTAMP).log
 
+
+
 import_csv:
 	@WHAT=$(WHAT) $(ODOO_SHELL) < ops/import/import_csv.py
+
+import_pictures:
+	@$(ODOO_SHELL) < ops/import/import_pictures.py
+
 
 # ODOO_SHELL = docker compose exec -T odoo odoo shell -d $(DB_NAME) --no-http
 

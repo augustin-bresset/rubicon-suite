@@ -5,56 +5,70 @@
   <record id="action_pdp_picture" model="ir.actions.act_window">
     <field name="name">Pictures</field>
     <field name="res_model">pdp.picture</field>
-    <field name="view_mode">tree,form</field>
-    <field name="context">{}</field>
+    <field name="view_mode">kanban,list,form</field>
   </record>
 
-  <!-- Place this submenu under PDP root if you already have a root menu in pdp_frontend -->
   <menuitem id="menu_pdp_picture_root"
             name="Pictures"
             parent="pdp_frontend.menu_pdp_root"
             action="action_pdp_picture"
             sequence="50"/>
 
-  <!-- List view -->
-  <record id="view_pdp_picture_tree" model="ir.ui.view">
-    <field name="name">pdp.picture.tree</field>
+  <!-- Kanban -->
+  <record id="view_pdp_picture_kanban" model="ir.ui.view">
+    <field name="name">pdp.picture.kanban</field>
     <field name="model">pdp.picture</field>
     <field name="arch" type="xml">
-      <tree string="Pictures" create="true" delete="true">
-        <field name="sequence" widget="handle"/>
-        <field name="name"/>
-        <field name="kind"/>
-        <field name="model_id"/>
-        <field name="model_code"/>
-        <field name="filename"/>
-        <field name="code"/>
-        <field name="active"/>
-      </tree>
+      <kanban default_group_by="model_id">
+        <templates>
+          <t t-name="card">
+            <div class="o_kanban_record">
+              <field name="image" widget="image" class="oe_avatar" width="160" height="160"/>
+              <div class="o_kanban_primary_bottom">
+                <strong><field name="model_id"/></strong>
+              </div>
+              <div><field name="filename"/></div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
     </field>
   </record>
 
-  <!-- Search view -->
+  <!-- List -->
+  <record id="view_pdp_picture_list" model="ir.ui.view">
+    <field name="name">pdp.picture.list</field>
+    <field name="model">pdp.picture</field>
+    <field name="arch" type="xml">
+      <list string="Pictures">
+        <field name="model_id"/>
+        <field name="filename"/>
+        <field name="checksum"/>
+        <field name="active"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Search (⚠️ version minimale, valide RNG) -->
   <record id="view_pdp_picture_search" model="ir.ui.view">
     <field name="name">pdp.picture.search</field>
     <field name="model">pdp.picture</field>
     <field name="arch" type="xml">
-      <search string="Search Pictures">
-        <field name="name"/>
+      <search>
         <field name="model_id"/>
-        <field name="model_code"/>
-        <filter name="kind_sketch" string="Sketch" domain="[('kind','=','sketch')]"/>
-        <filter name="kind_snapshot" string="Snapshot" domain="[('kind','=','snapshot')]"/>
-        <filter name="kind_render" string="Render" domain="[('kind','=','render')]"/>
-        <group expand="0" string="Group By">
-          <filter name="group_model" string="Model" context="{'group_by': 'model_id'}"/>
-          <filter name="group_kind" string="Type" context="{'group_by': 'kind'}"/>
-        </group>
+        <field name="filename"/>
+        <filter name="filter_orphans" string="Orphans" domain="[('model_id','=',False)]"/>
+        <filter name="filter_active" string="Active" domain="[('active','=',True)]"/>
+        <filter name="filter_inactive" string="Archived" domain="[('active','=',False)]"/>
+        <!-- group by via filters simples (pas de balise <group> pour éviter l'erreur RNG) -->
+        <separator/>
+        <filter name="grp_model" string="Group by Model" context="{'group_by': 'model_id'}"/>
+        <filter name="grp_active" string="Group by Active" context="{'group_by': 'active'}"/>
       </search>
     </field>
   </record>
 
-  <!-- Form view -->
+  <!-- Form -->
   <record id="view_pdp_picture_form" model="ir.ui.view">
     <field name="name">pdp.picture.form</field>
     <field name="model">pdp.picture</field>
@@ -62,17 +76,10 @@
       <form string="Picture">
         <sheet>
           <group>
-            <field name="name"/>
-            <field name="kind"/>
-            <field name="sequence"/>
-            <field name="active"/>
-          </group>
-          <group>
-            <field name="model_id"/>
-            <field name="model_code" readonly="1"/>
-            <field name="code"/>
+            <field name="model_id" options="{'no_create': True}"/>
             <field name="filename"/>
             <field name="checksum" readonly="1"/>
+            <field name="active"/>
           </group>
           <group>
             <field name="image" widget="image" class="oe_avatar"/>

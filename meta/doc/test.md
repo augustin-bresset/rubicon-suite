@@ -41,3 +41,20 @@ docker compose exec -T odoo \
   --http-port=8070
 ```
 
+```sh
+docker compose exec -T odoo \
+  odoo -d rubicon \
+  --stop-after-init \
+  --test-enable \
+  --test-tags=/rubicon_env \
+  --http-port=8070
+```
+
+
+
+docker compose exec -T odoo \
+  odoo -d rubicon \
+  -u pdp_price \
+  --stop-after-init \
+  --test-enable \
+  --http-port=8070

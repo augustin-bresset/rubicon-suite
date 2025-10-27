@@ -22,6 +22,7 @@ services:
     volumes:
       - odoo_data:/var/lib/odoo/.local/share/Odoo   # << filestore + sessions
       - ./rubicon_addons:/mnt/extra-addons
+      - ./data/pictures:/mnt/extra-addons/pictures:ro
       - ./external_addons:/mnt/external-addons
       - ./odoo_conf/odoo.conf:/etc/odoo/odoo.conf:ro
 

@@ -9,7 +9,8 @@
     'data': [
         'security/ir.model.access.csv',
         'views/picture_views.xml',
-        'views/inherit_model_views.xml',
+        # 'views/inherit_model_views.xml',
+        "views/test_picture_views.xml",      # <-- ajoute ceci
     ],
     'installable': True,
     'application': False,
