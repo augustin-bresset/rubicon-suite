@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pdp_labor.access_pdp_labor_type,access_pdp_labor_type,pdp_labor.model_pdp_labor_type,base.group_user,1,1,1,1
+pdp_labor.access_pdp_labor_cost_model,access_pdp_labor_cost_model,pdp_labor.model_pdp_labor_cost_model,base.group_user,1,1,1,1
+pdp_labor.access_pdp_labor_cost_product,access_pdp_labor_cost_product,pdp_labor.model_pdp_labor_cost_product,base.group_user,1,1,1,1
+pdp_labor.access_pdp_addon_type,access_pdp_addon_type,pdp_labor.model_pdp_addon_type,base.group_user,1,1,1,1
+pdp_labor.access_pdp_addon_cost,access_pdp_addon_cost,pdp_labor.model_pdp_addon_cost,base.group_user,1,1,1,1
+

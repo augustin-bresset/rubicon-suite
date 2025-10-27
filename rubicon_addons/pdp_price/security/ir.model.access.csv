@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pdp_price.access_pdp_price_component,access_pdp_price_component,pdp_price.model_pdp_price_component,base.group_user,1,1,1,1
+pdp_price.access_pdp_price_addon,access_pdp_price_addon,pdp_price.model_pdp_price_addon,base.group_user,1,1,1,1
+pdp_price.access_pdp_price_stone,access_pdp_price_stone,pdp_price.model_pdp_price_stone,base.group_user,1,1,1,1
+pdp_price.access_pdp_price_metal,access_pdp_price_metal,pdp_price.model_pdp_price_metal,base.group_user,1,1,1,1
+pdp_price.access_pdp_price_labor,access_pdp_price_labor,pdp_price.model_pdp_price_labor,base.group_user,1,1,1,1
+pdp_price.access_pdp_price_part,access_pdp_price_part,pdp_price.model_pdp_price_part,base.group_user,1,1,1,1
+pdp_price.access_pdp_price_preview,access_pdp_price_preview,pdp_price.model_pdp_price_preview,base.group_user,1,1,1,1
+pdp_price.access_pdp_price_preview_line,access_pdp_price_preview_line,pdp_price.model_pdp_price_preview_line,base.group_user,1,1,1,1

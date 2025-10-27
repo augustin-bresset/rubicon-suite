@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rubicon_import_log_user,rubicon.import.log,model_rubicon_import_log,base.group_user,1,0,0,0
+access_rubicon_import_log_line_user,rubicon.import.log.line,model_rubicon_import_log_line,base.group_user,1,0,0,0

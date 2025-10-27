@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pdp_product.access_pdp_product_category,access_pdp_product_category,pdp_product.model_pdp_product_category,base.group_user,1,1,1,1
+pdp_product.access_pdp_model,access_pdp_model,pdp_product.model_pdp_product_model,base.group_user,1,1,1,1
+pdp_product.access_pdp_product_model_matching,access_pdp_product_model_matching,pdp_product.model_pdp_product_model_matching,base.group_user,1,1,1,1
+pdp_product.access_pdp_product_model_metal,access_pdp_product_model_metal,pdp_product.model_pdp_product_model_metal,base.group_user,1,1,1,1
+pdp_product.access_pdp_product_stone,access_pdp_product_stone,pdp_product.model_pdp_product_stone,base.group_user,1,1,1,1
+pdp_product.access_pdp_product_part,access_pdp_product_part,pdp_product.model_pdp_product_part,base.group_user,1,1,1,1
+pdp_product.access_pdp_product,access_pdp_product,pdp_product.model_pdp_product,base.group_user,1,1,1,1
+pdp_product.access_pdp_product_stone_composition,access_pdp_product_stone_composition,pdp_product.model_pdp_product_stone_composition,base.group_user,1,1,1,1

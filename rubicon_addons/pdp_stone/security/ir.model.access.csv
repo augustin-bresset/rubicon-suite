@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pdp_stone.access_pdp_stone_category,access_pdp_stone_category,pdp_stone.model_pdp_stone_category,base.group_user,1,1,1,1
+pdp_stone.access_pdp_stone_type,access_pdp_stone_type,pdp_stone.model_pdp_stone_type,base.group_user,1,1,1,1
+pdp_stone.access_pdp_stone_shape,access_pdp_stone_shape,pdp_stone.model_pdp_stone_shape,base.group_user,1,1,1,1
+pdp_stone.access_pdp_stone_size,access_pdp_stone_size,pdp_stone.model_pdp_stone_size,base.group_user,1,1,1,1
+pdp_stone.access_pdp_stone_shade,access_pdp_stone_shade,pdp_stone.model_pdp_stone_shade,base.group_user,1,1,1,1
+pdp_stone.access_pdp_stone_weight,access_pdp_stone_weight,pdp_stone.model_pdp_stone_weight,base.group_user,1,1,1,1
+pdp_stone.access_pdp_stone,access_pdp_stone,pdp_stone.model_pdp_stone,base.group_user,1,1,1,1

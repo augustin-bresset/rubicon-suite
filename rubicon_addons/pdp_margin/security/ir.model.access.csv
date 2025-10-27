@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pdp_margin.access_pdp_margin,access_pdp_margin,pdp_margin.model_pdp_margin,base.group_user,1,1,1,1
+pdp_margin.access_pdp_margin_addon,access_pdp_margin_addon,pdp_margin.model_pdp_margin_addon,base.group_user,1,1,1,1
+pdp_margin.access_pdp_margin_stone,access_pdp_margin_stone,pdp_margin.model_pdp_margin_stone,base.group_user,1,1,1,1
+pdp_margin.access_pdp_margin_metal,access_pdp_margin_metal,pdp_margin.model_pdp_margin_metal,base.group_user,1,1,1,1
+pdp_margin.access_pdp_margin_labor,access_pdp_margin_labor,pdp_margin.model_pdp_margin_labor,base.group_user,1,1,1,1
+pdp_margin.access_pdp_margin_part,access_pdp_margin_part,pdp_margin.model_pdp_margin_part,base.group_user,1,1,1,1
+pdp_margin.access_pdp_margin_stone_conditional,access_pdp_margin_stone_conditional,pdp_margin.model_pdp_margin_stone_conditional,base.group_user,1,1,1,1

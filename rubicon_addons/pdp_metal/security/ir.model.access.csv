@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pdp_metal.access_pdp_metal_purity,access_pdp_metal_purity,pdp_metal.model_pdp_metal_purity,base.group_user,1,1,1,1
+pdp_metal.access_pdp_metal,access_pdp_metal,pdp_metal.model_pdp_metal,base.group_user,1,1,1,1
+pdp_metal.access_pdp_part,access_pdp_part,pdp_metal.model_pdp_part,base.group_user,1,1,1,1
+pdp_metal.access_pdp_part_cost,access_pdp_part_cost,pdp_metal.model_pdp_part_cost,base.group_user,1,1,1,1

@@ -62,6 +62,9 @@ logs/
 mssql_backups/
 *.csv
 
+# For model security
+!rubicon_addons/**/security/*.csv
+
 # Static / generated assets (si tu en as)
 staticfiles/
 node_modules/
