@@ -5,7 +5,7 @@ class ProductModel(models.Model):
     _inherit = 'pdp.product.model'
 
     
-    picture = fields.Image(compute='_compute_picture_image', store=False)
+    picture_image = fields.Image(compute='_compute_picture_image', store=False)
 
     def _compute_image(self):
         Pic = self.env['pdp.picture']
