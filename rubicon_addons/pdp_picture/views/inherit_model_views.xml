@@ -8,10 +8,25 @@
     <field name="inherit_id" ref="pdp_product.view_pdp_product_model_form"/>
     <field name="arch" type="xml">
       <notebook position="inside">
-        <page string="Picture">
-          <group>
-            <field name="picture_image" widget="image" class="oe_avatar"/>
-          </group>
+        <page string="Pictures">
+          <field name="picture_ids" context="{'default_model_id': active_id}">
+            <list editable="bottom">
+              <field name="kind"/>
+              <field name="image" widget="image"/>
+              <field name="filename"/>
+            </list>
+            <form>
+              <sheet>
+                <group>
+                  <field name="kind"/>
+                  <field name="filename"/>
+                </group>
+                <group>
+                  <field name="image" widget="image" class="oe_avatar"/>
+                </group>
+              </sheet>
+            </form>
+          </field>
         </page>
       </notebook>
     </field>
@@ -24,11 +39,15 @@
     <field name="inherit_id" ref="pdp_frontend.view_pdp_product_form_frontend"/>
     <field name="arch" type="xml">
       <notebook position="inside">
-        <page string="Model Picture">
-          <group>
-            <field name="model_id" invisible="1"/>
-            <field name="model_id.picture_image" widget="image" class="oe_avatar"/>
-          </group>
+        <page string="Model Pictures">
+          <!-- show pictures of linked model -->
+          <field name="model_id" invisible="1"/>
+          <field name="model_id.picture_ids" widget="one2many_list">
+            <list string="Model Pictures">
+              <field name="image" widget="image"/>
+              <field name="filename"/>
+            </list>
+          </field>
         </page>
       </notebook>
     </field>

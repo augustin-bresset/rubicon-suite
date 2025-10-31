@@ -8,12 +8,17 @@
     <field name="view_mode">kanban,list,form</field>
   </record>
 
-  <menuitem id="menu_pdp_picture_root"
-            name="Pictures"
-            parent="pdp_frontend.menu_pdp_root"
-            action="action_pdp_picture"
+
+  <menuitem id="menu_pdp_root"
+            name="PDP Pictures"
+            parent="pdp_product.menu_pdp_root"
             sequence="50"/>
 
+  <menuitem id="menu_pdp_picture_root"
+            name="Pictures"
+            parent="menu_pdp_root"
+            action="action_pdp_picture"
+            sequence="10"/>
   <!-- Kanban -->
   <record id="view_pdp_picture_kanban" model="ir.ui.view">
     <field name="name">pdp.picture.kanban</field>
