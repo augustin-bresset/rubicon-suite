@@ -1,0 +1,80 @@
+# -*- coding: utf-8 -*-
+from unittest.mock import Mock, patch
+
+from odoo import fields
+from odoo.tests.common import TransactionCase
+
+
+class TestMarketProviderNY(TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency = cls.env.ref("base.USD")
+        cls.provider = cls.env["pdp.market.provider.nymex"]
+        cls.day = fields.Date.from_string("2024-06-01")
+
+        metal_model = cls.env["pdp.market.metal"]
+        cls.gold = metal_model.create({
+            "name": "Gold",
+            "code": "XAU",
+            "base_unit": "troy_oz",
+            "base_currency_id": cls.currency.id,
+        })
+        cls.silver = metal_model.create({
+            "name": "Silver",
+            "code": "XAG",
+            "base_unit": "troy_oz",
+            "base_currency_id": cls.currency.id,
+        })
+
+    def fake_response(self, rates=None):
+        payload = {
+            "market": "nymex",
+            "date": self.day.isoformat(),
+            "rates": rates or {},
+        }
+        resp = Mock()
+        resp.json.return_value = payload
+        resp.raise_for_status.return_value = None
+        return resp
+
+    def test_update_prices_creates_records(self):
+        rates = {
+            "XAU": {"price": 2350.50},
+            "XAG": {"price": 32.10},
+        }
+        with patch("requests.get", return_value=self.fake_response(rates)) as mock_get:
+            prices = self.provider.update_prices(day=self.day)
+
+        mock_get.assert_called_once()
+        self.assertEqual(len(prices), 2)
+
+        gold_price = prices.filtered(lambda p: p.metal_id == self.gold)
+        self.assertEqual(gold_price.price, 2350.50)
+        self.assertEqual(gold_price.currency_id, self.currency)
+        self.assertEqual(gold_price.date, self.day)
+
+        silver_price = prices.filtered(lambda p: p.metal_id == self.silver)
+        self.assertEqual(silver_price.price, 32.10)
+        self.assertEqual(silver_price.source_id.type, "api")
+
+    def test_update_prices_overwrites_existing(self):
+        with patch("requests.get", return_value=self.fake_response({"XAU": {"price": 2000.0}})):
+            first_batch = self.provider.update_prices(codes=["XAU"], day=self.day)
+        self.assertEqual(first_batch.price, 2000.0)
+
+        with patch("requests.get", return_value=self.fake_response({"XAU": {"price": 2100.0}})):
+            updated = self.provider.update_prices(codes=["XAU"], day=self.day)
+        self.assertEqual(len(updated), 1)
+        self.assertEqual(updated.price, 2100.0)
+
+    def test_normalize_payload_tolerates_invalid_entries(self):
+        payload = {
+            "rates": {
+                "XPT": {"price": "980.5"},
+                "XPD": None,
+                "BAD": {"price": "not-a-number"},
+            }
+        }
+        normalized = self.provider._normalize_payload(payload)
+        self.assertEqual(normalized, {"XPT": 980.5})

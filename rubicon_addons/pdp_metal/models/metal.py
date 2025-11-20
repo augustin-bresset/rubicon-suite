@@ -20,7 +20,7 @@ class Metal(models.Model):
     currency_id =  fields.Many2one(
         'res.currency',
         string='Currency',
-        default='USD'
+        default=lambda self: self.env.company.currency_id.id
     )
     
     plating      = fields.Boolean(string='Plating')
