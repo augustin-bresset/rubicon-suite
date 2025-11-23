@@ -23,8 +23,6 @@ test_values = {
     "XPD": 1381.9184538212,
 }
 
-
-
 class MarketProviderNY(models.AbstractModel):
     _name = "pdp.market.provider.nymex"
     _description = "New York market API provider"
