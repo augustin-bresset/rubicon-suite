@@ -35,3 +35,19 @@ class MetalPriceService(models.AbstractModel):
         for line in alloy.line_ids:
             total += (line.ratio or 0.0) * self.get_spot_per_gram(line.metal_id, date, to_currency)
         return total * (alloy.yield_factor or 1.0)
+
+    @api.model
+    def get_spot_per_gram_with_purity(self, metal, date, to_currency, purity_percent):
+        """Return price per gram in target currency at the given date adjusted by purity percent.
+        purity_percent is expected as a value between 0 and 100.
+        """
+        try:
+            p = float(purity_percent)
+        except (TypeError, ValueError):
+            return 0.0
+        if p <= 0.0:
+            return 0.0
+        if p > 100.0:
+            p = 100.0
+        base_price = self.get_spot_per_gram(metal, date, to_currency)
+        return base_price * (p / 100.0)
