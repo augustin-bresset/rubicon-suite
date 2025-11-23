@@ -1,6 +1,7 @@
 # rubicon_addons/pdp_metal_market/models/market_models.py
 from odoo import models, fields, api
 
+
 class MarketMetal(models.Model):
     _name = "pdp.market.metal"
     _description = "Base commodity metal"
@@ -39,3 +40,4 @@ class MarketSource(models.Model):
     name = fields.Char(required=True)
     type = fields.Selection([('manual','Manual'), ('csv','CSV'), ('api','API')], default='manual')
     config_json = fields.Text()
+    
