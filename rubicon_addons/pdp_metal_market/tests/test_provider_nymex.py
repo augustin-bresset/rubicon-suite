@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from unittest.mock import Mock, patch
+"""Tests for NY market provider and export helpers."""
+from unittest.mock import patch
 
 from odoo import fields
 from odoo.tests.common import TransactionCase
@@ -11,7 +11,7 @@ class TestMarketProviderNY(TransactionCase):
         super().setUpClass()
         cls.currency = cls.env.ref("base.USD")
         cls.provider = cls.env["pdp.market.provider.nymex"]
-        cls.day = fields.Date.from_string("2024-06-01")
+        cls.day = fields.Date.from_string("2025-11-23")
 
         metal_model = cls.env["pdp.market.metal"]
         cls.gold = metal_model.create({
@@ -27,26 +27,9 @@ class TestMarketProviderNY(TransactionCase):
             "base_currency_id": cls.currency.id,
         })
 
-    def fake_response(self, rates=None):
-        payload = {
-            "market": "nymex",
-            "date": self.day.isoformat(),
-            "rates": rates or {},
-        }
-        resp = Mock()
-        resp.json.return_value = payload
-        resp.raise_for_status.return_value = None
-        return resp
-
     def test_update_prices_creates_records(self):
-        rates = {
-            "XAU": {"price": 2350.50},
-            "XAG": {"price": 32.10},
-        }
-        with patch("requests.get", return_value=self.fake_response(rates)) as mock_get:
+        with patch.object(self.provider, "_get_metal_prices", return_value={"XAU": 2350.50, "XAG": 32.10}):
             prices = self.provider.update_prices(day=self.day)
-
-        mock_get.assert_called_once()
         self.assertEqual(len(prices), 2)
 
         gold_price = prices.filtered(lambda p: p.metal_id == self.gold)
@@ -59,11 +42,11 @@ class TestMarketProviderNY(TransactionCase):
         self.assertEqual(silver_price.source_id.type, "api")
 
     def test_update_prices_overwrites_existing(self):
-        with patch("requests.get", return_value=self.fake_response({"XAU": {"price": 2000.0}})):
+        with patch.object(self.provider, "_get_metal_prices", return_value={"XAU": 2000.0}):
             first_batch = self.provider.update_prices(codes=["XAU"], day=self.day)
         self.assertEqual(first_batch.price, 2000.0)
 
-        with patch("requests.get", return_value=self.fake_response({"XAU": {"price": 2100.0}})):
+        with patch.object(self.provider, "_get_metal_prices", return_value={"XAU": 2100.0}):
             updated = self.provider.update_prices(codes=["XAU"], day=self.day)
         self.assertEqual(len(updated), 1)
         self.assertEqual(updated.price, 2100.0)
@@ -78,3 +61,22 @@ class TestMarketProviderNY(TransactionCase):
         }
         normalized = self.provider._normalize_payload(payload)
         self.assertEqual(normalized, {"XPT": 980.5})
+
+    def test_export_prices_csv(self):
+        prices = self.env["pdp.market.price"]
+        prices.create({
+            "metal_id": self.gold.id,
+            "date": self.day,
+            "price": 4000.0,
+            "source_id": self.env["pdp.market.source"].create({"name": "Test", "type": "api"}).id,
+        })
+        prices.create({
+            "metal_id": self.silver.id,
+            "date": self.day,
+            "price": 50.0,
+            "source_id": self.env["pdp.market.source"].search([], limit=1).id,
+        })
+
+        csv_data = prices.export_prices_csv(start_date=self.day, end_date=self.day)
+        expected = """date,Gold,Silver\n23-11-2025,4000.0,50.0\n"""
+        self.assertEqual(csv_data, expected)

@@ -7,19 +7,20 @@ New York market endpoint and stores them as ``pdp.market.price`` entries.
 from datetime import date as date_cls
 from typing import Dict, Iterable, List
 
+import os
+
 import requests
 
 from odoo import fields, models
 from odoo.exceptions import UserError
 
+METALPRICE_BASE_URL = "https://api.metalpriceapi.com/v1"
+METALPRICE_API_KEY = os.getenv("API_KEY_METAL_MARKET")
+
 
 class MarketProviderNY(models.AbstractModel):
     _name = "pdp.market.provider.nymex"
     _description = "New York market API provider"
-
-    PARAM_URL = "pdp_metal_market.ny_api_url"
-    PARAM_TOKEN = "pdp_metal_market.ny_api_token"
-    DEFAULT_URL = "https://example.ny-metals.test/v1/spot"
 
     # -- Public API ---------------------------------------------------------
     def update_prices(self, codes: Iterable[str] = None, day=None):
@@ -90,26 +91,51 @@ class MarketProviderNY(models.AbstractModel):
         return source
 
     def _fetch_remote(self, codes: List[str], target_date):
-        config = self._get_config()
-        params = {
-            "symbols": ",".join(codes),
-            "date": target_date.isoformat(),
-        }
-        headers = {"Accept": "application/json"}
-        if config["token"]:
-            headers["Authorization"] = f"Bearer {config['token']}"
-        response = requests.get(
-            config["url"], params=params, headers=headers, timeout=10,
-        )
-        response.raise_for_status()
-        payload = response.json()
+        raw_rates = self._get_metal_prices(target_date, test=True)
+        payload = {"rates": {}}
+        for code in codes:
+            upper_code = code.upper()
+            value = raw_rates.get(upper_code)
+            if value is None:
+                continue
+            payload["rates"][upper_code] = {"price": value}
         return self._normalize_payload(payload)
 
-    def _get_config(self):
-        icp = self.env["ir.config_parameter"].sudo()
+    def _get_metal_prices(self, target_date=None, test=True) -> Dict[str, float]:
+        """Return spot prices per metal code (USD per troy ounce)."""
+
+        if test:
+            return {
+                "XAU": 4064.9216770891,
+                "XAG": 49.9913197572,
+                "XPT": 1516.3825420698,
+                "XPD": 1381.9184538212,
+            }
+
+        if not METALPRICE_API_KEY:
+            raise UserError("Missing API_KEY_METAL_MARKET in environment")
+
+        date_fragment = "latest" if target_date is None else target_date.isoformat()
+        endpoint = f"{METALPRICE_BASE_URL}/{date_fragment}"
+        params = {
+            "api_key": METALPRICE_API_KEY,
+            "base": "USD",
+            "currencies": "XAU,XAG,XPT,XPD",
+        }
+
+        response = requests.get(endpoint, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        if not data.get("success", True):
+            raise UserError(f"Metal price API error: {data}")
+
+        rates = data.get("rates", {})
         return {
-            "url": icp.get_param(self.PARAM_URL, self.DEFAULT_URL),
-            "token": icp.get_param(self.PARAM_TOKEN, default=None),
+            "XAU": rates.get("USDXAU"),
+            "XAG": rates.get("USDXAG"),
+            "XPT": rates.get("USDXPT"),
+            "XPD": rates.get("USDXPD"),
         }
 
     def _normalize_payload(self, payload) -> Dict[str, float]:
