@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_pdp_market_metal_list" model="ir.ui.view">
+        <field name="name">pdp.market.metal.list</field>
+        <field name="model">pdp.market.metal</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="base_unit"/>
+                <field name="base_currency_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_pdp_market_metal_form" model="ir.ui.view">
+        <field name="name">pdp.market.metal.form</field>
+        <field name="model">pdp.market.metal</field>
+        <field name="arch" type="xml">
+            <form string="Market Metal">
+                <group>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="base_unit"/>
+                    <field name="base_currency_id"/>
+                </group>
+            </form>
+        </field>
+    </record>
+    <record id="action_pdp_market_metal" model="ir.actions.act_window">
+        <field name="name">Market Metals</field>
+        <field name="res_model">pdp.market.metal</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_pdp_market_price_list" model="ir.ui.view">
+        <field name="name">pdp.market.price.list</field>
+        <field name="model">pdp.market.price</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date"/>
+                <field name="metal_id"/>
+                <field name="price"/>
+                <field name="currency_id"/>
+                <field name="source_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_pdp_market_price_form" model="ir.ui.view">
+        <field name="name">pdp.market.price.form</field>
+        <field name="model">pdp.market.price</field>
+        <field name="arch" type="xml">
+            <form string="Market Price">
+                <group>
+                    <field name="date"/>
+                    <field name="metal_id"/>
+                    <field name="price"/>
+                    <field name="currency_id" readonly="1"/>
+                    <field name="source_id"/>
+                </group>
+            </form>
+        </field>
+    </record>
+    <record id="action_pdp_market_price" model="ir.actions.act_window">
+        <field name="name">Daily Prices</field>
+        <field name="res_model">pdp.market.price</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_pdp_market_source_list" model="ir.ui.view">
+        <field name="name">pdp.market.source.list</field>
+        <field name="model">pdp.market.source</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="type"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_pdp_market_source_form" model="ir.ui.view">
+        <field name="name">pdp.market.source.form</field>
+        <field name="model">pdp.market.source</field>
+        <field name="arch" type="xml">
+            <form string="Source">
+                <group>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="config_json" widget="text"/>
+                </group>
+            </form>
+        </field>
+    </record>
+    <record id="action_pdp_market_source" model="ir.actions.act_window">
+        <field name="name">Sources</field>
+        <field name="res_model">pdp.market.source</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_pdp_metal_alloy_list" model="ir.ui.view">
+        <field name="name">pdp.metal.alloy.list</field>
+        <field name="model">pdp.metal.alloy</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="variant_code"/>
+                <field name="yield_factor"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_pdp_metal_alloy_form" model="ir.ui.view">
+        <field name="name">pdp.metal.alloy.form</field>
+        <field name="model">pdp.metal.alloy</field>
+        <field name="arch" type="xml">
+            <form string="Alloy">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="variant_code"/>
+                        <field name="yield_factor"/>
+                    </group>
+                    <notebook>
+                        <page string="Components">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="metal_id"/>
+                                    <field name="ratio"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_pdp_metal_alloy" model="ir.actions.act_window">
+        <field name="name">Alloys</field>
+        <field name="res_model">pdp.metal.alloy</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_pdp_market_root" name="Metal Market" parent="pdp_metal.menu_pdp_root" sequence="20"/>
+    <menuitem id="menu_pdp_market_metal" name="Metals" parent="menu_pdp_market_root" action="action_pdp_market_metal" sequence="1"/>
+    <menuitem id="menu_pdp_market_price" name="Daily Prices" parent="menu_pdp_market_root" action="action_pdp_market_price" sequence="2"/>
+    <menuitem id="menu_pdp_market_source" name="Sources" parent="menu_pdp_market_root" action="action_pdp_market_source" sequence="3"/>
+    <menuitem id="menu_pdp_metal_alloy" name="Alloys" parent="menu_pdp_market_root" action="action_pdp_metal_alloy" sequence="4"/>
+</odoo>

@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_market_metal_user,access_market_metal_user,model_pdp_market_metal,base.group_user,1,1,1,1
+access_market_price_user,access_market_price_user,model_pdp_market_price,base.group_user,1,1,1,1
+access_market_source_user,access_market_source_user,model_pdp_market_source,base.group_user,1,1,1,1
+access_metal_alloy_user,access_metal_alloy_user,model_pdp_metal_alloy,base.group_user,1,1,1,1
+access_metal_alloy_line_user,access_metal_alloy_line_user,model_pdp_metal_alloy_line,base.group_user,1,1,1,1

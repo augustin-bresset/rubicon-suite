@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="pdp_market_metal_gold" model="pdp.market.metal">
+        <field name="name">Gold</field>
+        <field name="code">XAU</field>
+        <field name="base_unit">troy_oz</field>
+        <field name="base_currency_id" ref="base.USD"/>
+    </record>
+    <record id="pdp_market_metal_silver" model="pdp.market.metal">
+        <field name="name">Silver</field>
+        <field name="code">XAG</field>
+        <field name="base_unit">troy_oz</field>
+        <field name="base_currency_id" ref="base.USD"/>
+    </record>
+    <record id="pdp_market_metal_platinum" model="pdp.market.metal">
+        <field name="name">Platinum</field>
+        <field name="code">XPT</field>
+        <field name="base_unit">troy_oz</field>
+        <field name="base_currency_id" ref="base.USD"/>
+    </record>
+    <record id="pdp_market_metal_palladium" model="pdp.market.metal">
+        <field name="name">Palladium</field>
+        <field name="code">XPD</field>
+        <field name="base_unit">troy_oz</field>
+        <field name="base_currency_id" ref="base.USD"/>
+    </record>
+</odoo>

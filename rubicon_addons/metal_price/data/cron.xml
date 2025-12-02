@@ -1,0 +1,14 @@
+<odoo>
+  <record id="ir_cron_pdp_market_update_prices" model="ir.cron">
+      <field name="name">Update metal market prices (NY)</field>
+      <field name="model_id" ref="model_pdp_market_provider_nymex"/>
+      <field name="state">code</field>
+      <field name="code">model.update_prices()</field>
+
+      <!-- run every day -->
+      <field name="interval_number">1</field>
+      <field name="interval_type">days</field>
+
+      <field name="active">True</field>
+  </record>
+</odoo>
