@@ -16,6 +16,18 @@
             action="pdp_price.action_pdp_price_preview_wizard"
             sequence="2"/>
 
+  <!-- PDP Frontend page (opens the /pdp route) -->
+  <record id="action_pdp_frontend_page" model="ir.actions.act_url">
+    <field name="name">PDP Frontend</field>
+    <field name="url">/pdp</field>
+    <field name="target">self</field>
+  </record>
+  <menuitem id="menu_pdp_frontend_page"
+            name="PDP Page"
+            parent="menu_pdp_frontend_root"
+            action="action_pdp_frontend_page"
+            sequence="5"/>
+
   <!-- Addon Prices (déjà dans pdp_price) -->
   <menuitem id="menu_pdp_frontend_price_addon"
             name="Addon Prices"

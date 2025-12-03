@@ -1,0 +1,293 @@
+<odoo>
+  <template id="pdp_frontend_page" name="PDP Frontend Website Page">
+    <t t-call="website.layout">
+      <t t-set="pageName">pdp_frontend</t>
+      <t t-set="title">PDP</t>
+      <div class="container my-4 pdp-frontend-webpage">
+        <style type="text/css">
+          .pdp-frontend-webpage {
+            max-width: 1200px;
+          }
+          .pdp-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+          }
+          .pdp-top-bar {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 1rem;
+          }
+          .pdp-top-bar .form-select,
+          .pdp-top-bar .form-control {
+            min-width: 160px;
+          }
+          .pdp-panel-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+          }
+          .pdp-panel {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.75rem;
+            background-color: #fff;
+          }
+          .pdp-panel .pdp-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            align-items: center;
+          }
+          .pdp-panel .pdp-row + .pdp-row {
+            margin-top: 0.5rem;
+          }
+          .pdp-panel .pdp-checkboxes {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+          }
+          .pdp-preview-card {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+          }
+          .pdp-preview-image-wrapper {
+            position: relative;
+            background: linear-gradient(135deg, #f1f3f5, #e9ecef);
+            height: 320px;
+          }
+          .pdp-preview-image-wrapper .pdp-overlay-label {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+          }
+          .pdp-preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          .pdp-preview-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #fff;
+            border-top: 1px solid #dee2e6;
+          }
+          .pdp-tab-panel {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: #fff;
+            padding: 1rem;
+          }
+          .pdp-tab-content {
+            display: grid;
+            grid-template-columns: 1.1fr 2fr;
+            gap: 1rem;
+          }
+          .pdp-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+          .pdp-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.25rem;
+          }
+          .pdp-table th,
+          .pdp-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+          }
+          .pdp-table tfoot tr {
+            background: #f1f3f5;
+            font-weight: 600;
+          }
+          .pdp-footer-bar {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .pdp-footer-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+          }
+        </style>
+
+        <div class="pdp-top-bar">
+          <div class="flex-grow-1">
+            <label class="form-label">Modèle</label>
+            <select class="form-select">
+              <option>Choisir un modèle</option>
+              <option>R132</option>
+              <option>R250</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">&nbsp;</label>
+            <button class="btn btn-primary w-100">Charger</button>
+          </div>
+          <div>
+            <label class="form-label">Résultats</label>
+            <select class="form-select">
+              <option>3 éléments trouvés</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pdp-grid">
+          <div class="pdp-panel-stack">
+            <t t-foreach="range(0, 3)" t-as="panel">
+              <div class="pdp-panel">
+                <strong class="d-block mb-2">Section <t t-esc="panel + 1"/></strong>
+                <div class="pdp-row">
+                  <label class="form-label mb-0">Champ principal</label>
+                  <input class="form-control" type="text" placeholder="Valeur"/>
+                </div>
+                <div class="pdp-row">
+                  <label class="form-label mb-0">Liste</label>
+                  <select class="form-select">
+                    <option>Option 1</option>
+                    <option>Option 2</option>
+                  </select>
+                </div>
+                <div class="pdp-row">
+                  <label class="form-label mb-0">Date/Heure</label>
+                  <input class="form-control" type="datetime-local"/>
+                </div>
+                <div class="pdp-checkboxes mt-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="check_a_" t-att-id="'check_a_%s' % panel"/>
+                    <label class="form-check-label" t-att-for="'check_a_%s' % panel">Cocher A</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="check_b_" t-att-id="'check_b_%s' % panel"/>
+                    <label class="form-check-label" t-att-for="'check_b_%s' % panel">Cocher B</label>
+                  </div>
+                </div>
+              </div>
+            </t>
+          </div>
+
+          <div class="pdp-preview-card">
+            <div class="pdp-preview-image-wrapper">
+              <span class="pdp-overlay-label">Texte en haut à droite</span>
+              <img class="pdp-preview-image" src="https://via.placeholder.com/640x360" alt="Aperçu"/>
+            </div>
+            <div class="pdp-preview-actions">
+              <button class="btn btn-outline-secondary btn-sm" type="button">Modèle</button>
+              <button class="btn btn-outline-secondary btn-sm" type="button">Dessin</button>
+              <button class="btn btn-outline-secondary btn-sm" type="button">Afficher</button>
+              <button class="btn btn-outline-secondary btn-sm" type="button">Effacer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdp-tab-panel">
+          <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a class="nav-link active" data-bs-toggle="tab" href="#pdp-tab-pricing" role="tab">Onglet actif</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" data-bs-toggle="tab" href="#pdp-tab-secondary" role="tab">Onglet 2</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" data-bs-toggle="tab" href="#pdp-tab-tertiary" role="tab">Onglet 3</a>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="pdp-tab-pricing" role="tabpanel">
+              <div class="pdp-tab-content">
+                <div class="pdp-settings">
+                  <div>
+                    <label class="form-label">Paramètre A</label>
+                    <select class="form-select">
+                      <option>Valeur 1</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label">Paramètre B</label>
+                    <input class="form-control" type="number" value="12"/>
+                  </div>
+                  <div>
+                    <label class="form-label">Paramètre C</label>
+                    <select class="form-select">
+                      <option>Valeur 2</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <table class="pdp-table">
+                    <thead>
+                      <tr>
+                        <th>Colonne 1</th>
+                        <th>Colonne 2</th>
+                        <th>Colonne 3</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Ligne 1</td>
+                        <td>Donnée</td>
+                        <td>Donnée</td>
+                      </tr>
+                      <tr>
+                        <td>Ligne 2</td>
+                        <td>Donnée</td>
+                        <td>Donnée</td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td>Dernière ligne</td>
+                        <td>Résumé</td>
+                        <td>Total</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="pdp-tab-secondary" role="tabpanel">
+              <p class="text-muted">Contenu d'onglet secondaire.</p>
+            </div>
+            <div class="tab-pane fade" id="pdp-tab-tertiary" role="tabpanel">
+              <p class="text-muted">Autre contenu d'onglet.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdp-footer-bar">
+          <div class="pdp-footer-actions">
+            <button class="btn btn-light" type="button">⟵</button>
+            <button class="btn btn-light" type="button">⟶</button>
+            <button class="btn btn-secondary" type="button">Nouveau</button>
+            <button class="btn btn-danger" type="button">Supprimer</button>
+            <button class="btn btn-primary" type="button">Sauvegarder</button>
+            <button class="btn btn-outline-secondary" type="button">Rafraîchir</button>
+          </div>
+          <button class="btn btn-outline-primary" type="button">Écran supplémentaire</button>
+        </div>
+      </div>
+    </t>
+  </template>
+</odoo>
