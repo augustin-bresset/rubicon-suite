@@ -9,7 +9,7 @@
           <button name="action_copy_model" string="Copy" type="object"/> -->
           <button name="%(pdp_price.action_pdp_price_preview_wizard)d"
                   type="action"
-                  context="{'default_product_id': active_id}"
+                  context="{'default_product_id': id}"
                   string="Preview Price"
                   class="btn-secondary"/>
         </header>
@@ -21,42 +21,40 @@
                   <field name="model_id"/>
                   <field name="code" string="Design Ref#"/>
                 </group>
-                <group string="Variants">
-                  <label string="Products found" for="frontend_variant_count" class="o_inline_label"/>
-                  <field name="frontend_variant_count" readonly="1" class="oe_inline"/>
-                  <field name="frontend_variant_ids" nolabel="1" class="pdp-variant-list">
-                    <list string="Designs" create="false" editable="bottom">
-                      <field name="code" string="Design Ref#"/>
-                      <field name="category_id" string="Category"/>
-                      <field name="create_date" string="Created On"/>
-                      <field name="active" string="Selected"/>
-                      <field name="in_collection" string="In Collection"/>
-                    </list>
-                  </field>
-                </group>
+              </group>
+
+              <group string="Designs">
+                <field name="frontend_variant_ids" class="pdp-variant-list">
+                  <list create="false" editable="bottom">
+                    <field name="code"/>
+                    <field name="category_id"/>
+                    <field name="create_date"/>
+                    <field name="active"/>
+                    <field name="in_collection"/>
+                  </list>
+                </field>
               </group>
 
               <div class="pdp-frontend-preview">
                 <field name="model_picture_image" widget="image" class="pdp-preview-image" nolabel="1"/>
                 <div class="pdp-preview-overlay">
-                  <div class="pdp-preview-name">
-                    <label string="Design" class="o_form_label"/>
-                    <field name="code" readonly="1" class="oe_inline"/>
-                  </div>
-                  <div class="pdp-preview-price">
-                    <label string="Total Price" class="o_form_label"/>
-                    <field name="frontend_total_price" readonly="1" class="oe_inline"/>
-                  </div>
-                  <div class="pdp-preview-actions">
-                    <button name="action_frontend_preview_reset" string="Model" type="object" class="btn-secondary"/>
-                    <button name="action_frontend_preview_reset" string="Drawing" type="object" class="btn-secondary"/>
-                    <button name="action_frontend_preview_reset" string="Show" type="object" class="btn-secondary"/>
-                    <button name="action_frontend_preview_reset" string="Clear" type="object" class="btn-secondary"/>
-                  </div>
+                  <label string="Design" for="code" class="o_form_label"/>
+                  <field name="code" readonly="1" class="oe_inline"/>
+                </div>
+                  
+                <div class="pdp-preview-price">
+                  <span class="o_form_label">Total Price</span>
+                  <field name="frontend_total_price" readonly="1" class="oe_inline"/>
+                </div>
+
+                <div class="pdp-preview-actions">
+                  <button name="action_frontend_preview_reset" string="Model" type="object" class="btn-secondary"/>
+                  <button name="action_frontend_preview_reset" string="Drawing" type="object" class="btn-secondary"/>
+                  <button name="action_frontend_preview_reset" string="Show" type="object" class="btn-secondary"/>
+                  <button name="action_frontend_preview_reset" string="Clear" type="object" class="btn-secondary"/>
                 </div>
               </div>
             </div>
-
             <div class="pdp-frontend-bottom">
               <group string="Pricing Parameters" class="pdp-pricing-params" col="2">
                 <group>
@@ -72,7 +70,7 @@
               </group>
 
               <div class="pdp-cost-breakdown" colspan="2">
-                <label string="Cost Breakdown" class="o_form_label"/>
+                <div class="o_form_label">Cost Breakdown</div>
                 <div class="pdp-cost-table">
                   <div class="pdp-cost-row pdp-cost-header">
                     <span class="pdp-cell pdp-cell-label"></span>

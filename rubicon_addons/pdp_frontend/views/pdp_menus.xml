@@ -29,11 +29,10 @@
             sequence="5"/>
 
   <!-- Addon Prices (déjà dans pdp_price) -->
-  <menuitem id="menu_pdp_frontend_price_addon"
-            name="Addon Prices"
-            parent="menu_pdp_frontend_root"
-            action="pdp_price.action_price_addon"
-            sequence="3"/>
+<menuitem id="menu_pdp_frontend_price_addon" 
+          name="Addon Prices" 
+          parent="menu_pdp_frontend_root" 
+          action="pdp_price.action_pdp_price_addon"  sequence="3"/>
 
   <!-- Manage sous-menu -->
   <menuitem id="menu_pdp_frontend_manage"
