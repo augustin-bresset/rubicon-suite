@@ -22,3 +22,9 @@ Welcome to the Rubicon Suite repository. Please follow these guidelines when mak
 ## Communication
 - Summaries should clearly state user-visible effects and reference important files.
 - If you create additional `AGENTS.md` files in subdirectories, ensure their instructions refine (not contradict) the guidance here.
+
+## Odoo 18.0 Specifics
+
+### HTML
+- Do not use *tree*, they have been removed in Odoo 18.0, use *list* instead.
+

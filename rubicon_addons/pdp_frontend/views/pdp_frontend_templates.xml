@@ -31,8 +31,7 @@
             flex-direction: column;
             gap: 0.75rem;
           }
-          /* FIX: Removed orphaned CSS line that was likely unintended or misplaced */
-          /* margin-top: 0.25rem; */
+
           .pdp-table th,
           .pdp-table td {
             border: 1px solid #dee2e6;
@@ -59,163 +58,217 @@
       </head>
       <body>
         <div class="container my-4 pdp-frontend-webpage">
-          <div class="pdp-top-bar">
+          <!-- Top Bar -->
+          <form action="/pdp" method="get" class="pdp-top-bar" id="pdpForm">
             <div class="flex-grow-1">
-              <label class="form-label">Modèle</label>
-              <select class="form-select">
-                <option>Choisir un modèle</option>
-                <option>R132</option>
-                <option>R250</option>
+              <label class="form-label">Model</label>
+              <select name="model_id" class="form-select" onchange="this.form.submit()">
+                <option value="">Select a model...</option>
+                <t t-foreach="all_models" t-as="m">
+                  <option t-att-value="m.id" t-att-selected="str(m.id) == str(current_model_id)">
+                    <t t-esc="m.code"/>
+                  </option>
+                </t>
               </select>
             </div>
             <div>
-              <label class="form-label">&#160;</label>
-              <button class="btn btn-primary w-100">Charger</button>
-            </div>
-            <div>
-              <label class="form-label">Résultats</label>
-              <select class="form-select">
-                <option>3 éléments trouvés</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="pdp-grid">
-            <div class="pdp-panel-stack">
-              <t t-foreach="range(0, 3)" t-as="panel">
-                <div class="pdp-panel">
-                  <strong class="d-block mb-2">Section <t t-esc="panel + 1"/></strong>
-                  <div class="pdp-row">
-                    <label class="form-label mb-0">Champ principal</label>
-                    <input class="form-control" type="text" placeholder="Valeur"/>
-                  </div>
-                  <div class="pdp-row">
-                    <label class="form-label mb-0">Liste</label>
-                    <select class="form-select">
-                      <option>Option 1</option>
-                      <option>Option 2</option>
-                    </select>
-                  </div>
-                  <div class="pdp-row">
-                    <label class="form-label mb-0">Date/Heure</label>
-                    <input class="form-control" type="datetime-local"/>
-                  </div>
-                  <div class="pdp-checkboxes mt-2">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" t-att-id="'check_a_%s' % panel"/>
-                      <label class="form-check-label" t-att-for="'check_a_%s' % panel">Cocher A</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" t-att-id="'check_b_%s' % panel"/>
-                      <label class="form-check-label" t-att-for="'check_b_%s' % panel">Cocher B</label>
-                    </div>
-                  </div>
-                </div>
+              <label class="form-label">Design</label>
+              <t t-if="model_products">
+                  <select class="form-select" onchange="window.location.href='/pdp/' + this.value">
+                    <t t-foreach="model_products" t-as="p">
+                        <option t-att-value="p.id" t-att-selected="p.id == product.id">
+                            <t t-esc="p.code"/>
+                        </option>
+                    </t>
+                  </select>
+              </t>
+              <t t-else="">
+                 <input type="text" class="form-control" readonly="1" value="No Design"/>
               </t>
             </div>
-
-            <div class="pdp-preview-card">
-              <div class="pdp-preview-image-wrapper">
-                <span class="pdp-overlay-label">Texte en haut à droite</span>
-                <img class="pdp-preview-image" src="https://via.placeholder.com/640x360" alt="Aperçu"/>
-              </div>
-              <div class="pdp-preview-actions">
-                <button class="btn btn-outline-secondary btn-sm" type="button">Modèle</button>
-                <button class="btn btn-outline-secondary btn-sm" type="button">Dessin</button>
-                <button class="btn btn-outline-secondary btn-sm" type="button">Afficher</button>
-                <button class="btn btn-outline-secondary btn-sm" type="button">Effacer</button>
-              </div>
+            <div>
+               <label class="form-label">&#160;</label>
+               <a t-if="product" t-att-href="'/web#id=%s&amp;model=pdp.product' % product.id" class="btn btn-outline-secondary w-100" target="_blank">Open Backend</a>
             </div>
-          </div>
+          </form>
 
-          <div class="pdp-tab-panel mt-3">
-            <ul class="nav nav-tabs" id="pdpTab" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab" aria-controls="materials" aria-selected="true">Matériaux</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="prices-tab" data-bs-toggle="tab" data-bs-target="#prices" type="button" role="tab" aria-controls="prices" aria-selected="false">Prix</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="catalog-tab" data-bs-toggle="tab" data-bs-target="#catalog" type="button" role="tab" aria-controls="catalog" aria-selected="false">Catalogue</button>
-              </li>
-            </ul>
-            <div class="tab-content pdp-tab-content" id="pdpTabContent">
-              <div class="tab-pane fade show active" id="materials" role="tabpanel" aria-labelledby="materials-tab">
-                <div class="pdp-settings">
-                  <label class="form-label mb-0">Type de métal</label>
-                  <select class="form-select">
-                    <option>Or blanc 18k</option>
-                    <option>Or jaune 18k</option>
-                    <option>Or rose 18k</option>
-                  </select>
-                  <label class="form-label mb-0">Grammage</label>
-                  <input class="form-control" type="number" value="5.32"/>
-                  <label class="form-label mb-0">Titre</label>
-                  <input class="form-control" type="text" value="750"/>
-                  <label class="form-label mb-0">Déchets</label>
-                  <input class="form-control" type="number" value="2.5"/>
+          <t t-if="product">
+            <div class="pdp-grid">
+                <!-- Left Panel: Info -->
+                <div class="pdp-panel-stack">
+                    <div class="pdp-panel card card-body">
+                        <strong>Product Details</strong>
+                        <div class="pdp-row mt-2">
+                           <label class="form-label mb-0">Code:</label> <span><t t-esc="product.code"/></span>
+                        </div>
+                         <div class="pdp-row">
+                           <label class="form-label mb-0">Model:</label> <span><t t-esc="product.model_id.code"/></span>
+                        </div>
+                        <div class="pdp-row">
+                           <label class="form-label mb-0">Metal:</label> <span><t t-esc="product.metal"/></span>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="tab-pane fade" id="prices" role="tabpanel" aria-labelledby="prices-tab">
-                <div>
-                  <label class="form-label">Prix de vente</label>
-                  <table class="pdp-table">
-                    <thead>
-                      <tr>
-                        <th>Groupe</th>
-                        <th>Coût</th>
-                        <th>Marge</th>
-                        <th>TVA</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Standard</td>
-                        <td>1,325.00</td>
-                        <td>15%</td>
-                        <td>20%</td>
-                        <td>1,839.38</td>
-                      </tr>
-                      <tr>
-                        <td>Pro</td>
-                        <td>1,325.00</td>
-                        <td>10%</td>
-                        <td>20%</td>
-                        <td>1,747.50</td>
-                      </tr>
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td colspan="4">Total</td>
-                        <td>1,793.44</td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
-              <div class="tab-pane fade" id="catalog" role="tabpanel" aria-labelledby="catalog-tab">
-                <p class="mb-2">Info produit</p>
-                <textarea class="form-control" rows="4">Détails du produit...</textarea>
-              </div>
-            </div>
-          </div>
 
-          <div class="pdp-footer-bar">
-            <div class="pdp-footer-actions">
-              <button class="btn btn-secondary" type="button">Copier</button>
-              <button class="btn btn-outline-primary" type="button">Enregistrer</button>
-              <button class="btn btn-outline-secondary" type="button">Prévision</button>
-              <button class="btn btn-outline-secondary" type="button">Exporter</button>
-              <button class="btn btn-outline-secondary" type="button">Imprimer</button>
-              <button class="btn btn-outline-secondary" type="button">Exporter vers ERP</button>
-              <button class="btn btn-outline-secondary" type="button">New</button>
-              <button class="btn btn-outline-secondary" type="button">Reset</button>
+                <!-- Right Panel: Image -->
+                <div class="pdp-preview-card">
+                  <div class="pdp-preview-image-wrapper">
+                    <img class="pdp-preview-image" 
+                         t-att-src="'/web/image?model=pdp.product.model&amp;id=%s&amp;field=picture_image' % product.model_id.id" 
+                         alt="Product Image"/>
+                  </div>
+                </div>
             </div>
-            <div class="pdp-footer-info text-muted">
-              Déclinés&#160;– 1 unité
+
+            <!-- Tabs -->
+            <div class="pdp-tab-panel mt-3">
+              <ul class="nav nav-tabs" id="pdpTab" role="tablist">
+                <li class="nav-item">
+                  <button class="nav-link active" id="stones-tab" data-bs-toggle="tab" data-bs-target="#stones" type="button">Stones</button>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link" id="metals-tab" data-bs-toggle="tab" data-bs-target="#metals" type="button">Metals</button>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link" id="labor-tab" data-bs-toggle="tab" data-bs-target="#labor" type="button">Labor / Parts</button>
+                </li>
+                 <li class="nav-item">
+                  <button class="nav-link" id="costing-tab" data-bs-toggle="tab" data-bs-target="#costing" type="button">Costing Summary</button>
+                </li>
+              </ul>
+              
+              <div class="tab-content pdp-tab-content p-3 border border-top-0" id="pdpTabContent">
+                <!-- Stones Tab -->
+                <div class="tab-pane fade show active" id="stones">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Stone</th>
+                                <th>Pieces</th>
+                                <th>Weight (ct)</th>
+                                <th>Reshaped</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="product.stone_composition_id.stone_line_ids" t-as="line">
+                                <td><t t-esc="line.stone_id.code if line.stone_id else ''"/></td>
+                                <td><t t-esc="line.pieces"/></td>
+                                <td><t t-esc="line.weight"/></td>
+                                <td>
+                                    <t t-if="line.reshaped_shape_id">
+                                        <t t-esc="line.reshaped_shape_id.name"/> 
+                                        (<t t-esc="line.reshaped_weight"/> ct)
+                                    </t>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Metals Tab -->
+                <div class="tab-pane fade" id="metals">
+                     <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Metal</th>
+                                <th>Version</th>
+                                <th>Weight (g)</th>
+                                <th>Purity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="product.model_id.metal_weights_ids" t-as="m">
+                                <td><t t-esc="m.metal_id.name"/></td>
+                                <td><t t-esc="m.metal_version"/></td>
+                                <td><t t-esc="m.weight"/></td>
+                                <td><t t-esc="m.purity_id.code"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Labor Tab -->
+                <div class="tab-pane fade" id="labor">
+                     <h5>Parts</h5>
+                     <table class="table table-sm">
+                        <thead>
+                             <tr>
+                                <th>Part Name</th>
+                                <th>Quantity</th>
+                             </tr>
+                        </thead>
+                        <tbody>
+                             <tr t-foreach="product.part_ids" t-as="pp">
+                                 <td><t t-esc="pp.part_id.name"/></td>
+                                 <td><t t-esc="pp.quantity"/></td>
+                             </tr>
+                        </tbody>
+                     </table>
+                </div>
+                
+                 <!-- Costing Tab -->
+                <div class="tab-pane fade" id="costing">
+                    <t t-if="price_preview">
+                      <div class="row">
+                        <div class="col-md-6">
+                            <h5>Details</h5>
+                            <table class="table table-sm text-end">
+                                <thead>
+                                    <tr>
+                                        <th class="text-start">Type</th>
+                                        <th>Cost</th>
+                                        <th>Margin</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="price_preview.line_ids" t-as="line">
+                                        <td class="text-start"><t t-esc="line.type"/></td>
+                                        <td><t t-esc="line.cost" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                        <td><t t-esc="line.margin" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                        <td><t t-esc="line.price" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                           <h5>Total</h5>
+                           <div class="card card-body bg-light">
+                                <div class="d-flex justify-content-between">
+                                    <span>Total Cost:</span>
+                                    <strong t-field="price_preview.cost"/>
+                                </div>
+                                 <div class="d-flex justify-content-between">
+                                    <span>Total Margin:</span>
+                                    <strong t-field="price_preview.margin"/>
+                                </div>
+                                <hr/>
+                                <div class="d-flex justify-content-between fs-5">
+                                    <span>Final Price:</span>
+                                    <strong t-field="price_preview.price" class="text-primary"/>
+                                </div>
+                           </div>
+                        </div>
+                      </div>
+                    </t>
+                    <t t-else="">
+                        <div class="alert alert-warning">Pricing could not be calculated. Check server logs or configuration.</div>
+                    </t>
+                </div>
+
+              </div>
             </div>
+          </t>
+          <t t-else="">
+            <div class="alert alert-warning mt-4">
+                Please select a Model to view its Products.
+            </div>
+          </t>
+
+          <div class="pdp-footer-bar mt-4">
+             <button class="btn btn-secondary">New</button>
+             <button class="btn btn-secondary">Save</button>
+             <button class="btn btn-secondary">Copy</button>
           </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-H2UH7x/6KijLJrVN6a8GN28AL5soiceqd7qV671CyMfCVxMDamS0ajENPBIfl9xG" crossorigin="anonymous"></script>
