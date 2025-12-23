@@ -1,6 +1,6 @@
 {
     "name": "PDP Frontend",
-    "version": "0.1.1",
+    "version": "0.1.3",
     "license": "LGPL-3",
     "summary": "Frontend interface for Product Definition and Pricing",
     "depends": [

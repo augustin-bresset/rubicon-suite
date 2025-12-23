@@ -57,221 +57,523 @@
         </style>
       </head>
       <body>
-        <div class="container my-4 pdp-frontend-webpage">
-          <!-- Top Bar -->
-          <form action="/pdp" method="get" class="pdp-top-bar" id="pdpForm">
-            <div class="flex-grow-1">
-              <label class="form-label">Model</label>
-              <select name="model_id" class="form-select" onchange="this.form.submit()">
-                <option value="">Select a model...</option>
-                <t t-foreach="all_models" t-as="m">
-                  <option t-att-value="m.id" t-att-selected="str(m.id) == str(current_model_id)">
-                    <t t-esc="m.code"/>
-                  </option>
-                </t>
-              </select>
-            </div>
-            <div>
-              <label class="form-label">Design</label>
-              <t t-if="model_products">
-                  <select class="form-select" onchange="window.location.href='/pdp/' + this.value">
-                    <t t-foreach="model_products" t-as="p">
-                        <option t-att-value="p.id" t-att-selected="p.id == product.id">
-                            <t t-esc="p.code"/>
-                        </option>
-                    </t>
-                  </select>
-              </t>
-              <t t-else="">
-                 <input type="text" class="form-control" readonly="1" value="No Design"/>
-              </t>
-            </div>
-            <div>
-               <label class="form-label">&#160;</label>
-               <a t-if="product" t-att-href="'/web#id=%s&amp;model=pdp.product' % product.id" class="btn btn-outline-secondary w-100" target="_blank">Open Backend</a>
-            </div>
-          </form>
+        <div class="d-flex flex-column vh-100 bg-light-subtle" style="font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.9rem;">
+          
+          <!-- 1. Strict Toolbar: Application | Manage | Tools | Help -->
+          <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom py-0 px-2 shadow-sm" style="min-height: 28px;">
+             <div class="container-fluid px-0">
+                <ul class="navbar-nav me-auto mb-0 d-flex flex-row align-items-center">
+                    <li class="nav-item"><a class="nav-link py-0 px-2 text-dark" href="/web">Application</a></li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle py-0 px-2 text-dark" href="#" id="manageDropdown" role="button" data-bs-toggle="dropdown">Manage</a>
+                        <ul class="dropdown-menu shadow-sm rounded-0" style="font-size: 0.85rem;">
+                            <li><a class="dropdown-item py-1" href="/web#action=pdp_stone.action_pdp_stone_type&amp;view_type=list">Stones &amp; Diamonds</a></li>
+                            <li><hr class="dropdown-divider my-0"/></li>
+                            <li><a class="dropdown-item py-1" href="/web#action=pdp_metal_market.action_pdp_market_metal&amp;view_type=list">Metals</a></li>
+                            <li><a class="dropdown-item py-1" href="/web#action=pdp_product.action_pdp_product_part&amp;view_type=list">Parts</a></li>
+                            <li><a class="dropdown-item py-1" href="/web#action=pdp_margin.action_pdp_margin&amp;view_type=list">Margins</a></li>
+                            <li><a class="dropdown-item py-1" href="#">Ornament Categories</a></li>
+                            <li><hr class="dropdown-divider my-0"/></li>
+                            <li><a class="dropdown-item py-1" href="/web#action=base.action_currency_form&amp;view_type=list">Currencies</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle py-0 px-2 text-dark" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown">Tools</a>
+                        <ul class="dropdown-menu shadow-sm rounded-0" style="font-size: 0.85rem;">
+                            <li><a class="dropdown-item py-1" href="#">Options</a></li>
+                            <li><a class="dropdown-item py-1" href="/web#action=base.ir_action_report">Reports</a></li>
+                            <li><a class="dropdown-item py-1" href="#">Check Data</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item"><a class="nav-link py-0 px-2 text-dark" href="#" onclick="alert('Help documentation coming soon')">Help</a></li>
+                </ul>
+             </div>
+          </nav>
 
-          <t t-if="product">
-            <div class="pdp-grid">
-                <!-- Left Panel: Info -->
-                <div class="pdp-panel-stack">
-                    <div class="pdp-panel card card-body">
-                        <strong>Product Details</strong>
-                        <div class="pdp-row mt-2">
-                           <label class="form-label mb-0">Code:</label> <span><t t-esc="product.code"/></span>
-                        </div>
-                         <div class="pdp-row">
-                           <label class="form-label mb-0">Model:</label> <span><t t-esc="product.model_id.code"/></span>
-                        </div>
-                        <div class="pdp-row">
-                           <label class="form-label mb-0">Metal:</label> <span><t t-esc="product.metal"/></span>
-                        </div>
+          <!-- 2. Top Content Pane: Model Selection & Image -->
+          <div class="container-fluid px-0 border-bottom bg-white d-flex" style="height: 40vh; min-height: 300px;">
+             <form action="/pdp" method="get" id="pdpForm" class="w-100 d-flex">
+                
+                <!-- Left: Model & Details -->
+                <div class="flex-grow-1 d-flex flex-column border-end p-2" style="width: 60%;">
+                    <!-- Model Line: Model Label | [Code] | List Button -->
+                    <div class="d-flex align-items-center mb-2">
+                         <span class="fw-bold me-2" style="width: 60px;">Model</span>
+                         <div class="input-group input-group-sm w-auto">
+                            <!-- We use a hidden select for functionality, but visual is strictly per spec? 
+                                 Spec says: "Model XXXX" and a "List" button.
+                                 We'll simulate this with a select that LOOKS like the input, and the List button triggers the dropdown. 
+                            -->
+                             <select name="model_id" class="form-select form-select-sm border-secondary rounded-0" style="min-width: 150px;" onchange="this.form.submit()">
+                                <option value="">Select...</option>
+                                <t t-foreach="all_models" t-as="m">
+                                  <option class="text-dark" t-att-value="m.id" t-att-selected="str(m.id) == str(current_model_id)">
+                                    <t t-esc="m.code"/>
+                                  </option>
+                                </t>
+                             </select>
+                             <button type="button" class="btn btn-outline-secondary rounded-0 px-3" onclick="alert('Full Model List View not implemented using frontend only. Use dropdown.')">List</button>
+                         </div>
+                    </div>
+
+                    <!-- Design Selection List -->
+                    <div class="flex-grow-1 border border-secondary bg-white overflow-auto p-0 mb-2">
+                         <table class="table table-sm table-hover mb-0 w-100" style="font-size: 0.85rem;">
+                            <thead class="bg-light sticky-top">
+                                <tr><th>Design</th><th>Category</th><th>Date</th></tr>
+                            </thead>
+                            <tbody>
+                                <t t-if="model_products">
+                                    <tr t-foreach="model_products" t-as="p" t-att-class="'table-active' if p.id == product.id else ''" style="cursor: pointer;" onclick="window.location.href='/pdp/' + this.getAttribute('data-id')" t-att-data-id="p.id">
+                                        <td>
+                                            <div class="fw-bold text-truncate" style="max-width: 250px;"><t t-esc="p.code"/></div>
+                                            <div class="small text-muted"><t t-esc="p.name"/></div>
+                                        </td>
+                                        <td>All</td> <!-- Category placeholder, need logic if real data exists -->
+                                        <td><t t-esc="p.create_date.strftime('%d/%m/%Y %H:%M:%S') if p.create_date else ''"/></td>
+                                    </tr>
+                                </t>
+                                <t t-else="">
+                                    <tr><td colspan="3" class="text-center text-muted fst-italic py-4">Select a model to view designs.</td></tr>
+                                </t>
+                            </tbody>
+                         </table>
                     </div>
                 </div>
 
-                <!-- Right Panel: Image -->
-                <div class="pdp-preview-card">
-                  <div class="pdp-preview-image-wrapper">
-                    <img class="pdp-preview-image" 
-                         t-att-src="'/web/image?model=pdp.product.model&amp;id=%s&amp;field=picture_image' % product.model_id.id" 
-                         alt="Product Image"/>
-                  </div>
-                </div>
-            </div>
-
-            <!-- Tabs -->
-            <div class="pdp-tab-panel mt-3">
-              <ul class="nav nav-tabs" id="pdpTab" role="tablist">
-                <li class="nav-item">
-                  <button class="nav-link active" id="stones-tab" data-bs-toggle="tab" data-bs-target="#stones" type="button">Stones</button>
-                </li>
-                <li class="nav-item">
-                  <button class="nav-link" id="metals-tab" data-bs-toggle="tab" data-bs-target="#metals" type="button">Metals</button>
-                </li>
-                <li class="nav-item">
-                  <button class="nav-link" id="labor-tab" data-bs-toggle="tab" data-bs-target="#labor" type="button">Labor / Parts</button>
-                </li>
-                 <li class="nav-item">
-                  <button class="nav-link" id="costing-tab" data-bs-toggle="tab" data-bs-target="#costing" type="button">Costing Summary</button>
-                </li>
-              </ul>
-              
-              <div class="tab-content pdp-tab-content p-3 border border-top-0" id="pdpTabContent">
-                <!-- Stones Tab -->
-                <div class="tab-pane fade show active" id="stones">
-                    <table class="table table-sm table-striped">
-                        <thead>
-                            <tr>
-                                <th>Stone</th>
-                                <th>Pieces</th>
-                                <th>Weight (ct)</th>
-                                <th>Reshaped</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr t-foreach="product.stone_composition_id.stone_line_ids" t-as="line">
-                                <td><t t-esc="line.stone_id.code if line.stone_id else ''"/></td>
-                                <td><t t-esc="line.pieces"/></td>
-                                <td><t t-esc="line.weight"/></td>
-                                <td>
-                                    <t t-if="line.reshaped_shape_id">
-                                        <t t-esc="line.reshaped_shape_id.name"/> 
-                                        (<t t-esc="line.reshaped_weight"/> ct)
-                                    </t>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Metals Tab -->
-                <div class="tab-pane fade" id="metals">
-                     <table class="table table-sm table-striped">
-                        <thead>
-                            <tr>
-                                <th>Metal</th>
-                                <th>Version</th>
-                                <th>Weight (g)</th>
-                                <th>Purity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr t-foreach="product.model_id.metal_weights_ids" t-as="m">
-                                <td><t t-esc="m.metal_id.name"/></td>
-                                <td><t t-esc="m.metal_version"/></td>
-                                <td><t t-esc="m.weight"/></td>
-                                <td><t t-esc="m.purity_id.code"/></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Labor Tab -->
-                <div class="tab-pane fade" id="labor">
-                     <h5>Parts</h5>
-                     <table class="table table-sm">
-                        <thead>
-                             <tr>
-                                <th>Part Name</th>
-                                <th>Quantity</th>
-                             </tr>
-                        </thead>
-                        <tbody>
-                             <tr t-foreach="product.part_ids" t-as="pp">
-                                 <td><t t-esc="pp.part_id.name"/></td>
-                                 <td><t t-esc="pp.quantity"/></td>
-                             </tr>
-                        </tbody>
-                     </table>
+                <!-- Right: Image/Drawing -->
+                <div class="bg-light d-flex flex-column p-2 position-relative" style="width: 40%; min-width: 300px;">
+                    <div class="d-flex justify-content-end mb-1">
+                        <span class="badge bg-secondary rounded-0 fw-normal">Picture</span>
+                    </div>
+                    <div class="flex-grow-1 bg-white border d-flex align-items-center justify-content-center">
+                         <t t-if="product and product.model_id">
+                            <img class="img-fluid" 
+                                 style="max-height: 90%; max-width: 90%; object-fit: contain;"
+                                 t-att-src="'/web/image?model=pdp.product.model&amp;id=%s&amp;field=picture_image' % product.model_id.id" 
+                                 alt="Drawing"/>
+                         </t>
+                         <t t-else="">
+                             <span class="text-muted small">No Drawing</span>
+                         </t>
+                    </div>
+                     <t t-if="product">
+                        <div class="text-center small mt-1 fw-bold"><t t-esc="product.code"/></div>
+                     </t>
                 </div>
                 
-                 <!-- Costing Tab -->
-                <div class="tab-pane fade" id="costing">
-                    <t t-if="price_preview">
-                      <div class="row">
-                        <div class="col-md-6">
-                            <h5>Details</h5>
-                            <table class="table table-sm text-end">
-                                <thead>
+             </form>
+          </div>
+
+          <!-- 3. Tabs Divider -->
+          <ul class="nav nav-tabs ps-2 bg-light border-bottom border-top" id="pdpTab" role="tablist" style="font-size: 0.85rem; min-height: 31px;">
+            <li class="nav-item"><button class="nav-link active py-1 px-3 rounded-0 border-bottom-0" data-bs-toggle="tab" data-bs-target="#costing">Costing Summary</button></li>
+            <li class="nav-item"><button class="nav-link py-1 px-3 rounded-0 border-bottom-0" data-bs-toggle="tab" data-bs-target="#weight">Weight Summary</button></li>
+            <li class="nav-item"><button class="nav-link py-1 px-3 rounded-0 border-bottom-0" data-bs-toggle="tab" data-bs-target="#stones">Stones</button></li>
+            <li class="nav-item"><button class="nav-link py-1 px-3 rounded-0 border-bottom-0" data-bs-toggle="tab" data-bs-target="#metals">Metals</button></li>
+            <li class="nav-item"><button class="nav-link py-1 px-3 rounded-0 border-bottom-0" data-bs-toggle="tab" data-bs-target="#labor">Labor etc.</button></li>
+            <li class="nav-item"><button class="nav-link py-1 px-3 rounded-0 border-bottom-0" data-bs-toggle="tab" data-bs-target="#matching">Matching</button></li>
+          </ul>
+
+          <!-- 4. Bottom Content Pane -->
+          <div class="flex-grow-1 overflow-auto bg-white p-2 mb-5" style="padding-bottom: 50px;">
+              <div class="tab-content h-100" id="pdpTabContent">
+                 
+                 <!-- A. Costing Summary -->
+                 <div class="tab-pane fade show active h-100" id="costing">
+                    <div class="row h-100 g-0">
+                        <!-- Left Inputs -->
+                        <div class="col-md-5 p-2 px-3 border-end">
+                             <input type="hidden" id="currentProductId" t-att-value="product.id if product else ''"/>
+                             <h6 class="bg-secondary text-white px-2 py-1 small fw-bold mb-3">Select Pricing Parameters</h6>
+                             <div class="row mb-2 align-items-center">
+                                <label class="col-4 text-end small fw-bold">Margin</label>
+                                <div class="col-8">
+                                    <select name="pricing_margin" class="form-select form-select-sm rounded-0 py-0">
+                                        <t t-foreach="margins" t-as="m"><option t-att-value="m.id"><t t-esc="m.name"/></option></t>
+                                    </select>
+                                </div>
+                             </div>
+                             <div class="row mb-2 align-items-center">
+                                <label class="col-4 text-end small fw-bold">Purity</label>
+                                <div class="col-8">
+                                    <select class="form-select form-select-sm rounded-0 py-0">
+                                        <option>18K</option>
+                                        <option>14K</option>
+                                        <option>PT</option>
+                                    </select>
+                                </div>
+                             </div>
+                             <div class="row mb-2 align-items-center">
+                                <label class="col-4 text-end small fw-bold">Metal Conv.</label>
+                                <div class="col-8">
+                                    <select class="form-select form-select-sm rounded-0 py-0">
+                                        <option value="">None</option>
+                                        <t t-foreach="metals" t-as="m"><option t-att-value="m.id"><t t-esc="m.name"/></option></t>
+                                    </select>
+                                </div>
+                             </div>
+                             <div class="row mb-2 align-items-center">
+                                <label class="col-4 text-end small fw-bold">Currency</label>
+                                <div class="col-6">
+                                    <select name="pricing_currency" class="form-select form-select-sm rounded-0 py-0">
+                                        <t t-foreach="currencies" t-as="c"><option t-att-value="c.id" t-att-selected="c.name == 'USD'"><t t-esc="c.name"/></option></t>
+                                    </select>
+                                </div>
+                             </div>
+                             <div class="row mb-2 align-items-center">
+                                <label class="col-4 text-end small fw-bold">US$ Rate</label>
+                                <div class="col-3">
+                                    <input type="text" id="inputUsRate" class="form-control form-control-sm rounded-0 py-0 text-end" value="1.00"/>
+                                </div>
+                                <div class="col-3 ps-0">
+                                    <a href="/web#action=base.action_currency_form&amp;view_type=list" class="btn btn-sm btn-outline-dark rounded-0 py-0 w-100" target="_blank">Rates</a>
+                                </div>
+                             </div>
+                             
+                             <div class="mt-4 pt-3 border-top">
+                                <div class="d-flex justify-content-end gap-2">
+                                     <button id="btnUpdatePrice" class="btn btn-sm btn-outline-secondary rounded-0 px-3">Update Price</button>
+                                </div>
+                             </div>
+                        </div>
+
+                        <!-- Right Grid -->
+                        <div class="col-md-7 p-2 px-3">
+                             <table class="table table-bordered table-sm small table-striped mb-0 text-end">
+                                <thead class="bg-dark text-white text-center">
                                     <tr>
-                                        <th class="text-start">Type</th>
+                                        <th class="text-start">Item</th>
                                         <th>Cost</th>
                                         <th>Margin</th>
                                         <th>Price</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr t-foreach="price_preview.line_ids" t-as="line">
-                                        <td class="text-start"><t t-esc="line.type"/></td>
-                                        <td><t t-esc="line.cost" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
-                                        <td><t t-esc="line.margin" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
-                                        <td><t t-esc="line.price" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                <tbody id="priceTableBody">
+                                    <t t-if="price_preview">
+                                        <tr t-foreach="price_preview.line_ids" t-as="line">
+                                            <td class="text-start fw-bold"><t t-esc="line.type"/></td>
+                                            <td><span t-field="line.cost" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                            <td><span t-field="line.margin" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                            <td><span t-field="line.price" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                        </tr>
+                                         <!-- Totals -->
+                                        <tr class="fw-bold" style="background-color: #ffc107;">
+                                            <td class="text-start">Net / Final</td>
+                                            <td><span t-field="price_preview.cost" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                            <td><span t-field="price_preview.margin" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                            <td><span t-field="price_preview.price" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                        </tr>
+                                    </t>
+                                    <t t-else="">
+                                        <tr><td colspan="4" class="text-center py-4">Price not calculated.</td></tr>
+                                    </t>
+                                </tbody>
+                             </table>
+                        </div>
+                    </div>
+                 </div>
+
+                 <!-- B. Weight Summary (Split into Stone & Recut + Metal) -->
+                 <div class="tab-pane fade p-3" id="weight">
+                     <div class="row h-100">
+                        <!-- Left: Stone Tables -->
+                        <div class="col-md-6 border-end">
+                            <!-- Stone (Original) -->
+                            <h6 class="small fw-bold mb-1">Stone</h6>
+                            <table class="table table-sm table-bordered small mb-3">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Shade</th>
+                                        <th>Shape</th>
+                                        <th>Pcs</th>
+                                        <th>Weight</th>
                                     </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-if="product and product.stone_composition_id">
+                                        <tr t-foreach="product.stone_composition_id.stone_line_ids" t-as="line">
+                                            <td><t t-esc="line.stone_id.type_id.name"/></td>
+                                            <td><t t-esc="line.stone_id.shade_id.name"/></td>
+                                            <td><t t-esc="line.stone_id.shape_id.name"/></td>
+                                            <td><t t-esc="line.pieces"/></td>
+                                            <td class="text-end"><t t-esc="line.weight"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+
+                            <!-- Stone after Recutting -->
+                            <h6 class="small fw-bold mb-1">Stone after Recutting</h6>
+                            <table class="table table-sm table-bordered small">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Shade</th>
+                                        <th>Shape</th>
+                                        <th>Pcs</th>
+                                        <th>Weight</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-if="product and product.stone_composition_id">
+                                        <tr t-foreach="product.stone_composition_id.stone_line_ids" t-as="line">
+                                            <td><t t-esc="line.stone_id.type_id.name"/></td>
+                                            <td><t t-esc="line.stone_id.shade_id.name"/></td>
+                                            <!-- Use reshaped_shape_id if available, field might be empty -->
+                                            <td><t t-esc="line.reshaped_shape_id.name if line.reshaped_shape_id else ''"/></td>
+                                            <td><t t-esc="line.pieces"/></td>
+                                            <td class="text-end"><t t-esc="line.reshaped_weight"/></td> <!-- Use reshaped_weight -->
+                                        </tr>
+                                    </t>
                                 </tbody>
                             </table>
                         </div>
+                        
+                        <!-- Right: Metal / Totals -->
                         <div class="col-md-6">
-                           <h5>Total</h5>
-                           <div class="card card-body bg-light">
-                                <div class="d-flex justify-content-between">
-                                    <span>Total Cost:</span>
-                                    <strong t-field="price_preview.cost"/>
-                                </div>
-                                 <div class="d-flex justify-content-between">
-                                    <span>Total Margin:</span>
-                                    <strong t-field="price_preview.margin"/>
-                                </div>
-                                <hr/>
-                                <div class="d-flex justify-content-between fs-5">
-                                    <span>Final Price:</span>
-                                    <strong t-field="price_preview.price" class="text-primary"/>
-                                </div>
-                           </div>
+                            <h6 class="small fw-bold mb-1">Metal</h6>
+                            <table class="table table-sm table-bordered small bg-white">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Metal</th>
+                                        <th>Purity</th>
+                                        <th>Weight</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-if="product and product.model_id">
+                                        <tr t-foreach="product.model_id.metal_weights_ids" t-as="m">
+                                            <td><t t-esc="m.metal_id.name"/></td>
+                                            <td><t t-esc="m.purity_id.code"/></td>
+                                            <td class="text-end"><t t-esc="m.weight"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
                         </div>
-                      </div>
-                    </t>
-                    <t t-else="">
-                        <div class="alert alert-warning">Pricing could not be calculated. Check server logs or configuration.</div>
-                    </t>
-                </div>
+                     </div>
+                 </div>
 
+                 <!-- C. Stones -->
+                 <div class="tab-pane fade" id="stones">
+                    <table class="table table-sm table-hover small mb-0 table-bordered">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>LineNum</th>
+                                <th>Setting</th>
+                                <th>Stone</th>
+                                <th>Shape/Ref</th>
+                                <th>Pcs</th>
+                                <th>Wgt</th>
+                                <th>RecShape</th>
+                                <th>RecSize</th>
+                                <th>RecWgt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-if="product and product.stone_composition_id">
+                                <tr t-foreach="product.stone_composition_id.stone_line_ids" t-as="line">
+                                    <td><t t-esc="line_index + 1"/></td> <!-- Simulate LineNum -->
+                                    <td>-</td> <!-- Setting placeholder -->
+                                    <td><t t-esc="line.stone_id.code"/></td>
+                                    <td><t t-esc="line.stone_id.shape_id.shape"/></td>
+                                    <td><t t-esc="line.pieces"/></td>
+                                    <td><t t-esc="line.weight"/></td>
+                                    <td><t t-esc="line.reshaped_shape_id.shape if line.reshaped_shape_id else ''"/></td>
+                                    <td>-</td> <!-- RecSize placeholder -->
+                                    <td><t t-esc="line.reshaped_weight"/></td> 
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                 </div>
+
+                 <!-- D. Metals -->
+                 <div class="tab-pane fade" id="metals">
+                    <table class="table table-sm table-hover small mb-0 table-bordered">
+                         <thead class="bg-light">
+                             <tr>
+                                 <th>Metal</th>
+                                 <th>Ver.</th>
+                                 <th>Purity</th>
+                                 <th>Wgt (g)</th>
+                                 <th>Actions</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+                            <t t-if="product and product.model_id">
+                                <tr t-foreach="product.model_id.metal_weights_ids" t-as="m">
+                                    <td><t t-esc="m.metal_id.name"/></td>
+                                    <td><t t-esc="m.metal_version"/></td>
+                                    <td><t t-esc="m.purity_id.code"/></td>
+                                    <td><t t-esc="m.weight"/></td>
+                                    <td class="text-center"><button class="btn btn-outline-danger btn-sm py-0 border-0">-</button></td>
+                                </tr>
+                            </t>
+                         </tbody>
+                    </table>
+                 </div>
+
+                 <!-- E. Labor -->
+                 <div class="tab-pane fade" id="labor">
+                     <div class="p-2">
+                         <h6 class="small fw-bold">Labor (Model Level)</h6>
+                         <table class="table table-sm table-bordered small w-auto">
+                            <thead class="bg-light"><tr><th>Type</th><th>Qty</th></tr></thead>
+                             <tbody>
+                                 <tr t-foreach="product.part_ids" t-as="pp">
+                                     <td><t t-esc="pp.part_id.name"/></td>
+                                     <td><t t-esc="pp.quantity"/></td>
+                                 </tr>
+                            </tbody>
+                         </table>
+                         <button class="btn btn-sm btn-outline-dark rounded-0 px-3">Parts</button>
+                     </div>
+                 </div>
+
+                 <!-- F. Matching -->
+                 <div class="tab-pane fade p-2" id="matching">
+                      <div class="d-flex gap-3 overflow-auto">
+                        <t t-foreach="product.model_id.matching_model_ids" t-as="match_model">
+                            <div class="border text-center bg-white p-2" style="width: 120px;">
+                                <img t-att-src="'/web/image?model=pdp.product.model&amp;id=%s&amp;field=picture_image' % match_model.id" 
+                                     class="img-fluid mb-1" style="height: 80px; object-fit: contain;" alt=".."/>
+                                <div class="small fw-bold text-truncate"><a t-att-href="'/pdp?model_id=%s' % match_model.id"><t t-esc="match_model.code"/></a></div>
+                            </div>
+                        </t>
+                     </div>
+                 </div>
               </div>
-            </div>
-          </t>
-          <t t-else="">
-            <div class="alert alert-warning mt-4">
-                Please select a Model to view its Products.
-            </div>
-          </t>
-
-          <div class="pdp-footer-bar mt-4">
-             <button class="btn btn-secondary">New</button>
-             <button class="btn btn-secondary">Save</button>
-             <button class="btn btn-secondary">Copy</button>
           </div>
+
+          <!-- 5. Footer Toolbar (Fixed & Compact) -->
+          <footer class="fixed-bottom bg-light border-top d-flex align-items-center px-2 shadow-lg" style="height: 40px; z-index: 1040;">
+             <div class="btn-group me-auto">
+                 <form action="/pdp/create" method="post" class="d-flex">
+                    <input type="hidden" name="model_id" t-att-value="product.model_id.id if product else ''"/>
+                    <button type="submit" class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3">New</button>
+                 </form>
+                 <div class="vr mx-1"></div>
+                 <form t-att-action="'/pdp/delete/%s' % product.id" method="post" class="d-flex" t-if="product" onsubmit="return confirm('Delete?');">
+                    <button type="submit" class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3">Delete</button>
+                 </form>
+                 <div class="vr mx-1" t-if="product"></div>
+                 <!-- Save Button -->
+                 <button type="button" class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3" t-if="product"
+                         onclick="document.getElementById('pdpForm').action='/pdp/save'; document.getElementById('pdpForm').method='post'; document.getElementById('pdpForm').submit();">
+                         Save
+                 </button>
+             </div>
+             
+             <div class="btn-group">
+                 <button class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3">Margins</button>
+                 <button class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3" onclick="location.reload()">Refresh</button>
+                 <button class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3">Close</button>
+             </div>
+          </footer>
+          
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-H2UH7x/6KijLJrVN6a8GN28AL5soiceqd7qV671CyMfCVxMDamS0ajENPBIfl9xG" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Tabs manual handling
+            document.querySelectorAll('#pdpTab button').forEach(button => {
+                button.addEventListener('click', event => {
+                    event.preventDefault();
+                    document.querySelectorAll('#pdpTab button').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
+                    button.classList.add('active');
+                    const target = document.querySelector(button.getAttribute('data-bs-target'));
+                    if(target) target.classList.add('show', 'active');
+                });
+            });
+
+            // Pricing Interactivity
+            document.addEventListener('DOMContentLoaded', function() {
+                const marginSelect = document.querySelector('select[name="pricing_margin"]');
+                const currencySelect = document.querySelector('select[name="pricing_currency"]');
+                const updateBtn = document.getElementById('btnUpdatePrice');
+                const rateInput = document.getElementById('inputUsRate');
+                const productId = document.getElementById('currentProductId').value;
+
+                if(updateBtn && productId) {
+                   updateBtn.addEventListener('click', function() {
+                        const marginId = marginSelect ? marginSelect.value : null;
+                        const currencyId = currencySelect ? currencySelect.value : null;
+                        
+                        // Using Odoo RPC (jsonrpc)
+                        fetch('/pdp/update_price', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                jsonrpc: "2.0",
+                                method: "call",
+                                params: {
+                                    product_id: productId,
+                                    margin_id: marginId,
+                                    currency_id: currencyId
+                                }
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if(data.result) {
+                                if(data.result.error) {
+                                    alert('Error: ' + data.result.error);
+                                } else {
+                                    renderPriceTable(data.result);
+                                    if(data.result.currency && rateInput) {
+                                        rateInput.value = data.result.currency.rate.toFixed(4);
+                                    }
+                                }
+                            } else if (data.error) {
+                                console.error(data.error);
+                                alert("Server Error");
+                            }
+                        });
+                   });
+                }
+                
+                // Helper to render table
+                function renderPriceTable(data) {
+                    const tbody = document.querySelector('#priceTableBody');
+                    if(!tbody) return;
+                    tbody.innerHTML = '';
+                    
+                    const fmt = (val) => {
+                         // Simple formatter, ideally use Intl.NumberFormat based on currency info
+                         return val.toFixed(2) + ' ' + (data.currency.symbol || '');
+                    };
+
+                    data.lines.forEach(line => {
+                        const row = `<tr>
+                            <td class="text-start fw-bold">${line.type}</td>
+                            <td>${fmt(line.cost)}</td>
+                            <td>${fmt(line.margin)}</td>
+                            <td>${fmt(line.price)}</td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+
+                    // Totals
+                    const total = `
+                        <tr class="fw-bold" style="background-color: #ffc107;">
+                            <td class="text-start">Net / Final</td>
+                            <td>${fmt(data.totals.cost)}</td>
+                            <td>${fmt(data.totals.margin)}</td>
+                            <td>${fmt(data.totals.price)}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += total;
+                }
+            });
+        </script>
       </body>
     </html>
   </template>
