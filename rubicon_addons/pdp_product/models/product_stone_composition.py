@@ -12,3 +12,29 @@ class ProductStoneComposition(models.Model):
         inverse_name='composition_id',
         string='Stone Lines'
     )
+
+    # =========================================================================
+    # Domain Methods - Reusable by API, Cron, OWL, Reports
+    # =========================================================================
+
+    def to_dict_list(self):
+        """Return all stone lines as list of dicts."""
+        self.ensure_one()
+        return [line.to_dict() for line in self.stone_line_ids]
+
+    def get_weight_summary(self):
+        """Compute total weight and pieces for this composition."""
+        self.ensure_one()
+        total_weight = 0.0
+        total_pieces = 0
+        for line in self.stone_line_ids:
+            total_pieces += line.pieces
+            try:
+                w = float(str(line.weight).replace(',', '.')) if line.weight else 0.0
+                total_weight += w * line.pieces
+            except (ValueError, TypeError):
+                pass
+        return {
+            'total_weight': total_weight,
+            'total_pieces': total_pieces,
+        }

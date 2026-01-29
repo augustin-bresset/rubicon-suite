@@ -37,13 +37,18 @@ class PriceStone(models.TransientModel):
             ])
             rate_by_type = {ml.stone_type_id.id: (ml.rate or 1.0) for ml in mlines}
 
+        warnings = []
         for line in lines:
             stone = line.stone_id
             if not stone:
                 continue
             
             from_cur = stone.currency_id or currency
-            unit_cost = self._convert(stone.cost or 0.0, from_cur, currency, date)
+            raw_cost = stone.cost or 0.0
+            if raw_cost <= 0.0:
+                warnings.append(f"Stone {stone.code} has no cost defined.")
+
+            unit_cost = self._convert(raw_cost, from_cur, currency, date)
             cost = unit_cost * (line.pieces or 1.0)
             total_cost += cost
             
@@ -69,5 +74,5 @@ class PriceStone(models.TransientModel):
             margin_val = (rate - 1.0) * cost
             total_margin += margin_val
 
-        return self._payload('stone', total_cost, total_margin, currency)
+        return self._payload('stone', total_cost, total_margin, currency, warnings=warnings)
 

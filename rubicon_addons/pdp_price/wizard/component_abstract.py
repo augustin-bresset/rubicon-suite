@@ -15,10 +15,16 @@ class PriceComponent(models.TransientModel):
         return from_cur._convert(amount, to_cur, self.env.company, date)
 
     @api.model
-    def _payload(self, type_, cost, margin, currency):
+    def _payload(self, type_, cost, margin, currency, warnings=None):
         cost = currency.round(cost or 0.0)
         margin = currency.round(margin or 0.0)
-        return {'type': type_, 'cost': cost, 'margin': margin, 'price': cost + margin}
+        return {
+            'type': type_,
+            'cost': cost,
+            'margin': margin,
+            'price': cost + margin,
+            'warnings': warnings or []
+        }
 
     # @api.model
     # def compute_payload(self, *args, **kwargs):

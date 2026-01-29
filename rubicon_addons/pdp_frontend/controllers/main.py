@@ -5,15 +5,14 @@ from odoo.http import request
 class PDPFrontendController(http.Controller):
     @http.route(["/pdp", "/pdp/<model('pdp.product'):product>"], type="http", auth="user")
     def pdp_home(self, product=None, **kwargs):
-        """Serve the PDP frontend preview page using the Facade Service."""
+        """Serve the PDP frontend preview page using the unified API Service."""
         
         # Resolve IDs from args or kwargs
         product_id = product.id if product else kwargs.get('product_id')
         model_id = kwargs.get('model_id')
 
-        # Call the Service (Facade)
-        # This is the "API Call" the user requested, just internal for now.
-        values = request.env['pdp.frontend.service'].get_pdp_state(product_id=product_id, model_id=model_id)
+        # Call the unified API Service
+        values = request.env['pdp.api.service'].get_pdp_state(product_id=product_id, model_id=model_id)
 
         return request.render("pdp_frontend.pdp_frontend_page", values)
 
@@ -49,9 +48,64 @@ class PDPFrontendController(http.Controller):
         return request.redirect("/pdp")
     
     @http.route("/pdp/save", type="http", auth="user", methods=["POST"], csrf=False)
-    def pdp_save(self, product_id, code, **kwargs):
-        Product = request.env['pdp.product']
-        product = Product.browse(int(product_id))
+    def pdp_save(self, product_id=None, code=None, **kwargs):
+        """Save product data from the frontend form."""
+        try:
+            if not product_id:
+                return request.redirect("/pdp")
+            
+            Product = request.env['pdp.product']
+            product = Product.browse(int(product_id))
+            
+            if product.exists():
+                vals = {}
+                if code:
+                    vals['code'] = code
+                # Add more fields as needed from kwargs
+                if vals:
+                    product.write(vals)
+                return request.redirect(f"/pdp?product_id={product.id}")
+            return request.redirect("/pdp")
+        except Exception as e:
+            # Log error and redirect
+            return request.redirect(f"/pdp?error={str(e)}")
+
+    @http.route("/pdp/create_copy", type="http", auth="user", methods=["POST"], csrf=False)
+    def pdp_create_copy(self, source_product_id=None, new_code=None, **kwargs):
+        """Create a new product by copying an existing one."""
+        try:
+            if not source_product_id:
+                return request.redirect("/pdp")
+            
+            Product = request.env['pdp.product']
+            source = Product.browse(int(source_product_id))
+            
+            if source.exists():
+                copy_code = new_code if new_code else f"{source.code} (Copy)"
+                new_product = source.copy({'code': copy_code})
+                return request.redirect(f"/pdp?product_id={new_product.id}")
+            return request.redirect("/pdp")
+        except Exception as e:
+            return request.redirect(f"/pdp?error={str(e)}")
+
+    @http.route("/pdp/create_blank", type="http", auth="user", methods=["POST"], csrf=False)
+    def pdp_create_blank(self, model_id=None, new_code=None, **kwargs):
+        """Create a new blank product for a model."""
+        try:
+            if not model_id:
+                return request.redirect("/pdp")
+            
+            Product = request.env['pdp.product']
+            code = new_code if new_code else 'NEW-DESIGN'
+            
+            new_product = Product.create({
+                'model_id': int(model_id),
+                'code': code,
+            })
+            return request.redirect(f"/pdp?product_id={new_product.id}")
+        except Exception as e:
+            return request.redirect(f"/pdp?error={str(e)}")
+
     @http.route("/pdp/update_price", type="json", auth="user")
     def pdp_update_price(self, product_id, margin_id, currency_id, metal_id=None):
         """

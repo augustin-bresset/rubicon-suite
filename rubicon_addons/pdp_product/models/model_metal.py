@@ -34,4 +34,16 @@ class ModelMetal(models.Model):
         index=True,
         )
 
-    
+    # =========================================================================
+    # Domain Methods - Reusable by API, Cron, OWL, Reports
+    # =========================================================================
+
+    def to_dict(self):
+        """Return metal weight data as JSON-serializable dict."""
+        return {
+            'metal': self.metal_id.name if self.metal_id else '',
+            'metal_code': self.metal_id.code if self.metal_id else '',
+            'purity': self.purity_id.code if self.purity_id else '',
+            'weight': self.weight,
+            'version': self.metal_version,
+        }

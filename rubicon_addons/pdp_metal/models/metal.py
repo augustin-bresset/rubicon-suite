@@ -23,6 +23,17 @@ class Metal(models.Model):
         default=lambda self: self.env.company.currency_id.id
     )
     
+    cost_method = fields.Selection(
+        [('fixed', 'Fixed Cost'), ('market', 'Market Price')],
+        string='Cost Method',
+        default='fixed',
+        required=True
+    )
+    market_metal_id = fields.Many2one(
+        'pdp.market.metal',
+        string='Market Metal'
+    )
+    
     plating      = fields.Boolean(string='Plating')
     gold         = fields.Boolean(string='Is Gold', default=True)
     reference    = fields.Boolean(string='Reference (18K gold)', default=False)

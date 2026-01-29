@@ -44,12 +44,14 @@ class PricePreview(models.TransientModel):
                 currency=self.currency_id,
                 date=self.date,
             )
+            warnings = payload.get('warnings', [])
             vals_list.append({
                 'preview_id': self.id,
                 'type': code,
                 'cost': payload['cost'],
                 'margin': payload['margin'],
                 'price': payload['price'],
+                'warnings': '\n'.join(warnings) if warnings else False,
             })
         self.env['pdp.price.preview.line'].create(vals_list)
         return {
@@ -58,6 +60,41 @@ class PricePreview(models.TransientModel):
             'res_id': self.id,
             'view_mode': 'form',
             'target': 'new',
+        }
+
+    def action_save(self):
+        self.ensure_one()
+        # Create pdp.price.product
+        
+        detail = []
+        for line in self.line_ids:
+            detail.append({
+                'type': line.type,
+                'cost': line.cost,
+                'margin': line.margin,
+                'price': line.price,
+                'warnings': line.warnings or ''
+            })
+            
+        vals = {
+            'product_id': self.product_id.id,
+            'margin_id': self.margin_id.id,
+            'date': self.date,
+            'currency_id': self.currency_id.id,
+            'cost': self.cost,
+            'margin': self.margin,
+            'price': self.price,
+            'detail_json': detail,
+        }
+        
+        saved_record = self.env['pdp.price.product'].create(vals)
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'pdp.price.product',
+            'res_id': saved_record.id,
+            'view_mode': 'form',
+            'target': 'current',
         }
 
 class PricePreviewLine(models.TransientModel):
@@ -76,3 +113,4 @@ class PricePreviewLine(models.TransientModel):
     margin = fields.Monetary(currency_field='currency_id')
     price = fields.Monetary(currency_field='currency_id')
     currency_id = fields.Many2one(related='preview_id.currency_id', store=False, readonly=True)
+    warnings = fields.Text(string='Warnings', readonly=True)

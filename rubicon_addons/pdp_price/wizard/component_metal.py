@@ -42,8 +42,43 @@ class PriceMetal(models.TransientModel):
         except Exception:
             usd = currency  # au pire aucune conversion
 
-        # Exemple: cost_per_gram = cost_per_ounce / 31.1034768
-        cost_per_gram_usd = (model_metal.metal_id.cost or 0.0) / OZ_TO_G
+        cost_per_gram_usd = 0.0
+        
+        # Check cost method
+        cost_method = model_metal.metal_id.cost_method
+        
+        if cost_method == 'market' and model_metal.metal_id.market_metal_id:
+            # Market Cost Strategy
+            market_metal = model_metal.metal_id.market_metal_id
+            
+            # Find latest price
+            MarketPrice = self.env['pdp.market.price']
+            price_rec = MarketPrice.search([
+                ('metal_id', '=', market_metal.id),
+                ('date', '<=', date or fields.Date.context_today(self))
+            ], order='date desc', limit=1)
+            
+            if price_rec:
+                # Convert price to USD
+                market_price_usd = self._convert(price_rec.price, price_rec.currency_id, usd, date)
+                
+                # Convert unit to gram
+                if market_metal.base_unit == 'troy_oz':
+                    cost_per_gram_usd = market_price_usd / OZ_TO_G
+                else: # gram
+                    cost_per_gram_usd = market_price_usd
+            else:
+                # Fallback to fixed cost if no market price found? Or 0?
+                # For now let's fall back to 0 but maybe we should log a warning (future step)
+                pass 
+                
+        else:
+            # Fixed Cost Strategy (default)
+            # cost is per ounce in metal definition
+            fixed_cost_usd = self._convert(model_metal.metal_id.cost or 0.0, model_metal.metal_id.currency_id, usd, date)
+            cost_per_gram_usd = fixed_cost_usd / OZ_TO_G
+
+
         grams = model_metal.weight or 0.0
         usd_cost = cost_per_gram_usd * grams
         total_cost = self._convert(usd_cost, usd, currency, date)

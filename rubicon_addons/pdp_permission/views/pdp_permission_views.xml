@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- Permission Tree View -->
+    <!-- ============================================================ -->
+    <record id="view_pdp_permission_tree" model="ir.ui.view">
+        <field name="name">pdp.permission.tree</field>
+        <field name="model">pdp.permission</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Permission Form View -->
+    <!-- ============================================================ -->
+    <record id="view_pdp_permission_form" model="ir.ui.view">
+        <field name="name">pdp.permission.form</field>
+        <field name="model">pdp.permission</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <field name="active" widget="boolean_button"
+                               options='{"terminology": "archive"}'/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="category"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Permission Search View -->
+    <!-- ============================================================ -->
+    <record id="view_pdp_permission_search" model="ir.ui.view">
+        <field name="name">pdp.permission.search</field>
+        <field name="model">pdp.permission</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="code"/>
+                <field name="name"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_category" string="Category" context="{'group_by': 'category'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Permission Action -->
+    <!-- ============================================================ -->
+    <record id="action_pdp_permission" model="ir.actions.act_window">
+        <field name="name">Permissions</field>
+        <field name="res_model">pdp.permission</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_group_by_category': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No permissions defined yet.
+            </p>
+            <p>
+                Permissions define what actions users can perform in PDP.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Role Tree View -->
+    <!-- ============================================================ -->
+    <record id="view_pdp_role_tree" model="ir.ui.view">
+        <field name="name">pdp.role.tree</field>
+        <field name="model">pdp.role</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="permission_ids" widget="many2many_tags"/>
+                <field name="user_ids" widget="many2many_tags"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Role Form View -->
+    <!-- ============================================================ -->
+    <record id="view_pdp_role_form" model="ir.ui.view">
+        <field name="name">pdp.role.form</field>
+        <field name="model">pdp.role</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <field name="active" widget="boolean_button"
+                               options='{"terminology": "archive"}'/>
+                    </div>
+                    <group>
+                        <field name="name"/>
+                        <field name="description"/>
+                    </group>
+                    <notebook>
+                        <page name="permissions" string="Permissions">
+                            <field name="permission_ids">
+                                <tree>
+                                    <field name="category"/>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="users" string="Users">
+                            <field name="user_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="login"/>
+                                    <field name="email"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Role Action -->
+    <!-- ============================================================ -->
+    <record id="action_pdp_role" model="ir.actions.act_window">
+        <field name="name">Roles</field>
+        <field name="res_model">pdp.role</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first role.
+            </p>
+            <p>
+                Roles group permissions together and are assigned to users.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- User Form Extension -->
+    <!-- ============================================================ -->
+    <record id="view_users_form_pdp" model="ir.ui.view">
+        <field name="name">res.users.form.pdp</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page name="pdp_access" string="PDP Access">
+                    <group>
+                        <field name="pdp_role_ids" widget="many2many_tags"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

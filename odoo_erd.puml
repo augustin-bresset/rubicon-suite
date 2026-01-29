@@ -15,7 +15,6 @@ class "pdp.addon.cost" as pdp_addon_cost {
   - write_uid : m2o→res.users
   - cost : monetary
 }
-
 class "pdp.addon.type" as pdp_addon_type {
   + id : integer
   - code : char
@@ -26,6 +25,15 @@ class "pdp.addon.type" as pdp_addon_type {
   - id : integer
   - create_uid : m2o→res.users
   - write_uid : m2o→res.users
+}
+class "pdp.api.jwt" as pdp_api_jwt {
+  + id : integer
+}
+class "pdp.api.service" as pdp_api_service {
+  + id : integer
+}
+class "pdp.frontend.service" as pdp_frontend_service {
+  + id : integer
 }
 class "pdp.labor.cost.model" as pdp_labor_cost_model {
   + id : integer
@@ -150,6 +158,48 @@ class "pdp.margin.stone.conditional" as pdp_margin_stone_conditional {
   - comparative_cost : monetary
   - operator : selection
 }
+class "pdp.market.metal" as pdp_market_metal {
+  + id : integer
+  - code : char
+  - display_name : char
+  - name : char
+  - create_date : datetime
+  - write_date : datetime
+  - id : integer
+  - base_currency_id : m2o→res.currency
+  - create_uid : m2o→res.users
+  - write_uid : m2o→res.users
+  - base_unit : selection
+}
+class "pdp.market.price" as pdp_market_price {
+  + id : integer
+  - display_name : char
+  - date : date
+  - create_date : datetime
+  - write_date : datetime
+  - id : integer
+  - create_uid : m2o→res.users
+  - currency_id : m2o→res.currency
+  - metal_id : m2o→pdp.market.metal
+  - source_id : m2o→pdp.market.source
+  - write_uid : m2o→res.users
+  - price : monetary
+}
+class "pdp.market.provider.nymex" as pdp_market_provider_nymex {
+  + id : integer
+}
+class "pdp.market.source" as pdp_market_source {
+  + id : integer
+  - display_name : char
+  - name : char
+  - create_date : datetime
+  - write_date : datetime
+  - id : integer
+  - create_uid : m2o→res.users
+  - write_uid : m2o→res.users
+  - type : selection
+  - config_json : text
+}
 class "pdp.metal" as pdp_metal {
   + id : integer
   - gold : boolean
@@ -163,8 +213,52 @@ class "pdp.metal" as pdp_metal {
   - id : integer
   - create_uid : m2o→res.users
   - currency_id : m2o→res.currency
+  - market_metal_id : m2o→pdp.market.metal
   - write_uid : m2o→res.users
   - cost : monetary
+  - cost_method : selection
+}
+class "pdp.metal.alloy" as pdp_metal_alloy {
+  + id : integer
+  - display_name : char
+  - name : char
+  - variant_code : char
+  - create_date : datetime
+  - write_date : datetime
+  - yield_factor : float
+  - id : integer
+  - create_uid : m2o→res.users
+  - write_uid : m2o→res.users
+  - line_ids : o2m→pdp.metal.alloy.line
+}
+class "pdp.metal.alloy.line" as pdp_metal_alloy_line {
+  + id : integer
+  - display_name : char
+  - create_date : datetime
+  - write_date : datetime
+  - ratio : float
+  - id : integer
+  - alloy_id : m2o→pdp.metal.alloy
+  - create_uid : m2o→res.users
+  - metal_id : m2o→pdp.market.metal
+  - write_uid : m2o→res.users
+}
+class "pdp.metal.parameter" as pdp_metal_parameter {
+  + id : integer
+  - display_name : char
+  - name : char
+  - create_date : datetime
+  - write_date : datetime
+  - loss_percentage : float
+  - risk_factor : float
+  - id : integer
+  - create_uid : m2o→res.users
+  - metal_id : m2o→pdp.metal
+  - write_uid : m2o→res.users
+  - composition : text
+}
+class "pdp.metal.price.service" as pdp_metal_price_service {
+  + id : integer
 }
 class "pdp.metal.purity" as pdp_metal_purity {
   + id : integer
@@ -202,23 +296,84 @@ class "pdp.part.cost" as pdp_part_cost {
   - write_uid : m2o→res.users
   - cost : monetary
 }
+class "pdp.picture" as pdp_picture {
+  + id : integer
+  - image : binary
+  - image_1920 : binary
+  - active : boolean
+  - checksum : char
+  - display_name : char
+  - filename : char
+  - create_date : datetime
+  - write_date : datetime
+  - id : integer
+  - create_uid : m2o→res.users
+  - model_id : m2o→pdp.product.model
+  - write_uid : m2o→res.users
+}
+class "pdp.price.product" as pdp_price_product {
+  + id : integer
+  - display_name : char
+  - date : date
+  - create_date : datetime
+  - write_date : datetime
+  - id : integer
+  - detail_json : json
+  - create_uid : m2o→res.users
+  - currency_id : m2o→res.currency
+  - margin_id : m2o→pdp.margin
+  - product_id : m2o→pdp.product
+  - write_uid : m2o→res.users
+  - cost : monetary
+  - margin : monetary
+  - price : monetary
+}
+class "pdp.price.service" as pdp_price_service {
+  + id : integer
+}
 class "pdp.product" as pdp_product {
   + id : integer
+  - model_picture_image : binary
   - active : boolean
   - in_collection : boolean
   - code : char
   - display_name : char
   - metal : char
+  - frontend_date : date
   - create_date : datetime
   - write_date : datetime
+  - frontend_usd_rate : float
+  - frontend_variant_count : integer
   - id : integer
+  - frontend_variant_ids : m2m→pdp.product
   - category_id : m2o→pdp.product.category
   - create_uid : m2o→res.users
+  - frontend_currency_id : m2o→res.currency
+  - frontend_margin_id : m2o→pdp.margin
+  - frontend_purity_id : m2o→pdp.metal.purity
   - model_id : m2o→pdp.product.model
   - stone_composition_id : m2o→pdp.product.stone.composition
   - write_uid : m2o→res.users
+  - frontend_labor_cost : monetary
+  - frontend_labor_margin : monetary
+  - frontend_labor_price : monetary
+  - frontend_metal_cost : monetary
+  - frontend_metal_margin : monetary
+  - frontend_metal_price : monetary
+  - frontend_misc_cost : monetary
+  - frontend_misc_margin : monetary
+  - frontend_misc_price : monetary
+  - frontend_parts_cost : monetary
+  - frontend_parts_margin : monetary
+  - frontend_parts_price : monetary
+  - frontend_stone_cost : monetary
+  - frontend_stone_margin : monetary
+  - frontend_stone_price : monetary
+  - frontend_total_cost : monetary
+  - frontend_total_margin : monetary
+  - frontend_total_price : monetary
   - part_ids : o2m→pdp.product.part
-  - remark : text
+  ...
 }
 class "pdp.product.category" as pdp_product_category {
   + id : integer
@@ -235,6 +390,7 @@ class "pdp.product.category" as pdp_product_category {
 }
 class "pdp.product.model" as pdp_product_model {
   + id : integer
+  - picture_image : binary
   - code : char
   - display_name : char
   - drawing : char
@@ -420,9 +576,22 @@ pdp_margin_stone --> pdp_margin : margin_id
 pdp_margin_stone --> pdp_stone_type : stone_type_id
 pdp_margin_stone_conditional --> pdp_margin : margin_id
 pdp_margin_stone_conditional --> pdp_stone_category : stone_cat_id
+pdp_market_price --> pdp_market_metal : metal_id
+pdp_market_price --> pdp_market_source : source_id
+pdp_metal --> pdp_market_metal : market_metal_id
+pdp_metal_alloy ..> pdp_metal_alloy_line : line_ids (o2m)
+pdp_metal_alloy_line --> pdp_market_metal : metal_id
+pdp_metal_alloy_line --> pdp_metal_alloy : alloy_id
+pdp_metal_parameter --> pdp_metal : metal_id
 pdp_part ..> pdp_part_cost : cost_ids (o2m)
 pdp_part_cost --> pdp_metal_purity : purity_id
 pdp_part_cost --> pdp_part : part_id
+pdp_picture --> pdp_product_model : model_id
+pdp_price_product --> pdp_margin : margin_id
+pdp_price_product --> pdp_product : product_id
+pdp_product --> pdp_margin : frontend_margin_id
+pdp_product --> pdp_metal_purity : frontend_purity_id
+pdp_product -- pdp_product : frontend_variant_ids
 pdp_product --> pdp_product_category : category_id
 pdp_product --> pdp_product_model : model_id
 pdp_product ..> pdp_product_part : part_ids (o2m)

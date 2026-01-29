@@ -7,6 +7,7 @@
       <form string="Price Preview" create="false" edit="true">
         <header>
           <button name="action_compute" type="object" string="Compute" class="btn-primary"/>
+          <button name="action_save" type="object" string="Save" class="btn-secondary"/>
         </header>
         <sheet>
           <group>
@@ -26,6 +27,7 @@
                 <field name="cost"/>
                 <field name="margin"/>
                 <field name="price"/>
+                <field name="warnings" optional="show" decoration-danger="warnings" column_invisible="not parent.cost"/>
               </list>
             </field>
           </group>

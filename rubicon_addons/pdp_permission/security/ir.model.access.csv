@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pdp_permission.access_pdp_permission_user,access_pdp_permission_user,pdp_permission.model_pdp_permission,base.group_user,1,0,0,0
+pdp_permission.access_pdp_permission_admin,access_pdp_permission_admin,pdp_permission.model_pdp_permission,base.group_system,1,1,1,1
+pdp_permission.access_pdp_role_user,access_pdp_role_user,pdp_permission.model_pdp_role,base.group_user,1,0,0,0
+pdp_permission.access_pdp_role_admin,access_pdp_role_admin,pdp_permission.model_pdp_role,base.group_system,1,1,1,1

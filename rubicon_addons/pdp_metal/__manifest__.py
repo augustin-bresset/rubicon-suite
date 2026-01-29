@@ -1,6 +1,6 @@
 {
     'name': 'PDP Metal',
-    'version': '0.01',
+    'version': '0.02',
     'license': 'LGPL-3',
     'category': 'Product',
     'author': 'Rubicon',

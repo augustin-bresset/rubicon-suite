@@ -41,3 +41,43 @@ class ProductStone(models.Model):
         required=True,
         ondelete='cascade'
     )
+
+    # =========================================================================
+    # Domain Methods - Reusable by API, Cron, OWL, Reports
+    # =========================================================================
+
+    def to_dict_original(self):
+        """Return original stone data (as purchased)."""
+        return {
+            'type': self.stone_id.type_id.name if self.stone_id.type_id else '',
+            'shade': self.stone_id.shade_id.shade if self.stone_id.shade_id else '',
+            'shape': self.stone_id.shape_id.shape if self.stone_id.shape_id else '',
+            'pieces': self.pieces,
+            'weight': self.weight,
+        }
+
+    def to_dict_recut(self):
+        """Return recut stone data (after reshaping)."""
+        recut_shape = self.reshaped_shape_id.shape if self.reshaped_shape_id else (
+            self.stone_id.shape_id.shape if self.stone_id.shape_id else ''
+        )
+        return {
+            'type': self.stone_id.type_id.name if self.stone_id.type_id else '',
+            'shade': self.stone_id.shade_id.shade if self.stone_id.shade_id else '',
+            'shape': recut_shape,
+            'pieces': self.pieces,
+            'weight': self.reshaped_weight or self.weight,
+        }
+
+    def to_dict(self):
+        """Return complete stone line data."""
+        return {
+            'stone_code': self.stone_id.code if self.stone_id else '',
+            'type': self.stone_id.type_id.name if self.stone_id.type_id else '',
+            'shade': self.stone_id.shade_id.shade if self.stone_id.shade_id else '',
+            'shape': self.stone_id.shape_id.shape if self.stone_id.shape_id else '',
+            'pieces': self.pieces,
+            'weight': self.weight,
+            'reshaped_shape': self.reshaped_shape_id.shape if self.reshaped_shape_id else '',
+            'reshaped_weight': self.reshaped_weight,
+        }

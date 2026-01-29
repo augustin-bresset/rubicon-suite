@@ -1,3 +1,5 @@
+##
+#%%
 import os
 import pyodbc
 from tqdm import tqdm
@@ -30,7 +32,7 @@ WHERE DATA_TYPE IN ('varbinary', 'image');
 """)
 rows = cursor.fetchall()
 
-print("🧠 Binary columns found:")
+print("Binary columns found:")
 for t, c, d in rows:
     print(f" - {t}.{c} ({d})")
 
@@ -72,7 +74,7 @@ for row in tqdm(cursor, desc="Exporting pictures"):
         f.write(image_data)
         
 
-print(f"\n✅ Export terminé. Les fichiers sont dans {out_dir}/")
+print(f"\n[INFO] Export terminé. Les fichiers sont dans {out_dir}/")
 
 cursor.close()
 conn.close()

@@ -82,3 +82,29 @@ class ProductModel(models.Model):
         Pic = self.env['pdp.picture']
         for rec in self:
             rec.picture_id = Pic.search([('model_id', '=', rec.id)], limit=1)
+
+    # =========================================================================
+    # Domain Methods - Reusable by API, Cron, OWL, Reports
+    # =========================================================================
+
+    def to_dict(self):
+        """Return model data as JSON-serializable dict."""
+        self.ensure_one()
+        return {
+            'id': self.id,
+            'code': self.code,
+            'drawing': self.drawing,
+            'quotation': self.quotation,
+            'category_id': self.category_id.id if self.category_id else None,
+        }
+
+    def get_metal_weights(self):
+        """Return list of metal weight dicts."""
+        self.ensure_one()
+        return [m.to_dict() for m in self.metal_weights_ids]
+
+    def get_total_metal_weight(self):
+        """Return sum of all metal weights in grams."""
+        self.ensure_one()
+        return sum(m.weight for m in self.metal_weights_ids)
+

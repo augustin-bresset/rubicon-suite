@@ -1,45 +1,49 @@
-## Roadmap Rubicon Suite
+# ROAD MAP / Remarks
 
-1. **Préparation de l’environnement**
+## Actual State
 
-   * Docker Compose : PostgreSQL 13 + Odoo 18
-   * Montage de vos dossiers `odoo_conf/` et `rubicon_addons/`
-   * Initialisation de la base `odoo` (module `base`) pour sortir de l’erreur 500
+Currently we manage to imports all of the data needed for PDP.
 
-2. **Package métier léger (`rubicon_core`)**
+We have two addons :
+* Metal Market that give the metal prices per day
+* Currency that gives prices per rates (per day)
 
-   * Création d’un package Python séparé
-   * SQLAlchemy + Alembic pour gérer le schéma `metier`
-   * Modèles de base et première migration
+We have pdp_price that compute the price of a specific product given his margins.
 
-3. **Conception du schéma de données**
+## Metal
+We need to add some parameters, those will help us compute the good price given the composition of the metal and how it can be used.
 
-   * Recensement des entités métier (produits, pierres, marges…)
-   * Diagramme ER / PlantUML et définition du schéma `metier`
-   * Ajustement des migrations Alembic
+Currently the cost of the metal is compute only from his prices but we do not take into account :
+* Risk Factor : for example pink gold have more chances to failed during process
+* Material Lost : during polishing, a part of gold can be retrieve, this is not the case for palladium
+* Composition : rubicon use his own metal composition for white gold etc
 
-4. **Scaffolding du module Odoo (`rubicon_addons/pdp`)**
 
-   * Création du dossier, `__manifest__.py` minimal, structure Python
-   * Déclaration des modèles `models.Model` pointant sur le schéma `metier`
-   * Configuration de `addons_path` et tests de chargement
 
-5. **Gestion et migration de la base existante**
+## Pricing
+It have to take into account everything.
 
-   * **Restaurer** votre backup SQL dans un schéma de test (ou base temporaire)
-   * **Explorer** la structure : liste des tables, relations, volumes de données
-   * **Mapper** les tables anciennes → nouveaux modèles (`rubicon_core`/Odoo)
-   * **Écrire** des scripts de migration (ETL) : en Python/SQLAlchemy ou via psql
-   * **Valider** sur un jeu réduit (tests d’intégrité, données critiques)
+During pricing, some can change value can change :
+* Specific weights
+* Specific prices 
 
-6. **Intégration et déploiement**
+Currently stones weight are from pdp.product.stones but the good process is :
+* pdp.product.stone weight if not equal to 0 else pdp.stone weight
 
-   * Charger les données migrées dans le schéma `metier` de votre base Odoo
-   * Installer et tester le module PDP dans Odoo
-   * Mettre en place un pipeline CI (tests Pytest, migrations Alembic, checks Odoo)
+pdp.product.stone price have to be added
 
-7. **Tests, documentation et formation**
 
-   * Rédiger des tests unitaires pour la logique métier et des tests d’intégration Odoo
-   * Documenter le processus de migration et d’installation
-   * Former les utilisateurs à l’environnement Rubicon Suite
+## Environment
+
+* Having the possibility to change mesures like going from gram to ounce
+
+
+## Backend API
+Having a full API that manage the backend with a doc.
+
+This will greatly be usefull for having a clear frontend.
+
+## Frontend
+Having a frontend that respect the old version of PDP
+
+

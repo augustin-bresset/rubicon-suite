@@ -5,13 +5,8 @@
     "summary": "Frontend interface for Product Definition and Pricing",
     "depends": [
         "web",
+        "pdp_api",
         "pdp_picture",
-        "pdp_price",
-        "pdp_product",
-        "pdp_labor",
-        "pdp_metal",
-        "pdp_stone",
-        "pdp_margin",
     ],
     "data": [
         "views/pdp_product_views.xml",

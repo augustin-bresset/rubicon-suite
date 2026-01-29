@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- PDP Configuration Menu (if not exists) -->
+    <!-- ============================================================ -->
+    <menuitem id="menu_pdp_config_root"
+              name="PDP Configuration"
+              parent="base.menu_custom"
+              sequence="100"/>
+
+    <!-- ============================================================ -->
+    <!-- Access Control Submenu -->
+    <!-- ============================================================ -->
+    <menuitem id="menu_pdp_access_control"
+              name="Access Control"
+              parent="menu_pdp_config_root"
+              sequence="10"/>
+
+    <menuitem id="menu_pdp_permission"
+              name="Permissions"
+              parent="menu_pdp_access_control"
+              action="action_pdp_permission"
+              sequence="10"/>
+
+    <menuitem id="menu_pdp_role"
+              name="Roles"
+              parent="menu_pdp_access_control"
+              action="action_pdp_role"
+              sequence="20"/>
+</odoo>

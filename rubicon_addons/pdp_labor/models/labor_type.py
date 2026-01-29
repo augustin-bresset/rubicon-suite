@@ -13,5 +13,7 @@ class LaborTypes(models.Model):
         """Return the category of the labor type."""
         if self.code in {'CAS', 'FIL', 'POL'}:
             return 'METAL'
-        elif self.code in {'ASS', 'SET'}:
-            return  
+        elif self.code in {'REC', 'SET'}:
+            return ''
+        else:
+            return 'OTHER'

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Product Category -->
+        <!-- ============================================================ -->
+        <record id="perm_product_read" model="pdp.permission">
+            <field name="code">product.read</field>
+            <field name="name">View Products</field>
+            <field name="category">product</field>
+            <field name="description">Allows viewing product details and list</field>
+        </record>
+        <record id="perm_product_create" model="pdp.permission">
+            <field name="code">product.create</field>
+            <field name="name">Create Products</field>
+            <field name="category">product</field>
+            <field name="description">Allows creating new products</field>
+        </record>
+        <record id="perm_product_update" model="pdp.permission">
+            <field name="code">product.update</field>
+            <field name="name">Update Products</field>
+            <field name="category">product</field>
+            <field name="description">Allows modifying existing products</field>
+        </record>
+        <record id="perm_product_delete" model="pdp.permission">
+            <field name="code">product.delete</field>
+            <field name="name">Delete Products</field>
+            <field name="category">product</field>
+            <field name="description">Allows deleting products</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Price Category -->
+        <!-- ============================================================ -->
+        <record id="perm_price_read" model="pdp.permission">
+            <field name="code">price.read</field>
+            <field name="name">View Prices</field>
+            <field name="category">price</field>
+            <field name="description">Allows viewing price breakdowns</field>
+        </record>
+        <record id="perm_price_compute" model="pdp.permission">
+            <field name="code">price.compute</field>
+            <field name="name">Compute Prices</field>
+            <field name="category">price</field>
+            <field name="description">Allows computing/refreshing prices</field>
+        </record>
+        <record id="perm_price_update" model="pdp.permission">
+            <field name="code">price.update</field>
+            <field name="name">Update Prices</field>
+            <field name="category">price</field>
+            <field name="description">Allows modifying price parameters</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Stone Category -->
+        <!-- ============================================================ -->
+        <record id="perm_stone_read" model="pdp.permission">
+            <field name="code">stone.read</field>
+            <field name="name">View Stones</field>
+            <field name="category">stone</field>
+            <field name="description">Allows viewing stone compositions</field>
+        </record>
+        <record id="perm_stone_update" model="pdp.permission">
+            <field name="code">stone.update</field>
+            <field name="name">Update Stones</field>
+            <field name="category">stone</field>
+            <field name="description">Allows modifying stone data</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Metal Category -->
+        <!-- ============================================================ -->
+        <record id="perm_metal_read" model="pdp.permission">
+            <field name="code">metal.read</field>
+            <field name="name">View Metals</field>
+            <field name="category">metal</field>
+            <field name="description">Allows viewing metal weights</field>
+        </record>
+        <record id="perm_metal_update" model="pdp.permission">
+            <field name="code">metal.update</field>
+            <field name="name">Update Metals</field>
+            <field name="category">metal</field>
+            <field name="description">Allows modifying metal data</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Margin Category -->
+        <!-- ============================================================ -->
+        <record id="perm_margin_read" model="pdp.permission">
+            <field name="code">margin.read</field>
+            <field name="name">View Margins</field>
+            <field name="category">margin</field>
+            <field name="description">Allows viewing margin settings</field>
+        </record>
+        <record id="perm_margin_update" model="pdp.permission">
+            <field name="code">margin.update</field>
+            <field name="name">Update Margins</field>
+            <field name="category">margin</field>
+            <field name="description">Allows modifying margin settings</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Export Category -->
+        <!-- ============================================================ -->
+        <record id="perm_export_pdf" model="pdp.permission">
+            <field name="code">export.pdf</field>
+            <field name="name">Export PDF</field>
+            <field name="category">export</field>
+            <field name="description">Allows exporting to PDF</field>
+        </record>
+        <record id="perm_export_excel" model="pdp.permission">
+            <field name="code">export.excel</field>
+            <field name="name">Export Excel</field>
+            <field name="category">export</field>
+            <field name="description">Allows exporting to Excel</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Admin Category -->
+        <!-- ============================================================ -->
+        <record id="perm_admin_roles" model="pdp.permission">
+            <field name="code">admin.roles</field>
+            <field name="name">Manage Roles</field>
+            <field name="category">admin</field>
+            <field name="description">Allows creating and modifying roles</field>
+        </record>
+        <record id="perm_admin_users" model="pdp.permission">
+            <field name="code">admin.users</field>
+            <field name="name">Manage User Access</field>
+            <field name="category">admin</field>
+            <field name="description">Allows assigning roles to users</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Roles -->
+        <!-- ============================================================ -->
+        <record id="role_viewer" model="pdp.role">
+            <field name="name">PDP Viewer</field>
+            <field name="description">Can view products, prices, and compositions. Read-only access.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_product_read'),
+                ref('perm_price_read'),
+                ref('perm_stone_read'),
+                ref('perm_metal_read'),
+                ref('perm_margin_read'),
+            ])]"/>
+        </record>
+
+        <record id="role_editor" model="pdp.role">
+            <field name="name">PDP Editor</field>
+            <field name="description">Can view and modify products, prices, and compositions.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_product_read'),
+                ref('perm_product_create'),
+                ref('perm_product_update'),
+                ref('perm_price_read'),
+                ref('perm_price_compute'),
+                ref('perm_price_update'),
+                ref('perm_stone_read'),
+                ref('perm_stone_update'),
+                ref('perm_metal_read'),
+                ref('perm_metal_update'),
+                ref('perm_margin_read'),
+                ref('perm_export_pdf'),
+            ])]"/>
+        </record>
+
+        <record id="role_manager" model="pdp.role">
+            <field name="name">PDP Manager</field>
+            <field name="description">Full access to PDP including margins and exports.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_product_read'),
+                ref('perm_product_create'),
+                ref('perm_product_update'),
+                ref('perm_product_delete'),
+                ref('perm_price_read'),
+                ref('perm_price_compute'),
+                ref('perm_price_update'),
+                ref('perm_stone_read'),
+                ref('perm_stone_update'),
+                ref('perm_metal_read'),
+                ref('perm_metal_update'),
+                ref('perm_margin_read'),
+                ref('perm_margin_update'),
+                ref('perm_export_pdf'),
+                ref('perm_export_excel'),
+            ])]"/>
+        </record>
+
+        <record id="role_admin" model="pdp.role">
+            <field name="name">PDP Administrator</field>
+            <field name="description">Full access including role and user management.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_product_read'),
+                ref('perm_product_create'),
+                ref('perm_product_update'),
+                ref('perm_product_delete'),
+                ref('perm_price_read'),
+                ref('perm_price_compute'),
+                ref('perm_price_update'),
+                ref('perm_stone_read'),
+                ref('perm_stone_update'),
+                ref('perm_metal_read'),
+                ref('perm_metal_update'),
+                ref('perm_margin_read'),
+                ref('perm_margin_update'),
+                ref('perm_export_pdf'),
+                ref('perm_export_excel'),
+                ref('perm_admin_roles'),
+                ref('perm_admin_users'),
+            ])]"/>
+        </record>
+    </data>
+</odoo>

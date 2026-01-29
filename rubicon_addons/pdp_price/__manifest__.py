@@ -15,6 +15,7 @@
         # Views
         'views/price_preview_views.xml',
         'views/pdp_menus.xml',
+        'views/res_config_settings_views.xml',
         ],   
     'installable': True,
     'application': True,
