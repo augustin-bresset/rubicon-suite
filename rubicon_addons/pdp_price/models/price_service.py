@@ -48,7 +48,7 @@ class PdpPriceService(models.AbstractModel):
 
         for model_name, code, label in components:
             comp_model = self.env.get(model_name)
-            if not comp_model:
+            if comp_model is None:
                 continue
 
             try:
@@ -58,8 +58,11 @@ class PdpPriceService(models.AbstractModel):
                     currency=currency,
                     date=date,
                 )
-            except Exception:
-                payload = {'cost': 0.0, 'margin': 0.0, 'price': 0.0, 'warnings': ['Error computing ' + label]}
+            except Exception as e:
+                import logging
+                _logger = logging.getLogger(__name__)
+                _logger.exception("Error computing %s for product %s", label, product.code)
+                payload = {'cost': 0.0, 'margin': 0.0, 'price': 0.0, 'warnings': [f'Error computing {label}: {e}']}
 
             c_cost = payload.get('cost', 0.0)
             c_margin = payload.get('margin', 0.0)

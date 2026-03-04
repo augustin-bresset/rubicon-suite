@@ -1,0 +1,26 @@
+<odoo>
+    <!-- Currency Settings: list view -->
+    <record id="view_pdp_currency_setting_list" model="ir.ui.view">
+        <field name="name">pdp.currency.setting.list</field>
+        <field name="model">pdp.currency.setting</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="currency_id"/>
+                <field name="rate"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Currency Settings: action -->
+    <record id="action_pdp_currency_setting" model="ir.actions.act_window">
+        <field name="name">PDP Currency Rates</field>
+        <field name="res_model">pdp.currency.setting</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add currencies to offer in the PDP Workspace</p>
+            <p>Configure which currencies and custom rates users can choose when pricing products.</p>
+        </field>
+    </record>
+</odoo>

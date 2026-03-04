@@ -4,8 +4,11 @@ documents*
 *.venv*
 */.venv/
 *.bak
-
+*.zip
+# Pictures 
+exported_drawings/
 exported_pictures/
+exported_pictures_v2/
 random/
 
 

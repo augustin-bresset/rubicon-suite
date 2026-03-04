@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class Stone(models.Model):
     """
@@ -21,6 +21,19 @@ class Stone(models.Model):
     shape_id = fields.Many2one("pdp.stone.shape", string="Stone Shape", required=True, index=True)
     shade_id = fields.Many2one("pdp.stone.shade", string="Stone Shade", required=True, index=True)
     size_id  = fields.Many2one("pdp.stone.size",  string="Stone Size",  required=True, index=True)
+    weight_id = fields.Many2one(
+        'pdp.stone.weight',
+        string="Stone Weight Reference",
+        compute='_compute_weight_id',
+        store=True,
+    )
+    weight = fields.Float(
+        string='Weight (carat)',
+        related='weight_id.weight',
+        readonly=True,
+        digits=(7, 4),
+        store=True,
+    )
 
     
     cost        = fields.Monetary(
@@ -38,6 +51,21 @@ class Stone(models.Model):
         ("cost_currency_chk", "CHECK (cost IS NULL OR currency_id IS NOT NULL)", "Currency required when a cost is set."),
     ]
     
+    @api.depends('type_id', 'shape_id', 'shade_id', 'size_id')
+    def _compute_weight_id(self):
+        for record in self:
+            if record.type_id and record.shape_id and record.shade_id and record.size_id:
+                domain = [
+                    ('type_id', '=', record.type_id.id),
+                    ('shape_id', '=', record.shape_id.id),
+                    ('shade_id', '=', record.shade_id.id),
+                    ('size_id', '=', record.size_id.id),
+                ]
+                weight_record = self.env['pdp.stone.weight'].search(domain, limit=1)
+                record.weight_id = weight_record.id if weight_record else False
+            else:
+                record.weight_id = False
+                
     @staticmethod
     def get_stone_code(type, shade, shape, size):
         type = type.replace(' ', '')

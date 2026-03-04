@@ -107,7 +107,7 @@ class PDPFrontendController(http.Controller):
             return request.redirect(f"/pdp?error={str(e)}")
 
     @http.route("/pdp/update_price", type="json", auth="user")
-    def pdp_update_price(self, product_id, margin_id, currency_id, metal_id=None):
+    def pdp_update_price(self, product_id, margin_id, currency_id, metal_id=None, price_source=None):
         """
         JSON Endpoint to recalculate prices based on frontend parameters.
         """

@@ -1,45 +1,35 @@
 <odoo>
   <!-- Root menu -->
-  <menuitem id="menu_pdp_frontend_root" name="PDP Frontend" sequence="1"/>
+  <menuitem id="menu_pdp_frontend_root" name="PDP" action="action_pdp_frontend_workspace" sequence="1"/>
 
-  <!-- Models -->
-  <menuitem id="menu_pdp_frontend_models"
-            name="Models"
-            parent="menu_pdp_frontend_root"
-            action="pdp_product.action_pdp_product"
-            sequence="1"/>
-
-  <!-- Price Preview (wizard défini dans pdp_price) -->
-  <menuitem id="menu_pdp_frontend_price_preview"
-            name="Price Preview"
-            parent="menu_pdp_frontend_root"
-            action="pdp_price.action_pdp_price_preview_wizard"
-            sequence="2"/>
-
-  <!-- PDP Frontend page (opens the /pdp route) -->
-  <record id="action_pdp_frontend_page" model="ir.actions.act_url">
-    <field name="name">PDP Frontend</field>
-    <field name="url">/pdp</field>
-    <field name="target">self</field>
+  <!-- PDP Workspace action (used by client tag) -->
+  <record id="action_pdp_frontend_workspace" model="ir.actions.client">
+    <field name="name">PDP Workspace</field>
+    <field name="tag">pdp_frontend.workspace</field>
   </record>
-  <menuitem id="menu_pdp_frontend_page"
-            name="PDP Page"
-            parent="menu_pdp_frontend_root"
-            action="action_pdp_frontend_page"
-            sequence="5"/>
 
-  <!-- Addon Prices (déjà dans pdp_price) -->
-  <!-- <menuitem id="menu_pdp_frontend_price_addon"
-            name="Addon Prices"
-            parent="menu_pdp_frontend_root"
-            action="pdp_price.action_price_addon"
-            sequence="3"/> -->
-
-  <!-- Manage sous-menu -->
+  <!-- ============ Manage ============ -->
   <menuitem id="menu_pdp_frontend_manage"
             name="Manage"
             parent="menu_pdp_frontend_root"
             sequence="10"/>
+
+  <record id="action_pdp_product_model" model="ir.actions.act_window">
+    <field name="name">Models</field>
+    <field name="res_model">pdp.product.model</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_frontend_models"
+            name="Models"
+            parent="menu_pdp_frontend_manage"
+            action="action_pdp_product_model"
+            sequence="1"/>
+
+  <menuitem id="menu_pdp_frontend_products"
+            name="Products"
+            parent="menu_pdp_frontend_manage"
+            action="pdp_product.action_pdp_product"
+            sequence="2"/>
 
   <menuitem id="menu_pdp_manage_stones"
             name="Stones and Diamonds"
@@ -53,4 +43,66 @@
             name="Margins"
             parent="menu_pdp_frontend_manage"
             action="pdp_margin.action_pdp_margin"/>
+
+  <record id="action_pdp_product_category" model="ir.actions.act_window">
+    <field name="name">Ornament Categories</field>
+    <field name="res_model">pdp.product.category</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <menuitem id="menu_pdp_manage_categories"
+            name="Ornament Categories"
+            parent="menu_pdp_frontend_manage"
+            action="action_pdp_product_category"/>
+
+  <menuitem id="menu_pdp_manage_labor_type"
+            name="Labor Types"
+            parent="menu_pdp_frontend_manage"
+            action="pdp_labor.action_pdp_labor_type"/>
+  <menuitem id="menu_pdp_manage_labor_cost_model"
+            name="Labor Costs (Model)"
+            parent="menu_pdp_frontend_manage"
+            action="pdp_labor.action_pdp_labor_cost_model"/>
+
+  <!-- ============ Tools ============ -->
+  <menuitem id="menu_pdp_frontend_tools"
+            name="Tools"
+            parent="menu_pdp_frontend_root"
+            sequence="15"/>
+
+  <menuitem id="menu_pdp_frontend_price_preview"
+            name="Price Preview"
+            parent="menu_pdp_frontend_tools"
+            action="pdp_price.action_pdp_price_preview_wizard"
+            sequence="1"/>
+
+  <record id="action_pdp_product_stone_zero_weight" model="ir.actions.act_window">
+    <field name="name">Stones with 0 Weight</field>
+    <field name="res_model">pdp.product.stone</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">['|', ('weight', '=', False), ('weight', 'in', ['0', '0.0', '0.00', ''])]</field>
+  </record>
+
+  <menuitem id="menu_pdp_frontend_reports"
+            name="Reports"
+            parent="menu_pdp_frontend_tools"
+            sequence="10"/>
+
+  <menuitem id="menu_pdp_report_stone_zero_weight"
+            name="Stones (0 Weight)"
+            parent="menu_pdp_frontend_reports"
+            action="action_pdp_product_stone_zero_weight"
+            sequence="1"/>
+
+  <!-- ============ Settings ============ -->
+  <menuitem id="menu_pdp_frontend_settings"
+            name="Settings"
+            parent="menu_pdp_frontend_root"
+            sequence="20"/>
+
+  <menuitem id="menu_pdp_settings_currency"
+            name="Currency Rates"
+            parent="menu_pdp_frontend_settings"
+            action="action_pdp_currency_setting"
+            sequence="1"/>
+
 </odoo>

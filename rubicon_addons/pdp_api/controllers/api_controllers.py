@@ -156,6 +156,133 @@ class PdpApiController(http.Controller):
             return self._json_response({'error': str(e)}, status=500)
 
     # ==========================================================================
+    # Ornament Categories Endpoints
+    # ==========================================================================
+
+    @http.route('/api/v1/pdp/categories', type='http', auth='none',
+                methods=['GET'], cors='*', csrf=False)
+    def list_categories(self, **kwargs):
+        """
+        GET /api/v1/pdp/categories
+        Returns all ornament categories.
+        """
+        user = self._authenticate_jwt()
+        if isinstance(user, Response):
+            return user
+
+        try:
+            categories = request.env['pdp.product.category'].with_user(user).search([])
+            data = {
+                'categories': [{
+                    'id': c.id,
+                    'code': c.code,
+                    'name': c.name,
+                    'waste': c.waste,
+                } for c in categories]
+            }
+            return self._json_response(data)
+        except Exception as e:
+            _logger.error(f"API Error: {e}")
+            return self._json_response({'error': str(e)}, status=500)
+
+    @http.route('/api/v1/pdp/categories/<int:category_id>', type='http', auth='none',
+                methods=['PUT'], cors='*', csrf=False)
+    def update_category(self, category_id, **kwargs):
+        """
+        PUT /api/v1/pdp/categories/<id>
+        Body: { "code": "R", "name": "Ring", "waste": 5.0 }
+        Updates an ornament category.
+        """
+        user = self._authenticate_jwt()
+        if isinstance(user, Response):
+            return user
+
+        try:
+            body = json.loads(request.httprequest.data.decode('utf-8')) if request.httprequest.data else {}
+            category = request.env['pdp.product.category'].with_user(user).browse(category_id)
+            
+            if not category.exists():
+                return self._json_response({'error': 'Category not found'}, status=404)
+
+            vals = {}
+            if 'code' in body:
+                vals['code'] = body['code']
+            if 'name' in body:
+                vals['name'] = body['name']
+            if 'waste' in body:
+                vals['waste'] = float(body['waste'])
+
+            if vals:
+                category.write(vals)
+
+            return self._json_response({
+                'id': category.id,
+                'code': category.code,
+                'name': category.name,
+                'waste': category.waste,
+            })
+        except Exception as e:
+            _logger.error(f"API Error: {e}")
+            return self._json_response({'error': str(e)}, status=500)
+
+    @http.route('/api/v1/pdp/categories', type='http', auth='none',
+                methods=['POST'], cors='*', csrf=False)
+    def create_category(self, **kwargs):
+        """
+        POST /api/v1/pdp/categories
+        Body: { "code": "R", "name": "Ring", "waste": 5.0 }
+        Creates a new ornament category.
+        """
+        user = self._authenticate_jwt()
+        if isinstance(user, Response):
+            return user
+
+        try:
+            body = json.loads(request.httprequest.data.decode('utf-8')) if request.httprequest.data else {}
+            
+            if not body.get('code') or not body.get('name'):
+                return self._json_response({'error': 'Code and name are required'}, status=400)
+
+            category = request.env['pdp.product.category'].with_user(user).create({
+                'code': body['code'],
+                'name': body['name'],
+                'waste': float(body.get('waste', 0)),
+            })
+
+            return self._json_response({
+                'id': category.id,
+                'code': category.code,
+                'name': category.name,
+                'waste': category.waste,
+            }, status=201)
+        except Exception as e:
+            _logger.error(f"API Error: {e}")
+            return self._json_response({'error': str(e)}, status=500)
+
+    @http.route('/api/v1/pdp/categories/<int:category_id>', type='http', auth='none',
+                methods=['DELETE'], cors='*', csrf=False)
+    def delete_category(self, category_id, **kwargs):
+        """
+        DELETE /api/v1/pdp/categories/<id>
+        Deletes an ornament category.
+        """
+        user = self._authenticate_jwt()
+        if isinstance(user, Response):
+            return user
+
+        try:
+            category = request.env['pdp.product.category'].with_user(user).browse(category_id)
+            
+            if not category.exists():
+                return self._json_response({'error': 'Category not found'}, status=404)
+
+            category.unlink()
+            return self._json_response({'success': True})
+        except Exception as e:
+            _logger.error(f"API Error: {e}")
+            return self._json_response({'error': str(e)}, status=500)
+
+    # ==========================================================================
     # Helpers
     # ==========================================================================
 

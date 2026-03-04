@@ -39,7 +39,8 @@ def raw_to_data(
     xml_idx=True,
     verbose=True,
     dest_folder=data_folder,
-    test_collision=False
+    test_collision=False,
+    src_folder=None
     ):
     t0 = time.time()
     logs = {"created": 0, "skipped": 0, "total": 0}
@@ -52,7 +53,7 @@ def raw_to_data(
 
     dest_name = os.path.join(dest_folder, f"{model_name}.csv")
     
-    file_name = os.path.join(backup_folder, csv_name)
+    file_name = os.path.join(src_folder or backup_folder, csv_name)
 
     if index_auto and not xml_idx:
         print(f'[WARN] Know what you want ! an auto index but no index... weirdooo, so auto index for YOU ! xml_idx is True')

@@ -21,6 +21,12 @@ class Picture(models.Model):
     filename = fields.Char(string='Filename')
     
     checksum = fields.Char(string='Checksum', index=True)
+    
+    # Drawing (Sketch) support
+    drawing_1920 = fields.Image(string='Drawing', max_width=1920, max_height=1920, required=False)
+    drawing = fields.Image(related='drawing_1920', readonly=False, string=False)
+    drawing_filename = fields.Char(string='Drawing Filename')
+
     active = fields.Boolean(default=True)
 
     @api.model_create_multi

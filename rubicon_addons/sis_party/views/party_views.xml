@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Party Tree View -->
+    <record id="view_sis_party_tree" model="ir.ui.view">
+        <field name="name">sis.party.tree</field>
+        <field name="model">sis.party</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not active">
+                <field name="code"/>
+                <field name="company"/>
+                <field name="contact"/>
+                <field name="contact_type" optional="show"/>
+                <field name="parent_id" optional="hide"/>
+                <field name="is_vendor" string="Vendor?" optional="hide"/>
+                <field name="country_id"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Party Search View -->
+    <record id="view_sis_party_search" model="ir.ui.view">
+        <field name="name">sis.party.search</field>
+        <field name="model">sis.party</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="company"/>
+                <field name="code"/>
+                <field name="contact"/>
+                <field name="country_id"/>
+                <field name="phone"/>
+                <filter string="Companies" name="companies" domain="[('contact_type', '=', 'company')]"/>
+                <filter string="Individuals" name="individuals" domain="[('contact_type', '=', 'individual')]"/>
+                <separator/>
+                <filter string="Customers" name="customers" domain="[('customer_rank', '>', 0)]"/>
+                <filter string="Vendors" name="vendors" domain="[('supplier_rank', '>', 0)]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Country" name="group_country" context="{'group_by': 'country_id'}"/>
+                    <filter string="Region" name="group_region" context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Party Form View -->
+    <record id="view_sis_party_form" model="ir.ui.view">
+        <field name="name">sis.party.form</field>
+        <field name="model">sis.party</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="company"/>
+                            <field name="code"/>
+                            <field name="contact_type"/>
+                            <field name="parent_id" invisible="contact_type != 'individual'"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="contact"/>
+                            <field name="title"/>
+                            <field name="group_code"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="General" name="general">
+                            <group>
+                                <group string="Address">
+                                    <field name="address"/>
+                                    <field name="city"/>
+                                    <field name="state"/>
+                                    <field name="zip"/>
+                                    <field name="country_id"/>
+                                </group>
+                                <group string="Communication">
+                                    <field name="phone"/>
+                                    <field name="email"/>
+                                    <field name="fax"/>
+                                    <field name="homepage"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="notes"/>
+                            </group>
+                        </page>
+                        <page string="Defaults" name="defaults">
+                            <group>
+                                <group>
+                                    <field name="margin_id"/>
+                                    <field name="pay_term_id"/>
+                                    <field name="account"/>
+                                </group>
+                                <group>
+                                    <field name="is_vendor"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Shipment Info" name="shipment">
+                            <group>
+                                <group>
+                                    <field name="ship_address"/>
+                                    <field name="ship_city"/>
+                                    <field name="ship_state"/>
+                                    <field name="ship_zip"/>
+                                    <field name="ship_country_id"/>
+                                </group>
+                                <group>
+                                    <field name="ship_method_id"/>
+                                    <field name="ship_fedex_acc"/>
+                                    <field name="ship_stamp"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Bank Info" name="bank">
+                            <group>
+                                <group>
+                                    <field name="bank_name"/>
+                                    <field name="bank_address"/>
+                                </group>
+                                <group>
+                                    <field name="bank_acc_name"/>
+                                    <field name="bank_acc_no"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Contacts" name="contacts" invisible="contact_type != 'company'">
+                            <field name="child_ids">
+                                <list>
+                                    <field name="company"/>
+                                    <field name="contact"/>
+                                    <field name="phone"/>
+                                    <field name="email"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Party Action -->
+    <record id="action_sis_party" model="ir.actions.act_window">
+        <field name="name">Parties</field>
+        <field name="res_model">sis.party</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Region Tree -->
+    <record id="view_sis_region_tree" model="ir.ui.view">
+        <field name="name">sis.region.tree</field>
+        <field name="model">sis.region</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_region" model="ir.actions.act_window">
+        <field name="name">Regions</field>
+        <field name="res_model">sis.region</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Country Tree -->
+    <record id="view_sis_country_tree" model="ir.ui.view">
+        <field name="name">sis.country.tree</field>
+        <field name="model">sis.country</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="region_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_country" model="ir.actions.act_window">
+        <field name="name">Countries</field>
+        <field name="res_model">sis.country</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- PayTerm Tree -->
+    <record id="view_sis_pay_term_tree" model="ir.ui.view">
+        <field name="name">sis.pay.term.tree</field>
+        <field name="model">sis.pay.term</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_pay_term" model="ir.actions.act_window">
+        <field name="name">Payment Terms</field>
+        <field name="res_model">sis.pay.term</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Shipper Tree -->
+    <record id="view_sis_shipper_tree" model="ir.ui.view">
+        <field name="name">sis.shipper.tree</field>
+        <field name="model">sis.shipper</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_shipper" model="ir.actions.act_window">
+        <field name="name">Shippers</field>
+        <field name="res_model">sis.shipper</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Trade Fair Tree -->
+    <record id="view_sis_trade_fair_tree" model="ir.ui.view">
+        <field name="name">sis.trade.fair.tree</field>
+        <field name="model">sis.trade.fair</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="city"/>
+                <field name="country_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_trade_fair" model="ir.actions.act_window">
+        <field name="name">Trade Fairs</field>
+        <field name="res_model">sis.trade.fair</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

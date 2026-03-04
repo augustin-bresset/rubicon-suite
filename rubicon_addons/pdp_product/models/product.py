@@ -44,6 +44,27 @@ class Product(models.Model):
         comodel_name='pdp.product.part',
         inverse_name='product_id'
     )
+    
+    stone_line_ids  = fields.One2many(
+        related='stone_composition_id.stone_line_ids',
+        string='Stones',
+        readonly=False
+    )
+    
+    total_stone_weight = fields.Float(
+        string="Total Stone Weight",
+        compute="_compute_total_stone_weight",
+        store=True,
+        digits=(7, 4)
+    )
+
+    @api.depends('stone_line_ids.weight', 'stone_line_ids.pieces')
+    def _compute_total_stone_weight(self):
+        for product in self:
+            total = 0.0
+            for line in product.stone_line_ids:
+                total += (line.weight or 0.0) * (line.pieces or 1)
+            product.total_stone_weight = total
 
     # =========================================================================
     # Domain Methods - Reusable by API, Cron, OWL, Reports
@@ -117,3 +138,72 @@ class Product(models.Model):
             ),
             'all_margins': self.env['pdp.margin'].search_read([], ['id', 'name', 'code']),
         }
+
+    @api.model
+    def copy_product_from_ui(self, source_id, new_code, options):
+        """
+        Duplicate a product with selected partial fields.
+        Options dictionary allows granular control over what gets copied.
+        """
+        source = self.browse(source_id)
+        if not source.exists():
+            raise ValueError(f"Source product {source_id} not found.")
+
+        # 1. Create the new blank product
+        new_product = self.create({
+            'code': new_code,
+            'model_id': source.model_id.id if source.model_id else False,
+            'active': True,
+        })
+
+        # 2. Copy stones
+        if options.get('copy_stone') and source.stone_composition_id:
+            old_comp = source.stone_composition_id
+            stones = self.env['pdp.product.stone'].search([('composition_id', '=', old_comp.id)])
+            if stones:
+                new_comp = self.env['pdp.product.stone.composition'].create({'code': new_code})
+                for s in stones:
+                    self.env['pdp.product.stone'].create({
+                        'composition_id': new_comp.id,
+                        'stone_id': s.stone_id.id if s.stone_id else False,
+                        'pieces': s.pieces,
+                        'weight': s.weight,
+                        'reshaped_shape_id': s.reshaped_shape_id.id if s.reshaped_shape_id else False,
+                        'reshaped_size_id': s.reshaped_size_id.id if s.reshaped_size_id else False,
+                        'reshaped_weight': s.reshaped_weight,
+                    })
+                new_product.write({'stone_composition_id': new_comp.id})
+
+        # 3. Copy labor product costs
+        if options.get('copy_labor'):
+            labors = self.env['pdp.labor.cost.product'].search([('product_id', '=', source.id)])
+            for l in labors:
+                self.env['pdp.labor.cost.product'].create({
+                    'product_id': new_product.id,
+                    'labor_id': l.labor_id.id if l.labor_id else False,
+                    'cost': l.cost,
+                    'currency_id': l.currency_id.id if l.currency_id else False,
+                })
+
+        # 4. Copy parts
+        if options.get('copy_parts'):
+            parts = self.env['pdp.product.part'].search([('product_id', '=', source.id)])
+            for p in parts:
+                self.env['pdp.product.part'].create({
+                    'product_id': new_product.id,
+                    'part_id': p.part_id.id if p.part_id else False,
+                    'quantity': p.quantity,
+                })
+
+        # 5. Copy misc (addon costs)
+        if options.get('copy_misc'):
+            addons = self.env['pdp.addon.cost'].search([('product_id', '=', source.id)])
+            for a in addons:
+                self.env['pdp.addon.cost'].create({
+                    'product_id': new_product.id,
+                    'addon_id': a.addon_id.id if a.addon_id else False,
+                    'cost': a.cost,
+                    'currency_id': a.currency_id.id if a.currency_id else False,
+                })
+
+        return new_product.id

@@ -1,0 +1,1188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="pdp_frontend.Workspace" owl="1">
+        <div class="o_action_manager pdp-workspace h-100 w-100 d-flex flex-column" style="font-size: 13px; background: #f0f0f0;">
+
+            <!-- ===== TOP BAR ===== -->
+            <div class="bg-white border-bottom p-2 d-flex align-items-center gap-3 shadow-sm">
+                <div class="fw-bold fs-5 text-primary">PDP</div>
+                <div class="d-flex align-items-center gap-2">
+                    <label class="fw-bold mb-0">Model</label>
+                    <select class="form-select form-select-sm" style="width: 200px;" t-on-change="onModelSelectChange">
+                        <t t-foreach="filteredModels" t-as="model" t-key="model.id">
+                            <option t-att-value="model.id" t-att-selected="model.id === state.selectedModelId">
+                                <t t-esc="model.code"/>
+                            </option>
+                        </t>
+                    </select>
+                    <input type="text" class="form-control form-control-sm" placeholder="Filter..." style="width: 120px;" t-on-input="onSearchInput"/>
+                    <span class="text-muted ms-2 px-2 py-1 bg-light border rounded small"><t t-esc="state.products.length"/> products</span>
+                </div>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <t t-if="state.isDirty">
+                        <span class="badge bg-warning text-dark">Unsaved changes</span>
+                    </t>
+                    <span class="fw-bold text-warning fs-5" t-if="activeModel">
+                        <t t-esc="activeModel.category_id ? activeModel.category_id[1] : ''"/>
+                    </span>
+                </div>
+            </div>
+
+            <!-- ===== MIDDLE PANE ===== -->
+            <div class="d-flex flex-grow-1 w-100" style="min-height: 200px; resize: vertical; overflow: auto; border-bottom: 2px solid #ccc;">
+
+                <!-- LEFT: Product List -->
+                <div class="border-end bg-white h-100 overflow-auto flex-shrink-0" style="width: 50%; resize: horizontal; min-width: 200px; max-width: calc(100% - 200px);">
+                    <table class="table table-sm table-hover table-bordered mb-0" style="font-size: 12px;">
+                        <thead class="bg-light sticky-top">
+                            <tr>
+                                <th>Design Ref#</th>
+                                <th>Metal</th>
+                                <th>Date</th>
+                                <th class="text-center" style="width:50px;">Sel</th>
+                                <th class="text-center" style="width:50px;">Col</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-if="state.products.length === 0">
+                                <tr><td colspan="5" class="text-center text-muted p-3">No products.</td></tr>
+                            </t>
+                            <t t-foreach="state.products" t-as="product" t-key="product.id">
+                                <tr style="cursor: pointer;"
+                                    t-attf-class="{{ state.selectedProductId === product.id ? 'table-primary fw-bold' : '' }}"
+                                    t-on-click="() => this.selectProduct(product.id)">
+                                    <td><t t-esc="product.code"/></td>
+                                    <td><t t-esc="product.metal || 'W'"/></td>
+                                    <td class="text-muted small"><t t-esc="product.create_date"/></td>
+                                    <td class="text-center" t-on-click.stop="() => this.toggleActive(product.id)">
+                                        <input type="checkbox" t-att-checked="product.active" style="cursor:pointer;"/>
+                                    </td>
+                                    <td class="text-center" t-on-click.stop="() => this.toggleCollection(product.id)">
+                                        <input type="checkbox" t-att-checked="product.in_collection" style="cursor:pointer;"/>
+                                    </td>
+                                </tr>
+                                <tr t-if="product.remark" t-attf-class="{{ state.selectedProductId === product.id ? 'table-primary' : 'bg-light' }}">
+                                    <td colspan="5" class="py-1 px-3 text-muted fst-italic border-bottom">
+                                        <small><t t-esc="product.remark"/></small>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- RIGHT: Image / Drawing -->
+                <div class="flex-grow-1 d-flex flex-column h-100 bg-white" style="width: 0; min-width: 200px;">
+                    <div class="d-flex justify-content-between align-items-center p-1 border-bottom bg-light">
+                        <small class="fw-bold text-truncate px-1" t-if="activeProduct"><t t-esc="activeProduct.code"/></small>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" t-attf-class="btn {{ state.imageMode === 'model' ? 'btn-secondary' : 'btn-outline-secondary' }}"
+                                    t-on-click="() => this.setImageMode('model')">Model</button>
+                            <button type="button" t-attf-class="btn {{ state.imageMode === 'drawing' ? 'btn-secondary' : 'btn-outline-secondary' }}"
+                                    t-on-click="() => this.setImageMode('drawing')">Drawing</button>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 d-flex align-items-center justify-content-center overflow-hidden p-1 position-relative">
+                        <div class="position-absolute top-0 end-0 p-2 z-1 fw-bold" style="color: #333; text-shadow: 0 0 3px #fff;">
+                            <t t-esc="state.currencySymbol"/> <t t-esc="(state.priceTotals.price || 0).toFixed(2)"/>
+                        </div>
+                        <t t-if="state.imageMode === 'model' and state.pictureUrl">
+                            <img t-att-src="state.pictureUrl" class="img-fluid" style="max-height: 100%; object-fit: contain; cursor: zoom-in;" alt="Model" t-on-click="openFullScreenImage"/>
+                        </t>
+                        <t t-if="state.imageMode === 'drawing'">
+                            <div class="position-absolute top-0 start-0 m-2 p-2 bg-white border shadow-sm" style="opacity: 0.95; z-index: 2; font-size: 11px; width: 250px;">
+                                <div class="row g-0 mb-1">
+                                    <div class="col-4 fw-bold text-muted">Model:</div>
+                                    <div class="col-8 fw-bold text-dark"><t t-esc="activeModel ? activeModel.code : ''"/></div>
+                                </div>
+                                <div class="row g-0 mb-1">
+                                    <div class="col-4 text-muted">Drawing#:</div>
+                                    <div class="col-8">
+                                        <input type="text" class="form-control form-control-sm p-0 px-1 border-0 border-bottom rounded-0" style="font-size: 11px;" 
+                                               t-att-value="activeModel ? activeModel.drawing : ''" 
+                                               t-on-change="onDrawingChange"/>
+                                    </div>
+                                </div>
+                                <div class="row g-0">
+                                    <div class="col-4 text-muted">Quotation#:</div>
+                                    <div class="col-8">
+                                        <input type="text" class="form-control form-control-sm p-0 px-1 border-0 border-bottom rounded-0" style="font-size: 11px;" 
+                                               t-att-value="activeModel ? activeModel.quotation : ''" 
+                                               t-on-change="onQuotationChange"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <t t-if="state.drawingUrl">
+                                <img t-att-src="state.drawingUrl" class="img-fluid" style="max-height: 100%; object-fit: contain; cursor: zoom-in;" alt="Drawing" t-on-click="openFullScreenImage"/>
+                            </t>
+                        </t>
+                        <t t-if="(state.imageMode === 'model' and !state.pictureUrl) or (state.imageMode === 'drawing' and !state.drawingUrl)">
+                            <div class="text-muted d-flex flex-column align-items-center">
+                                <i class="fa fa-image fa-3x opacity-25 mb-1"></i>
+                                <small>No <t t-esc="state.imageMode"/> available</small>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOTTOM PANE: TABS ===== -->
+            <div class="border-top flex-grow-1 d-flex flex-column bg-white" style="min-height: 35vh;">
+                <!-- Tab Headers -->
+                <ul class="nav nav-tabs px-2 pt-1 bg-light border-0" style="border-bottom: 2px solid #ddd !important;">
+                    <t t-foreach="[['costing','Costing'],['weight','Weight'],['stones','Stones'],['metals','Metals'],['labor','Labor etc.'],['matching','Matching']]" t-as="tab" t-key="tab[0]">
+                        <li class="nav-item">
+                            <a t-attf-class="nav-link py-1 px-3 text-dark border-0 rounded-top {{ state.activeTab === tab[0] ? 'bg-white border-top border-start border-end fw-bold' : '' }}"
+                               href="#" t-on-click.prevent="() => this.setTab(tab[0])"><t t-esc="tab[1]"/></a>
+                        </li>
+                    </t>
+                </ul>
+
+                <div class="tab-content flex-grow-1 p-2 overflow-auto" style="font-size: 12px;">
+
+                    <div t-if="!state.selectedProductId" class="text-center text-muted p-4">
+                        <i class="fa fa-hand-pointer-o fa-2x mb-2 d-block"></i>Select a product to view details.
+                    </div>
+
+                    <!-- ===== COSTING SUMMARY ===== -->
+                    <div t-if="state.activeTab === 'costing' and state.selectedProductId" class="row g-0">
+                        <div class="col-4 pe-3 border-end">
+                            <div class="bg-secondary text-white fw-bold px-2 py-1 mb-2 text-center small rounded-1">Select Pricing Parameters</div>
+                            <div class="row mb-1 align-items-center">
+                                <label class="col-4 fw-bold small">Margin</label>
+                                <div class="col-8">
+                                    <select class="form-select form-select-sm" t-on-change="onMarginChange">
+                                        <t t-foreach="state.margins" t-as="margin" t-key="margin.id">
+                                            <option t-att-value="margin.id" t-att-selected="margin.id === state.selectedMarginId"><t t-esc="margin.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-1 align-items-center">
+                                <label class="col-4 fw-bold small">Purity</label>
+                                <div class="col-5">
+                                    <select class="form-select form-select-sm" t-on-change="onPurityChange">
+                                        <option value="">All</option>
+                                        <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
+                                            <option t-att-value="pur.id" t-att-selected="pur.id === state.selectedPurityId"><t t-esc="pur.code"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-1 align-items-center">
+                                <label class="col-4 fw-bold small">Currency</label>
+                                <div class="col-5">
+                                    <select class="form-select form-select-sm" t-on-change="onCurrencyChange">
+                                        <t t-foreach="state.currencies" t-as="currency" t-key="currency.id">
+                                            <option t-att-value="currency.id" t-att-selected="currency.id === state.selectedCurrencyId"><t t-esc="currency.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-1 align-items-center">
+                                <label class="col-4 fw-bold small">Rate</label>
+                                <div class="col-5"><input type="text" class="form-control form-control-sm bg-light" t-att-value="state.usRate" readonly="1"/></div>
+                            </div>
+                        </div>
+                        <div class="col-8 ps-3">
+                            <table class="table table-sm table-bordered mb-0 text-end align-middle">
+                                <thead>
+                                    <tr class="bg-secondary text-white text-center small">
+                                        <th class="bg-white border-0"></th>
+                                        <th>Cost</th><th>Margin</th><th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.priceLines" t-as="line" t-key="line_index">
+                                        <tr>
+                                            <td class="text-start bg-light fw-bold text-capitalize"><t t-esc="line.type"/></td>
+                                            <td><t t-esc="(line.cost || 0).toFixed(2)"/></td>
+                                            <td><t t-esc="(line.margin || 0).toFixed(2)"/></td>
+                                            <td><t t-esc="(line.price || 0).toFixed(2)"/></td>
+                                        </tr>
+                                    </t>
+                                    <tr t-if="state.priceLines.length === 0"><td colspan="4" class="text-center text-muted p-2">No pricing data computed.</td></tr>
+                                    <tr class="fw-bold" style="background-color: #ff8c42; color: white;">
+                                        <td class="text-start border-0">Net</td>
+                                        <td class="bg-white text-dark"><t t-esc="(state.priceTotals.cost || 0).toFixed(2)"/></td>
+                                        <td class="bg-white text-dark"><t t-esc="(state.priceTotals.margin || 0).toFixed(2)"/></td>
+                                        <td class="bg-white text-dark"><t t-esc="(state.priceTotals.price || 0).toFixed(2)"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ===== WEIGHT SUMMARY ===== -->
+                    <div t-if="state.activeTab === 'weight' and state.selectedProductId" class="row g-3">
+                        <div class="col-4">
+                            <h6 class="fw-bold small border-bottom pb-1">Stone (Original)</h6>
+                            <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
+                                <thead class="bg-light"><tr><th>Stone</th><th class="text-end">Pcs</th><th class="text-end">Wt</th></tr></thead>
+                                <tbody>
+                                    <t t-foreach="state.stoneOriginal" t-as="s" t-key="s_index">
+                                        <tr><td><t t-esc="s.stone"/></td><td class="text-end"><t t-esc="s.pieces"/></td><td class="text-end"><t t-esc="s.weight"/></td></tr>
+                                    </t>
+                                    <t t-if="state.stoneOriginal.length === 0"><tr><td colspan="3" class="text-muted text-center">None</td></tr></t>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="fw-bold small border-bottom pb-1">Stone after Recutting</h6>
+                            <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
+                                <thead class="bg-light"><tr><th>Stone</th><th class="text-end">Pcs</th><th class="text-end">Wt</th><th>Shape</th></tr></thead>
+                                <tbody>
+                                    <t t-foreach="state.stoneRecut" t-as="s" t-key="s_index">
+                                        <tr><td><t t-esc="s.stone"/></td><td class="text-end"><t t-esc="s.pieces"/></td><td class="text-end"><t t-esc="s.weight"/></td><td><t t-esc="s.shape"/></td></tr>
+                                    </t>
+                                    <t t-if="state.stoneRecut.length === 0"><tr><td colspan="4" class="text-muted text-center">None</td></tr></t>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="fw-bold small border-bottom pb-1">Metal</h6>
+                            <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
+                                <thead class="bg-light"><tr><th>Metal</th><th>Purity</th><th>Ver.</th><th class="text-end">Wt (g)</th></tr></thead>
+                                <tbody>
+                                    <t t-foreach="state.metalWeights" t-as="m" t-key="m._key">
+                                        <tr>
+                                            <td><t t-esc="m.metal_id ? m.metal_id[1] : ''"/></td>
+                                            <td><t t-esc="m.purity_id ? m.purity_id[1] : ''"/></td>
+                                            <td><t t-esc="m.metal_version"/></td>
+                                            <td class="text-end"><t t-esc="(m.weight || 0).toFixed(3)"/></td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.metalWeights.length === 0"><tr><td colspan="4" class="text-muted text-center">None</td></tr></t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ===== STONES ===== -->
+                    <div t-if="state.activeTab === 'stones' and state.selectedProductId">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold small">Stones</span>
+                            <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addStone()">+ Add</button>
+                        </div>
+                        <div style="overflow-x:auto;">
+                        <table class="table table-sm table-bordered table-hover mb-0" style="font-size: 11px; min-width: 900px;">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th style="min-width:110px;">Stone</th>
+                                    <th style="min-width:70px;">Type</th>
+                                    <th style="min-width:70px;">Shade</th>
+                                    <th style="min-width:70px;">Shape</th>
+                                    <th style="min-width:60px;">Size</th>
+                                    <th style="width:50px;" class="text-center">Pcs</th>
+                                    <th style="width:60px;" class="text-end">Weight</th>
+                                    <th style="min-width:90px;">Rec. Shape</th>
+                                    <th style="min-width:80px;">Rec. Size</th>
+                                    <th style="width:60px;" class="text-end">Rec. Wgt</th>
+                                    <th style="width:24px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.stoneRows" t-as="sr" t-key="sr._key">
+                                    <tr t-attf-class="{{ sr._dirty ? 'table-warning' : '' }}">
+                                        <td>
+                                            <input type="text"
+                                                   t-attf-class="form-control form-control-sm p-0 text-center {{ !sr._stoneValid and sr._stoneCode ? 'border-danger' : '' }}"
+                                                   style="font-size:11px; min-width:100px;"
+                                                   t-att-value="sr._stoneCode"
+                                                   t-on-blur="(ev) => this.validateStoneCode(sr._key, ev.target.value)"
+                                                   placeholder="Code..."/>
+                                        </td>
+                                        <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.type_id) ? sr._stoneDetail.type_id[1] : ''"/></td>
+                                        <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.shade_id) ? sr._stoneDetail.shade_id[1] : ''"/></td>
+                                        <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.shape_id) ? sr._stoneDetail.shape_id[1] : ''"/></td>
+                                        <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.size_id) ? sr._stoneDetail.size_id[1] : ''"/></td>
+                                        <td>
+                                            <input type="number" class="form-control form-control-sm p-0 text-center" style="font-size:11px;"
+                                                   t-att-value="sr.pieces"
+                                                   t-on-change="(ev) => this.setStoneField(sr._key, 'pieces', ev.target.value)"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                   t-att-value="sr.weight"
+                                                   t-on-change="(ev) => this.setStoneField(sr._key, 'weight', ev.target.value)"/>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_shape_id', ev.target.value)">
+                                                <option value="">None</option>
+                                                <t t-foreach="this.stoneShapes" t-as="sshp" t-key="sshp.id">
+                                                    <option t-att-value="sshp.id"
+                                                            t-att-selected="sshp.id === (Array.isArray(sr.reshaped_shape_id) ? sr.reshaped_shape_id[0] : sr.reshaped_shape_id)">
+                                                        <t t-esc="sshp.code"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_size_id', ev.target.value)">
+                                                <option value="">None</option>
+                                                <t t-foreach="this.stoneSizes" t-as="ssz" t-key="ssz.id">
+                                                    <option t-att-value="ssz.id"
+                                                            t-att-selected="ssz.id === (Array.isArray(sr.reshaped_size_id) ? sr.reshaped_size_id[0] : sr.reshaped_size_id)">
+                                                        <t t-esc="ssz.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                   t-att-value="sr.reshaped_weight"
+                                                   t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_weight', ev.target.value)"/>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
+                                                    t-on-click="() => this.removeStone(sr._key)">✕</button>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-if="state.stoneRows.length === 0">
+                                    <tr><td colspan="11" class="text-muted text-center p-3">No stones. Click "+ Add" to add a stone.</td></tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+
+                    <!-- ===== METALS ===== -->
+                    <div t-if="state.activeTab === 'metals' and state.selectedProductId" class="row g-2 h-100">
+
+                        <!-- Column 1: Metal weights (model level) -->
+                        <div class="col-7">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">Metals</span>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addMetal()">+ Add</button>
+                            </div>
+                            <table class="table table-sm table-bordered mb-1" style="font-size: 11px;">
+                                <thead class="bg-light">
+                                    <tr><th>Metal</th><th>Purity</th><th style="width:40px;">Ver</th><th class="text-end" style="width:60px;">Wt(g)</th><th style="width:24px;"></th></tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="filteredMetalWeights" t-as="m" t-key="m._key">
+                                        <tr t-attf-class="{{ m._dirty ? 'table-warning' : '' }}">
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setMetalField(m._key, 'metal_id', ev.target.value)">
+                                                    <t t-foreach="this.allMetals" t-as="opt" t-key="opt.id">
+                                                        <option t-att-value="opt.id"
+                                                                t-att-selected="opt.id === (Array.isArray(m.metal_id) ? m.metal_id[0] : m.metal_id)">
+                                                            <t t-esc="opt.code"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setMetalField(m._key, 'purity_id', ev.target.value)">
+                                                    <option value="">--</option>
+                                                    <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
+                                                        <option t-att-value="pur.id"
+                                                                t-att-selected="pur.id === (Array.isArray(m.purity_id) ? m.purity_id[0] : m.purity_id)">
+                                                            <t t-esc="pur.code"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm p-0 text-center" style="font-size:11px;"
+                                                       t-att-value="m.metal_version"
+                                                       t-on-change="(ev) => this.setMetalField(m._key, 'metal_version', ev.target.value)"/>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                       t-att-value="m.weight"
+                                                       t-on-change="(ev) => this.setMetalField(m._key, 'weight', ev.target.value)"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
+                                                        t-on-click="() => this.removeMetal(m._key)">✕</button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="filteredMetalWeights.length === 0">
+                                        <tr><td colspan="5" class="text-muted text-center">None</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                            <!-- Select Purity filter -->
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <small class="fw-bold">Filter Purity:</small>
+                                <select class="form-select form-select-sm" style="width:100px; font-size:11px;" t-on-change="onPurityChange">
+                                    <option value="">All</option>
+                                    <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
+                                        <option t-att-value="pur.id" t-att-selected="pur.id === state.selectedPurityId"><t t-esc="pur.code"/></option>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Sub Parts (product level) -->
+                        <div class="col-5 border-start">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">Sub Parts</span>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addPart()">+ Add</button>
+                            </div>
+                            <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
+                                <thead class="bg-light">
+                                    <tr><th>Part</th><th style="width:50px;" class="text-end">Qty</th><th style="width:24px;"></th></tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.parts" t-as="p" t-key="p._key">
+                                        <tr t-attf-class="{{ p._dirty ? 'table-warning' : '' }}">
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setPartField(p._key, 'part_id', ev.target.value)">
+                                                    <option value="">--</option>
+                                                    <t t-foreach="this.allParts" t-as="opt" t-key="opt.id">
+                                                        <option t-att-value="opt.id"
+                                                                t-att-selected="opt.id === (Array.isArray(p.part_id) ? p.part_id[0] : p.part_id)">
+                                                            <t t-esc="opt.code"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                       t-att-value="p.quantity"
+                                                       t-on-change="(ev) => this.setPartField(p._key, 'quantity', ev.target.value)"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
+                                                        t-on-click="() => this.removePart(p._key)">✕</button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.parts.length === 0">
+                                        <tr><td colspan="3" class="text-muted text-center">None</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <!-- ===== LABOR ETC. ===== -->
+                    <div t-if="state.activeTab === 'labor' and state.selectedProductId" class="row g-2">
+
+                        <!-- Top-left: Labor Model Level -->
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">Labor (Model Level)</span>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addLaborModel()">+ Add</button>
+                            </div>
+                            <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
+                                <thead class="bg-light">
+                                    <tr><th>Type</th><th style="width:35px;">Metal</th><th class="text-end" style="width:60px;">Cost</th><th style="width:55px;">Curr.</th><th style="width:24px;"></th></tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.laborModelCosts" t-as="l" t-key="l._key">
+                                        <tr t-attf-class="{{ l._dirty ? 'table-warning' : '' }}">
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setLaborModelField(l._key, 'labor_id', ev.target.value)">
+                                                    <t t-foreach="this.laborTypes" t-as="ltype" t-key="ltype.id">
+                                                        <option t-att-value="ltype.id"
+                                                                t-att-selected="ltype.id === (Array.isArray(l.labor_id) ? l.labor_id[0] : l.labor_id)">
+                                                            <t t-esc="ltype.code"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm p-0 text-center" style="font-size:11px;"
+                                                       t-att-value="l.metal"
+                                                       t-on-change="(ev) => this.setLaborModelField(l._key, 'metal', ev.target.value)"/>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                       t-att-value="l.cost"
+                                                       t-on-change="(ev) => this.setLaborModelField(l._key, 'cost', ev.target.value)"/>
+                                            </td>
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setLaborModelField(l._key, 'currency_id', ev.target.value)">
+                                                    <option value="">--</option>
+                                                    <t t-foreach="state.currencies" t-as="curr" t-key="curr.id">
+                                                        <option t-att-value="curr.id"
+                                                                t-att-selected="curr.id === (Array.isArray(l.currency_id) ? l.currency_id[0] : l.currency_id)">
+                                                            <t t-esc="curr.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
+                                                        t-on-click="() => this.removeLaborModel(l._key)">✕</button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.laborModelCosts.length === 0">
+                                        <tr><td colspan="5" class="text-muted text-center">None</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Top-right: Parts -->
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">Parts</span>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addPart()">+ Add</button>
+                            </div>
+                            <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
+                                <thead class="bg-light">
+                                    <tr><th>Part</th><th class="text-end" style="width:50px;">Qty</th><th style="width:24px;"></th></tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.parts" t-as="p" t-key="p._key">
+                                        <tr t-attf-class="{{ p._dirty ? 'table-warning' : '' }}">
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setPartField(p._key, 'part_id', ev.target.value)">
+                                                    <option value="">--</option>
+                                                    <t t-foreach="this.allParts" t-as="opt" t-key="opt.id">
+                                                        <option t-att-value="opt.id"
+                                                                t-att-selected="opt.id === (Array.isArray(p.part_id) ? p.part_id[0] : p.part_id)">
+                                                            <t t-esc="opt.code"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                       t-att-value="p.quantity"
+                                                       t-on-change="(ev) => this.setPartField(p._key, 'quantity', ev.target.value)"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
+                                                        t-on-click="() => this.removePart(p._key)">✕</button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.parts.length === 0">
+                                        <tr><td colspan="3" class="text-muted text-center">None</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Bottom-left: Labor Product Level -->
+                        <div class="col-6 mt-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">Labor (Product Level)</span>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addLaborProduct()">+ Add</button>
+                            </div>
+                            <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
+                                <thead class="bg-light">
+                                    <tr><th>Type</th><th class="text-end" style="width:60px;">Cost</th><th style="width:55px;">Curr.</th><th style="width:24px;"></th></tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.laborProductCosts" t-as="l" t-key="l._key">
+                                        <tr t-attf-class="{{ l._dirty ? 'table-warning' : '' }}">
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setLaborProductField(l._key, 'labor_id', ev.target.value)">
+                                                    <t t-foreach="this.laborTypes" t-as="ltype" t-key="ltype.id">
+                                                        <option t-att-value="ltype.id"
+                                                                t-att-selected="ltype.id === (Array.isArray(l.labor_id) ? l.labor_id[0] : l.labor_id)">
+                                                            <t t-esc="ltype.code"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                       t-att-value="l.cost"
+                                                       t-on-change="(ev) => this.setLaborProductField(l._key, 'cost', ev.target.value)"/>
+                                            </td>
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setLaborProductField(l._key, 'currency_id', ev.target.value)">
+                                                    <option value="">--</option>
+                                                    <t t-foreach="state.currencies" t-as="curr" t-key="curr.id">
+                                                        <option t-att-value="curr.id"
+                                                                t-att-selected="curr.id === (Array.isArray(l.currency_id) ? l.currency_id[0] : l.currency_id)">
+                                                            <t t-esc="curr.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
+                                                        t-on-click="() => this.removeLaborProduct(l._key)">✕</button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.laborProductCosts.length === 0">
+                                        <tr><td colspan="4" class="text-muted text-center">None</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Bottom-right: Misc (Addon Costs) -->
+                        <div class="col-6 mt-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">Misc.</span>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addAddonCost()">+ Add</button>
+                            </div>
+                            <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
+                                <thead class="bg-light">
+                                    <tr><th>Type</th><th class="text-end" style="width:60px;">Cost</th><th style="width:55px;">Curr.</th><th style="width:24px;"></th></tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.addonCosts" t-as="a" t-key="a._key">
+                                        <tr t-attf-class="{{ a._dirty ? 'table-warning' : '' }}">
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setAddonCostField(a._key, 'addon_id', ev.target.value)">
+                                                    <t t-foreach="this.addonTypes" t-as="at" t-key="at.id">
+                                                        <option t-att-value="at.id"
+                                                                t-att-selected="at.id === (Array.isArray(a.addon_id) ? a.addon_id[0] : a.addon_id)">
+                                                            <t t-esc="at.code"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                       t-att-value="a.cost"
+                                                       t-on-change="(ev) => this.setAddonCostField(a._key, 'cost', ev.target.value)"/>
+                                            </td>
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setAddonCostField(a._key, 'currency_id', ev.target.value)">
+                                                    <option value="">--</option>
+                                                    <t t-foreach="state.currencies" t-as="curr" t-key="curr.id">
+                                                        <option t-att-value="curr.id"
+                                                                t-att-selected="curr.id === (Array.isArray(a.currency_id) ? a.currency_id[0] : a.currency_id)">
+                                                            <t t-esc="curr.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
+                                                        t-on-click="() => this.removeAddonCost(a._key)">✕</button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.addonCosts.length === 0">
+                                        <tr><td colspan="4" class="text-muted text-center">None</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ===== MATCHING ===== -->
+                    <div t-if="state.activeTab === 'matching' and state.selectedProductId">
+                        <p class="small text-muted mb-2">Models that match the look of your product for a set (ring + earrings + pendant).</p>
+                        <table class="table table-sm table-bordered table-hover mb-0" style="font-size: 11px;">
+                            <thead class="bg-light"><tr><th style="width: 60px;">Image</th><th>Model Code</th></tr></thead>
+                            <tbody>
+                                <t t-foreach="state.matchingModels" t-as="mm" t-key="mm.id">
+                                    <tr style="cursor: pointer;" t-on-click="() => this.selectModel(mm.id)">
+                                        <td class="text-center">
+                                            <t t-if="mm.picture_id">
+                                                <img t-attf-src="/web/image/pdp.picture/{{mm.picture_id[0]}}/image_128" style="max-height: 40px; max-width: 50px; object-fit: contain;"/>
+                                            </t>
+                                        </td>
+                                        <td class="text-primary align-middle"><i class="fa fa-link me-1"></i><t t-esc="mm.code"/></td>
+                                    </tr>
+                                </t>
+                                <t t-if="state.matchingModels.length === 0"><tr><td colspan="2" class="text-muted text-center p-3">No matching models.</td></tr></t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== FOOTER ===== -->
+                <div class="bg-light border-top p-2 d-flex justify-content-between align-items-center" style="box-shadow: 0 -2px 5px rgba(0,0,0,0.05);">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-light border" title="First" t-on-click="() => this.productNav('first')"><i class="fa fa-step-backward"></i></button>
+                        <button class="btn btn-light border" title="Previous" t-on-click="() => this.productNav('prev')"><i class="fa fa-chevron-left"></i></button>
+                        <button class="btn btn-light border" title="Next" t-on-click="() => this.productNav('next')"><i class="fa fa-chevron-right"></i></button>
+                        <button class="btn btn-light border" title="Last" t-on-click="() => this.productNav('last')"><i class="fa fa-step-forward"></i></button>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-light border px-3" t-on-click="showNewProductModal" t-att-disabled="!state.selectedModelId">New</button>
+                        <button class="btn btn-sm btn-light border px-3 text-danger" t-on-click="deleteProduct" t-att-disabled="!state.selectedProductId">Delete</button>
+                        <button class="btn btn-sm btn-primary border px-3 fw-bold" t-on-click="saveAll" t-att-disabled="!state.isDirty">Save</button>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-light border px-3 text-primary" t-on-click="() => this.recalculatePrice()">Recalculate</button>
+                        <button class="btn btn-sm btn-light border px-3 text-secondary" t-on-click="openMarginsModal" t-att-disabled="!state.selectedMarginId">Margins</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== NEW PRODUCT MODAL ===== -->
+            <t t-if="state.showNewModal">
+                <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                     style="background: rgba(0,0,0,0.4); z-index: 9999;">
+                    <div class="bg-white shadow-lg" style="width: 580px; border: 1px solid #999;">
+
+                        <!-- Title bar -->
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-light">
+                            <span class="fw-bold" style="font-size:13px;">Make new product.</span>
+                            <button class="btn-close btn-sm" t-on-click="closeNewModal"></button>
+                        </div>
+
+                        <div class="d-flex p-3 gap-3" style="font-size:12px;">
+
+                            <!-- Left: Source Design list -->
+                            <div style="width: 240px; min-width: 200px;">
+                                <div class="fw-bold small mb-1">Source Design</div>
+                                <div style="height: 230px; overflow-y: auto; border: 1px solid #dee2e6;">
+                                    <table class="table table-sm table-hover table-bordered mb-0" style="font-size:12px;">
+                                        <thead class="bg-light sticky-top">
+                                            <tr><th>Design</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.products" t-as="p" t-key="p.id">
+                                                <tr style="cursor:pointer;"
+                                                    t-attf-class="{{ state.copySourceProductId === p.id ? 'table-primary fw-bold' : '' }}"
+                                                    t-on-click="() => this.state.copySourceProductId = p.id">
+                                                    <td><t t-esc="p.code"/></td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="state.products.length === 0">
+                                                <tr><td class="text-muted text-center">No designs</td></tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Right: New ref + options + buttons -->
+                            <div class="d-flex flex-column gap-2 flex-grow-1">
+
+                                <!-- New Ref. # -->
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold text-nowrap">New Ref. #</span>
+                                    <input type="text" class="form-control form-control-sm"
+                                           t-att-value="state.newCode"
+                                           t-on-input="onNewCodeInput"
+                                           style="flex:1; font-size:12px;"/>
+                                </div>
+
+                                <!-- Checkboxes -->
+                                <div class="text-muted small mt-1">Please select information to be copied.</div>
+                                <div class="d-flex flex-column gap-1">
+                                    <label class="d-flex align-items-center gap-2 small" style="cursor:pointer;">
+                                        <input type="checkbox" t-att-checked="state.copyStone"
+                                               t-on-change="(ev) => this.state.copyStone = ev.target.checked"/>
+                                        Stone
+                                    </label>
+                                    <label class="d-flex align-items-center gap-2 small" style="cursor:pointer;">
+                                        <input type="checkbox" t-att-checked="state.copyMetals"
+                                               t-on-change="(ev) => this.state.copyMetals = ev.target.checked"/>
+                                        Metals
+                                    </label>
+                                    <label class="d-flex align-items-center gap-2 small" style="cursor:pointer;">
+                                        <input type="checkbox" t-att-checked="state.copyLabor"
+                                               t-on-change="(ev) => this.state.copyLabor = ev.target.checked"/>
+                                        Labor
+                                    </label>
+                                    <label class="d-flex align-items-center gap-2 small" style="cursor:pointer;">
+                                        <input type="checkbox" t-att-checked="state.copyParts"
+                                               t-on-change="(ev) => this.state.copyParts = ev.target.checked"/>
+                                        Parts
+                                    </label>
+                                    <label class="d-flex align-items-center gap-2 small" style="cursor:pointer;">
+                                        <input type="checkbox" t-att-checked="state.copyMisc"
+                                               t-on-change="(ev) => this.state.copyMisc = ev.target.checked"/>
+                                        Misc
+                                    </label>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="d-flex gap-2 mt-auto pt-2">
+                                    <button class="btn btn-sm btn-light border px-3"
+                                            t-on-click="confirmCopy"
+                                            t-att-disabled="!state.newCode.trim() || !state.copySourceProductId">Copy</button>
+                                    <button class="btn btn-sm btn-light border px-3"
+                                            t-on-click="confirmMakeBlank"
+                                            t-att-disabled="!state.newCode.trim()">Make Blank</button>
+                                    <button class="btn btn-sm btn-outline-secondary px-3"
+                                            t-on-click="closeNewModal">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- ===== FULL SCREEN IMAGE MODAL ===== -->
+            <t t-if="state.showFullScreenImage">
+                <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                     style="background: rgba(0,0,0,0.85); z-index: 10000;" t-on-click="closeFullScreenImage">
+                    <button class="btn btn-close btn-close-white position-absolute top-0 end-0 m-4" style="z-index: 10001;" t-on-click.stop="closeFullScreenImage"></button>
+                    <img t-if="state.imageMode === 'model' and state.pictureUrl" t-att-src="state.pictureUrl" style="max-width: 90%; max-height: 90%; object-fit: contain; box-shadow: 0 0 20px rgba(0,0,0,0.5);" t-on-click.stop=""/>
+                    <img t-if="state.imageMode === 'drawing' and state.drawingUrl" t-att-src="state.drawingUrl" style="max-width: 90%; max-height: 90%; object-fit: contain; box-shadow: 0 0 20px rgba(0,0,0,0.5);" t-on-click.stop=""/>
+                </div>
+            </t>
+
+        </div>
+
+        <!-- ===== MARGINS MODAL ===== -->
+        <t t-if="state.showMarginsModal">
+            <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                 style="background: rgba(0,0,0,0.45); z-index: 10000;">
+                <div class="bg-white shadow-lg d-flex flex-column" style="width: 700px; max-height: 85vh; border: 1px solid #999;">
+
+                    <!-- Title bar -->
+                    <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-light">
+                        <span class="fw-bold" style="font-size:13px;">Margins</span>
+                        <button class="btn-close btn-sm" t-on-click="closeMarginsModal"></button>
+                    </div>
+
+                    <!-- Header: ID + Name selector -->
+                    <div class="px-3 pt-2 pb-2 d-flex gap-3 align-items-center border-bottom bg-light" style="font-size:12px;">
+                        <span class="fw-bold">Margin:</span>
+                        <select class="form-select form-select-sm" style="width: auto; min-width: 250px; font-weight: bold;" t-on-change="onMarginModalSelectionChange">
+                            <t t-foreach="state.margins" t-as="margin" t-key="margin.id">
+                                <option t-att-value="margin.id" t-att-selected="margin.id === state.selectedMarginId"><t t-esc="margin.code"/> - <t t-esc="margin.name"/></option>
+                            </t>
+                        </select>
+                        <button class="btn btn-sm btn-outline-primary py-0 px-2 ms-2" t-on-click="openNewMarginModal">+ New Margin</button>
+                    </div>
+
+                    <!-- Tabs: Misc | Metal | Stone -->
+                    <div class="px-3 pt-2 border-bottom d-flex gap-1" style="font-size:12px;">
+                        <button t-attf-class="btn btn-sm px-3 py-0 {{ state.marginTab === 'misc' ? 'btn-primary' : 'btn-outline-secondary' }}"
+                                t-on-click="() => this.state.marginTab = 'misc'">Misc</button>
+                        <button t-attf-class="btn btn-sm px-3 py-0 {{ state.marginTab === 'metal' ? 'btn-primary' : 'btn-outline-secondary' }}"
+                                t-on-click="() => this.state.marginTab = 'metal'">Metal</button>
+                        <button t-attf-class="btn btn-sm px-3 py-0 {{ state.marginTab === 'stone' ? 'btn-primary' : 'btn-outline-secondary' }}"
+                                t-on-click="() => this.state.marginTab = 'stone'">Stone</button>
+                    </div>
+
+                    <!-- Tab content -->
+                    <div class="flex-grow-1 overflow-auto p-3" style="font-size:12px;">
+
+                        <!-- ===== MISC TAB ===== -->
+                        <t t-if="state.marginTab === 'misc'">
+                            <div class="row g-3">
+                                <!-- Left: Parts + Labor -->
+                                <div class="col-5">
+                                    <div class="fw-bold small mb-2 border-bottom pb-1">Global Rates</div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <label class="small fw-bold" style="width:90px;">Parts</label>
+                                        <input type="number" step="0.001" class="form-control form-control-sm text-end" style="width:80px; font-size:11px;"
+                                               t-att-value="state.marginPartRecord ? state.marginPartRecord.rate : 1.0"
+                                               t-on-change="(ev) => this.setMarginPartRate(ev.target.value)"/>
+                                    </div>
+                                    <div class="fw-bold small mt-3 mb-1 border-bottom pb-1">Labor Rates</div>
+                                    <table class="table table-sm table-bordered mb-1" style="font-size:11px;">
+                                        <thead class="bg-light"><tr><th>Labor Type</th><th style="width:70px;" class="text-end">Margin</th><th style="width:24px;"></th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.marginLabors" t-as="ml" t-key="ml._key">
+                                                <tr t-attf-class="{{ ml._dirty ? 'table-warning' : '' }}">
+                                                    <td>
+                                                        <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                                t-on-change="(ev) => this.setMarginLaborField(ml._key, 'labor_id', ev.target.value)">
+                                                            <option value="">--</option>
+                                                            <t t-foreach="this.laborTypes" t-as="lt2" t-key="lt2.id">
+                                                                <option t-att-value="lt2.id"
+                                                                        t-att-selected="lt2.id === (Array.isArray(ml.labor_id) ? ml.labor_id[0] : ml.labor_id)">
+                                                                    <t t-esc="lt2.code"/>
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="number" step="0.001" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                               t-att-value="ml.rate"
+                                                               t-on-change="(ev) => this.setMarginLaborField(ml._key, 'rate', ev.target.value)"/></td>
+                                                    <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px;"
+                                                            t-on-click="() => this.removeMarginLabor(ml._key)">✕</button></td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="state.marginLabors.length === 0">
+                                                <tr><td colspan="3" class="text-muted text-center">None</td></tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginLabor">+ Add</button>
+                                </div>
+
+                                <!-- Right: Misc (Addon) -->
+                                <div class="col-7 border-start">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold small border-bottom pb-1 w-100">Misc.</span>
+                                    </div>
+                                    <table class="table table-sm table-bordered mb-1" style="font-size:11px;">
+                                        <thead class="bg-light"><tr><th>MiscType</th><th style="width:80px;" class="text-end">Margin</th><th style="width:24px;"></th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.marginAddons" t-as="ma" t-key="ma._key">
+                                                <tr t-attf-class="{{ ma._dirty ? 'table-warning' : '' }}">
+                                                    <td>
+                                                        <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                                t-on-change="(ev) => this.setMarginAddonField(ma._key, 'addon_id', ev.target.value)">
+                                                            <option value="">--</option>
+                                                            <t t-foreach="this.addonTypes" t-as="at2" t-key="at2.id">
+                                                                <option t-att-value="at2.id"
+                                                                        t-att-selected="at2.id === (Array.isArray(ma.addon_id) ? ma.addon_id[0] : ma.addon_id)">
+                                                                    <t t-esc="at2.code"/>
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="number" step="0.001" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                               t-att-value="ma.rate"
+                                                               t-on-change="(ev) => this.setMarginAddonField(ma._key, 'rate', ev.target.value)"/></td>
+                                                    <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px;"
+                                                            t-on-click="() => this.removeMarginAddon(ma._key)">✕</button></td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="state.marginAddons.length === 0">
+                                                <tr><td colspan="3" class="text-muted text-center">None</td></tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginAddon">+ Add</button>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ===== METAL TAB ===== -->
+                        <t t-if="state.marginTab === 'metal'">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold small">Metal Margins (by Purity)</span>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginMetal">+ Add</button>
+                            </div>
+                            <table class="table table-sm table-bordered" style="font-size:11px;">
+                                <thead class="bg-light"><tr><th>Purity</th><th style="width:100px;" class="text-end">Margin</th><th style="width:24px;"></th></tr></thead>
+                                <tbody>
+                                    <t t-foreach="state.marginMetals" t-as="mm" t-key="mm._key">
+                                        <tr t-attf-class="{{ mm._dirty ? 'table-warning' : '' }}">
+                                            <td>
+                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                        t-on-change="(ev) => this.setMarginMetalField(mm._key, 'metal_purity_id', ev.target.value)">
+                                                    <option value="">--</option>
+                                                    <t t-foreach="this.purities" t-as="pur2" t-key="pur2.id">
+                                                        <option t-att-value="pur2.id"
+                                                                t-att-selected="pur2.id === (Array.isArray(mm.metal_purity_id) ? mm.metal_purity_id[0] : mm.metal_purity_id)">
+                                                            <t t-esc="pur2.code"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" step="0.001" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                       t-att-value="mm.rate"
+                                                       t-on-change="(ev) => this.setMarginMetalField(mm._key, 'rate', ev.target.value)"/></td>
+                                            <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px;"
+                                                    t-on-click="() => this.removeMarginMetal(mm._key)">✕</button></td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.marginMetals.length === 0">
+                                        <tr><td colspan="3" class="text-muted text-center">None</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- ===== STONE TAB ===== -->
+                        <t t-if="state.marginTab === 'stone'">
+                            <!-- Sub-tabs: Conditional | Normal -->
+                            <div class="d-flex gap-1 mb-2">
+                                <button t-attf-class="btn btn-sm px-3 py-0 {{ state.marginStoneTab === 'conditional' ? 'btn-secondary' : 'btn-outline-secondary' }}"
+                                        t-on-click="() => this.state.marginStoneTab = 'conditional'">Conditional</button>
+                                <button t-attf-class="btn btn-sm px-3 py-0 {{ state.marginStoneTab === 'normal' ? 'btn-secondary' : 'btn-outline-secondary' }}"
+                                        t-on-click="() => this.state.marginStoneTab = 'normal'">Normal</button>
+                            </div>
+
+                            <!-- Conditional -->
+                            <t t-if="state.marginStoneTab === 'conditional'">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <small class="fw-bold">Stone Category:</small>
+                                        <select class="form-select form-select-sm" style="width:140px; font-size:11px;"
+                                                t-on-change="(ev) => this.state.stoneCatFilter = ev.target.value">
+                                            <option value="">All</option>
+                                            <t t-foreach="this.stoneCategories" t-as="sc" t-key="sc.id">
+                                                <option t-att-value="sc.id" t-att-selected="sc.id === state.stoneCatFilter"><t t-esc="sc.name"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginStoneCond">+ Add</button>
+                                </div>
+                                <table class="table table-sm table-bordered" style="font-size:11px;">
+                                    <thead class="bg-light">
+                                        <tr><th>Stone Category</th><th>Condition</th><th style="width:75px;" class="text-end">U.Cost</th><th style="width:80px;">Curr.</th><th style="width:75px;" class="text-end">Margin</th><th style="width:24px;"></th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.marginStonesConditional" t-as="sc2" t-key="sc2._key">
+                                            <t t-if="!state.stoneCatFilter or (Array.isArray(sc2.stone_cat_id) ? sc2.stone_cat_id[0] : sc2.stone_cat_id) == state.stoneCatFilter">
+                                            <tr t-attf-class="{{ sc2._dirty ? 'table-warning' : '' }}">
+                                                <td>
+                                                    <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                            t-on-change="(ev) => this.setMarginStoneCondField(sc2._key, 'stone_cat_id', ev.target.value)">
+                                                        <option value="">--</option>
+                                                        <t t-foreach="this.stoneCategories" t-as="scat" t-key="scat.id">
+                                                            <option t-att-value="scat.id"
+                                                                    t-att-selected="scat.id === (Array.isArray(sc2.stone_cat_id) ? sc2.stone_cat_id[0] : sc2.stone_cat_id)">
+                                                                <t t-esc="scat.name"/>
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                            t-on-change="(ev) => this.setMarginStoneCondField(sc2._key, 'operator', ev.target.value)">
+                                                        <option value="&lt;" t-att-selected="sc2.operator === '&lt;'">is less than</option>
+                                                        <option value="&lt;=" t-att-selected="sc2.operator === '&lt;='">is less than or equal to</option>
+                                                        <option value="=" t-att-selected="sc2.operator === '='">is equal to</option>
+                                                        <option value="&gt;" t-att-selected="sc2.operator === '&gt;'">is more than</option>
+                                                        <option value="&gt;=" t-att-selected="sc2.operator === '&gt;='">is more than or equal to</option>
+                                                    </select>
+                                                </td>
+                                                <td><input type="number" step="0.01" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                           t-att-value="sc2.comparative_cost"
+                                                           t-on-change="(ev) => this.setMarginStoneCondField(sc2._key, 'comparative_cost', ev.target.value)"/></td>
+                                                <td>
+                                                    <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                            t-on-change="(ev) => this.setMarginStoneCondField(sc2._key, 'currency_id', ev.target.value)">
+                                                        <option value="">--</option>
+                                                        <t t-foreach="state.currencies" t-as="cur2" t-key="cur2.id">
+                                                            <option t-att-value="cur2.id"
+                                                                    t-att-selected="cur2.id === (Array.isArray(sc2.currency_id) ? sc2.currency_id[0] : sc2.currency_id)">
+                                                                <t t-esc="cur2.name"/>
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td><input type="number" step="0.001" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                           t-att-value="sc2.rate"
+                                                           t-on-change="(ev) => this.setMarginStoneCondField(sc2._key, 'rate', ev.target.value)"/></td>
+                                                <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px;"
+                                                        t-on-click="() => this.removeMarginStoneCond(sc2._key)">✕</button></td>
+                                            </tr>
+                                            </t>
+                                        </t>
+                                        <t t-if="state.marginStonesConditional.length === 0">
+                                            <tr><td colspan="6" class="text-muted text-center">None</td></tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </t>
+
+                            <!-- Normal -->
+                            <t t-if="state.marginStoneTab === 'normal'">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <small class="fw-bold">Stone Category:</small>
+                                        <select class="form-select form-select-sm" style="width:140px; font-size:11px;"
+                                                t-on-change="(ev) => this.state.stoneCatFilter = ev.target.value">
+                                            <option value="">All</option>
+                                            <t t-foreach="this.stoneCategories" t-as="sc3" t-key="sc3.id">
+                                                <option t-att-value="sc3.id" t-att-selected="sc3.id === state.stoneCatFilter"><t t-esc="sc3.name"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginStoneNorm">+ Add</button>
+                                </div>
+                                <table class="table table-sm table-bordered" style="font-size:11px;">
+                                    <thead class="bg-light"><tr><th>Stone Type</th><th>Category</th><th style="width:90px;" class="text-end">Margin</th><th style="width:24px;"></th></tr></thead>
+                                    <tbody>
+                                        <t t-foreach="state.marginStonesNormal" t-as="sn" t-key="sn._key">
+                                            <t t-set="snType" t-value="this.getStoneType(sn.stone_type_id)"/>
+                                            <t t-if="!state.stoneCatFilter or (snType and (Array.isArray(snType.category_id) ? snType.category_id[0] : snType.category_id) == state.stoneCatFilter)">
+                                            <tr t-attf-class="{{ sn._dirty ? 'table-warning' : '' }}">
+                                                <td>
+                                                    <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                            t-on-change="(ev) => this.setMarginStoneNormField(sn._key, 'stone_type_id', ev.target.value)">
+                                                        <option value="">--</option>
+                                                        <t t-foreach="this.stoneTypes" t-as="styp" t-key="styp.id">
+                                                            <option t-att-value="styp.id"
+                                                                    t-att-selected="styp.id === (Array.isArray(sn.stone_type_id) ? sn.stone_type_id[0] : sn.stone_type_id)">
+                                                                <t t-esc="styp.name"/>
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td class="text-muted align-middle small"><t t-esc="snType and Array.isArray(snType.category_id) ? snType.category_id[1] : ''"/></td>
+                                                <td><input type="number" step="0.001" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                           t-att-value="sn.rate"
+                                                           t-on-change="(ev) => this.setMarginStoneNormField(sn._key, 'rate', ev.target.value)"/></td>
+                                                <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px;"
+                                                        t-on-click="() => this.removeMarginStoneNorm(sn._key)">✕</button></td>
+                                            </tr>
+                                            </t>
+                                        </t>
+                                        <t t-if="state.marginStonesNormal.length === 0">
+                                            <tr><td colspan="4" class="text-muted text-center">None</td></tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </t>
+                        </t>
+
+                    </div>
+
+                    <!-- Footer: Save -->
+                    <div class="px-3 py-2 border-top bg-light d-flex justify-content-end">
+                        <button class="btn btn-sm btn-primary px-4" t-on-click="saveMarginData">Save</button>
+                    </div>
+                </div>
+            </div>
+        </t>
+        
+        <!-- ===== NEW MARGIN MODAL ===== -->
+            <t t-if="state.showNewMarginModal">
+                <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                     style="background: rgba(0,0,0,0.45); z-index: 10500;">
+                    <div class="bg-white shadow-lg d-flex flex-column" style="width: 400px; border: 1px solid #999;">
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-light">
+                            <span class="fw-bold" style="font-size:13px;">Create New Margin</span>
+                            <button class="btn-close btn-sm" t-on-click="closeNewMarginModal"></button>
+                        </div>
+                        <div class="p-3" style="font-size:12px;">
+                            <div class="mb-2 row align-items-center">
+                                <label class="col-4 fw-bold">Code / ID <span class="text-danger">*</span></label>
+                                <div class="col-8">
+                                    <input type="text" class="form-control form-control-sm"
+                                           t-att-value="state.newMarginCode"
+                                           t-on-change="(ev) => this.state.newMarginCode = ev.target.value"/>
+                                </div>
+                            </div>
+                            <div class="mb-3 row align-items-center">
+                                <label class="col-4 fw-bold">Name <span class="text-danger">*</span></label>
+                                <div class="col-8">
+                                    <input type="text" class="form-control form-control-sm"
+                                           t-att-value="state.newMarginName"
+                                           t-on-change="(ev) => this.state.newMarginName = ev.target.value"/>
+                                </div>
+                            </div>
+                            <div class="mb-3 row align-items-center">
+                                <label class="col-4 fw-bold text-muted">Copy Rules From</label>
+                                <div class="col-8">
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.state.newMarginCopySourceId = parseInt(ev.target.value) || null">
+                                        <option value="">-- Start Empty --</option>
+                                        <t t-foreach="state.margins" t-as="margin" t-key="'copy_' + margin.id">
+                                            <option t-att-value="margin.id" t-att-selected="margin.id === state.newMarginCopySourceId"><t t-esc="margin.code"/> - <t t-esc="margin.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 justify-content-end mt-4">
+                                <button class="btn btn-sm btn-primary px-3"
+                                        t-on-click="confirmCreateMargin"
+                                        t-att-disabled="!state.newMarginCode.trim() || !state.newMarginName.trim()">Create Margin</button>
+                                <button class="btn btn-sm btn-outline-secondary px-3"
+                                        t-on-click="closeNewMarginModal">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+    </t>
+</templates>

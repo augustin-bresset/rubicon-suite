@@ -77,6 +77,12 @@ class ProductModel(models.Model):
         ])
         record.sibling_model_ids = siblings
         
+    picture_id = fields.Many2one(
+        comodel_name='pdp.picture',
+        compute='_compute_picture',
+        string='Main Picture',
+        store=False,
+    )
     
     def _compute_picture(self):
         Pic = self.env['pdp.picture']

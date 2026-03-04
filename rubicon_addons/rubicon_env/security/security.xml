@@ -40,4 +40,28 @@
         <field name="category_id" ref="base.module_category_hidden"/>
     </record>
 
+    <!-- Officer: Sales Order management, pricing, invoicing -->
+    <record id="group_rubicon_officer" model="res.groups">
+        <field name="name">Officer</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <!-- Accountant: Financial operations -->
+    <record id="group_rubicon_accountant" model="res.groups">
+        <field name="name">Accountant</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <!-- Stock Manager: Inventory operations -->
+    <record id="group_rubicon_stock_manager" model="res.groups">
+        <field name="name">Stock Manager</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <!-- Lapidary Supervisor: Production supervision -->
+    <record id="group_rubicon_lapidary_supervisor" model="res.groups">
+        <field name="name">Lapidary Supervisor</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
 </odoo>

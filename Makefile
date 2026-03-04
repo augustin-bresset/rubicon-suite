@@ -31,6 +31,11 @@ ODOO_SHELL = docker compose exec -T odoo odoo shell \
 
 CORE_DATA_MODULES = pdp_stone,pdp_metal,pdp_labor,pdp_margin,pdp_product
 
+PDP_MODULES = pdp_stone,pdp_metal,pdp_labor,pdp_margin,pdp_product,pdp_frontend
+
+SIS_MODULES = sis_party,sis_document,sis_frontend
+
+
 export PYTHONPATH := $(abspath rubicon_addons):$(PYTHONPATH)
 
 LOG_DIR ?= meta/logs
@@ -52,6 +57,10 @@ init-data-modules:
 
 update-data-modules:
 	$(ODOO) -u $(CORE_DATA_MODULES) --stop-after-init --workers=0
+
+update-sis-modules:
+	$(ODOO) -u $(CORE_DATA_MODULES) --stop-after-init --workers=0
+
 
 raw_to_data_all:
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_stone

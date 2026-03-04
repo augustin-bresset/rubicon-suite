@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sis_doc_type,sis.doc.type,model_sis_doc_type,base.group_user,1,1,1,1
+access_sis_doc_in_mode,sis.doc.in.mode,model_sis_doc_in_mode,base.group_user,1,1,1,1
+access_sis_document,sis.document,model_sis_document,base.group_user,1,1,1,1
+access_sis_document_item,sis.document.item,model_sis_document_item,base.group_user,1,1,1,1

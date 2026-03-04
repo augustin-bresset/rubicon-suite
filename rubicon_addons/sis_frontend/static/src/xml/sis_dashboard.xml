@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="sis_frontend.SisDashboard" owl="1">
+        <div class="sis_dashboard w-100 h-100 bg-light d-flex flex-column align-items-center justify-content-center">
+
+            <div class="text-center mb-5">
+                <h1 class="display-4 text-secondary mb-2" style="font-weight: 300; letter-spacing: 1px;">Sales Information System (SIS)</h1>
+                <p class="text-muted">Rubicon Integrated Edition</p>
+            </div>
+
+            <div class="container" style="max-width: 700px;">
+                <div class="row g-4 justify-content-center">
+
+                    <!-- Parties -->
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100 shadow-sm border-0 sis-card" t-on-click="() => this.openAction('sis_party.action_sis_parties')">
+                            <div class="card-body text-center p-4 d-flex flex-column align-items-center justify-content-center">
+                                <i class="fa fa-users fa-3x text-primary mb-3"></i>
+                                <h4 class="card-title text-dark">Parties</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quotation -->
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100 shadow-sm border-0 sis-card" t-on-click="() => this.openAction('sis_document.action_sis_quotations')">
+                            <div class="card-body text-center p-4 d-flex flex-column align-items-center justify-content-center">
+                                <i class="fa fa-file-text-o fa-3x text-info mb-3"></i>
+                                <h4 class="card-title text-dark">Quotation</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book Orders -->
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100 shadow-sm border-0 sis-card" t-on-click="() => this.openAction('sis_document.action_sis_orders')">
+                            <div class="card-body text-center p-4 d-flex flex-column align-items-center justify-content-center">
+                                <i class="fa fa-shopping-cart fa-3x text-success mb-3"></i>
+                                <h4 class="card-title text-dark">Book Orders</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ship Goods -->
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100 shadow-sm border-0 sis-card" t-on-click="() => this.openAction('sis_document.action_sis_invoices')">
+                            <div class="card-body text-center p-4 d-flex flex-column align-items-center justify-content-center">
+                                <i class="fa fa-ship fa-3x text-warning mb-3"></i>
+                                <h4 class="card-title text-dark">Ship Goods</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </t>
+</templates>

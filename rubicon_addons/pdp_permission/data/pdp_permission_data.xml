@@ -100,6 +100,76 @@
         </record>
 
         <!-- ============================================================ -->
+        <!-- Default Permissions - Order Category -->
+        <!-- ============================================================ -->
+        <record id="perm_order_read" model="pdp.permission">
+            <field name="code">order.read</field>
+            <field name="name">View Orders</field>
+            <field name="category">order</field>
+            <field name="description">Allows viewing sales orders</field>
+        </record>
+        <record id="perm_order_create" model="pdp.permission">
+            <field name="code">order.create</field>
+            <field name="name">Create Orders</field>
+            <field name="category">order</field>
+            <field name="description">Allows creating sales orders</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Invoice Category -->
+        <!-- ============================================================ -->
+        <record id="perm_invoice_read" model="pdp.permission">
+            <field name="code">invoice.read</field>
+            <field name="name">View Invoices</field>
+            <field name="category">invoice</field>
+            <field name="description">Allows viewing invoices</field>
+        </record>
+        <record id="perm_invoice_create" model="pdp.permission">
+            <field name="code">invoice.create</field>
+            <field name="name">Create Invoices</field>
+            <field name="category">invoice</field>
+            <field name="description">Allows creating invoices</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Stock Category -->
+        <!-- ============================================================ -->
+        <record id="perm_stock_read" model="pdp.permission">
+            <field name="code">stock.read</field>
+            <field name="name">View Stock</field>
+            <field name="category">stock</field>
+            <field name="description">Allows viewing inventory stock</field>
+        </record>
+        <record id="perm_stock_update" model="pdp.permission">
+            <field name="code">stock.update</field>
+            <field name="name">Update Stock</field>
+            <field name="category">stock</field>
+            <field name="description">Allows updating stock records</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Default Permissions - Purchase Category -->
+        <!-- ============================================================ -->
+        <record id="perm_voucher_read" model="pdp.permission">
+            <field name="code">voucher.read</field>
+            <field name="name">View Vouchers</field>
+            <field name="category">purchase</field>
+            <field name="description">Allows viewing purchase vouchers</field>
+        </record>
+        <record id="perm_voucher_create" model="pdp.permission">
+            <field name="code">voucher.create</field>
+            <field name="name">Create Vouchers</field>
+            <field name="category">purchase</field>
+            <field name="description">Allows creating purchase vouchers</field>
+        </record>
+        <record id="perm_voucher_approve" model="pdp.permission">
+            <field name="code">voucher.approve</field>
+            <field name="name">Approve Vouchers</field>
+            <field name="category">purchase</field>
+            <field name="description">Allows approving purchase vouchers</field>
+        </record>
+
+        <!-- ============================================================ -->
         <!-- Default Permissions - Export Category -->
         <!-- ============================================================ -->
         <record id="perm_export_pdf" model="pdp.permission">
@@ -132,23 +202,13 @@
         </record>
 
         <!-- ============================================================ -->
-        <!-- Default Roles -->
+        <!-- Audit-Aligned Business Roles -->
         <!-- ============================================================ -->
-        <record id="role_viewer" model="pdp.role">
-            <field name="name">PDP Viewer</field>
-            <field name="description">Can view products, prices, and compositions. Read-only access.</field>
-            <field name="permission_ids" eval="[(6, 0, [
-                ref('perm_product_read'),
-                ref('perm_price_read'),
-                ref('perm_stone_read'),
-                ref('perm_metal_read'),
-                ref('perm_margin_read'),
-            ])]"/>
-        </record>
 
-        <record id="role_editor" model="pdp.role">
-            <field name="name">PDP Editor</field>
-            <field name="description">Can view and modify products, prices, and compositions.</field>
+        <!-- Officer: Sales Order management, pricing, invoicing -->
+        <record id="role_officer" model="pdp.role">
+            <field name="name">Officer</field>
+            <field name="description">Sales Order management, pricing via PDP, and invoicing. Creates and manages orders for clients.</field>
             <field name="permission_ids" eval="[(6, 0, [
                 ref('perm_product_read'),
                 ref('perm_product_create'),
@@ -157,17 +217,50 @@
                 ref('perm_price_compute'),
                 ref('perm_price_update'),
                 ref('perm_stone_read'),
-                ref('perm_stone_update'),
                 ref('perm_metal_read'),
-                ref('perm_metal_update'),
                 ref('perm_margin_read'),
+                ref('perm_order_read'),
+                ref('perm_order_create'),
+                ref('perm_invoice_read'),
+                ref('perm_invoice_create'),
                 ref('perm_export_pdf'),
             ])]"/>
         </record>
 
-        <record id="role_manager" model="pdp.role">
-            <field name="name">PDP Manager</field>
-            <field name="description">Full access to PDP including margins and exports.</field>
+        <!-- Stone Purchaser: Stone procurement and voucher management -->
+        <record id="role_stone_purchaser" model="pdp.role">
+            <field name="name">Stone Purchaser</field>
+            <field name="description">Stone procurement: compares stock, contacts suppliers, creates confirmation vouchers for stones.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_stone_read'),
+                ref('perm_stone_update'),
+                ref('perm_stock_read'),
+                ref('perm_voucher_read'),
+                ref('perm_voucher_create'),
+                ref('perm_product_read'),
+                ref('perm_price_read'),
+            ])]"/>
+        </record>
+
+        <!-- Metal Purchaser: Metal procurement and voucher management -->
+        <record id="role_metal_purchaser" model="pdp.role">
+            <field name="name">Metal Purchaser</field>
+            <field name="description">Metal procurement: compares stock, contacts suppliers, creates confirmation vouchers for metals.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_metal_read'),
+                ref('perm_metal_update'),
+                ref('perm_stock_read'),
+                ref('perm_voucher_read'),
+                ref('perm_voucher_create'),
+                ref('perm_product_read'),
+                ref('perm_price_read'),
+            ])]"/>
+        </record>
+
+        <!-- Director: Full validation and oversight -->
+        <record id="role_director" model="pdp.role">
+            <field name="name">Director</field>
+            <field name="description">Full access. Reviews vouchers, validates prices against PDP, approves critical operations.</field>
             <field name="permission_ids" eval="[(6, 0, [
                 ref('perm_product_read'),
                 ref('perm_product_create'),
@@ -182,33 +275,88 @@
                 ref('perm_metal_update'),
                 ref('perm_margin_read'),
                 ref('perm_margin_update'),
-                ref('perm_export_pdf'),
-                ref('perm_export_excel'),
-            ])]"/>
-        </record>
-
-        <record id="role_admin" model="pdp.role">
-            <field name="name">PDP Administrator</field>
-            <field name="description">Full access including role and user management.</field>
-            <field name="permission_ids" eval="[(6, 0, [
-                ref('perm_product_read'),
-                ref('perm_product_create'),
-                ref('perm_product_update'),
-                ref('perm_product_delete'),
-                ref('perm_price_read'),
-                ref('perm_price_compute'),
-                ref('perm_price_update'),
-                ref('perm_stone_read'),
-                ref('perm_stone_update'),
-                ref('perm_metal_read'),
-                ref('perm_metal_update'),
-                ref('perm_margin_read'),
-                ref('perm_margin_update'),
+                ref('perm_order_read'),
+                ref('perm_order_create'),
+                ref('perm_invoice_read'),
+                ref('perm_invoice_create'),
+                ref('perm_stock_read'),
+                ref('perm_stock_update'),
+                ref('perm_voucher_read'),
+                ref('perm_voucher_create'),
+                ref('perm_voucher_approve'),
                 ref('perm_export_pdf'),
                 ref('perm_export_excel'),
                 ref('perm_admin_roles'),
                 ref('perm_admin_users'),
             ])]"/>
         </record>
+
+        <!-- Accountant: Financial operations -->
+        <record id="role_accountant" model="pdp.role">
+            <field name="name">Accountant</field>
+            <field name="description">Records vouchers in accounting system, manages payments. Limited financial view.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_voucher_read'),
+                ref('perm_price_read'),
+                ref('perm_invoice_read'),
+                ref('perm_order_read'),
+            ])]"/>
+        </record>
+
+        <!-- Stock Manager: Inventory operations -->
+        <record id="role_stock_manager" model="pdp.role">
+            <field name="name">Stock Manager</field>
+            <field name="description">Updates paper/digital stock records, selects resources for production orders.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_stock_read'),
+                ref('perm_stock_update'),
+                ref('perm_product_read'),
+                ref('perm_stone_read'),
+                ref('perm_metal_read'),
+                ref('perm_order_read'),
+            ])]"/>
+        </record>
+
+        <!-- Designer: Product design and 3D modeling -->
+        <record id="role_designer" model="pdp.role">
+            <field name="name">Designer</field>
+            <field name="description">Creates 3D models from client designs. Manages product definitions.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_product_read'),
+                ref('perm_product_create'),
+                ref('perm_product_update'),
+                ref('perm_stone_read'),
+                ref('perm_metal_read'),
+                ref('perm_price_read'),
+            ])]"/>
+        </record>
+
+        <!-- Lapidary Supervisor: Production supervision -->
+        <record id="role_lapidary_supervisor" model="pdp.role">
+            <field name="name">Lapidary Supervisor</field>
+            <field name="description">Processes orders through production. Oversees stone and metal work.</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_product_read'),
+                ref('perm_price_read'),
+                ref('perm_stock_read'),
+                ref('perm_stone_read'),
+                ref('perm_metal_read'),
+                ref('perm_order_read'),
+            ])]"/>
+        </record>
+
+        <!-- Quality Controller: QC and traceability -->
+        <record id="role_quality_controller" model="pdp.role">
+            <field name="name">Quality Controller</field>
+            <field name="description">Collects stakeholder signatures, checks quality of work in progress (WIP).</field>
+            <field name="permission_ids" eval="[(6, 0, [
+                ref('perm_product_read'),
+                ref('perm_stock_read'),
+                ref('perm_order_read'),
+                ref('perm_stone_read'),
+                ref('perm_metal_read'),
+            ])]"/>
+        </record>
     </data>
 </odoo>
+

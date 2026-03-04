@@ -1,0 +1,93 @@
+// Odoo 18 Black and White Theme Overrides
+// Colors inlined to avoid SCSS import/scope issues
+
+:root {
+    // Primary brand colors
+    --o-brand-primary: #000000 !important;
+    --o-brand-odoo: #000000 !important;
+
+    // Navbar
+    --o-navbar-background-color: #000000 !important;
+    --o-navbar-color: #ffffff !important;
+    --o-navbar-entry-focus-background-color: #333333 !important;
+
+    // Buttons
+    --o-btn-primary-bg: #000000 !important;
+    --o-btn-primary-border: #000000 !important;
+    --o-btn-primary-color: #ffffff !important;
+
+    // Sidebar / App Drawer
+    --o-app-drawer-background: #000000 !important;
+}
+
+// Global UI overrides
+body {
+    background-color: #ffffff !important;
+}
+
+.o_main_navbar {
+    background-color: #000000 !important;
+    border-bottom: 1px solid #333 !important;
+
+    .o_menu_brand,
+    .o_nav_entry,
+    .o_menu_sections .nav-link {
+        color: #ffffff !important;
+
+        &:hover {
+            background-color: #333333 !important;
+        }
+    }
+}
+
+// Buttons
+.btn-primary {
+    background-color: #000000 !important;
+    border-color: #000000 !important;
+    color: #ffffff !important;
+    --hover-background: #333333;
+    --hover-border: #333333;
+
+    &:hover,
+    &:focus,
+    &:active {
+        background-color: #333333 !important;
+        border-color: #333333 !important;
+    }
+}
+
+// Progress bars and active elements
+.progress-bar {
+    background-color: #000000 !important;
+}
+
+.o_list_table {
+    thead {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+
+        th {
+            color: #000000 !important;
+            border-bottom: 2px solid #000 !important;
+        }
+    }
+}
+
+// Selection colors
+::selection {
+    background: #000000 !important;
+    color: #ffffff !important;
+}
+
+// Menu Highlights
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+// Form view tabs
+.o_notebook .nav-link.active {
+    border-top-color: #000000 !important;
+    color: #000000 !important;
+}

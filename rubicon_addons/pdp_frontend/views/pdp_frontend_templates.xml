@@ -10,6 +10,11 @@
           .pdp-frontend-webpage {
             max-width: 1200px;
           }
+          /* ... existing styles ... */
+          
+          /* User Request: Fix button positioning/sizing */
+
+
           .pdp-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -54,6 +59,15 @@
             gap: 0.5rem;
             flex-wrap: wrap;
           }
+
+          /* Black &amp; White Theme Overrides */
+          a { color: #000; text-decoration: none; }
+          a:hover { color: #333; }
+          .dropdown-item:active, .dropdown-item.active { background-color: #000 !important; color: #fff !important; }
+          .btn-primary { background-color: #000 !important; border-color: #000 !important; }
+          .btn-outline-primary { color: #000 !important; border-color: #000 !important; }
+          .btn-outline-primary:hover { background-color: #000 !important; color: #fff !important; }
+          .nav-link { color: #000 !important; }
         </style>
       </head>
       <body>
@@ -73,7 +87,7 @@
                             <li><a class="dropdown-item py-1" href="/web#action=pdp_metal_market.action_pdp_market_metal&amp;view_type=list">Metals</a></li>
                             <li><a class="dropdown-item py-1" href="/web#action=pdp_product.action_pdp_product_part&amp;view_type=list">Parts</a></li>
                             <li><a class="dropdown-item py-1" href="/web#action=pdp_margin.action_pdp_margin&amp;view_type=list">Margins</a></li>
-                            <li><a class="dropdown-item py-1" href="#">Ornament Categories</a></li>
+                            <li><a class="dropdown-item py-1" href="/web#action=pdp_frontend.action_pdp_product_category&amp;view_type=list">Ornament Categories</a></li>
                             <li><hr class="dropdown-divider"/></li>
                             <li><a class="dropdown-item py-1" href="/web#action=base.action_currency_form&amp;view_type=list">Currencies</a></li>
                         </ul>
@@ -82,7 +96,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle py-0 px-2 text-dark" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown">Tools</a>
                         <ul class="dropdown-menu shadow-sm rounded-0" style="font-size: 0.85rem;">
-                            <li><a class="dropdown-item py-1" href="#">Options</a></li>
+                            <li><a class="dropdown-item py-1" href="javascript:void(0)" onclick="bootstrap.Modal.getOrCreateInstance(document.getElementById('optionsModal')).show();">Settings</a></li>
                             <li><a class="dropdown-item py-1" href="/web#action=base.ir_action_report">Reports</a></li>
                             <li><a class="dropdown-item py-1" href="#">Check Data</a></li>
                         </ul>
@@ -146,23 +160,70 @@
 
                 <!-- Right: Image/Drawing -->
                 <div class="bg-light d-flex flex-column p-2 position-relative" style="width: 40%; min-width: 300px;">
-                    <div class="d-flex justify-content-end mb-1">
-                        <span class="badge bg-secondary rounded-0 fw-normal">Picture</span>
+                    <div class="d-flex justify-content-end mb-1 gap-1">
+                        <!-- Toggle Buttons -->
+                        <button type="button" class="btn btn-sm btn-secondary rounded-0 py-0 px-2" id="btnShowPicture" style="font-size: 0.8rem;" onclick="toggleImageDisplay('picture')">Picture</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0 py-0 px-2" id="btnShowDrawing" style="font-size: 0.8rem;" onclick="toggleImageDisplay('drawing')">Drawing</button>
                     </div>
-                    <div class="flex-grow-1 bg-white border d-flex align-items-center justify-content-center overflow-hidden">
+                    <div class="flex-grow-1 bg-white border d-flex align-items-center justify-content-center overflow-hidden position-relative">
                          <t t-if="product and product.model_id">
-                            <img class="img-fluid" 
+                            <!-- Helper to store IDs -->
+                            <input type="hidden" id="modelIdForImage" t-att-value="product.model_id.id"/>
+                            
+                            <!-- Main Image -->
+                            <img id="mainProductImage" class="img-fluid" 
                                  style="max-height: 100%; max-width: 100%; object-fit: contain;"
                                  t-att-src="'/web/image?model=pdp.product.model&amp;id=%s&amp;field=picture_image' % product.model_id.id" 
-                                 alt="Drawing"/>
+                                 alt="Product Image"/>
+                                 
+                            <!-- Message if no drawing -->
+                            <div id="noDrawingMsg" class="d-none text-muted small position-absolute top-50 start-50 translate-middle text-center bg-white p-2 border">No Drawing Available</div>
                          </t>
                          <t t-else="">
-                             <span class="text-muted small">No Drawing</span>
+                             <span class="text-muted small">No Image</span>
                          </t>
                     </div>
                      <t t-if="product">
                         <div class="text-center small mt-1 fw-bold"><t t-esc="product.code"/></div>
                      </t>
+
+                    <script>
+                        function toggleImageDisplay(type) {
+                            var img = document.getElementById('mainProductImage');
+                            var modelId = document.getElementById('modelIdForImage') ? document.getElementById('modelIdForImage').value : null;
+                            var btnPic = document.getElementById('btnShowPicture');
+                            var btnDraw = document.getElementById('btnShowDrawing');
+                            var msg = document.getElementById('noDrawingMsg');
+
+                            if(!img || !modelId) return;
+
+                            if(type === 'picture') {
+                                img.src = '/web/image?model=pdp.product.model&amp;id=' + modelId + '&amp;field=picture_image';
+                                img.classList.remove('d-none');
+                                if(msg) msg.classList.add('d-none');
+                                
+                                btnPic.classList.add('btn-secondary');
+                                btnPic.classList.remove('btn-outline-secondary');
+                                btnDraw.classList.add('btn-outline-secondary');
+                                btnDraw.classList.remove('btn-secondary');
+                            } else {
+                                // Check if drawing exists via fetch? Or just load it and handle error?
+                                // Odoo /web/image returns placeholder if empty? 
+                                // Actually, let's use the field `drawing` on pdp.picture.
+                                // But pdp.product.model doesn't have `drawing` field yet? 
+                                // WAIT! I need to add `drawing` computed field to pdp.product.model as well!
+                                // The plan said "pdp.picture" schema changes. It missed specific "pdp.product.model" compute!
+                                // For now, let's assume I fix the backend model too.
+                                
+                                img.src = '/web/image?model=pdp.product.model&amp;id=' + modelId + '&amp;field=drawing_image';
+                                
+                                btnDraw.classList.add('btn-secondary');
+                                btnDraw.classList.remove('btn-outline-secondary');
+                                btnPic.classList.add('btn-outline-secondary');
+                                btnPic.classList.remove('btn-secondary');
+                            }
+                        }
+                    </script>
                 </div>
                 
              </form>
@@ -247,7 +308,7 @@
                                 <thead class="bg-dark text-white text-center">
                                     <tr>
                                         <th class="text-start">Item</th>
-                                        <th>Cost</th>
+                                        <th class="pdp-cost">Cost</th>
                                         <th>Margin</th>
                                         <th>Price</th>
                                     </tr>
@@ -256,14 +317,14 @@
                                     <t t-if="price_preview">
                                         <tr t-foreach="price_preview.line_ids" t-as="line">
                                             <td class="text-start fw-bold"><t t-esc="line.type"/></td>
-                                            <td><span t-field="line.cost" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                            <td class="pdp-cost"><span t-field="line.cost" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
                                             <td><span t-field="line.margin" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
                                             <td><span t-field="line.price" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
                                         </tr>
                                          <!-- Totals -->
                                         <tr class="fw-bold" style="background-color: #ffc107;">
                                             <td class="text-start">Net / Final</td>
-                                            <td><span t-field="price_preview.cost" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
+                                            <td class="pdp-cost"><span t-field="price_preview.cost" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
                                             <td><span t-field="price_preview.margin" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
                                             <td><span t-field="price_preview.price" t-options='{"widget": "monetary", "display_currency": price_preview.currency_id}'/></td>
                                         </tr>
@@ -301,7 +362,7 @@
                                             <td><t t-esc="line.stone_id.shade_id.shade"/></td>
                                             <td><t t-esc="line.stone_id.shape_id.shape"/></td>
                                             <td><t t-esc="line.pieces"/></td>
-                                            <td class="text-end"><t t-esc="line.weight"/></td>
+                                            <td class="text-end pdp-weight" t-att-data-weight="line.weight or 0"><t t-esc="line.weight"/></td>
                                         </tr>
                                     </t>
                                 </tbody>
@@ -327,7 +388,7 @@
                                             <!-- Use reshaped_shape_id if available, field might be empty -->
                                             <td><t t-esc="line.reshaped_shape_id.shape if line.reshaped_shape_id else ''"/></td>
                                             <td><t t-esc="line.pieces"/></td>
-                                            <td class="text-end"><t t-esc="line.reshaped_weight"/></td> <!-- Use reshaped_weight -->
+                                            <td class="text-end pdp-weight" t-att-data-weight="line.reshaped_weight or 0"><t t-esc="line.reshaped_weight"/></td> <!-- Use reshaped_weight -->
                                         </tr>
                                     </t>
                                 </tbody>
@@ -350,7 +411,7 @@
                                         <tr t-foreach="product.model_id.metal_weights_ids" t-as="m">
                                             <td><t t-esc="m.metal_id.name"/></td>
                                             <td><t t-esc="m.purity_id.code"/></td>
-                                            <td class="text-end"><t t-esc="m.weight"/></td>
+                                            <td class="text-end pdp-weight" t-att-data-weight="m.weight or 0"><t t-esc="m.weight"/></td>
                                         </tr>
                                     </t>
                                 </tbody>
@@ -388,13 +449,13 @@
                                     <td><t t-esc="line.stone_id.shape_id.shape if line.stone_id.shape_id else ''"/></td>
                                     <td><t t-esc="line.stone_id.size_id.name if line.stone_id.size_id else ''"/></td>
                                     <td class="text-center"><t t-esc="line.pieces"/></td>
-                                    <td class="text-end"><t t-esc="line.weight or ''"/></td>
-                                    <td class="text-end"><t t-esc="line.stone_id.cost if line.stone_id else ''"/></td>
+                                    <td class="text-end pdp-weight" t-att-data-weight="line.weight or 0"><t t-esc="line.weight or ''"/></td>
+                                    <td class="text-end pdp-cost"><t t-esc="line.stone_id.cost if line.stone_id else ''"/></td>
                                     <td><t t-esc="line.stone_id.currency_id.name if line.stone_id and line.stone_id.currency_id else 'US'"/></td>
                                     <td>-</td>
                                     <td><t t-esc="line.reshaped_shape_id.shape if line.reshaped_shape_id else ''"/></td>
                                     <td><t t-esc="line.reshaped_size_id.name if line.reshaped_size_id else ''"/></td>
-                                    <td class="text-end"><t t-esc="line.reshaped_weight or ''"/></td>
+                                    <td class="text-end pdp-weight" t-att-data-weight="line.reshaped_weight or 0"><t t-esc="line.reshaped_weight or ''"/></td>
                                 </tr>
                             </t>
                         </tbody>
@@ -437,7 +498,7 @@
                                     <td><t t-esc="m.metal_id.name"/></td>
                                     <td><t t-esc="m.metal_version"/></td>
                                     <td><t t-esc="m.purity_id.code"/></td>
-                                    <td><t t-esc="m.weight"/></td>
+                                    <td class="pdp-weight" t-att-data-weight="m.weight or 0"><t t-esc="m.weight"/></td>
                                     <td class="text-center"><button class="btn btn-outline-danger btn-sm py-0 border-0">-</button></td>
                                 </tr>
                             </t>
@@ -453,10 +514,10 @@
                              <h6 class="small fw-bold mb-2">Labor (Model Level)</h6>
                              <table class="table table-sm table-bordered small mb-3">
                                 <thead class="bg-light">
-                                    <tr><th>Labor</th><th>Casting</th><th>Filing</th><th>Polishing</th><th>Curr</th></tr>
+                                    <tr><th>Labor</th><th>Casting</th><th>Filing</th><th>Polishing</th><th class="pdp-cost">Total</th><th>Curr</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td>➤</td><td class="text-end">242</td><td class="text-end">100</td><td class="text-end">150</td><td>150 TH</td></tr>
+                                    <tr><td>➤</td><td class="text-end">242</td><td class="text-end">100</td><td class="text-end">150</td><td class="text-end pdp-cost">492</td><td>TH</td></tr>
                                 </tbody>
                              </table>
                          </div>
@@ -480,10 +541,10 @@
                          <div class="col-md-4">
                              <h6 class="small fw-bold mb-2">Misc.</h6>
                              <table class="table table-sm table-bordered small mb-0">
-                                <thead class="bg-light"><tr><th>Type</th><th>Cost</th><th>Curr</th></tr></thead>
+                                <thead class="bg-light"><tr><th>Type</th><th class="pdp-cost">Cost</th><th>Curr</th></tr></thead>
                                 <tbody>
-                                    <tr><td>Lazer</td><td class="text-end">4</td><td>US</td></tr>
-                                    <tr><td>Paint</td><td class="text-end">2</td><td>US</td></tr>
+                                    <tr><td>Lazer</td><td class="text-end pdp-cost">4</td><td>US</td></tr>
+                                    <tr><td>Paint</td><td class="text-end pdp-cost">2</td><td>US</td></tr>
                                 </tbody>
                              </table>
                          </div>
@@ -508,19 +569,19 @@
           <!-- 5. Footer Toolbar (Fixed & Compact) -->
           <footer class="fixed-bottom bg-light border-top d-flex align-items-center px-2 shadow-lg" style="height: 40px; z-index: 1040;">
              <div class="btn-group me-auto">
-                 <form class="d-flex">
-                    <button type="button" class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3" data-bs-toggle="modal" data-bs-target="#newProductModal">New</button>
-                 </form>
-                 <div class="vr mx-1"></div>
-                 <form t-att-action="'/pdp/delete/%s' % product.id" method="post" class="d-flex" t-if="product" onsubmit="return confirm('Delete?');">
-                    <button type="submit" class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3">Delete</button>
-                 </form>
-                 <div class="vr mx-1" t-if="product"></div>
-                 <!-- Save Button -->
-                 <button type="button" class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3" t-if="product"
-                         onclick="document.getElementById('pdpForm').action='/pdp/save'; document.getElementById('pdpForm').method='post'; document.getElementById('pdpForm').submit();">
-                         Save
-                 </button>
+                 <button type="button" class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3" data-bs-toggle="modal" data-bs-target="#newProductModal">New</button>
+                 
+                 <t t-if="product">
+                     <div class="vr mx-1"></div>
+                     <form t-att-action="'/pdp/delete/%s' % product.id" method="post" class="d-flex m-0 p-0" onsubmit="return confirm('Delete?');">
+                        <button type="submit" class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3">Delete</button>
+                     </form>
+                     <div class="vr mx-1"></div>
+                     <button type="button" class="btn btn-sm btn-light border text-dark fw-bold rounded-0 px-3"
+                             onclick="document.getElementById('pdpForm').action='/pdp/save'; document.getElementById('pdpForm').method='post'; document.getElementById('pdpForm').submit();">
+                             Save
+                     </button>
+                 </t>
              </div>
              
              <div class="btn-group">
@@ -641,6 +702,56 @@
                 </div>
             </div>
         </div>
+        <!-- Modal: Options -->
+        <div class="modal fade" id="optionsModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content rounded-0">
+                    <div class="modal-header py-2 bg-light">
+                        <h6 class="modal-title fw-bold">Settings</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-3">
+                        <h6 class="border-bottom pb-2 mb-3">General</h6>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="optShowCost"/>
+                            <label class="form-check-label" for="optShowCost">Show Cost Breakdown</label>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" class="form-check-input" id="optAutoRefresh"/>
+                                <label class="form-check-label" for="optAutoRefresh">Auto Refresh</label>
+                            </div>
+                            <div class="d-inline-block">
+                                <input type="number" id="optRefreshInterval" class="form-control form-control-sm d-inline-block rounded-0 text-center" style="width: 60px;" value="30"/>
+                                <span class="small ms-1">Sec.</span>
+                            </div>
+                        </div>
+
+                        <h6 class="border-bottom pb-2 mb-3 mt-4">Defaults &amp; Calculation</h6>
+                        <div class="mb-3">
+                            <label for="optWeightUnit" class="form-label small fw-bold">Default Weight Unit</label>
+                            <select id="optWeightUnit" class="form-select form-select-sm rounded-0">
+                                <option value="g">Grams (g)</option>
+                                <option value="oz">Ounces (oz)</option>
+                                <option value="ct">Carats (ct)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                             <label for="optPriceSource" class="form-label small fw-bold">Metal Price Source</label>
+                             <select id="optPriceSource" class="form-select form-select-sm rounded-0">
+                                 <option value="reference">Reference Price</option>
+                                 <option value="market">Market Price</option>
+                             </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-1">
+                        <button type="button" id="btnSaveOptions" class="btn btn-sm btn-primary rounded-0">Save</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-0" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
@@ -658,6 +769,12 @@
 
             // Pricing Interactivity
             document.addEventListener('DOMContentLoaded', function() {
+                loadPdpOptions();
+                const btnSave = document.getElementById('btnSaveOptions');
+                if(btnSave) btnSave.addEventListener('click', savePdpOptions);
+                
+                // ... existing code ...
+
                 const marginSelect = document.querySelector('select[name="pricing_margin"]');
                 const currencySelect = document.querySelector('select[name="pricing_currency"]');
                 const updateBtn = document.getElementById('btnUpdatePrice');
@@ -668,10 +785,12 @@
                    updateBtn.addEventListener('click', function() {
                         const marginId = marginSelect ? marginSelect.value : null;
                         const currencyId = currencySelect ? currencySelect.value : null;
+                        const opts = JSON.parse(localStorage.getItem('pdp_options') || '{}');
+                        const priceSource = opts.priceSource || 'reference';
                         
                         // Using Odoo RPC (jsonrpc)
                         fetch('/pdp/update_price', {
-                            method: 'POST',
+                                method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
@@ -681,7 +800,8 @@
                                 params: {
                                     product_id: productId,
                                     margin_id: marginId,
-                                    currency_id: currencyId
+                                    currency_id: currencyId,
+                                    price_source: priceSource
                                 }
                             })
                         })
@@ -718,7 +838,7 @@
                     data.lines.forEach(line => {
                         const row = `<tr>
                             <td class="text-start fw-bold">${line.type}</td>
-                            <td>${fmt(line.cost)}</td>
+                            <td class="pdp-cost">${fmt(line.cost)}</td>
                             <td>${fmt(line.margin)}</td>
                             <td>${fmt(line.price)}</td>
                         </tr>`;
@@ -729,14 +849,101 @@
                     const total = `
                         <tr class="fw-bold" style="background-color: #ffc107;">
                             <td class="text-start">Net / Final</td>
-                            <td>${fmt(data.totals.cost)}</td>
+                            <td class="pdp-cost">${fmt(data.totals.cost)}</td>
                             <td>${fmt(data.totals.margin)}</td>
                             <td>${fmt(data.totals.price)}</td>
                         </tr>
                     `;
                     tbody.innerHTML += total;
                 }
+                }
             });
+
+            // Options Logic
+            function loadPdpOptions() {
+                const opts = JSON.parse(localStorage.getItem('pdp_options') || '{}');
+                
+                // Set Inputs
+                if(document.getElementById('optShowCost')) document.getElementById('optShowCost').checked = opts.showCost !== false;
+                if(document.getElementById('optAutoRefresh')) document.getElementById('optAutoRefresh').checked = !!opts.autoRefresh;
+                if(document.getElementById('optRefreshInterval')) document.getElementById('optRefreshInterval').value = opts.refreshInterval || 30;
+                if(document.getElementById('optWeightUnit')) document.getElementById('optWeightUnit').value = opts.weightUnit || 'g';
+                if(document.getElementById('optPriceSource')) document.getElementById('optPriceSource').value = opts.priceSource || 'reference';
+                
+                // Apply Settings
+                applyPdpSettings(opts);
+            }
+
+            function savePdpOptions() {
+                try {
+                    console.log('Saving PDP Options...');
+                    const opts = {
+                        showCost: document.getElementById('optShowCost').checked,
+                        autoRefresh: document.getElementById('optAutoRefresh').checked,
+                        refreshInterval: parseInt(document.getElementById('optRefreshInterval').value) || 30,
+                        weightUnit: document.getElementById('optWeightUnit').value,
+                        priceSource: document.getElementById('optPriceSource').value
+                    };
+                    localStorage.setItem('pdp_options', JSON.stringify(opts));
+                    
+                    applyPdpSettings(opts);
+                    
+                    // Close modal (bootstrap5)
+                    const modalEl = document.getElementById('optionsModal');
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    if(modal) modal.hide();
+                    else console.warn('Modal instance not found');
+                } catch(e) {
+                    console.error(e);
+                    alert('Error saving options: ' + e.message);
+                }
+            }
+
+            let refreshTimer = null;
+
+            function applyPdpSettings(opts) {
+                // Auto Refresh
+                if(refreshTimer) clearInterval(refreshTimer);
+                if(opts.autoRefresh) {
+                    refreshTimer = setInterval(() => {
+                        window.location.reload();
+                    }, opts.refreshInterval * 1000);
+                }
+                
+                // Weight Unit
+                updateWeightDisplay(opts.weightUnit);
+                
+                // Cost Visibility
+                updateCostVisibility(opts.showCost !== false);
+            }
+
+            function updateWeightDisplay(unit) {
+                unit = unit || 'g';
+                const factors = { 'g': 1, 'oz': 0.035274, 'ct': 5 };
+                const factor = factors[unit] || 1;
+                const precision = unit === 'ct' ? 2 : (unit === 'oz' ? 4 : 2);
+                
+                document.querySelectorAll('.pdp-weight').forEach(el => {
+                    const val = parseFloat(el.getAttribute('data-weight')) || 0;
+                    const conv = val * factor;
+                    el.innerText = conv.toFixed(precision);
+                });
+            }
+
+            function updateCostVisibility(show) {
+                const styleId = 'pdp-cost-style';
+                let style = document.getElementById(styleId);
+                if (!style) {
+                    style = document.createElement('style');
+                    style.id = styleId;
+                    document.head.appendChild(style);
+                }
+                if (show) {
+                    style.textContent = '';
+                } else {
+                    style.textContent = '.pdp-cost { display: none !important; }';
+                }
+            }
         </script>
       </body>
     </html>

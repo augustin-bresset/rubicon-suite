@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============ Document Tree ============ -->
+    <record id="view_sis_document_tree" model="ir.ui.view">
+        <field name="name">sis.document.tree</field>
+        <field name="model">sis.document</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="closed">
+                <field name="name"/>
+                <field name="doc_type_code"/>
+                <field name="party_id"/>
+                <field name="date_created"/>
+                <field name="date_due"/>
+                <field name="total_qty"/>
+                <field name="total_amount"/>
+                <field name="closed"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ Document Search ============ -->
+    <record id="view_sis_document_search" model="ir.ui.view">
+        <field name="name">sis.document.search</field>
+        <field name="model">sis.document</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="party_id"/>
+                <field name="doc_type_code"/>
+                <separator/>
+                <filter string="Open" name="open" domain="[('closed', '=', False), ('canceled', '=', False)]"/>
+                <filter string="Closed" name="closed_filter" domain="[('closed', '=', True)]"/>
+                <filter string="Canceled" name="canceled" domain="[('canceled', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Customer" name="group_party" context="{'group_by': 'party_id'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'doc_type_code'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ Document Form ============ -->
+    <record id="view_sis_document_form" model="ir.ui.view">
+        <field name="name">sis.document.form</field>
+        <field name="model">sis.document</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_print_pdf" string="Print PDF" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" string="Doc Name"/>
+                            <field name="doc_type_id"/>
+                            <field name="legacy_id" string="ID"/>
+                            <field name="closed"/>
+                            <field name="canceled"/>
+                        </group>
+                        <group>
+                            <field name="margin_id"/>
+                            <field name="date_created" string="Created"/>
+                            <field name="date_due" string="Due Date"/>
+                            <field name="currency_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="General" name="general">
+                            <group>
+                                <group>
+                                    <field name="party_id" string="Customer"/>
+                                    <field name="ship_method_id" string="Ship By"/>
+                                    <field name="stamp"/>
+                                </group>
+                                <group>
+                                    <field name="notes"/>
+                                    <field name="footnotes"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Items" name="items">
+                            <field name="item_ids" nolabel="1">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="design"/>
+                                    <field name="product_id" optional="show"/>
+                                    <field name="purity"/>
+                                    <field name="qty"/>
+                                    <field name="currency_id"/>
+                                    <field name="unit_price"/>
+                                    <field name="amount"/>
+                                    <field name="description" optional="hide"/>
+                                    <field name="item_group" optional="hide"/>
+                                    <field name="special_instruction" optional="hide"/>
+                                    <field name="size_remarks" optional="hide"/>
+                                    <field name="diamond_weight" optional="hide"/>
+                                    <field name="stone_weight" optional="hide"/>
+                                    <field name="metal_weight" optional="hide"/>
+                                    <field name="unit_cost" optional="hide"/>
+                                    <field name="cost" optional="hide"/>
+                                    <field name="profit" optional="hide"/>
+                                    <field name="profit_pct" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Order" name="order">
+                            <group>
+                                <group>
+                                    <field name="customer_po" string="Cust. P.O. No."/>
+                                    <field name="rcv_mode_id" string="Receiving Mode"/>
+                                    <field name="trade_fair_id" string="Trade Fair"/>
+                                    <field name="employee"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Shipment" name="shipment">
+                            <group>
+                                <group>
+                                    <field name="ship_consignee_bank" string="Consignee Bank"/>
+                                    <field name="ship_for_acc_of" string="For Acc. Of"/>
+                                    <field name="ship_book" string="Book"/>
+                                    <field name="ship_page" string="Page"/>
+                                </group>
+                                <group>
+                                    <field name="ship_address" string="Ship To Address"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Financials" name="financials">
+                            <group>
+                                <group string="Summary">
+                                    <field name="total_fob" string="Total F.O.B Bangkok US$"/>
+                                    <field name="freight_insurance" string="Freight &amp; Insurance US$"/>
+                                    <field name="total_cif" string="Total C.I.F US$"/>
+                                    <field name="deposit" string="Less Deposit"/>
+                                    <field name="total_amount" string="Total"/>
+                                </group>
+                                <group string="Profit">
+                                    <field name="total_qty" string="Qty"/>
+                                    <field name="total_cost" string="Less Cost"/>
+                                    <field name="total_profit" string="Profit"/>
+                                    <field name="profit_pct" string="Profit %"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Child Documents" name="child_docs">
+                            <field name="child_doc_ids" nolabel="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="doc_type_code"/>
+                                    <field name="party_id"/>
+                                    <field name="date_created"/>
+                                    <field name="closed"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ Actions ============ -->
+    <record id="action_sis_quotations" model="ir.actions.act_window">
+        <field name="name">Quotations</field>
+        <field name="res_model">sis.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('doc_type_code', '=', 'SQ')]</field>
+        <field name="context">{'default_doc_type_code': 'SQ'}</field>
+    </record>
+
+    <record id="action_sis_orders" model="ir.actions.act_window">
+        <field name="name">Sales Orders</field>
+        <field name="res_model">sis.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('doc_type_code', '=', 'SO')]</field>
+        <field name="context">{'default_doc_type_code': 'SO'}</field>
+    </record>
+
+    <record id="action_sis_invoices" model="ir.actions.act_window">
+        <field name="name">Invoices</field>
+        <field name="res_model">sis.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('doc_type_code', '=', 'SI')]</field>
+        <field name="context">{'default_doc_type_code': 'SI'}</field>
+    </record>
+
+    <record id="action_sis_document" model="ir.actions.act_window">
+        <field name="name">All Documents</field>
+        <field name="res_model">sis.document</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ============ Doc Type ============ -->
+    <record id="view_sis_doc_type_tree" model="ir.ui.view">
+        <field name="name">sis.doc.type.tree</field>
+        <field name="model">sis.doc.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_doc_type" model="ir.actions.act_window">
+        <field name="name">Document Types</field>
+        <field name="res_model">sis.doc.type</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ============ Doc In Mode ============ -->
+    <record id="view_sis_doc_in_mode_tree" model="ir.ui.view">
+        <field name="name">sis.doc.in.mode.tree</field>
+        <field name="model">sis.doc.in.mode</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_doc_in_mode" model="ir.actions.act_window">
+        <field name="name">Receiving Modes</field>
+        <field name="res_model">sis.doc.in.mode</field>
+        <field name="view_mode">list</field>
+    </record>
+
+</odoo>

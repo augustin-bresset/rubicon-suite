@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Top-Level SIS Party Menu -->
+    <menuitem id="menu_sis_root" name="SIS Party" sequence="20" web_icon="sis_party,static/description/icon.png"/>
+
+    <!-- Parties -->
+    <menuitem id="menu_sis_parties" name="Parties" parent="menu_sis_root" action="action_sis_parties" sequence="10"/>
+
+    <!-- Manage submenu -->
+    <menuitem id="menu_sis_manage" name="Manage" parent="menu_sis_root" sequence="90"/>
+    <menuitem id="menu_sis_pay_terms" name="Payment Terms" parent="menu_sis_manage" action="action_sis_pay_term" sequence="30"/>
+    <menuitem id="menu_sis_shippers" name="Shippers" parent="menu_sis_manage" action="action_sis_shipper" sequence="40"/>
+    <menuitem id="menu_sis_trade_fairs" name="Trade Fairs" parent="menu_sis_manage" action="action_sis_trade_fair" sequence="50"/>
+
+</odoo>

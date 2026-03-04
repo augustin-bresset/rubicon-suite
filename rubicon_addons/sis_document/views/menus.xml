@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root menu for SIS Document (standalone, like pdp_stone / pdp_metal) -->
+    <menuitem id="menu_sis_document_root" name="SIS Document" sequence="21"/>
+
+    <!-- Sales Documents -->
+    <menuitem id="menu_sis_quotations"  name="Quotations"     parent="menu_sis_document_root" action="action_sis_quotations" sequence="10"/>
+    <menuitem id="menu_sis_orders"      name="Sales Orders"   parent="menu_sis_document_root" action="action_sis_orders"     sequence="20"/>
+    <menuitem id="menu_sis_invoices"    name="Invoices"       parent="menu_sis_document_root" action="action_sis_invoices"   sequence="30"/>
+    <menuitem id="menu_sis_all_docs"    name="All Documents"  parent="menu_sis_document_root" action="action_sis_document"   sequence="40"/>
+
+    <!-- Manage submenu -->
+    <menuitem id="menu_sis_doc_manage"    name="Manage"           parent="menu_sis_document_root" sequence="90"/>
+    <menuitem id="menu_sis_doc_types"     name="Document Types"   parent="menu_sis_doc_manage"    action="action_sis_doc_type"    sequence="10"/>
+    <menuitem id="menu_sis_doc_in_modes"  name="Receiving Modes"  parent="menu_sis_doc_manage"    action="action_sis_doc_in_mode" sequence="20"/>
+
+</odoo>

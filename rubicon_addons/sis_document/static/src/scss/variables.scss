@@ -1,0 +1,14 @@
+// Centralized Color Variables for SIS/Rubicon Theme
+
+$o-brand-primary: #000000;
+$o-brand-odoo: #000000;
+$o-navbar-background-color: #000000;
+$o-navbar-color: #ffffff;
+
+// Override Bootstrap / Odoo Theme Colors
+$primary: $o-brand-primary;
+$secondary: #6c757d;
+$success: #28a745;
+$info: #17a2b8;
+$warning: #ffc107;
+$danger: #dc3545;

@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- Main report template (called by ir.actions.report)      -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <template id="report_sis_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.basic_layout">
+                    <div class="page sis-doc-page">
+                        <t t-call="sis_document.report_sis_document_content"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- Document content                                        -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <template id="report_sis_document_content">
+        <style>
+            .sis-doc-page {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 11px;
+                color: #000;
+            }
+
+            /* ── Header ── */
+            .sis-header {
+                margin-bottom: 0;
+            }
+            .sis-company-name {
+                font-size: 20px;
+                font-weight: bold;
+                text-align: right;
+                margin-bottom: 2px;
+            }
+            .sis-company-address {
+                text-align: right;
+                font-size: 10px;
+                line-height: 1.4;
+            }
+            .sis-logo {
+                max-height: 60px;
+                margin-bottom: 5px;
+            }
+            .sis-separator {
+                border: none;
+                border-top: 3px solid #000;
+                margin: 8px 0 12px 0;
+            }
+
+            /* ── Title ── */
+            .sis-doc-title {
+                font-size: 18px;
+                font-weight: bold;
+                font-style: italic;
+                margin-bottom: 10px;
+            }
+
+            /* ── Consignee ── */
+            .sis-consignee-row {
+                display: flex;
+                align-items: flex-start;
+                margin-bottom: 12px;
+            }
+            .sis-consignee-box {
+                border: 1.5px solid #000;
+                border-radius: 8px;
+                padding: 8px 14px;
+                min-width: 380px;
+                max-width: 420px;
+                font-size: 11px;
+                line-height: 1.5;
+            }
+            .sis-consignee-label {
+                font-weight: bold;
+                margin-bottom: 2px;
+            }
+
+            /* ── Details table ── */
+            .sis-details-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 6px;
+                font-size: 10px;
+            }
+            .sis-details-table th {
+                border: 1px solid #000;
+                padding: 3px 6px;
+                text-align: center;
+                font-weight: bold;
+                background: #f5f5f5;
+            }
+            .sis-details-table td {
+                border: 1px solid #000;
+                padding: 3px 6px;
+                text-align: center;
+            }
+
+            /* ── Page indicator ── */
+            .sis-page-indicator {
+                text-align: center;
+                font-size: 10px;
+                margin: 6px 0;
+            }
+
+            /* ── Items table ── */
+            .sis-items-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 10px;
+                margin-bottom: 4px;
+            }
+            .sis-items-table th {
+                border: 1px solid #000;
+                padding: 3px 5px;
+                text-align: center;
+                font-weight: bold;
+                background: #f5f5f5;
+            }
+            .sis-items-table td {
+                border-left: 1px solid #000;
+                border-right: 1px solid #000;
+                border-bottom: 1px solid #ddd;
+                padding: 3px 5px;
+            }
+            .sis-items-table tr:last-child td {
+                border-bottom: 1px solid #000;
+            }
+            .sis-items-table .text-right {
+                text-align: right;
+            }
+            .sis-items-table .text-center {
+                text-align: center;
+            }
+            .sis-group-header td {
+                font-weight: bold;
+                font-style: italic;
+                border-bottom: 1px solid #000 !important;
+                padding-top: 6px;
+            }
+            .sis-ref-row td {
+                font-size: 9px;
+                color: #555;
+                border-bottom: none !important;
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+
+            /* ── Total line ── */
+            .sis-total-row {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 2px;
+                margin-bottom: 10px;
+                font-size: 11px;
+            }
+            .sis-total-row td {
+                border: 1px solid #000;
+                padding: 4px 6px;
+                font-weight: bold;
+            }
+
+            /* ── Ornament quantities ── */
+            .sis-ornament-table {
+                border-collapse: collapse;
+                font-size: 10px;
+                margin-bottom: 14px;
+            }
+            .sis-ornament-table th {
+                text-align: left;
+                font-weight: bold;
+                padding: 1px 8px;
+                border-bottom: 1px solid #000;
+            }
+            .sis-ornament-table td {
+                padding: 1px 8px;
+                border-bottom: 1px solid #ddd;
+            }
+
+            /* ── Remark ── */
+            .sis-remark {
+                margin-top: 18px;
+                font-size: 10px;
+                line-height: 1.5;
+            }
+            .sis-remark-title {
+                font-weight: bold;
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+            .sis-remark p {
+                margin: 4px 0;
+            }
+
+            /* ── Signature ── */
+            .sis-signature {
+                margin-top: 30px;
+                text-align: center;
+            }
+            .sis-signature-line {
+                border-top: 1px solid #000;
+                width: 250px;
+                margin: 0 auto;
+                padding-top: 4px;
+                font-weight: bold;
+                font-size: 11px;
+            }
+        </style>
+
+        <!-- ═══ HEADER ═══ -->
+        <div class="sis-header">
+            <div class="row">
+                <div class="col-6">
+                    <div class="sis-doc-title" style="text-align: left; margin-top: 10px;">
+                        <t t-if="doc.doc_type_code == 'SO'">Sales Order</t>
+                        <t t-elif="doc.doc_type_code == 'SQ'">Sales Quotation</t>
+                        <t t-elif="doc.doc_type_code == 'SI'">Invoice</t>
+                        <t t-elif="doc.doc_type_code == 'CO'">Casting Order</t>
+                        <t t-elif="doc.doc_type_code == 'SE'">Sales Repair</t>
+                        <t t-elif="doc.doc_type_code == 'SR'">Sales Return</t>
+                        <t t-else=""><t t-esc="doc.doc_type_id.name or 'Document'"/></t>
+                    </div>
+                    <img t-if="doc" t-att-src="'/sis_document/static/src/img/logo.webp'" class="sis-logo" style="margin-top: 5px;"/>
+                </div>
+                <div class="col-6 text-right">
+                    <div class="sis-company-name">Rubicon Co., Ltd.</div>
+                    <div class="sis-company-address">
+                        807-809 Silom-Shanghai bldg., 5/F,<br/>
+                        Silom 17 road, Bangrak,<br/>
+                        Bangkok 10500<br/>
+                        THAILAND<br/>
+                        <div style="margin-top: 5px; font-weight: bold;">
+                            Tel: +66 2236 7043 ext 105
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="sis-separator"/>
+
+        <!-- ═══ CONSIGNEE ═══ -->
+        <div class="sis-consignee-row">
+            <div class="sis-consignee-box">
+                <div class="sis-consignee-label">Consignee</div>
+                <t t-if="doc.party_id">
+                    <span t-field="doc.party_id.name"/><br/>
+                    <t t-if="doc.party_id.street">
+                        <span t-field="doc.party_id.street"/><br/>
+                    </t>
+                    <t t-if="doc.party_id.street2">
+                        <span t-field="doc.party_id.street2"/><br/>
+                    </t>
+                    <t t-if="doc.party_id.city or doc.party_id.zip">
+                        <t t-if="doc.party_id.city"><span t-field="doc.party_id.city"/></t>
+                        <t t-if="doc.party_id.zip"> <span t-field="doc.party_id.zip"/></t>
+                        <br/>
+                    </t>
+                    <t t-if="doc.party_id.country_id">
+                        <span t-field="doc.party_id.country_id.name"/>
+                    </t>
+                    <t t-if="doc.party_id.phone">
+                        <br/>
+                        Tel: <span t-field="doc.party_id.phone"/>
+                    </t>
+                </t>
+                <t t-else="">
+                    <span t-esc="doc.party_code or ''"/>
+                </t>
+            </div>
+        </div>
+
+        <!-- ═══ DOCUMENT DETAILS TABLE ═══ -->
+        <table class="sis-details-table">
+            <thead>
+                <tr>
+                    <th>Document Number</th>
+                    <th>Cust. PO</th>
+                    <th>Ship Method</th>
+                    <th>Terms of Payment</th>
+                    <th>Dated</th>
+                    <th>Due Date</th>
+                    <th>Stamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span t-field="doc.name"/></td>
+                    <td><span t-field="doc.customer_po"/></td>
+                    <td>
+                        <t t-if="doc.ship_method_id"><span t-field="doc.ship_method_id.name"/></t>
+                    </td>
+                    <td>
+                        <t t-if="doc.pay_term_id"><span t-field="doc.pay_term_id.name"/></t>
+                    </td>
+                    <td><span t-field="doc.date_created" t-options='{"format": "dd MMM, yyyy"}'/></td>
+                    <td><span t-field="doc.date_due" t-options='{"format": "dd MMM, yyyy"}'/></td>
+                    <td>
+                        <t t-if="doc.stamp"><span t-field="doc.stamp"/></t>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ═══ ITEMS TABLE ═══ -->
+        <table class="sis-items-table">
+            <thead>
+                <tr>
+                    <th style="width:30px;">SNo</th>
+                    <th style="width:140px;">Description</th>
+                    <th style="width:200px;">Design</th>
+                    <th style="width:70px;">Size/Rem.</th>
+                    <th style="width:55px;">Quantity</th>
+                    <th style="width:75px;">Unit Price</th>
+                    <th style="width:75px;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Group header: Gold Jewelry -->
+                <tr class="sis-group-header">
+                    <td colspan="7">Gold Jewelry</td>
+                </tr>
+
+                <t t-set="line_no" t-value="0"/>
+                <t t-set="total_qty" t-value="0"/>
+                <t t-foreach="doc.item_ids" t-as="line">
+                    <t t-set="line_no" t-value="line_no + 1"/>
+                    <t t-set="total_qty" t-value="total_qty + line.qty"/>
+
+                    <!-- Purity sub-header row if purity changes -->
+                    <t t-if="line_index == 0 or (line.purity and line.purity != doc.item_ids[line_index - 1].purity)">
+                        <t t-if="line.purity">
+                            <tr class="sis-group-header">
+                                <td colspan="7" style="padding-left: 20px;">
+                                    <span t-esc="line.purity"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </t>
+
+                    <!-- Ref document row (if any) -->
+                    <t t-if="line.ref_document">
+                        <tr class="sis-ref-row">
+                            <td/>
+                            <td/>
+                            <td style="font-size:8px; color:#777;">
+                                Ref. Doc.
+                            </td>
+                            <td colspan="4"/>
+                        </tr>
+                        <tr class="sis-ref-row">
+                            <td/>
+                            <td colspan="6" style="font-size:8px; color:#555;">
+                                <span t-esc="line.ref_document"/>
+                            </td>
+                        </tr>
+                    </t>
+
+                    <!-- Main item row -->
+                    <tr>
+                        <td class="text-center"><span t-esc="line_no"/></td>
+                        <td>
+                            <span t-esc="line.description or ''"/>
+                        </td>
+                        <td>
+                            <span t-esc="line.design or ''"/>
+                            <t t-if="line.special_instruction">
+                                <br/><small style="color:#555;"><span t-esc="line.special_instruction"/></small>
+                            </t>
+                        </td>
+                        <td class="text-center"><span t-esc="line.size_remarks or ''"/></td>
+                        <td class="text-right">
+                            <span t-esc="int(line.qty) if line.qty == int(line.qty) else line.qty"/>
+                        </td>
+                        <td class="text-right">
+                            <span t-esc="'%.2f' % line.unit_price"/>
+                        </td>
+                        <td class="text-right">
+                            <span t-esc="'%.2f' % line.amount"/>
+                        </td>
+                    </tr>
+                </t>
+            </tbody>
+        </table>
+
+        <!-- ═══ TOTAL ═══ -->
+        <t t-set="display_total" t-value="doc.total_fob if doc.total_fob else sum(line.amount for line in doc.item_ids)"/>
+        <table class="sis-total-row">
+            <tr>
+                <td style="width:80%; text-align:right; border:none;"/>
+                <td style="width:10%; text-align:right;">
+                    <span t-esc="doc.currency_id.name if doc.currency_id else 'US'"/>$
+                </td>
+                <td style="width:10%; text-align:right;">
+                    <span t-esc="'{:,.2f}'.format(display_total)"/>
+                </td>
+            </tr>
+        </table>
+
+        <!-- ═══ ORNAMENT QUANTITIES ═══ -->
+        <t t-set="desc_counts" t-value="{}"/>
+        <t t-foreach="doc.item_ids" t-as="item">
+            <t t-set="desc_key" t-value="item.description or 'Other'"/>
+            <t t-if="desc_key in desc_counts">
+                <t t-set="_dummy" t-value="desc_counts.update({desc_key: desc_counts[desc_key] + int(item.qty)})"/>
+            </t>
+            <t t-else="">
+                <t t-set="_dummy" t-value="desc_counts.update({desc_key: int(item.qty)})"/>
+            </t>
+        </t>
+
+        <t t-if="desc_counts">
+            <table class="sis-ornament-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Ornament Quantities</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="desc_counts" t-as="desc">
+                        <tr>
+                            <td><span t-esc="desc"/></td>
+                            <td><span t-esc="desc_counts[desc]"/> pcs</td>
+                        </tr>
+                    </t>
+                    <tr style="font-weight:bold; border-top:1px solid #000;">
+                        <td>Total</td>
+                        <td><span t-esc="sum(desc_counts.values())"/></td>
+                    </tr>
+                </tbody>
+            </table>
+        </t>
+
+        <!-- ═══ REMARK ═══ -->
+        <t t-set="rubicon" t-value="doc.env['res.partner'].sudo().search([('sis_code', '=', 'RUB')], limit=1)"/>
+        <div class="sis-remark">
+            <div class="sis-remark-title">Remark</div>
+            <t t-if="rubicon and rubicon.sis_ship_stamp">
+                <div style="white-space: pre-wrap;" t-field="rubicon.sis_ship_stamp"/>
+            </t>
+            <t t-else="">
+                <p><b>1.</b> The diamonds herein invoiced have been purchased from legitimate
+                sources not involved in
+                funding conflict and in compliance with United Nation Resolutions and
+                corresponding national laws.
+                The seller hereby guarantees that these diamonds are conflict free and
+                confirms adherence to the
+                WDC SoW guidelines.</p>
+                <p><b>2.</b> We certify that the non-industrial diamonds in our invoices were not
+                mined, extracted, produced,
+                or manufactured wholly or in part in Russian federal, notwithstanding
+                any prior-stage processing in a third country.</p>
+            </t>
+        </div>
+
+        <!-- ═══ NOTES (if any) ═══ -->
+        <t t-if="doc.notes">
+            <div style="margin-top:8px; font-size:10px;">
+                <b>Notes:</b> <span t-field="doc.notes"/>
+            </div>
+        </t>
+
+        <!-- ═══ SIGNATURE ═══ -->
+        <div class="sis-signature">
+            <div class="sis-signature-line">Signature</div>
+        </div>
+
+    </template>
+
+</odoo>

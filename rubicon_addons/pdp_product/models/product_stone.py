@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class ProductStone(models.Model):
     _name = 'pdp.product.stone'
@@ -17,8 +17,12 @@ class ProductStone(models.Model):
         default=1
     )
     
-    weight = fields.Char(
+    weight = fields.Float(
         string="Weight of one stone buyed",
+        compute="_compute_weight",
+        store=True,
+        readonly=False,
+        digits=(7, 4),
     )
 
     reshaped_shape_id = fields.Many2one(
@@ -41,6 +45,12 @@ class ProductStone(models.Model):
         required=True,
         ondelete='cascade'
     )
+
+    @api.depends('stone_id', 'stone_id.weight')
+    def _compute_weight(self):
+        for record in self:
+            if not record.weight or record.weight == 0.0:
+                record.weight = record.stone_id.weight
 
     # =========================================================================
     # Domain Methods - Reusable by API, Cron, OWL, Reports

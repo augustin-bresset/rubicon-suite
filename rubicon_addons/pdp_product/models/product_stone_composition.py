@@ -29,11 +29,8 @@ class ProductStoneComposition(models.Model):
         total_pieces = 0
         for line in self.stone_line_ids:
             total_pieces += line.pieces
-            try:
-                w = float(str(line.weight).replace(',', '.')) if line.weight else 0.0
-                total_weight += w * line.pieces
-            except (ValueError, TypeError):
-                pass
+            w = line.weight or 0.0
+            total_weight += w * line.pieces
         return {
             'total_weight': total_weight,
             'total_pieces': total_pieces,

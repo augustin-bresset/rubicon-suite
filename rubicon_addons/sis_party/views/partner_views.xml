@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- SIS Partner Tree View (standalone for SIS action) -->
+    <record id="view_res_partner_tree_sis" model="ir.ui.view">
+        <field name="name">res.partner.tree.sis</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sis_code"/>
+                <field name="name"/>
+                <field name="company_type"/>
+                <field name="parent_id" optional="hide"/>
+                <field name="city"/>
+                <field name="country_id"/>
+                <field name="phone"/>
+                <field name="email"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Extend Partner Form View with SIS fields -->
+    <record id="view_res_partner_form_sis" model="ir.ui.view">
+        <field name="name">res.partner.form.sis</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- SIS Code next to name -->
+            <field name="company_type" position="before">
+                <field name="sis_code"/>
+            </field>
+            <!-- SIS tab in notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="SIS" name="sis_info">
+                    <group>
+                        <group string="SIS Defaults">
+                            <field name="sis_group"/>
+                            <field name="margin_id"/>
+                            <field name="sis_pay_term_id"/>
+                            <field name="sis_account"/>
+                        </group>
+                        <group string="Shipping">
+                            <field name="sis_ship_method_id"/>
+                            <field name="sis_ship_fedex_acc"/>
+                            <field name="sis_ship_stamp"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- SIS-specific search: filter by sis_code -->
+    <record id="view_res_partner_search_sis" model="ir.ui.view">
+        <field name="name">res.partner.search.sis</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="sis_code"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- SIS Parties action: show only partners with SIS code -->
+    <record id="action_sis_parties" model="ir.actions.act_window">
+        <field name="name">SIS Parties</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_res_partner_tree_sis"/>
+        <field name="domain">[('sis_code', '!=', False)]</field>
+        <field name="context">{'default_company_type': 'company'}</field>
+    </record>
+
+    <!-- PayTerm Tree -->
+    <record id="view_sis_pay_term_tree" model="ir.ui.view">
+        <field name="name">sis.pay.term.tree</field>
+        <field name="model">sis.pay.term</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_pay_term" model="ir.actions.act_window">
+        <field name="name">Payment Terms</field>
+        <field name="res_model">sis.pay.term</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Shipper Tree -->
+    <record id="view_sis_shipper_tree" model="ir.ui.view">
+        <field name="name">sis.shipper.tree</field>
+        <field name="model">sis.shipper</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_shipper" model="ir.actions.act_window">
+        <field name="name">Shippers</field>
+        <field name="res_model">sis.shipper</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Trade Fair Tree -->
+    <record id="view_sis_trade_fair_tree" model="ir.ui.view">
+        <field name="name">sis.trade.fair.tree</field>
+        <field name="model">sis.trade.fair</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="city"/>
+                <field name="country_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_trade_fair" model="ir.actions.act_window">
+        <field name="name">Trade Fairs</field>
+        <field name="res_model">sis.trade.fair</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

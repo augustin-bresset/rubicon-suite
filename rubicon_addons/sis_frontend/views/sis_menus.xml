@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Dashboard Client Action (kept for reference) -->
+    <record id="action_sis_dashboard" model="ir.actions.client">
+        <field name="name">SIS Dashboard</field>
+        <field name="tag">sis_frontend.dashboard</field>
+    </record>
+
+    <!-- Workspace Client Action (full SIS workspace) -->
+    <record id="action_sis_workspace" model="ir.actions.client">
+        <field name="name">SIS Workspace</field>
+        <field name="tag">sis_frontend.workspace</field>
+    </record>
+
+    <!-- Root menu for SIS Application -->
+    <menuitem id="menu_sis_root" name="SIS" sequence="2" action="action_sis_workspace" web_icon="sis_frontend,static/description/icon.png"/>
+
+    <!-- Lobby/Workspace Link -->
+    <menuitem id="menu_sis_lobby" name="Lobby" parent="menu_sis_root" action="action_sis_workspace" sequence="1"/>
+
+    <!-- ========================================== -->
+    <!-- 1. Maintains Menu -->
+    <!-- ========================================== -->
+    <menuitem id="menu_sis_maintains" name="Maintains" parent="menu_sis_root" sequence="10"/>
+
+    <!-- Maintains -> Parties -->
+    <menuitem id="menu_sis_maintains_parties" name="Parties" parent="menu_sis_maintains" action="sis_party.action_sis_parties" sequence="10"/>
+
+    <!-- Maintains -> Sales -->
+    <menuitem id="menu_sis_maintains_sales" name="Sales" parent="menu_sis_maintains" sequence="20"/>
+    
+    <menuitem id="menu_sis_maintains_sales_quotations" name="Quotations" parent="menu_sis_maintains_sales" action="sis_document.action_sis_quotations" sequence="10"/>
+    <menuitem id="menu_sis_maintains_sales_orders" name="Orders" parent="menu_sis_maintains_sales" action="sis_document.action_sis_orders" sequence="20"/>
+    <!-- Placeholders for future / missing features -->
+    <!-- <menuitem id="menu_sis_maintains_sales_consignment" name="Consignment" parent="menu_sis_maintains_sales" sequence="30"/> -->
+    <!-- <menuitem id="menu_sis_maintains_sales_consignment_return" name="Consignment Return" parent="menu_sis_maintains_sales" sequence="40"/> -->
+    <menuitem id="menu_sis_maintains_sales_invoices" name="Invoices" parent="menu_sis_maintains_sales" action="sis_document.action_sis_invoices" sequence="50"/>
+    <!-- <menuitem id="menu_sis_maintains_sales_returns" name="Sales Returns" parent="menu_sis_maintains_sales" sequence="60"/> -->
+    <!-- <menuitem id="menu_sis_maintains_sales_repairs" name="Repairs" parent="menu_sis_maintains_sales" sequence="70"/> -->
+
+    <!-- Maintains -> Production -->
+    <menuitem id="menu_sis_maintains_production" name="Production" parent="menu_sis_maintains" sequence="30"/>
+
+    <!-- Maintains -> Misc. Info -->
+    <menuitem id="menu_sis_maintains_misc_info" name="Misc. Info." parent="menu_sis_maintains" sequence="40"/>
+    
+    <menuitem id="menu_sis_maintains_misc_business_areas" name="Business Areas" parent="menu_sis_maintains_misc_info" action="base.action_country" sequence="10"/>
+    <menuitem id="menu_sis_maintains_misc_trade_fairs" name="Trade Fairs" parent="menu_sis_maintains_misc_info" action="sis_party.action_sis_trade_fair" sequence="20"/>
+    <menuitem id="menu_sis_maintains_misc_pay_terms" name="Pay Terms" parent="menu_sis_maintains_misc_info" action="sis_party.action_sis_pay_term" sequence="30"/>
+    <menuitem id="menu_sis_maintains_misc_ship_methods" name="Ship Methods" parent="menu_sis_maintains_misc_info" action="sis_party.action_sis_shipper" sequence="40"/>
+
+    <!-- ========================================== -->
+    <!-- 2. Reports Menu -->
+    <!-- ========================================== -->
+    <menuitem id="menu_sis_reports" name="Reports" parent="menu_sis_root" sequence="20"/>
+    <!-- Example placeholders -->
+    <menuitem id="menu_sis_reports_production" name="Production Order Forms" parent="menu_sis_reports" sequence="10"/>
+    <menuitem id="menu_sis_reports_spec_sheet" name="Spec. Sheet" parent="menu_sis_reports" sequence="20"/>
+
+    <!-- ========================================== -->
+    <!-- 3. Tools Menu -->
+    <!-- ========================================== -->
+    <menuitem id="menu_sis_tools" name="Tools" parent="menu_sis_root" sequence="30"/>
+
+    <menuitem id="menu_sis_tools_document_browser" name="Document Browser" parent="menu_sis_tools" action="sis_document.action_sis_document" sequence="10"/>
+    
+    <!-- Action pointing to URL for PDP frontend -->
+    <record id="action_sis_tools_product_browser" model="ir.actions.act_url">
+        <field name="name">Product Browser (PDP)</field>
+        <field name="url">/pdp</field>
+        <field name="target">self</field>
+    </record>
+
+    <menuitem id="menu_sis_tools_product_browser" name="Product Browser" parent="menu_sis_tools" action="action_sis_tools_product_browser" sequence="20"/>
+
+    <!-- ========================================== -->
+    <!-- 4. Help Menu (Optional) -->
+    <!-- ========================================== -->
+    <!-- Note: Odoo standard help is usually top right or handled via documentation links, 
+         but we can leave a placeholder if needed. Or just rely on standard Odoo help. -->
+
+</odoo>
