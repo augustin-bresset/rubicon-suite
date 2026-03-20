@@ -29,10 +29,10 @@
             </div>
 
             <!-- ===== MIDDLE PANE ===== -->
-            <div class="d-flex flex-grow-1 w-100" style="min-height: 200px; resize: vertical; overflow: auto; border-bottom: 2px solid #ccc;">
+            <div class="d-flex w-100" style="flex: 1 1 0; min-height: 0; border-bottom: 2px solid #ccc;">
 
                 <!-- LEFT: Product List -->
-                <div class="border-end bg-white h-100 overflow-auto flex-shrink-0" style="width: 50%; resize: horizontal; min-width: 200px; max-width: calc(100% - 200px);">
+                <div class="border-end bg-white h-100 overflow-auto flex-shrink-0" style="flex: 0 0 auto; width: 75%; resize: horizontal; min-width: 200px; max-width: calc(100% - 150px);">
                     <table class="table table-sm table-hover table-bordered mb-0" style="font-size: 12px;">
                         <thead class="bg-light sticky-top">
                             <tr>
@@ -72,7 +72,7 @@
                 </div>
 
                 <!-- RIGHT: Image / Drawing -->
-                <div class="flex-grow-1 d-flex flex-column h-100 bg-white" style="width: 0; min-width: 200px;">
+                <div class="d-flex flex-column h-100 bg-white" style="flex: 1 1 0; min-width: 150px;">
                     <div class="d-flex justify-content-between align-items-center p-1 border-bottom bg-light">
                         <small class="fw-bold text-truncate px-1" t-if="activeProduct"><t t-esc="activeProduct.code"/></small>
                         <div class="btn-group btn-group-sm">
@@ -126,8 +126,15 @@
                 </div>
             </div>
 
+            <!-- ===== SPLITTER ===== -->
+            <div t-on-mousedown="onBottomSplitterMouseDown"
+                 style="height: 6px; cursor: ns-resize; background: #ccc; flex: 0 0 6px; display: flex; align-items: center; justify-content: center; user-select: none;"
+                 title="Drag to resize">
+                <div style="width: 40px; height: 3px; background: #999; border-radius: 2px;"></div>
+            </div>
+
             <!-- ===== BOTTOM PANE: TABS ===== -->
-            <div class="border-top flex-grow-1 d-flex flex-column bg-white" style="min-height: 35vh;">
+            <div class="pdp-bottom-pane d-flex flex-column bg-white" style="flex: 0 0 auto; height: 50%; overflow: hidden; min-height: 80px;">
                 <!-- Tab Headers -->
                 <ul class="nav nav-tabs px-2 pt-1 bg-light border-0" style="border-bottom: 2px solid #ddd !important;">
                     <t t-foreach="[['costing','Costing'],['weight','Weight'],['stones','Stones'],['metals','Metals'],['labor','Labor etc.'],['matching','Matching']]" t-as="tab" t-key="tab[0]">

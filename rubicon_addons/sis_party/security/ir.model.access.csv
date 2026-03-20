@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_sis_pay_term,sis.pay.term,model_sis_pay_term,base.group_user,1,1,1,1
 access_sis_shipper,sis.shipper,model_sis_shipper,base.group_user,1,1,1,1
 access_sis_trade_fair,sis.trade.fair,model_sis_trade_fair,base.group_user,1,1,1,1
+access_res_partner_phone,res.partner.phone,model_res_partner_phone,base.group_user,1,1,1,1

@@ -13,13 +13,13 @@
                     </h1>
                     <div class="d-flex gap-4 flex-wrap justify-content-center">
                         <button class="btn btn-outline-secondary sis-lobby-btn px-5 py-4 fs-5"
-                                t-on-click="() => this.goParties()">Parties</button>
+                                t-on-click="() => this.goParties()">PARTIES</button>
                         <button class="btn btn-outline-secondary sis-lobby-btn px-5 py-4 fs-5"
-                                t-on-click="() => this.goDocument('SQ')">Quotation</button>
+                                t-on-click="() => this.goDocument('SQ')">QUOTATION</button>
                         <button class="btn btn-outline-secondary sis-lobby-btn px-5 py-4 fs-5"
-                                t-on-click="() => this.goDocument('SO')">Book Orders</button>
+                                t-on-click="() => this.goDocument('SO')">BOOK ORDERS</button>
                         <button class="btn btn-outline-secondary sis-lobby-btn px-5 py-4 fs-5"
-                                t-on-click="() => this.goDocument('SI')">Ship Goods</button>
+                                t-on-click="() => this.goDocument('SI')">SHIP GOODS</button>
                     </div>
                 </div>
             </t>
@@ -57,25 +57,22 @@
                     </div>
                     <div class="d-flex align-items-center gap-1">
                         <label class="form-label mb-0 text-nowrap small fw-semibold">Company</label>
-                        <input class="form-control form-control-sm" style="width:200px;"
+                        <input class="form-control form-control-sm" style="width:250px; font-weight: 600;"
                                t-att-value="state.party ? state.party.name || '' : ''"
                                t-on-input="ev => this.setPartyField('name', ev.target.value)"/>
                     </div>
                     <div class="d-flex align-items-center gap-1">
-                        <label class="form-label mb-0 text-nowrap small fw-semibold">Code/Category</label>
-                        <input class="form-control form-control-sm" style="width:80px;" disabled="disabled"
-                               t-att-value="state.party and state.party.category_id ? state.party.category_id[1] : ''"/>
+                        <label class="form-label mb-0 text-nowrap small fw-semibold text-primary">Code</label>
+                        <input type="text"
+                               class="form-control form-control-sm border-primary" style="width:100px; font-weight: 600;"
+                               t-att-value="state.party.sis_code || ''"
+                               t-on-input="ev => this.setPartyField('sis_code', ev.target.value)"/>
                     </div>
-                    <div class="form-check mb-0">
+                    <div class="form-check mb-0 ms-2">
                         <input type="checkbox" class="form-check-input"
                                t-att-checked="state.party ? !state.party.active : false"
                                t-on-change="ev => this.setPartyField('active', !ev.target.checked)"/>
-                        <label class="form-check-label small">Inactive</label>
-                    </div>
-                    <div class="d-flex align-items-center gap-1">
-                        <label class="form-label mb-0 text-nowrap small">ID</label>
-                        <input class="form-control form-control-sm bg-white" style="width:60px;" readonly="1"
-                               t-att-value="state.party ? state.party.id || '' : ''"/>
+                        <label class="form-check-label small text-muted">Inactive</label>
                     </div>
                 </div>
 
@@ -89,6 +86,14 @@
                         <a t-att-class="state.partyTab === 'defaults' ? 'nav-link active py-1 px-3' : 'nav-link py-1 px-3 text-secondary'"
                            style="cursor:pointer;" t-on-click="() => this.setPartyTab('defaults')">Defaults</a>
                     </li>
+                    <li class="nav-item">
+                        <a t-att-class="state.partyTab === 'shipment' ? 'nav-link active py-1 px-3' : 'nav-link py-1 px-3 text-secondary'"
+                           style="cursor:pointer;" t-on-click="() => this.setPartyTab('shipment')">Shipment Info</a>
+                    </li>
+                    <li class="nav-item">
+                        <a t-att-class="state.partyTab === 'bank' ? 'nav-link active py-1 px-3' : 'nav-link py-1 px-3 text-secondary'"
+                           style="cursor:pointer;" t-on-click="() => this.setPartyTab('bank')">Bank Info</a>
+                    </li>
                 </ul>
 
                 <div class="flex-grow-1 overflow-auto p-3 bg-white" style="min-height:0;">
@@ -98,68 +103,126 @@
 
                     <!-- ─── GENERAL ─── -->
                     <t t-elif="state.partyTab === 'general'">
-                        <div class="row g-2" style="max-width:700px;">
-                            <div class="col-8">
-                                <label class="form-label mb-1 small">Title</label>
-                                <input class="form-control form-control-sm"
-                                       t-att-value="state.party.title || ''"
-                                       t-on-input="ev => this.setPartyField('title', ev.target.value)"/>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label mb-1 small">Address</label>
-                                <input class="form-control form-control-sm"
-                                       t-att-value="state.party.street || ''"
-                                       t-on-input="ev => this.setPartyField('street', ev.target.value)"/>
-                            </div>
-                            <div class="col-5">
-                                <label class="form-label mb-1 small">City</label>
-                                <input class="form-control form-control-sm"
-                                       t-att-value="state.party.city || ''"
-                                       t-on-input="ev => this.setPartyField('city', ev.target.value)"/>
-                            </div>
-                            <div class="col-7">
-                                <label class="form-label mb-1 small">Zip</label>
-                                <input class="form-control form-control-sm"
-                                       t-att-value="state.party.zip || ''"
-                                       t-on-input="ev => this.setPartyField('zip', ev.target.value)"/>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label mb-1 small">Country</label>
-                                <select class="form-select form-select-sm"
-                                        t-on-change="ev => this.setPartyField('country_id', parseInt(ev.target.value) || false)">
-                                    <option value="">—</option>
-                                    <t t-foreach="this.sisCountries" t-as="c" t-key="c.id">
-                                        <option t-att-value="c.id"
-                                                t-att-selected="(state.party.country_id ? (state.party.country_id[0] || state.party.country_id) : 0) === c.id">
-                                            <t t-esc="c.name"/>
-                                        </option>
-                                    </t>
-                                </select>
-                            </div>
+                        <div class="row g-3" style="max-width:900px;">
+
+                            <!-- LEFT: Address -->
                             <div class="col-6">
-                                <label class="form-label mb-1 small">Phone</label>
-                                <input class="form-control form-control-sm"
-                                       t-att-value="state.party.phone || ''"
-                                       t-on-input="ev => this.setPartyField('phone', ev.target.value)"/>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <label class="form-label mb-1 small">Contact</label>
+                                        <input class="form-control form-control-sm"
+                                               t-att-value="state.party.sis_contact || ''"
+                                               t-on-input="ev => this.setPartyField('sis_contact', ev.target.value)"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label mb-1 small">Address</label>
+                                        <input class="form-control form-control-sm"
+                                               t-att-value="state.party.street || ''"
+                                               t-on-input="ev => this.setPartyField('street', ev.target.value)"/>
+                                    </div>
+                                    <div class="col-5">
+                                        <label class="form-label mb-1 small">City</label>
+                                        <input class="form-control form-control-sm"
+                                               t-att-value="state.party.city || ''"
+                                               t-on-input="ev => this.setPartyField('city', ev.target.value)"/>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label mb-1 small">State</label>
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="ev => this.setPartyField('state_id', parseInt(ev.target.value) || false)">
+                                            <option value="">—</option>
+                                            <t t-foreach="this.partyStates" t-as="s" t-key="s.id">
+                                                <option t-att-value="s.id"
+                                                        t-att-selected="this._m2oId(state.party.state_id) === s.id">
+                                                    <t t-esc="s.code"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-3">
+                                        <label class="form-label mb-1 small">Zip</label>
+                                        <input class="form-control form-control-sm"
+                                               t-att-value="state.party.zip || ''"
+                                               t-on-input="ev => this.setPartyField('zip', ev.target.value)"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label mb-1 small">Country</label>
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="ev => this.setPartyField('country_id', parseInt(ev.target.value) || false)">
+                                            <option value="">—</option>
+                                            <t t-foreach="this.sisCountries" t-as="c" t-key="c.id">
+                                                <option t-att-value="c.id"
+                                                        t-att-selected="this._m2oId(state.party.country_id) === c.id">
+                                                    <t t-esc="c.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
+
+                            <!-- RIGHT: Title + Communication -->
                             <div class="col-6">
-                                <label class="form-label mb-1 small">Email</label>
-                                <input class="form-control form-control-sm"
-                                       t-att-value="state.party.email || ''"
-                                       t-on-input="ev => this.setPartyField('email', ev.target.value)"/>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <label class="form-label mb-1 small">Title</label>
+                                        <input class="form-control form-control-sm"
+                                               t-att-value="this.m2oName(state.party.title)"
+                                               t-on-input="ev => this.setPartyField('title', ev.target.value)"
+                                               placeholder="Mr., Mrs., …"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label mb-1 small d-flex justify-content-between">
+                                            <span>Phone</span>
+                                        </label>
+                                        <input class="form-control form-control-sm mb-1"
+                                               t-att-value="state.party.phone || ''"
+                                               t-on-input="ev => this.setPartyField('phone', ev.target.value)"
+                                               placeholder="Main Phone"/>
+                                        <t t-if="state.partyPhones">
+                                            <t t-foreach="state.partyPhones" t-as="pPhone" t-key="pPhone.id">
+                                                <div class="d-flex gap-1 mb-1">
+                                                    <input class="form-control form-control-sm w-50"
+                                                           t-att-value="pPhone.name || ''"
+                                                           t-on-input="ev => this.updatePartyPhone(pPhone.id, 'name', ev.target.value)"
+                                                           placeholder="Label (e.g. Mobile)"/>
+                                                    <input class="form-control form-control-sm w-50"
+                                                           t-att-value="pPhone.phone || ''"
+                                                           t-on-input="ev => this.updatePartyPhone(pPhone.id, 'phone', ev.target.value)"
+                                                           placeholder="Number"/>
+                                                    <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removePartyPhone(pPhone.id)">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </t>
+                                        </t>
+                                        <button class="btn btn-sm btn-link p-0 text-decoration-none small" t-on-click="addPartyPhone">
+                                            <i class="fa fa-plus"></i> Add Phone Number
+                                        </button>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <label class="form-label mb-1 small">Email</label>
+                                        <input class="form-control form-control-sm"
+                                               t-att-value="state.party.email || ''"
+                                               t-on-input="ev => this.setPartyField('email', ev.target.value)"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label mb-1 small">Home Page</label>
+                                        <input class="form-control form-control-sm"
+                                               t-att-value="state.party.website || ''"
+                                               t-on-input="ev => this.setPartyField('website', ev.target.value)"/>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label mb-1 small">Home Page</label>
-                                <input class="form-control form-control-sm"
-                                       t-att-value="state.party.website || ''"
-                                       t-on-input="ev => this.setPartyField('website', ev.target.value)"/>
-                            </div>
+
+                            <!-- FULL WIDTH: Notes -->
                             <div class="col-12">
                                 <label class="form-label mb-1 small">Notes</label>
-                                <textarea class="form-control form-control-sm" rows="5"
+                                <textarea class="form-control form-control-sm" rows="4"
                                           t-att-value="state.party.comment || ''"
                                           t-on-input="ev => this.setPartyField('comment', ev.target.value)"></textarea>
                             </div>
+
                         </div>
                     </t>
 
@@ -168,43 +231,167 @@
                         <div class="d-flex gap-4 mb-3">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input"
-                                       t-att-checked="state.party.customer_rank > 0"
-                                       t-on-change="ev => this.setPartyField('customer_rank', ev.target.checked ? 1 : 0)"/>
+                                       t-att-checked="state.party.sis_is_customer"
+                                       t-on-change="ev => this.setPartyField('sis_is_customer', ev.target.checked)"/>
                                 <label class="form-check-label">Is a Customer</label>
                             </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input"
+                                       t-att-checked="state.party.sis_is_vendor"
+                                       t-on-change="ev => this.setPartyField('sis_is_vendor', ev.target.checked)"/>
+                                <label class="form-check-label">Is a Vendor</label>
+                            </div>
                         </div>
-                        <fieldset class="border rounded p-3" style="max-width:340px;">
-                            <legend class="float-none w-auto px-2 small">Sales Defaults</legend>
-                            <div class="row g-2 align-items-center">
-                                <div class="col-4 small fw-semibold">Margin</div>
-                                <div class="col-8">
-                                    <select class="form-select form-select-sm"
-                                            t-on-change="ev => this.setPartyField('margin_id', parseInt(ev.target.value) || false)">
-                                        <option value="">—</option>
-                                        <t t-foreach="this.margins" t-as="m" t-key="m.id">
-                                            <option t-att-value="m.id"
-                                                    t-att-selected="(state.party.margin_id ? (state.party.margin_id[0] || state.party.margin_id) : 0) === m.id">
-                                                <t t-esc="m.name"/>
-                                            </option>
-                                        </t>
-                                    </select>
+
+                        <div class="d-flex gap-4 flex-wrap">
+                            <fieldset t-if="state.party.sis_is_customer" class="border rounded p-3" style="min-width:340px;">
+                                <legend class="float-none w-auto px-2 small">Sales Defaults</legend>
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-4 small fw-semibold">Account</div>
+                                    <div class="col-8">
+                                        <input class="form-control form-control-sm"
+                                               t-att-value="state.party.sis_account || ''"
+                                               t-on-input="ev => this.setPartyField('sis_account', ev.target.value)"/>
+                                    </div>
+                                    <div class="col-4 small fw-semibold">Margin</div>
+                                    <div class="col-8">
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="ev => this.setPartyField('margin_id', parseInt(ev.target.value) || false)">
+                                            <option value="">—</option>
+                                            <t t-foreach="this.margins" t-as="m" t-key="m.id">
+                                                <option t-att-value="m.id"
+                                                        t-att-selected="(state.party.margin_id ? (state.party.margin_id[0] || state.party.margin_id) : 0) === m.id">
+                                                    <t t-esc="m.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-4 small fw-semibold">PayTerm</div>
+                                    <div class="col-8">
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="ev => this.setPartyField('sis_pay_term_id', parseInt(ev.target.value) || false)">
+                                            <option value="">—</option>
+                                            <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
+                                                <option t-att-value="pt.id"
+                                                        t-att-selected="(state.party.sis_pay_term_id ? (state.party.sis_pay_term_id[0] || state.party.sis_pay_term_id) : 0) === pt.id">
+                                                    <t t-esc="pt.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="col-4 small fw-semibold">PayTerm</div>
-                                <div class="col-8">
+                            </fieldset>
+
+                            <fieldset t-if="state.party.sis_is_vendor" class="border rounded p-3" style="min-width:340px;">
+                                <legend class="float-none w-auto px-2 small">Purchase Defaults</legend>
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-4 small fw-semibold">A/P Account</div>
+                                    <div class="col-8">
+                                        <input class="form-control form-control-sm"
+                                               t-att-value="state.party.sis_vendor_account || ''"
+                                               t-on-input="ev => this.setPartyField('sis_vendor_account', ev.target.value)"/>
+                                    </div>
+                                    <div class="col-4 small fw-semibold">PayTerm</div>
+                                    <div class="col-8">
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="ev => this.setPartyField('sis_vendor_pay_term_id', parseInt(ev.target.value) || false)">
+                                            <option value="">—</option>
+                                            <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
+                                                <option t-att-value="pt.id"
+                                                        t-att-selected="(state.party.sis_vendor_pay_term_id ? (state.party.sis_vendor_pay_term_id[0] || state.party.sis_vendor_pay_term_id) : 0) === pt.id">
+                                                    <t t-esc="pt.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </t>
+
+                    <!-- ─── SHIPMENT INFO ─── -->
+                    <t t-elif="state.partyTab === 'shipment'">
+                        <div class="row g-4" style="max-width:900px;">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="form-label mb-1 small">Address</label>
+                                    <textarea class="form-control form-control-sm" rows="3"
+                                              t-att-value="state.party.sis_ship_address || ''"
+                                              t-on-input="ev => this.setPartyField('sis_ship_address', ev.target.value)"></textarea>
+                                </div>
+                                <div>
+                                    <label class="form-label mb-1 small">Country</label>
                                     <select class="form-select form-select-sm"
-                                            t-on-change="ev => this.setPartyField('pay_term_id', parseInt(ev.target.value) || false)">
+                                            t-on-change="ev => this.setPartyField('sis_ship_country_id', parseInt(ev.target.value) || false)">
                                         <option value="">—</option>
-                                        <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
-                                            <option t-att-value="pt.id"
-                                                    t-att-selected="(state.party.pay_term_id ? (state.party.pay_term_id[0] || state.party.pay_term_id) : 0) === pt.id">
-                                                <t t-esc="pt.name"/>
+                                        <t t-foreach="this.sisCountries" t-as="c" t-key="c.id">
+                                            <option t-att-value="c.id"
+                                                    t-att-selected="this._m2oId(state.party.sis_ship_country_id) === c.id">
+                                                <t t-esc="c.name"/>
                                             </option>
                                         </t>
                                     </select>
                                 </div>
                             </div>
-                        </fieldset>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="form-label mb-1 small">Default Method Courier</label>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="ev => this.setPartyField('sis_ship_method_id', parseInt(ev.target.value) || false)">
+                                        <option value="">—</option>
+                                        <t t-foreach="this.shippers" t-as="s" t-key="s.id">
+                                            <option t-att-value="s.id"
+                                                    t-att-selected="this._m2oId(state.party.sis_ship_method_id) === s.id">
+                                                <t t-esc="s.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label mb-1 small">FedEx Account</label>
+                                    <input class="form-control form-control-sm"
+                                           t-att-value="state.party.sis_ship_fedex_acc || ''"
+                                           t-on-input="ev => this.setPartyField('sis_ship_fedex_acc', ev.target.value)"/>
+                                </div>
+                                <div>
+                                    <label class="form-label mb-1 small">Stamp</label>
+                                    <textarea class="form-control form-control-sm" rows="2"
+                                              t-att-value="state.party.sis_ship_stamp || ''"
+                                              t-on-input="ev => this.setPartyField('sis_ship_stamp', ev.target.value)"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </t>
+
+                    <!-- ─── BANK INFO ─── -->
+                    <t t-elif="state.partyTab === 'bank'">
+                        <div style="max-width:800px;">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Bank Name</th>
+                                            <th>Account Holder Name</th>
+                                            <th>Account Number</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.partyBanks" t-as="b" t-key="b.id || b.bank_id">
+                                            <tr>
+                                                <td><t t-esc="b.bank_id ? b.bank_id[1] : ''"/></td>
+                                                <td><t t-esc="b.acc_holder_name"/></td>
+                                                <td><t t-esc="b.acc_number"/></td>
+                                            </tr>
+                                        </t>
+                                        <t t-if="!state.partyBanks.length">
+                                            <tr><td colspan="3" class="text-center text-muted py-3">No bank records. Please define them via the standard Odoo Contact view.</td></tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+
                 </div>
 
                 <!-- Navigation + Save bar -->

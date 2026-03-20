@@ -25,26 +25,70 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
-            <!-- SIS Code next to name -->
-            <field name="company_type" position="before">
-                <field name="sis_code"/>
+            <!-- SIS Code as an explicit bold badge next to name -->
+            <xpath expr="//div[hasclass('oe_title')]" position="inside">
+                <h2>
+                    <field name="sis_code" placeholder="SIS Code (e.g. A&amp;J)"/>
+                </h2>
+            </xpath>
+
+            <!-- Additional Phones after Email -->
+            <field name="email" position="after">
+                <field name="sis_phone_ids" widget="one2many">
+                    <list editable="bottom">
+                        <field name="name" placeholder="Label"/>
+                        <field name="phone" placeholder="Number"/>
+                    </list>
+                </field>
             </field>
-            <!-- SIS tab in notebook -->
+            <!-- SIS tabs in notebook -->
             <xpath expr="//notebook" position="inside">
-                <page string="SIS" name="sis_info">
+                <page string="Default" name="sis_default">
                     <group>
-                        <group string="SIS Defaults">
+                        <group>
                             <field name="sis_group"/>
-                            <field name="margin_id"/>
-                            <field name="sis_pay_term_id"/>
-                            <field name="sis_account"/>
-                        </group>
-                        <group string="Shipping">
-                            <field name="sis_ship_method_id"/>
-                            <field name="sis_ship_fedex_acc"/>
-                            <field name="sis_ship_stamp"/>
+                            <field name="sis_contact"/>
+                            <field name="sis_is_customer" widget="boolean_toggle"/>
+                            <field name="sis_is_vendor" widget="boolean_toggle"/>
                         </group>
                     </group>
+                    <group>
+                        <group string="Sales Defaults" invisible="not sis_is_customer">
+                            <field name="sis_account"/>
+                            <field name="margin_id"/>
+                            <field name="sis_pay_term_id"/>
+                        </group>
+                        <group string="Purchase Defaults" invisible="not sis_is_vendor">
+                            <field name="sis_vendor_account"/>
+                            <field name="sis_vendor_pay_term_id"/>
+                        </group>
+                    </group>
+                </page>
+                <page string="Shipment Info" name="sis_shipment_info">
+                    <group>
+                        <group string="Address">
+                            <field name="sis_ship_address" string="Address"/>
+                            <field name="sis_ship_city" string="City"/>
+                            <field name="sis_ship_state" string="State"/>
+                            <field name="sis_ship_zip" string="Zip"/>
+                            <field name="sis_ship_country_id" string="Country"/>
+                        </group>
+                        <group string="Shipping">
+                            <field name="sis_ship_method_id" string="Default Method"/>
+                            <field name="sis_ship_fedex_acc" string="Fed. Ex. Acc."/>
+                            <field name="sis_ship_stamp" string="Stamp"/>
+                        </group>
+                    </group>
+                </page>
+                <page string="Bank Info" name="sis_bank_info">
+                    <field name="bank_ids" context="{'default_partner_id': id}">
+                        <list editable="bottom">
+                            <field name="sis_bank_name" string="Bank Name"/>
+                            <field name="acc_holder_name" string="Acc. Name"/>
+                            <field name="acc_number" string="Acc. No."/>
+                            <field name="sis_bank_address" string="Bank Address"/>
+                        </list>
+                    </field>
                 </page>
             </xpath>
         </field>

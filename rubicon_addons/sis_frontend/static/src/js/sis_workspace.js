@@ -19,6 +19,7 @@ export class SisWorkspace extends Component {
         this.payTerms = [];
         this.shippers = [];
         this.sisCountries = [];
+        this.allStates = [];
         this.receivingModes = [];
         this.tradeFairs = [];
         this.sisPartners = [];
@@ -36,6 +37,8 @@ export class SisWorkspace extends Component {
             partyTab: "general",
             party: null,
             partyDirty: false,
+            partyBanks: [],
+            partyPhones: [],
 
             // ── Documents ──────────────────────────────────────
             documents: [],
@@ -69,12 +72,13 @@ export class SisWorkspace extends Component {
     // LOOKUP TABLES (non-reactive)
 
     async _loadLookups() {
-        const [margins, payTerms, shippers, sisCountries, receivingModes, tradeFairs, sisPartners] =
+        const [margins, payTerms, shippers, sisCountries, allStates, receivingModes, tradeFairs, sisPartners] =
             await Promise.all([
                 this.orm.searchRead("pdp.margin", [], ["id", "name"], { order: "name" }),
                 this.orm.searchRead("sis.pay.term", [], ["id", "name"], { order: "name" }),
                 this.orm.searchRead("sis.shipper", [], ["id", "name"], { order: "name" }),
                 this.orm.searchRead("res.country", [], ["id", "name", "code"], { order: "name" }),
+                this.orm.searchRead("res.country.state", [], ["id", "name", "code", "country_id"], { order: "name" }),
                 this.orm.searchRead("sis.doc.in.mode", [], ["id", "name"], { order: "name" }),
                 this.orm.searchRead("sis.trade.fair", [], ["id", "name"], { order: "name" }),
                 this.orm.searchRead(
@@ -88,6 +92,7 @@ export class SisWorkspace extends Component {
         this.payTerms = payTerms;
         this.shippers = shippers;
         this.sisCountries = sisCountries;
+        this.allStates = allStates;
         this.receivingModes = receivingModes;
         this.tradeFairs = tradeFairs;
         this.sisPartners = sisPartners;
@@ -122,8 +127,8 @@ export class SisWorkspace extends Component {
     async _reloadParties() {
         this.state.parties = await this.orm.searchRead(
             "res.partner",
-            [["is_company", "=", true]],
-            ["id", "name", "category_id"],
+            [["sis_code", "!=", false], ["is_company", "=", true]],
+            ["id", "name", "sis_code", "category_id"],
             { order: "name" }
         );
         if (this.state.parties.length > 0) {
@@ -142,15 +147,45 @@ export class SisWorkspace extends Component {
         );
     }
 
+    get partyStates() {
+        const cId = this.state.party && this._m2oId(this.state.party.country_id);
+        if (!cId) return this.allStates;
+        return this.allStates.filter(s => s.country_id[0] === cId);
+    }
+
     async _loadParty(partyId) {
         const records = await this.orm.read("res.partner", [partyId], [
             "id", "name", "category_id", "active",
             "title", "street", "city", "state_id", "zip", "country_id",
             "phone", "email", "website", "comment",
             "margin_id", "sis_pay_term_id", "customer_rank",
+            "sis_contact",
+            // New fields:
+            "sis_is_customer", "sis_is_vendor",
+            "sis_account", "sis_vendor_account", "sis_vendor_pay_term_id",
+            "sis_ship_address", "sis_ship_country_id", "sis_ship_method_id", "sis_ship_fedex_acc", "sis_ship_stamp",
+            "bank_ids", "sis_phone_ids", "sis_code"
         ]);
         this.state.party = records[0] ? { ...records[0] } : null;
         this.state.partyDirty = false;
+
+        // Fetch Bank details if any
+        if (this.state.party && this.state.party.bank_ids && this.state.party.bank_ids.length > 0) {
+            this.state.partyBanks = await this.orm.read("res.partner.bank", this.state.party.bank_ids, [
+                "bank_id", "acc_holder_name", "acc_number"
+            ]);
+        } else {
+            this.state.partyBanks = [];
+        }
+
+        if (this.state.party && this.state.party.sis_phone_ids && this.state.party.sis_phone_ids.length > 0) {
+            this.state.partyPhones = await this.orm.read("res.partner.phone", this.state.party.sis_phone_ids, [
+                "name", "phone"
+            ]);
+        } else {
+            this.state.partyPhones = [];
+        }
+
         const idx = this.state.parties.findIndex((p) => p.id === partyId);
         if (idx >= 0) this.state.partyIndex = idx;
     }
@@ -166,6 +201,24 @@ export class SisWorkspace extends Component {
 
     setPartyField(field, value) {
         this.state.party[field] = value;
+        this.state.partyDirty = true;
+    }
+
+    addPartyPhone() {
+        this.state.partyPhones.push({ id: "new_" + Date.now(), name: "", phone: "" });
+        this.state.partyDirty = true;
+    }
+
+    updatePartyPhone(id, field, value) {
+        const phone = this.state.partyPhones.find(p => p.id === id);
+        if (phone) {
+            phone[field] = value;
+            this.state.partyDirty = true;
+        }
+    }
+
+    removePartyPhone(id) {
+        this.state.partyPhones = this.state.partyPhones.filter(p => p.id !== id);
         this.state.partyDirty = true;
     }
 
@@ -185,9 +238,19 @@ export class SisWorkspace extends Component {
             id: null, name: "", is_company: true, active: true,
             title: "", street: "", city: "", state_id: false, zip: "", country_id: false,
             phone: "", email: "", website: "", comment: "",
+            sis_contact: "",
             margin_id: false, sis_pay_term_id: false,
-            customer_rank: 1,
+            customer_rank: 1, // keeping this for legacy, but now we use sis_is_customer/vendor
+            sis_is_customer: true,
+            sis_is_vendor: false,
+            sis_account: "", sis_vendor_account: "", sis_vendor_pay_term_id: false,
+            sis_ship_address: "", sis_ship_country_id: false, sis_ship_method_id: false, sis_ship_fedex_acc: "", sis_ship_stamp: "",
+            bank_ids: [],
+            sis_phone_ids: [],
+            sis_code: ""
         };
+        this.state.partyBanks = [];
+        this.state.partyPhones = [];
         this.state.partyDirty = true;
         this.state.partyTab = "general";
     }
@@ -197,6 +260,7 @@ export class SisWorkspace extends Component {
         const p = this.state.party;
         const vals = {
             name: p.name,
+            sis_code: p.sis_code || "",
             is_company: true,
             active: p.active !== false,
             title: p.title || "",
@@ -209,9 +273,30 @@ export class SisWorkspace extends Component {
             email: p.email || "",
             website: p.website || "",
             comment: p.comment || "",
+            sis_contact: p.sis_contact || "",
             margin_id: this._m2oId(p.margin_id),
             sis_pay_term_id: this._m2oId(p.sis_pay_term_id),
+            sis_is_customer: p.sis_is_customer || false,
+            sis_is_vendor: p.sis_is_vendor || false,
+            sis_account: p.sis_account || "",
+            sis_vendor_account: p.sis_vendor_account || "",
+            sis_vendor_pay_term_id: this._m2oId(p.sis_vendor_pay_term_id),
+            sis_ship_address: p.sis_ship_address || "",
+            sis_ship_country_id: this._m2oId(p.sis_ship_country_id),
+            sis_ship_method_id: this._m2oId(p.sis_ship_method_id),
+            sis_ship_fedex_acc: p.sis_ship_fedex_acc || "",
+            sis_ship_stamp: p.sis_ship_stamp || "",
+            // Note: We don't save bank_ids from this simple form currently as they are a One2Many which requires specific command formatting in odoo ORM if creating/updating from here. The user edits them via the backend for now, or we'd need a specific sub-form.
         };
+
+        const phoneCommands = [[5, 0, 0]];
+        for (const ph of this.state.partyPhones) {
+            if (ph.name || ph.phone) {
+                phoneCommands.push([0, 0, { name: ph.name || "", phone: ph.phone || "" }]);
+            }
+        }
+        vals.sis_phone_ids = phoneCommands;
+
         if (p.id) {
             await this.orm.write("res.partner", [p.id], vals);
             this.state.partyDirty = false;

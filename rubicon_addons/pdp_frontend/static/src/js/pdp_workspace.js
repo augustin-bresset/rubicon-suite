@@ -332,6 +332,25 @@ export class PdpWorkspace extends Component {
         this.state.imageMode = mode;
     }
 
+    onBottomSplitterMouseDown(ev) {
+        ev.preventDefault();
+        const workspace = ev.target.closest('.pdp-workspace');
+        const bottomPane = workspace.querySelector('.pdp-bottom-pane');
+        const startY = ev.clientY;
+        const startHeight = bottomPane.getBoundingClientRect().height;
+        const maxHeight = workspace.getBoundingClientRect().height - 100;
+        const onMouseMove = (e) => {
+            const newHeight = Math.max(80, Math.min(maxHeight, startHeight + (startY - e.clientY)));
+            bottomPane.style.height = newHeight + 'px';
+        };
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }
+
     openFullScreenImage() {
         this.state.showFullScreenImage = true;
     }
