@@ -1194,6 +1194,24 @@ Find the `<th>` for the weight column in the metals section and add:
 <th class="text-end">Weight (<t t-esc="weightDisplay.metalSymbol()"/>)</th>
 ```
 
+Update stone weight display cells. There are two stone tables (Original and Recut), both contain:
+```xml
+<!-- Before (appears twice, once per table): -->
+<td class="text-end"><t t-esc="s.weight"/></td>
+<!-- After — use t-esc with formatted value: -->
+<td class="text-end"><t t-esc="weightDisplay.stoneWeight(parseFloat(s.weight) || 0)"/></td>
+```
+
+Also update the stone weight column headers in both stone tables:
+```xml
+<!-- Before: -->
+<th class="text-end">Wt</th>
+<!-- After: -->
+<th class="text-end">Wt (<t t-esc="weightDisplay.stoneSymbol()"/>)</th>
+```
+
+> Note: stone weight values in `state.stoneOriginal` and `state.stoneRecut` are strings (legacy `replace(',', '.')` handling), hence `parseFloat(...) || 0`.
+
 - [ ] **Step 4: Add "Units of Measure" to PDP Settings menu in `pdp_menus.xml`**
 
 After the existing `menu_pdp_settings_currency` item:
