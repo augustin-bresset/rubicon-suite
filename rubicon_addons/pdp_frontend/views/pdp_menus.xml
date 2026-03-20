@@ -105,4 +105,10 @@
             action="action_pdp_currency_setting"
             sequence="1"/>
 
+  <menuitem id="menu_pdp_settings_uom"
+            name="Units of Measure"
+            parent="menu_pdp_frontend_settings"
+            action="rubicon_uom.action_rubicon_uom_category"
+            sequence="2"/>
+
 </odoo>

@@ -3,12 +3,16 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component, useState, onWillStart } from "@odoo/owl";
+import { UomSelector } from "@rubicon_uom/js/rubicon_uom_selector";
 
 export class PdpWorkspace extends Component {
+    static components = { UomSelector };
+
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
         this.notification = useService("notification");
+        this.uomService = useService("rubicon_uom");
 
         // Non-reactive deleted-ID tracking (product workspace)
         this._deletedStoneIds = [];
@@ -120,9 +124,13 @@ export class PdpWorkspace extends Component {
 
             // Dirty state
             isDirty: false,
+
+            // UOM version (incremented when user changes display unit)
+            uomVersion: 0,
         });
 
         onWillStart(async () => {
+            await this.uomService.load();
             await this.loadInitialData();
         });
     }
@@ -232,6 +240,19 @@ export class PdpWorkspace extends Component {
 
     get defaultCurrencyId() {
         return this.state.selectedCurrencyId || (this.state.currencies.length > 0 ? this.state.currencies[0].id : false);
+    }
+
+    onUomChange(categoryCode, uomId) {
+        this.state.uomVersion = (this.state.uomVersion || 0) + 1;
+    }
+
+    get weightDisplay() {
+        return {
+            metalWeight: (value) => this.uomService.format(value, 'metal_weight', 3),
+            stoneWeight: (value) => this.uomService.format(value, 'stone_weight', 3),
+            metalSymbol: () => this.uomService.symbol('metal_weight'),
+            stoneSymbol: () => this.uomService.symbol('stone_weight'),
+        };
     }
 
     // ==========================================

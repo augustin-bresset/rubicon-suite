@@ -222,10 +222,23 @@
 
                     <!-- ===== WEIGHT SUMMARY ===== -->
                     <div t-if="state.activeTab === 'weight' and state.selectedProductId" class="row g-3">
+                        <!-- Hidden read of uomVersion so OWL re-renders when UOM selection changes -->
+                        <t t-esc="state.uomVersion" t-out="''"/>
+                        <div class="col-12 d-flex gap-3 align-items-center pb-1 border-bottom mb-1">
+                            <small class="fw-bold text-muted">Display units:</small>
+                            <span class="d-flex align-items-center gap-1">
+                                <small class="text-muted">Metal:</small>
+                                <UomSelector categoryCode="'metal_weight'" onUomChange.bind="onUomChange"/>
+                            </span>
+                            <span class="d-flex align-items-center gap-1">
+                                <small class="text-muted">Stone:</small>
+                                <UomSelector categoryCode="'stone_weight'" onUomChange.bind="onUomChange"/>
+                            </span>
+                        </div>
                         <div class="col-4">
                             <h6 class="fw-bold small border-bottom pb-1">Stone (Original)</h6>
                             <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
-                                <thead class="bg-light"><tr><th>Type</th><th>Shade</th><th>Shape</th><th class="text-end">Pcs</th><th class="text-end">Wt</th></tr></thead>
+                                <thead class="bg-light"><tr><th>Type</th><th>Shade</th><th>Shape</th><th class="text-end">Pcs</th><th class="text-end">Wt (<t t-esc="weightDisplay.stoneSymbol()"/>)</th></tr></thead>
                                 <tbody>
                                     <t t-foreach="state.stoneOriginal" t-as="s" t-key="s_index">
                                         <tr>
@@ -233,7 +246,7 @@
                                             <td><t t-esc="s.shade"/></td>
                                             <td><t t-esc="s.shape"/></td>
                                             <td class="text-end"><t t-esc="s.pieces"/></td>
-                                            <td class="text-end"><t t-esc="s.weight"/></td>
+                                            <td class="text-end"><t t-esc="weightDisplay.stoneWeight(parseFloat(s.weight) || 0)"/></td>
                                         </tr>
                                     </t>
                                     <t t-if="state.stoneOriginal.length === 0"><tr><td colspan="5" class="text-muted text-center">None</td></tr></t>
@@ -243,7 +256,7 @@
                         <div class="col-4">
                             <h6 class="fw-bold small border-bottom pb-1">Stone after Recutting</h6>
                             <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
-                                <thead class="bg-light"><tr><th>Type</th><th>Shade</th><th>Shape</th><th class="text-end">Pcs</th><th class="text-end">Wt</th></tr></thead>
+                                <thead class="bg-light"><tr><th>Type</th><th>Shade</th><th>Shape</th><th class="text-end">Pcs</th><th class="text-end">Wt (<t t-esc="weightDisplay.stoneSymbol()"/>)</th></tr></thead>
                                 <tbody>
                                     <t t-foreach="state.stoneRecut" t-as="s" t-key="s_index">
                                         <tr>
@@ -251,7 +264,7 @@
                                             <td><t t-esc="s.shade"/></td>
                                             <td><t t-esc="s.shape"/></td>
                                             <td class="text-end"><t t-esc="s.pieces"/></td>
-                                            <td class="text-end"><t t-esc="s.weight"/></td>
+                                            <td class="text-end"><t t-esc="weightDisplay.stoneWeight(parseFloat(s.weight) || 0)"/></td>
                                         </tr>
                                     </t>
                                     <t t-if="state.stoneRecut.length === 0"><tr><td colspan="5" class="text-muted text-center">None</td></tr></t>
@@ -261,14 +274,14 @@
                         <div class="col-4">
                             <h6 class="fw-bold small border-bottom pb-1">Metal</h6>
                             <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
-                                <thead class="bg-light"><tr><th>Metal</th><th>Purity</th><th>Ver.</th><th class="text-end">Wt (g)</th></tr></thead>
+                                <thead class="bg-light"><tr><th>Metal</th><th>Purity</th><th>Ver.</th><th class="text-end">Weight (<t t-esc="weightDisplay.metalSymbol()"/>)</th></tr></thead>
                                 <tbody>
                                     <t t-foreach="state.metalWeights" t-as="m" t-key="m._key">
                                         <tr>
                                             <td><t t-esc="m.metal_id ? m.metal_id[1] : ''"/></td>
                                             <td><t t-esc="m.purity_id ? m.purity_id[1] : ''"/></td>
                                             <td><t t-esc="m.metal_version"/></td>
-                                            <td class="text-end"><t t-esc="(m.weight || 0).toFixed(3)"/></td>
+                                            <td class="text-end"><t t-esc="weightDisplay.metalWeight(m.weight || 0)"/></td>
                                         </tr>
                                     </t>
                                     <t t-if="state.metalWeights.length === 0"><tr><td colspan="4" class="text-muted text-center">None</td></tr></t>

@@ -7,6 +7,7 @@
         "web",
         "pdp_api",
         "pdp_picture",
+        "rubicon_uom",
     ],
     "data": [
         "security/ir.model.access.csv",
