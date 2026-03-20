@@ -1,20 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <!-- rubicon.uom list (inline in category form) -->
-  <record id="view_rubicon_uom_list_inline" model="ir.ui.view">
-    <field name="name">rubicon.uom.list.inline</field>
-    <field name="model">rubicon.uom</field>
-    <field name="arch" type="xml">
-      <list editable="bottom">
-        <field name="name"/>
-        <field name="symbol"/>
-        <field name="ratio"/>
-        <field name="is_reference"/>
-        <field name="is_global_default"/>
-      </list>
-    </field>
-  </record>
-
   <!-- rubicon.uom.category form -->
   <record id="view_rubicon_uom_category_form" model="ir.ui.view">
     <field name="name">rubicon.uom.category.form</field>
