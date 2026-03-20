@@ -221,9 +221,8 @@
                     </div>
 
                     <!-- ===== WEIGHT SUMMARY ===== -->
-                    <div t-if="state.activeTab === 'weight' and state.selectedProductId" class="row g-3">
-                        <!-- Hidden read of uomVersion so OWL re-renders when UOM selection changes -->
-                        <t t-esc="state.uomVersion" t-out="''"/>
+                    <!-- t-att-data-v reads state.uomVersion reactively so OWL re-renders when UOM selection changes -->
+                    <div t-if="state.activeTab === 'weight' and state.selectedProductId" class="row g-3" t-att-data-v="state.uomVersion">
                         <div class="col-12 d-flex gap-3 align-items-center pb-1 border-bottom mb-1">
                             <small class="fw-bold text-muted">Display units:</small>
                             <span class="d-flex align-items-center gap-1">
