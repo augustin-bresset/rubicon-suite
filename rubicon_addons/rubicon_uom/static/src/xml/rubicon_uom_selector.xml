@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="rubicon_uom.UomSelector">
+        <span class="d-inline-flex align-items-center gap-1">
+            <select class="form-select form-select-sm py-0"
+                    style="width: auto; font-size: 11px;"
+                    t-on-change="onChangeUom">
+                <t t-foreach="units" t-as="unit" t-key="unit.id">
+                    <option t-att-value="unit.id"
+                            t-att-selected="unit.id === activeUomId">
+                        <t t-esc="unit.symbol"/>
+                    </option>
+                </t>
+            </select>
+            <button t-if="userHasPref"
+                    t-on-click="onReset"
+                    class="btn btn-sm btn-link p-0 text-muted"
+                    title="Reset to default">↺</button>
+        </span>
+    </t>
+</templates>
