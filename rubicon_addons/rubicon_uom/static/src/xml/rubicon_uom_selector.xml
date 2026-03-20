@@ -4,10 +4,10 @@
         <span class="d-inline-flex align-items-center gap-1">
             <select class="form-select form-select-sm py-0"
                     style="width: auto; font-size: 11px;"
+                    t-att-value="activeUomId"
                     t-on-change="onChangeUom">
                 <t t-foreach="units" t-as="unit" t-key="unit.id">
-                    <option t-att-value="unit.id"
-                            t-att-selected="unit.id === activeUomId">
+                    <option t-att-value="unit.id">
                         <t t-esc="unit.symbol"/>
                     </option>
                 </t>

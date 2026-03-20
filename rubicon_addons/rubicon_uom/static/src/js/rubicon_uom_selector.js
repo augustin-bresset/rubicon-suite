@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 export class UomSelector extends Component {
@@ -12,9 +12,11 @@ export class UomSelector extends Component {
 
     setup() {
         this.uomService = useService("rubicon_uom");
+        this.state = useState({ version: 0 });
     }
 
     get units() {
+        void this.state.version;  // reactive dependency — forces re-render on version increment
         return this.uomService.getUnitsForCategory(this.props.categoryCode);
     }
 
@@ -29,14 +31,26 @@ export class UomSelector extends Component {
 
     async onChangeUom(ev) {
         const uomId = parseInt(ev.target.value, 10);
-        await this.uomService.setUserPref(this.props.categoryCode, uomId);
+        try {
+            await this.uomService.setUserPref(this.props.categoryCode, uomId);
+        } catch (e) {
+            console.error('[rubicon_uom] setUserPref failed:', e);
+            return;
+        }
+        this.state.version++;
         if (this.props.onUomChange) {
             this.props.onUomChange(this.props.categoryCode, uomId);
         }
     }
 
     async onReset() {
-        await this.uomService.resetUserPref(this.props.categoryCode);
+        try {
+            await this.uomService.resetUserPref(this.props.categoryCode);
+        } catch (e) {
+            console.error('[rubicon_uom] resetUserPref failed:', e);
+            return;
+        }
+        this.state.version++;
         if (this.props.onUomChange) {
             this.props.onUomChange(this.props.categoryCode, null);
         }
