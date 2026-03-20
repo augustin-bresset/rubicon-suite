@@ -129,13 +129,14 @@ const rubiconUomService = {
                 ['id']
             );
             if (existing.length) {
-                await orm.unlink('rubicon.uom.user.pref', existing.map(r => r.id));
+                await orm.write('rubicon.uom.user.pref', [existing[0].id], { uom_id: uomId });
+            } else {
+                await orm.create('rubicon.uom.user.pref', [{
+                    user_id: user.userId,
+                    category_id: cat.id,
+                    uom_id: uomId,
+                }]);
             }
-            await orm.create('rubicon.uom.user.pref', [{
-                user_id: user.userId,
-                category_id: cat.id,
-                uom_id: uomId,
-            }]);
             await load();
         }
 
