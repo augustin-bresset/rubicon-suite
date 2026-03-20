@@ -184,6 +184,22 @@ this.action.doAction({
 })
 ```
 
+### 12b. Weight Tab — Fix Stone Display
+
+**File:** `pdp_frontend/static/src/js/pdp_workspace.js` + `pdp_workspace.xml`
+
+**Issue 1 — Weight often 0:** `pdp.product.stone.weight` is a stored computed field that sources from `stone_id.weight` (itself a related to `pdp.stone.weight`). When the weight table has no matching record the stored value is 0 and stays 0. The JS `fetchProductStones()` doesn't include `weight` in the stone-details read from `pdp.stone`, so there is no fallback.
+
+**Fix:** Add `"weight"` to the `orm.read("pdp.stone", ...)` call in `fetchProductStones()`. Build `stoneOriginal[].weight` as `s.weight || detail.weight || 0`.
+
+**Issue 2 — Shows stone code instead of descriptive columns:** `stoneOriginal` and `stoneRecut` are built with a `stone` field that holds `stone_id[1]` (the ORM display name, which is the code). The `to_dict_original()` method on the model already produces the correct shape with `type`, `shade`, `shape`, `pieces`, `weight`.
+
+**Fix:** Rebuild both arrays using `detailMap` (already populated at that point):
+- `stoneOriginal`: `{ type, shade, shape, pieces, weight }` — type from `detail.type_id[1]`, shade from `detail.shade_id[1]`, shape from `detail.shape_id[1]`, weight from `s.weight || detail.weight || 0`
+- `stoneRecut`: same columns, shape overridden by `s.reshaped_shape_id[1]` if set, weight from `s.reshaped_weight || s.weight || detail.weight || 0`
+
+Update the Weight tab XML: replace "Stone/Pcs/Wt" columns with "Type/Shade/Shape/Pcs/Wt" for both sub-tables. Adjust `colspan` on the empty-row fallback accordingly.
+
 ### 12. Matching Tab — Fix Picture Loading
 
 `fetchMatchingModels()` currently uses `search_read` with `picture_id` field. Since `picture_id` is a non-stored computed Many2one, switch to `orm.read()` for the matched IDs to ensure the compute is triggered:

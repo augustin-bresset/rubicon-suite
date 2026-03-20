@@ -218,24 +218,36 @@
                         <div class="col-4">
                             <h6 class="fw-bold small border-bottom pb-1">Stone (Original)</h6>
                             <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
-                                <thead class="bg-light"><tr><th>Stone</th><th class="text-end">Pcs</th><th class="text-end">Wt</th></tr></thead>
+                                <thead class="bg-light"><tr><th>Type</th><th>Shade</th><th>Shape</th><th class="text-end">Pcs</th><th class="text-end">Wt</th></tr></thead>
                                 <tbody>
                                     <t t-foreach="state.stoneOriginal" t-as="s" t-key="s_index">
-                                        <tr><td><t t-esc="s.stone"/></td><td class="text-end"><t t-esc="s.pieces"/></td><td class="text-end"><t t-esc="s.weight"/></td></tr>
+                                        <tr>
+                                            <td><t t-esc="s.type"/></td>
+                                            <td><t t-esc="s.shade"/></td>
+                                            <td><t t-esc="s.shape"/></td>
+                                            <td class="text-end"><t t-esc="s.pieces"/></td>
+                                            <td class="text-end"><t t-esc="s.weight"/></td>
+                                        </tr>
                                     </t>
-                                    <t t-if="state.stoneOriginal.length === 0"><tr><td colspan="3" class="text-muted text-center">None</td></tr></t>
+                                    <t t-if="state.stoneOriginal.length === 0"><tr><td colspan="5" class="text-muted text-center">None</td></tr></t>
                                 </tbody>
                             </table>
                         </div>
                         <div class="col-4">
                             <h6 class="fw-bold small border-bottom pb-1">Stone after Recutting</h6>
                             <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
-                                <thead class="bg-light"><tr><th>Stone</th><th class="text-end">Pcs</th><th class="text-end">Wt</th><th>Shape</th></tr></thead>
+                                <thead class="bg-light"><tr><th>Type</th><th>Shade</th><th>Shape</th><th class="text-end">Pcs</th><th class="text-end">Wt</th></tr></thead>
                                 <tbody>
                                     <t t-foreach="state.stoneRecut" t-as="s" t-key="s_index">
-                                        <tr><td><t t-esc="s.stone"/></td><td class="text-end"><t t-esc="s.pieces"/></td><td class="text-end"><t t-esc="s.weight"/></td><td><t t-esc="s.shape"/></td></tr>
+                                        <tr>
+                                            <td><t t-esc="s.type"/></td>
+                                            <td><t t-esc="s.shade"/></td>
+                                            <td><t t-esc="s.shape"/></td>
+                                            <td class="text-end"><t t-esc="s.pieces"/></td>
+                                            <td class="text-end"><t t-esc="s.weight"/></td>
+                                        </tr>
                                     </t>
-                                    <t t-if="state.stoneRecut.length === 0"><tr><td colspan="4" class="text-muted text-center">None</td></tr></t>
+                                    <t t-if="state.stoneRecut.length === 0"><tr><td colspan="5" class="text-muted text-center">None</td></tr></t>
                                 </tbody>
                             </table>
                         </div>

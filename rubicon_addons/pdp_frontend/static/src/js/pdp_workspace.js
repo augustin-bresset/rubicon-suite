@@ -569,7 +569,7 @@ export class PdpWorkspace extends Component {
                 const stoneIds = stones.filter(s => s.stone_id).map(s => Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id);
                 let detailMap = {};
                 if (stoneIds.length) {
-                    const details = await this.orm.read("pdp.stone", stoneIds, ["id", "code", "type_id", "shape_id", "shade_id", "size_id"]);
+                    const details = await this.orm.read("pdp.stone", stoneIds, ["id", "code", "type_id", "shape_id", "shade_id", "size_id", "weight"]);
                     detailMap = Object.fromEntries(details.map(d => [d.id, d]));
                 }
                 this.state.stoneRows = stones.map(s => {
@@ -582,16 +582,28 @@ export class PdpWorkspace extends Component {
                         _stoneDetail: detail,
                     };
                 });
-                this.state.stoneOriginal = stones.map(s => ({
-                    stone: s.stone_id ? s.stone_id[1] : 'Unknown',
-                    pieces: s.pieces, weight: s.weight || '0',
-                }));
-                this.state.stoneRecut = stones.map(s => ({
-                    stone: s.stone_id ? s.stone_id[1] : 'Unknown',
-                    pieces: s.pieces,
-                    weight: s.reshaped_weight || s.weight || '0',
-                    shape: s.reshaped_shape_id ? s.reshaped_shape_id[1] : '',
-                }));
+                this.state.stoneOriginal = stones.map(s => {
+                    const sid = Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id;
+                    const d = sid ? (detailMap[sid] || null) : null;
+                    return {
+                        type:   d?.type_id  ? d.type_id[1]  : '',
+                        shade:  d?.shade_id ? d.shade_id[1] : '',
+                        shape:  d?.shape_id ? d.shape_id[1] : '',
+                        pieces: s.pieces,
+                        weight: s.weight || d?.weight || 0,
+                    };
+                });
+                this.state.stoneRecut = stones.map(s => {
+                    const sid = Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id;
+                    const d = sid ? (detailMap[sid] || null) : null;
+                    return {
+                        type:   d?.type_id  ? d.type_id[1]  : '',
+                        shade:  d?.shade_id ? d.shade_id[1] : '',
+                        shape:  s.reshaped_shape_id ? s.reshaped_shape_id[1] : (d?.shape_id ? d.shape_id[1] : ''),
+                        pieces: s.pieces,
+                        weight: s.reshaped_weight || s.weight || d?.weight || 0,
+                    };
+                });
             } else {
                 this.state.stoneRows = [];
                 this.state.stoneOriginal = [];
