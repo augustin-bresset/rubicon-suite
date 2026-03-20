@@ -3,3 +3,4 @@ access_rubicon_uom_category_user,rubicon.uom.category user,model_rubicon_uom_cat
 access_rubicon_uom_category_admin,rubicon.uom.category admin,model_rubicon_uom_category,base.group_system,1,1,1,1
 access_rubicon_uom_user,rubicon.uom user,model_rubicon_uom,base.group_user,1,0,0,0
 access_rubicon_uom_admin,rubicon.uom admin,model_rubicon_uom,base.group_system,1,1,1,1
+access_rubicon_uom_user_pref_user,rubicon.uom.user.pref user,model_rubicon_uom_user_pref,base.group_user,1,1,1,1
