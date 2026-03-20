@@ -7,9 +7,8 @@
     'depends': ['base'],
     'data': [
         'security/ir.model.access.csv',
-        'data/rubicon_uom_data.xml',
-        'views/uom_views.xml',
-        'views/res_config_settings_views.xml',
+        # data/rubicon_uom_data.xml, views/uom_views.xml, views/res_config_settings_views.xml
+        # added in Task 5 once those files exist
     ],
     'assets': {
         'web.assets_backend': [
