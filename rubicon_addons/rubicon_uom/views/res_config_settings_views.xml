@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="res_config_settings_view_rubicon_uom" model="ir.ui.view">
+    <field name="name">rubicon.uom.res.config.settings</field>
+    <field name="model">res.config.settings</field>
+    <field name="priority" eval="90"/>
+    <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//form" position="inside">
+        <app data-string="Rubicon UOM" string="Rubicon UOM" name="rubicon_uom" groups="base.group_system">
+          <block title="Units of Measure">
+            <setting string="Manage UOM categories and global defaults"
+                     help="Define which unit is displayed by default per measurement dimension.">
+              <button name="%(rubicon_uom.action_rubicon_uom_category)d" type="action"
+                      string="Open Units of Measure" class="btn-link"/>
+            </setting>
+          </block>
+        </app>
+      </xpath>
+    </field>
+  </record>
+</odoo>

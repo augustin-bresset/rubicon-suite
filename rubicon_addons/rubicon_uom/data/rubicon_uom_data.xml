@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Categories -->
+  <record id="uom_cat_metal_weight" model="rubicon.uom.category">
+    <field name="name">Metal Weight</field>
+    <field name="code">metal_weight</field>
+  </record>
+  <record id="uom_cat_stone_weight" model="rubicon.uom.category">
+    <field name="name">Stone Weight</field>
+    <field name="code">stone_weight</field>
+  </record>
+  <record id="uom_cat_stone_density" model="rubicon.uom.category">
+    <field name="name">Stone Density</field>
+    <field name="code">stone_density</field>
+  </record>
+  <record id="uom_cat_stone_size" model="rubicon.uom.category">
+    <field name="name">Stone Size</field>
+    <field name="code">stone_size</field>
+  </record>
+
+  <!-- Metal Weight units -->
+  <record id="uom_g" model="rubicon.uom">
+    <field name="name">Gramme</field>
+    <field name="symbol">g</field>
+    <field name="category_id" ref="uom_cat_metal_weight"/>
+    <field name="ratio">1.0</field>
+    <field name="is_reference" eval="True"/>
+    <field name="is_global_default" eval="True"/>
+  </record>
+  <record id="uom_troy_oz" model="rubicon.uom">
+    <field name="name">Troy Ounce</field>
+    <field name="symbol">oz t</field>
+    <field name="category_id" ref="uom_cat_metal_weight"/>
+    <field name="ratio">31.1035</field>
+    <field name="is_reference" eval="False"/>
+    <field name="is_global_default" eval="False"/>
+  </record>
+
+  <!-- Stone Weight units -->
+  <record id="uom_ct" model="rubicon.uom">
+    <field name="name">Carat</field>
+    <field name="symbol">ct</field>
+    <field name="category_id" ref="uom_cat_stone_weight"/>
+    <field name="ratio">1.0</field>
+    <field name="is_reference" eval="True"/>
+    <field name="is_global_default" eval="True"/>
+  </record>
+  <record id="uom_g_stone" model="rubicon.uom">
+    <field name="name">Gramme (stone)</field>
+    <field name="symbol">g</field>
+    <field name="category_id" ref="uom_cat_stone_weight"/>
+    <field name="ratio">5.0</field>
+    <field name="is_reference" eval="False"/>
+    <field name="is_global_default" eval="False"/>
+  </record>
+
+  <!-- Stone Density units -->
+  <record id="uom_rel_quartz" model="rubicon.uom">
+    <field name="name">Relative to Quartz</field>
+    <field name="symbol">×SiO₂</field>
+    <field name="category_id" ref="uom_cat_stone_density"/>
+    <field name="ratio">1.0</field>
+    <field name="is_reference" eval="True"/>
+    <field name="is_global_default" eval="True"/>
+  </record>
+  <record id="uom_gcm3" model="rubicon.uom">
+    <field name="name">Gramme per cm³</field>
+    <field name="symbol">g/cm³</field>
+    <field name="category_id" ref="uom_cat_stone_density"/>
+    <field name="ratio">0.377358</field>
+    <field name="is_reference" eval="False"/>
+    <field name="is_global_default" eval="False"/>
+  </record>
+
+  <!-- Stone Size units -->
+  <record id="uom_mm" model="rubicon.uom">
+    <field name="name">Millimetre</field>
+    <field name="symbol">mm</field>
+    <field name="category_id" ref="uom_cat_stone_size"/>
+    <field name="ratio">1.0</field>
+    <field name="is_reference" eval="True"/>
+    <field name="is_global_default" eval="True"/>
+  </record>
+  <record id="uom_inch" model="rubicon.uom">
+    <field name="name">Inch</field>
+    <field name="symbol">in</field>
+    <field name="category_id" ref="uom_cat_stone_size"/>
+    <field name="ratio">25.4</field>
+    <field name="is_reference" eval="False"/>
+    <field name="is_global_default" eval="False"/>
+  </record>
+</odoo>

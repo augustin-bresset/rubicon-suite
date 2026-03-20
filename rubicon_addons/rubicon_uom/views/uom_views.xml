@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- rubicon.uom list (inline in category form) -->
+  <record id="view_rubicon_uom_list_inline" model="ir.ui.view">
+    <field name="name">rubicon.uom.list.inline</field>
+    <field name="model">rubicon.uom</field>
+    <field name="arch" type="xml">
+      <list editable="bottom">
+        <field name="name"/>
+        <field name="symbol"/>
+        <field name="ratio"/>
+        <field name="is_reference"/>
+        <field name="is_global_default"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- rubicon.uom.category form -->
+  <record id="view_rubicon_uom_category_form" model="ir.ui.view">
+    <field name="name">rubicon.uom.category.form</field>
+    <field name="model">rubicon.uom.category</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="code"/>
+            <field name="description"/>
+          </group>
+          <notebook>
+            <page string="Units">
+              <field name="uom_ids">
+                <list editable="bottom">
+                  <field name="name"/>
+                  <field name="symbol"/>
+                  <field name="ratio"/>
+                  <field name="is_reference"/>
+                  <field name="is_global_default"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- rubicon.uom.category list -->
+  <record id="view_rubicon_uom_category_list" model="ir.ui.view">
+    <field name="name">rubicon.uom.category.list</field>
+    <field name="model">rubicon.uom.category</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="code"/>
+        <field name="name"/>
+        <field name="description"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Action -->
+  <record id="action_rubicon_uom_category" model="ir.actions.act_window">
+    <field name="name">Units of Measure</field>
+    <field name="res_model">rubicon.uom.category</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No UOM categories yet</p>
+      <p>Define measurement dimensions and their units (e.g. Metal Weight: g, oz t).</p>
+    </field>
+  </record>
+</odoo>
