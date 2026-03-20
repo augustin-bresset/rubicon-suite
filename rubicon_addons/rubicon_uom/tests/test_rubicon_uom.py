@@ -1,4 +1,7 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
+from odoo.tools import mute_logger
+from psycopg2 import IntegrityError
 
 
 class TestRubiconUomCategory(TransactionCase):
@@ -110,10 +113,20 @@ class TestRubiconUomUserPref(TransactionCase):
         self.assertEqual(result, self.troy_oz)
 
     def test_get_user_uom_falls_back_to_global_default(self):
+        # Ensure no pref exists for this user (TransactionCase rolls back each test)
+        self.assertEqual(self.env['rubicon.uom.user.pref'].search_count([
+            ('user_id', '=', self.user.id),
+            ('category_id', '=', self.cat.id),
+        ]), 0)
         result = self.cat.get_user_uom(user_id=self.user.id)
         self.assertEqual(result, self.gram)
 
     def test_get_user_uom_falls_back_to_reference(self):
+        # Ensure no pref exists for this user (TransactionCase rolls back each test)
+        self.assertEqual(self.env['rubicon.uom.user.pref'].search_count([
+            ('user_id', '=', self.user.id),
+            ('category_id', '=', self.cat.id),
+        ]), 0)
         # No global default — gram is reference only.
         # Safe to mutate self.gram here: Odoo TransactionCase wraps each test_*
         # method in a savepoint that is rolled back after the test, so this
@@ -147,12 +160,14 @@ class TestRubiconUomUserPref(TransactionCase):
             'category_id': self.cat.id,
             'uom_id': self.gram.id,
         })
-        with self.assertRaises(Exception):
-            self.env['rubicon.uom.user.pref'].create({
-                'user_id': self.user.id,
-                'category_id': self.cat.id,
-                'uom_id': self.troy_oz.id,
-            })
+        with self.assertRaises(IntegrityError):
+            with mute_logger('odoo.sql_db'):
+                self.env['rubicon.uom.user.pref'].create({
+                    'user_id': self.user.id,
+                    'category_id': self.cat.id,
+                    'uom_id': self.troy_oz.id,
+                })
+                self.env.flush_all()  # force the SQL to execute and trigger the constraint
 
     def test_set_global_default_atomic(self):
         self.troy_oz.set_global_default()

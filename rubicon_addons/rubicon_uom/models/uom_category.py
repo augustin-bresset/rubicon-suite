@@ -21,7 +21,8 @@ class RubiconUomCategory(models.Model):
         """Return the active display unit for a given user.
 
         Fallback chain: user pref → global default → reference unit.
-        Never returns False — reference unit is always present.
+        Returns an empty recordset only if the category has no reference unit,
+        which should not occur when data integrity constraints are respected.
         """
         self.ensure_one()
         uid = user_id or self.env.uid
