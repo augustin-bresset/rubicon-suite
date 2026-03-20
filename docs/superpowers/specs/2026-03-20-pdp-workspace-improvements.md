@@ -28,6 +28,7 @@ Add `metal_ids = One2many('pdp.product.metal', 'product_id')` on `pdp.product`.
 
 Remove `pdp.product.model.metal` model and all references once migration is complete.
 Remove `metal_weights_ids` One2many from `pdp.product.model`.
+Remove `get_metal_weights()` and `get_total_metal_weight()` methods from `pdp.product.model` (both iterate `metal_weights_ids`).
 
 ### 2. Data Migration Script
 
@@ -52,14 +53,19 @@ model_metal = env['pdp.product.model.metal'].search([
     ('metal_version', '=', product.metal),
 ], limit=1)
 ```
-With product-level lookup:
+With product-level lookup iterating all metal records and summing costs:
 ```python
-# NEW
-product_metal = product.metal_ids[:1]  # first metal record on the product
+# NEW — replace the early-return guard too
+if not product.metal_ids:
+    return self._payload(...)  # no metal data, zero cost
+for product_metal in product.metal_ids:
+    # ... compute cost per metal record
 ```
+Remove the old `if not product.model_id:` guard; replace with `if not product.metal_ids:`.
+
 If a product has multiple metal records, sum costs across all of them (iterate `product.metal_ids`).
 
-Also update `component_part.py` which uses `model_metal.purity_id` to find the margin — replace with `product_metal.purity_id`.
+Also update `component_part.py` which uses `model_metal.purity_id` to find the margin — replace with `product_metal.purity_id` from the first `product.metal_ids` record. `component_part.py` currently falls back to searching purity by `code='18K'` when no purity is found; keep this existing fallback behaviour unchanged (do not replace with the null-purity pattern — the two components have different fallback requirements).
 
 Update `pdp_price/tests/` accordingly.
 
@@ -67,16 +73,28 @@ Update `pdp_price/tests/` accordingly.
 
 **Current state:** Purity record `code='ALL'` (id=9) exists. 34 `pdp.margin.metal` records reference it. No `pdp.product.model.metal` (and therefore no future `pdp.product.metal`) records use it. These 34 margin records are effectively dead in pricing (exact purity match never hits them).
 
+**Pre-requisite:** `pdp.margin.metal.metal_purity_id` is currently `required=True` in `pdp_margin/models/margin_metal.py`. Must change to `required=False` before the cleanup script can set it to False on those 34 rows. Add this model change to the module upgrade.
+
+**Migration execution order (must follow this sequence):**
+1. Run `ops/setup/migrate_metals_to_product.py` (while `pdp.product.model.metal` still exists)
+2. Upgrade `pdp_margin` module (`odoo -u pdp_margin`) to apply `required=False` on `metal_purity_id`
+3. Run `ops/setup/fix_purity_all.py` (sets 34 rows to null, deletes purity id=9)
+4. Upgrade `pdp_product` module (`odoo -u pdp_product`) to drop `pdp.product.model.metal`
+
 **Fix:**
+- Change `metal_purity_id` to `required=False` in `pdp_margin/models/margin_metal.py`
 - Migration script `ops/setup/fix_purity_all.py`:
   - Set `metal_purity_id = False` on the 34 `pdp.margin.metal` records (null = applies to all purities)
   - Delete purity record id=9 (`code='ALL'`)
-- Update `component_metal.py` margin lookup to try exact purity first, then fall back to null:
+- Update `component_metal.py` margin lookup to try exact purity first, then fall back to null. This applies inside the `product.metal_ids` loop — each metal record gets its own lookup:
   ```python
-  margin_rec = Marge.search([('margin_id','=',margin.id), ('metal_purity_id','=',purity_id)], limit=1)
-  if not margin_rec:
-      margin_rec = Marge.search([('margin_id','=',margin.id), ('metal_purity_id','=',False)], limit=1)
-  rate = margin_rec.rate if margin_rec else 1.0
+  for product_metal in product.metal_ids:
+      purity_id = product_metal.purity_id.id if product_metal.purity_id else False
+      margin_rec = Marge.search([('margin_id','=',margin.id), ('metal_purity_id','=',purity_id)], limit=1)
+      if not margin_rec:
+          margin_rec = Marge.search([('margin_id','=',margin.id), ('metal_purity_id','=',False)], limit=1)
+      rate = margin_rec.rate if margin_rec else 1.0
+      # ... compute cost for this metal record
   ```
 - In the workspace purity filter dropdown: load purities with domain `[['code','!=','ALL']]` (becomes `[]` after deletion, but safe either way)
 
@@ -99,6 +117,10 @@ if options.get('copy_metals'):
 
 Also copy `source.metal` (char label) to new product.
 
+Also update `get_weight_data()` (currently calls `self.model_id.get_metal_weights()`) — replace with a direct sum over `self.metal_ids` after migration.
+
+**Pre-existing bug:** `confirmCopy()` in `pdp_workspace.js` builds the options dict without the `copy_metals` key despite `state.copyMetals` existing in state. Fix: add `copy_metals: this.state.copyMetals` to the options passed to the server call.
+
 ### 6. Workspace JS — Metals Become Product-Level
 
 **File:** `pdp_frontend/static/src/js/pdp_workspace.js`
@@ -112,13 +134,15 @@ Also copy `source.metal` (char label) to new product.
 - Metal dropdown: show `opt.name` (not `opt.code`)
 - Remove `metal_version` editable column (kept internally as label, not shown)
 
+**`fetchWhereUsed()` disposal:** Remove the method and the Where Used tab entirely. The tab queried `pdp.product.model.metal` to show which products use a given metal; that use case is now covered by the product-level relationship directly. Removing it is the simpler path — it can be re-added later if needed via a direct query on `pdp.product.metal`.
+
 ### 7. Select Model "List" Button
 
 Add `List` button next to the Model select in the top bar. Opens `showModelListModal`.
 
 **Modal contents:**
 - Title: "Select Model"
-- Category filter dropdown at top (filters the list)
+- Category filter dropdown at top — loads `pdp.product.category` records (`[['id','name']]`); filters the list
 - Searchable text input (filters by model code)
 - Table: Model | Drawing# | Quotation# — all columns searchable
 - Row click → selects model + closes modal
@@ -188,9 +212,9 @@ New OWL client action. One window with 5 tabs: **Categories | Types | Shapes | S
 Each tab shows an inline-editable table:
 - Categories: `code`, `name`
 - Types: `code`, `name`, `category_id` (dropdown), `density`
-- Shapes: `code`, `name`
-- Shades: `code`, `name`
-- Sizes: `code`, `name`
+- Shapes: `code`, `shape` (the actual field name on `pdp.stone.shape`)
+- Shades: `code`, `shade` (the actual field name on `pdp.stone.shade`)
+- Sizes: `code`, `name` — `pdp.stone.size` currently only has `name`; add `code = fields.Char()` to the model as part of this work
 
 Full CRUD per tab: Add row, delete row (with deleted-ID tracking), Save button. No cross-tab dependencies (each tab saves independently to its model).
 
@@ -217,7 +241,9 @@ New OWL client action.
 
 Same structure as Unit Cost. Manages `pdp.stone.weight` records.
 
-**Table:** For each size matching the filter (type+shape+shade), shows one row: Size | Weight (editable float). Rows may not exist yet — "Add" creates a new `pdp.stone.weight` record.
+**Table:** Load all `pdp.stone.size` records. For each size, look up the matching `pdp.stone.weight` record with `[type_id=X, shape_id=Y, shade_id=Z, size_id=size.id]`. If one exists, pre-populate its weight; if not, the row shows an empty weight. The table always shows all sizes — there is no size-level filter. Saving creates a new `pdp.stone.weight` record for rows with a weight value and no existing record; writes the `weight` field on rows with an existing record.
+
+Note: `pdp.stone.size` has no FK to type/shape — sizes are universal. The `pdp.stone.weight` table uniquely constrains `(type_id, shape_id, shade_id, size_id)`.
 
 Save writes weight changes. No print required.
 
@@ -229,11 +255,15 @@ Header: Stone Type (name), Stone Category (name), Shade (name), date
 Table: Size | Unit Cost | Currency
 Footer: generated by PDP
 
-Triggered from Unit Cost window via:
+Triggered from Unit Cost window via `this.action.doAction`:
 ```javascript
-window.open(`/report/pdf/pdp_stone.report_stone_cost_chart?type_id=X&shape_id=Y&shade_id=Z`)
+this.action.doAction({
+    type: 'ir.actions.report',
+    report_type: 'qweb-pdf',
+    report_name: 'pdp_stone.report_stone_cost_chart',
+    data: { type_id: X, shape_id: Y, shade_id: Z },
+});
 ```
-or via `this.action.doAction` with a report action.
 
 ---
 
@@ -261,11 +291,25 @@ or via `this.action.doAction` with a report action.
 - `pdp_price/wizard/component_metal_market.py` — product-level lookup
 - `pdp_price/wizard/component_part.py` — product-level purity lookup
 - `pdp_price/tests/test_component_metal.py` — update fixtures
-- `pdp_price/tests/test_component_part.py` — update fixtures
+- `pdp_price/tests/test_component_part.py` — structural rewrite: fixtures must create `pdp.product.metal` records instead of `pdp.product.model.metal`; test assertions around purity lookup change to cover null-fallback path
 - `pdp_frontend/static/src/js/pdp_workspace.js` — all workspace fixes
 - `pdp_frontend/static/src/xml/pdp_workspace.xml` — all workspace fixes
 - `pdp_frontend/views/pdp_menus.xml` — restructure Stones & Diamonds menu
-- `pdp_stone/__manifest__.py` — add report
+- `pdp_frontend/models/pdp_frontend_service.py` — lines 93-94 reference `product.model_id.metal_weights_ids`; replace with `product.metal_ids`
+- `pdp_frontend/views/pdp_frontend_templates.xml` — lines 411, 497 loop over `product.model_id.metal_weights_ids`; line 499 uses `m.metal_version`; replace all with `product.metal_ids` / `m.metal_version`
+- `pdp_margin/models/margin_metal.py` — change `metal_purity_id` from `required=True` to `required=False`
+- `pdp_product/views/pdp_views.xml` — remove `view_pdp_product_model_metal_list` view record (lines 46-59 reference `pdp.product.model.metal`)
+- `pdp_product/views/pdp_menus.xml` — remove `action_pdp_product_model_metal` action record and `menu_pdp_product_model_metal` menu item (lines 43-53)
+- `pdp_product/security/ir.model.access.csv` — remove `pdp.product.model.metal` access row; add `pdp.product.metal` access row
+- `rubicon_import/raw_to_data/raw_to_data_product.py` — update lines 387-409 which hardcode `model_name="pdp.product.model.metal"` and `metal_version`; change to target `pdp.product.metal` with `product_id` key (or mark as defunct if import will not be re-run)
+- `pdp_api/models/pdp_api_service.py` — line 81 calls `product.model_id.get_total_metal_weight()` which will be removed; replace with `sum(m.weight for m in product.metal_ids)`
+- `pdp_product/tests/test_domain_methods.py` — tests `get_metal_weights()` which will be deleted; remove or rewrite tests
+- `pdp_product/tests/test_domain_xmlrpc.py` — tests `get_metal_weights()` which will be deleted; remove or rewrite tests
+- `pdp_stone/__manifest__.py` — add report; register `pdp_stone/models/stone_size.py` change
+- `pdp_stone/models/stone_size.py` — add `code = fields.Char()` field
+- `ops/audit/audit_model.py` — remove `'pdp.product.model.metal'` from hardcoded model list; add `'pdp.product.metal'`
+- `ops/audit/audit_counts.py` — same substitution
+- `ops/import/import_csv.py` — line 40 imports into `pdp.product.model.metal`; update to `pdp.product.metal` with `product_id` key
 
 ### Deleted files
 - `pdp_product/models/model_metal.py` (after migration)
