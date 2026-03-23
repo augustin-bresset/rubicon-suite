@@ -1,15 +1,17 @@
 services:
   db_demo:
     image: postgres:13
+    env_file: .env.demo
     environment:
-      POSTGRES_DB: rubicondemo
-      POSTGRES_USER: odoo
-      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: ${DEMO_DB_NAME}
+      POSTGRES_USER: ${DEMO_DB_USER}
+      POSTGRES_PASSWORD: ${DEMO_DB_PASS}
     volumes:
       - db_demo_data:/var/lib/postgresql/data
 
   odoo_demo:
     image: odoo:18.0
+    env_file: .env.demo
     depends_on:
       - db_demo
     ports:
