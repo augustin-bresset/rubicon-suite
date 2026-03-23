@@ -1,5 +1,22 @@
 # Rubicon Import
 
+## ⚠️ WARNING: One-Time Migration Tools
+
+**These scripts are one-time migration tools used to migrate data from the legacy system into Odoo. Do not run them in normal operation.**
+
+### Key Points
+
+- **Legacy migration only**: These scripts were used as a one-time ETL process to move data from spreadsheets into Odoo during the initial setup. They are not operational tools.
+- **Canonical data source**: The Odoo database is now the authoritative source for all business data (products, models, parties, documents). Any changes should be made in the Odoo UI.
+- **Backup/restore**: For business data backup and restore, use `pg_dump` and `psql` instead of these import scripts.
+- **Reference data auto-loaded**: Stone catalog, labor types, and addon types are now automatically loaded via module manifests (`pdp_stone`, `pdp_labor`, etc.). No import from CSV is needed.
+
+See [data architecture documentation](../../docs/) for current data management practices.
+
+---
+
+## Historical Documentation
+
 Manage the dataflow between csv files to the Postgress Database of Odoo.
 
 ## Usecase
