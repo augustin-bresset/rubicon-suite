@@ -1,4 +1,4 @@
-def post_init_hook(env):
+def pre_init_hook(env):
     # Remove all PDP product models (cascade removes products, metal weights, model-level labor costs)
     env['pdp.product.model'].search([]).unlink()
 
