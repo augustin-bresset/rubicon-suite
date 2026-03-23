@@ -1,3 +1,796 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <!-- =========================================================
+         1. PRODUCT CATEGORIES
+         ========================================================= -->
+
+    <record id="demo_cat_rng" model="pdp.product.category">
+        <field name="code">RNG</field>
+        <field name="name">Ring</field>
+        <field name="waste">2.5</field>
+    </record>
+
+    <record id="demo_cat_ear" model="pdp.product.category">
+        <field name="code">EAR</field>
+        <field name="name">Earring</field>
+        <field name="waste">1.5</field>
+    </record>
+
+    <record id="demo_cat_pnd" model="pdp.product.category">
+        <field name="code">PND</field>
+        <field name="name">Pendant</field>
+        <field name="waste">2.0</field>
+    </record>
+
+    <!-- =========================================================
+         2. PRODUCT MODELS
+         ========================================================= -->
+
+    <record id="demo_model_r01" model="pdp.product.model">
+        <field name="code">DEMO-R01</field>
+        <field name="category_id" ref="demo_cat_rng"/>
+        <field name="drawing">DR-001</field>
+    </record>
+
+    <record id="demo_model_e01" model="pdp.product.model">
+        <field name="code">DEMO-E01</field>
+        <field name="category_id" ref="demo_cat_ear"/>
+        <field name="drawing">DR-002</field>
+    </record>
+
+    <record id="demo_model_p01" model="pdp.product.model">
+        <field name="code">DEMO-P01</field>
+        <field name="category_id" ref="demo_cat_pnd"/>
+        <field name="drawing">DR-003</field>
+    </record>
+
+    <record id="demo_model_set01" model="pdp.product.model">
+        <field name="code">DEMO-SET01</field>
+        <field name="category_id" ref="demo_cat_rng"/>
+        <field name="drawing">DR-004</field>
+    </record>
+
+    <!-- =========================================================
+         3. MODEL METAL WEIGHTS
+         ========================================================= -->
+
+    <!-- DEMO-R01 metal weights -->
+    <record id="demo_mw_r01_w" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_r01"/>
+        <field name="metal_id" ref="pdp_metal.metal_W"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.5</field>
+        <field name="metal_version">W</field>
+    </record>
+
+    <record id="demo_mw_r01_y" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_r01"/>
+        <field name="metal_id" ref="pdp_metal.metal_Y"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.6</field>
+        <field name="metal_version">Y</field>
+    </record>
+
+    <record id="demo_mw_r01_p" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_r01"/>
+        <field name="metal_id" ref="pdp_metal.metal_P"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.55</field>
+        <field name="metal_version">P</field>
+    </record>
+
+    <!-- DEMO-E01 metal weights -->
+    <record id="demo_mw_e01_w" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_e01"/>
+        <field name="metal_id" ref="pdp_metal.metal_W"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.5</field>
+        <field name="metal_version">W</field>
+    </record>
+
+    <record id="demo_mw_e01_y" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_e01"/>
+        <field name="metal_id" ref="pdp_metal.metal_Y"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.6</field>
+        <field name="metal_version">Y</field>
+    </record>
+
+    <record id="demo_mw_e01_p" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_e01"/>
+        <field name="metal_id" ref="pdp_metal.metal_P"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.55</field>
+        <field name="metal_version">P</field>
+    </record>
+
+    <!-- DEMO-P01 metal weights -->
+    <record id="demo_mw_p01_w" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_p01"/>
+        <field name="metal_id" ref="pdp_metal.metal_W"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.5</field>
+        <field name="metal_version">W</field>
+    </record>
+
+    <record id="demo_mw_p01_y" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_p01"/>
+        <field name="metal_id" ref="pdp_metal.metal_Y"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.6</field>
+        <field name="metal_version">Y</field>
+    </record>
+
+    <record id="demo_mw_p01_p" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_p01"/>
+        <field name="metal_id" ref="pdp_metal.metal_P"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.55</field>
+        <field name="metal_version">P</field>
+    </record>
+
+    <!-- DEMO-SET01 metal weights -->
+    <record id="demo_mw_set01_w" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_set01"/>
+        <field name="metal_id" ref="pdp_metal.metal_W"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.5</field>
+        <field name="metal_version">W</field>
+    </record>
+
+    <record id="demo_mw_set01_y" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_set01"/>
+        <field name="metal_id" ref="pdp_metal.metal_Y"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.6</field>
+        <field name="metal_version">Y</field>
+    </record>
+
+    <record id="demo_mw_set01_p" model="pdp.product.model.metal">
+        <field name="model_id" ref="demo_model_set01"/>
+        <field name="metal_id" ref="pdp_metal.metal_P"/>
+        <field name="purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="weight">3.55</field>
+        <field name="metal_version">P</field>
+    </record>
+
+    <!-- =========================================================
+         4. PRODUCTS
+         ========================================================= -->
+
+    <record id="demo_prod_r01_dts" model="pdp.product">
+        <field name="code">DEMO-R01-DTS</field>
+        <field name="model_id" ref="demo_model_r01"/>
+        <field name="category_id" ref="demo_cat_rng"/>
+        <field name="metal">W</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="demo_prod_r01_ruby" model="pdp.product">
+        <field name="code">DEMO-R01-RUB</field>
+        <field name="model_id" ref="demo_model_r01"/>
+        <field name="category_id" ref="demo_cat_rng"/>
+        <field name="metal">Y</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="demo_prod_e01_dts" model="pdp.product">
+        <field name="code">DEMO-E01-DTS</field>
+        <field name="model_id" ref="demo_model_e01"/>
+        <field name="category_id" ref="demo_cat_ear"/>
+        <field name="metal">W</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="demo_prod_e01_pln" model="pdp.product">
+        <field name="code">DEMO-E01-PLN</field>
+        <field name="model_id" ref="demo_model_e01"/>
+        <field name="category_id" ref="demo_cat_ear"/>
+        <field name="metal">Y</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="demo_prod_p01_dts" model="pdp.product">
+        <field name="code">DEMO-P01-DTS</field>
+        <field name="model_id" ref="demo_model_p01"/>
+        <field name="category_id" ref="demo_cat_pnd"/>
+        <field name="metal">W</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="demo_prod_p01_ruby" model="pdp.product">
+        <field name="code">DEMO-P01-RUB</field>
+        <field name="model_id" ref="demo_model_p01"/>
+        <field name="category_id" ref="demo_cat_pnd"/>
+        <field name="metal">Y</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="demo_prod_set_r" model="pdp.product">
+        <field name="code">DEMO-SET-R</field>
+        <field name="model_id" ref="demo_model_set01"/>
+        <field name="category_id" ref="demo_cat_rng"/>
+        <field name="metal">W</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="demo_prod_set_e" model="pdp.product">
+        <field name="code">DEMO-SET-E</field>
+        <field name="model_id" ref="demo_model_set01"/>
+        <field name="category_id" ref="demo_cat_rng"/>
+        <field name="metal">Y</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <!-- =========================================================
+         5. STONE COMPOSITIONS
+         ========================================================= -->
+
+    <record id="demo_comp_r01_dts" model="pdp.product.stone.composition">
+        <field name="code">SC-R01-DTS</field>
+    </record>
+
+    <record id="demo_comp_r01_ruby" model="pdp.product.stone.composition">
+        <field name="code">SC-R01-RUB</field>
+    </record>
+
+    <record id="demo_comp_e01_dts" model="pdp.product.stone.composition">
+        <field name="code">SC-E01-DTS</field>
+    </record>
+
+    <record id="demo_comp_p01_dts" model="pdp.product.stone.composition">
+        <field name="code">SC-P01-DTS</field>
+    </record>
+
+    <!-- =========================================================
+         6. PRODUCT STONES
+         ========================================================= -->
+
+    <!-- demo_comp_r01_dts: 8 x Diamond RD 1.2 -->
+    <record id="demo_stone_r01_dts_1" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_r01_dts"/>
+        <field name="stone_id" ref="pdp_stone.stone_DTSBR_RD_1_2"/>
+        <field name="pieces">8</field>
+    </record>
+
+    <!-- demo_comp_r01_ruby: 1 x Ruby OV 4X3 -->
+    <record id="demo_stone_r01_ruby_1" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_r01_ruby"/>
+        <field name="stone_id" ref="pdp_stone.stone_RU_OV_4X3"/>
+        <field name="pieces">1</field>
+    </record>
+
+    <!-- demo_comp_e01_dts: 6 x Diamond RD 1.5 -->
+    <record id="demo_stone_e01_dts_1" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_e01_dts"/>
+        <field name="stone_id" ref="pdp_stone.stone_DTSBR_RD_1_5"/>
+        <field name="pieces">6</field>
+    </record>
+
+    <!-- demo_comp_p01_dts: 1 x Ruby OV 5X4 + 4 x Diamond RD 1.2 -->
+    <record id="demo_stone_p01_dts_1" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_p01_dts"/>
+        <field name="stone_id" ref="pdp_stone.stone_RU_OV_5X4"/>
+        <field name="pieces">1</field>
+    </record>
+
+    <record id="demo_stone_p01_dts_2" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_p01_dts"/>
+        <field name="stone_id" ref="pdp_stone.stone_DTSBR_RD_1_2"/>
+        <field name="pieces">4</field>
+    </record>
+
+    <!-- =========================================================
+         7. LINK COMPOSITIONS TO PRODUCTS
+         ========================================================= -->
+
+    <record id="demo_prod_r01_dts" model="pdp.product">
+        <field name="stone_composition_id" ref="demo_comp_r01_dts"/>
+    </record>
+
+    <record id="demo_prod_r01_ruby" model="pdp.product">
+        <field name="stone_composition_id" ref="demo_comp_r01_ruby"/>
+    </record>
+
+    <record id="demo_prod_e01_dts" model="pdp.product">
+        <field name="stone_composition_id" ref="demo_comp_e01_dts"/>
+    </record>
+
+    <record id="demo_prod_p01_dts" model="pdp.product">
+        <field name="stone_composition_id" ref="demo_comp_p01_dts"/>
+    </record>
+
+    <!-- =========================================================
+         8. PRODUCT PARTS
+         ========================================================= -->
+
+    <record id="demo_part_r01_dts_1" model="pdp.product.part">
+        <field name="product_id" ref="demo_prod_r01_dts"/>
+        <field name="part_id" ref="pdp_metal.part_004"/>
+        <field name="quantity">1</field>
+    </record>
+
+    <record id="demo_part_e01_dts_1" model="pdp.product.part">
+        <field name="product_id" ref="demo_prod_e01_dts"/>
+        <field name="part_id" ref="pdp_metal.part_025"/>
+        <field name="quantity">2</field>
+    </record>
+
+    <!-- =========================================================
+         9. LABOR COSTS AT MODEL LEVEL
+         ========================================================= -->
+
+    <!-- demo_model_r01 (metal W) -->
+    <record id="demo_lc_r01_cas" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_r01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_CAS"/>
+        <field name="cost">120.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="demo_lc_r01_pol" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_r01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_POL"/>
+        <field name="cost">25.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="demo_lc_r01_set" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_r01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_SET"/>
+        <field name="cost">45.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="demo_lc_r01_fil" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_r01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_FIL"/>
+        <field name="cost">15.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <!-- demo_model_e01 (metal W) -->
+    <record id="demo_lc_e01_cas" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_e01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_CAS"/>
+        <field name="cost">90.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="demo_lc_e01_pol" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_e01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_POL"/>
+        <field name="cost">20.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="demo_lc_e01_set" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_e01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_SET"/>
+        <field name="cost">30.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <!-- demo_model_p01 (metal W) -->
+    <record id="demo_lc_p01_cas" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_p01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_CAS"/>
+        <field name="cost">80.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="demo_lc_p01_set" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_p01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_SET"/>
+        <field name="cost">35.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <!-- demo_model_set01 (metal W) -->
+    <record id="demo_lc_set01_cas" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_set01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_CAS"/>
+        <field name="cost">200.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="demo_lc_set01_ass" model="pdp.labor.cost.model">
+        <field name="model_id" ref="demo_model_set01"/>
+        <field name="metal">W</field>
+        <field name="labor_id" ref="pdp_labor.type_ASS"/>
+        <field name="cost">50.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <!-- =========================================================
+         10. ADDON COSTS
+         ========================================================= -->
+
+    <record id="demo_ac_r01_dts_laz" model="pdp.addon.cost">
+        <field name="product_id" ref="demo_prod_r01_dts"/>
+        <field name="addon_id" ref="pdp_labor.type_LAZ"/>
+        <field name="cost">15.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="demo_ac_p01_dts_pnt" model="pdp.addon.cost">
+        <field name="product_id" ref="demo_prod_p01_dts"/>
+        <field name="addon_id" ref="pdp_labor.type_PNT"/>
+        <field name="cost">10.0</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <!-- =========================================================
+         11. MARGINS
+         ========================================================= -->
+
+    <record id="demo_margin_retail" model="pdp.margin">
+        <field name="code">DEMO-RETAIL</field>
+        <field name="name">Demo Retail</field>
+    </record>
+
+    <record id="demo_margin_wholesale" model="pdp.margin">
+        <field name="code">DEMO-WHOLESALE</field>
+        <field name="name">Demo Wholesale</field>
+    </record>
+
+    <!-- =========================================================
+         12. MARGIN METAL RULES
+         ========================================================= -->
+
+    <record id="demo_mmetal_retail_18k" model="pdp.margin.metal">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="metal_purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="rate">2.8</field>
+    </record>
+
+    <record id="demo_mmetal_wholesale_18k" model="pdp.margin.metal">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="metal_purity_id" ref="pdp_metal.purity_18K"/>
+        <field name="rate">2.2</field>
+    </record>
+
+    <!-- =========================================================
+         13. MARGIN LABOR RULES
+         ========================================================= -->
+
+    <!-- DEMO-RETAIL labor margins -->
+    <record id="demo_mlabor_retail_cas" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="labor_id" ref="pdp_labor.type_CAS"/>
+        <field name="rate">3.0</field>
+    </record>
+
+    <record id="demo_mlabor_retail_set" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="labor_id" ref="pdp_labor.type_SET"/>
+        <field name="rate">3.0</field>
+    </record>
+
+    <record id="demo_mlabor_retail_pol" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="labor_id" ref="pdp_labor.type_POL"/>
+        <field name="rate">3.0</field>
+    </record>
+
+    <record id="demo_mlabor_retail_fil" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="labor_id" ref="pdp_labor.type_FIL"/>
+        <field name="rate">3.0</field>
+    </record>
+
+    <record id="demo_mlabor_retail_ass" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="labor_id" ref="pdp_labor.type_ASS"/>
+        <field name="rate">3.0</field>
+    </record>
+
+    <!-- DEMO-WHOLESALE labor margins -->
+    <record id="demo_mlabor_wholesale_cas" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="labor_id" ref="pdp_labor.type_CAS"/>
+        <field name="rate">2.2</field>
+    </record>
+
+    <record id="demo_mlabor_wholesale_set" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="labor_id" ref="pdp_labor.type_SET"/>
+        <field name="rate">2.2</field>
+    </record>
+
+    <record id="demo_mlabor_wholesale_pol" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="labor_id" ref="pdp_labor.type_POL"/>
+        <field name="rate">2.2</field>
+    </record>
+
+    <record id="demo_mlabor_wholesale_fil" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="labor_id" ref="pdp_labor.type_FIL"/>
+        <field name="rate">2.2</field>
+    </record>
+
+    <record id="demo_mlabor_wholesale_ass" model="pdp.margin.labor">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="labor_id" ref="pdp_labor.type_ASS"/>
+        <field name="rate">2.2</field>
+    </record>
+
+    <!-- =========================================================
+         14. MARGIN ADDON RULES
+         ========================================================= -->
+
+    <record id="demo_maddon_retail_laz" model="pdp.margin.addon">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="addon_id" ref="pdp_labor.type_LAZ"/>
+        <field name="rate">2.5</field>
+    </record>
+
+    <record id="demo_maddon_retail_pnt" model="pdp.margin.addon">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="addon_id" ref="pdp_labor.type_PNT"/>
+        <field name="rate">2.5</field>
+    </record>
+
+    <record id="demo_maddon_wholesale_laz" model="pdp.margin.addon">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="addon_id" ref="pdp_labor.type_LAZ"/>
+        <field name="rate">2.0</field>
+    </record>
+
+    <record id="demo_maddon_wholesale_pnt" model="pdp.margin.addon">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="addon_id" ref="pdp_labor.type_PNT"/>
+        <field name="rate">2.0</field>
+    </record>
+
+    <!-- =========================================================
+         15. MARGIN STONE RULES
+         ========================================================= -->
+
+    <record id="demo_mstone_retail_dts" model="pdp.margin.stone">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="stone_type_id" ref="pdp_stone.type_DTS"/>
+        <field name="rate">2.5</field>
+    </record>
+
+    <record id="demo_mstone_retail_ru" model="pdp.margin.stone">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="stone_type_id" ref="pdp_stone.type_RU"/>
+        <field name="rate">2.8</field>
+    </record>
+
+    <record id="demo_mstone_wholesale_dts" model="pdp.margin.stone">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="stone_type_id" ref="pdp_stone.type_DTS"/>
+        <field name="rate">2.0</field>
+    </record>
+
+    <record id="demo_mstone_wholesale_ru" model="pdp.margin.stone">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="stone_type_id" ref="pdp_stone.type_RU"/>
+        <field name="rate">2.2</field>
+    </record>
+
+    <!-- =========================================================
+         16. MARGIN PART RULES
+         ========================================================= -->
+
+    <record id="demo_mpart_retail" model="pdp.margin.part">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="rate">2.0</field>
+    </record>
+
+    <record id="demo_mpart_wholesale" model="pdp.margin.part">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="rate">1.8</field>
+    </record>
+
+    <!-- =========================================================
+         17. MODEL MATCHING
+         ========================================================= -->
+
+    <record id="demo_matching_r01_e01" model="pdp.product.model.matching">
+        <field name="model_one_id" ref="demo_model_r01"/>
+        <field name="model_two_id" ref="demo_model_e01"/>
+    </record>
+
+    <!-- =========================================================
+         18. SIS REFERENCE DATA — PAY TERMS AND SHIPPERS
+         ========================================================= -->
+
+    <record id="demo_pay_tt30" model="sis.pay.term">
+        <field name="name">T/T 30 Days</field>
+    </record>
+
+    <record id="demo_pay_tt60" model="sis.pay.term">
+        <field name="name">T/T 60 Days</field>
+    </record>
+
+    <record id="demo_ship_fedex" model="sis.shipper">
+        <field name="name">FedEx</field>
+    </record>
+
+    <record id="demo_ship_dhl" model="sis.shipper">
+        <field name="name">DHL</field>
+    </record>
+
+    <!-- =========================================================
+         19. SIS PARTIES (res.partner with SIS extension fields)
+         ========================================================= -->
+
+    <record id="demo_party_bkk" model="res.partner">
+        <field name="name">Siam Jewels Co. Ltd.</field>
+        <field name="sis_code">SJC</field>
+        <field name="sis_is_customer" eval="True"/>
+        <field name="country_id" ref="base.th"/>
+        <field name="city">Bangkok</field>
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="sis_pay_term_id" ref="demo_pay_tt30"/>
+    </record>
+
+    <record id="demo_party_tky" model="res.partner">
+        <field name="name">Tokyo Fine Jewelry KK</field>
+        <field name="sis_code">TFJ</field>
+        <field name="sis_is_customer" eval="True"/>
+        <field name="country_id" ref="base.jp"/>
+        <field name="city">Tokyo</field>
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="sis_pay_term_id" ref="demo_pay_tt60"/>
+    </record>
+
+    <record id="demo_party_par" model="res.partner">
+        <field name="name">Maison Dor&#233;e SARL</field>
+        <field name="sis_code">MDO</field>
+        <field name="sis_is_customer" eval="True"/>
+        <field name="country_id" ref="base.fr"/>
+        <field name="city">Paris</field>
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="sis_pay_term_id" ref="demo_pay_tt30"/>
+    </record>
+
+    <record id="demo_party_dxb" model="res.partner">
+        <field name="name">Gulf Prestige Trading LLC</field>
+        <field name="sis_code">GPT</field>
+        <field name="sis_is_customer" eval="True"/>
+        <field name="country_id" ref="base.ae"/>
+        <field name="city">Dubai</field>
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+    </record>
+
+    <record id="demo_party_nyc" model="res.partner">
+        <field name="name">Manhattan Gems Inc.</field>
+        <field name="sis_code">MGI</field>
+        <field name="sis_is_customer" eval="True"/>
+        <field name="country_id" ref="base.us"/>
+        <field name="city">New York</field>
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="sis_pay_term_id" ref="demo_pay_tt60"/>
+    </record>
+
+    <!-- =========================================================
+         20. SIS DOCUMENTS
+         Doc types from sis_document module (sis.doc.type.csv):
+           sis_document.sis_doctype_SQ  = Sales Quotation
+           sis_document.sis_doctype_SO  = Sales Order
+           sis_document.sis_doctype_SI  = Invoice
+         ========================================================= -->
+
+    <record id="demo_doc_quot" model="sis.document">
+        <field name="name">DEMO-Q-001</field>
+        <field name="doc_type_id" ref="sis_document.sis_doctype_SQ"/>
+        <field name="party_id" ref="demo_party_bkk"/>
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="date_created">2026-01-15</field>
+        <field name="date_due">2026-02-15</field>
+        <field name="notes">Demo quotation for review</field>
+    </record>
+
+    <record id="demo_doc_order" model="sis.document">
+        <field name="name">DEMO-O-001</field>
+        <field name="doc_type_id" ref="sis_document.sis_doctype_SO"/>
+        <field name="party_id" ref="demo_party_bkk"/>
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="date_created">2026-02-01</field>
+        <field name="date_due">2026-03-01</field>
+    </record>
+
+    <record id="demo_doc_invoice" model="sis.document">
+        <field name="name">DEMO-I-001</field>
+        <field name="doc_type_id" ref="sis_document.sis_doctype_SI"/>
+        <field name="party_id" ref="demo_party_tky"/>
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="date_created">2026-02-15</field>
+    </record>
+
+    <!-- =========================================================
+         21. DOCUMENT ITEMS
+         ========================================================= -->
+
+    <!-- demo_doc_quot items (3 lines) -->
+    <record id="demo_item_quot_1" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_quot"/>
+        <field name="product_id" ref="demo_prod_r01_dts"/>
+        <field name="design">DEMO-R01-DTS/W</field>
+        <field name="qty">2</field>
+        <field name="unit_price">450.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_item_quot_2" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_quot"/>
+        <field name="product_id" ref="demo_prod_e01_dts"/>
+        <field name="design">DEMO-E01-DTS/W</field>
+        <field name="qty">1</field>
+        <field name="unit_price">280.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <record id="demo_item_quot_3" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_quot"/>
+        <field name="product_id" ref="demo_prod_p01_dts"/>
+        <field name="design">DEMO-P01-DTS/W</field>
+        <field name="qty">1</field>
+        <field name="unit_price">320.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">3</field>
+    </record>
+
+    <!-- demo_doc_order items (2 lines) -->
+    <record id="demo_item_order_1" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_order"/>
+        <field name="product_id" ref="demo_prod_r01_dts"/>
+        <field name="design">DEMO-R01-DTS/W</field>
+        <field name="qty">5</field>
+        <field name="unit_price">420.0</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_item_order_2" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_order"/>
+        <field name="product_id" ref="demo_prod_r01_ruby"/>
+        <field name="design">DEMO-R01-RUB/Y</field>
+        <field name="qty">3</field>
+        <field name="unit_price">380.0</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <!-- demo_doc_invoice items (2 lines) -->
+    <record id="demo_item_inv_1" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_invoice"/>
+        <field name="product_id" ref="demo_prod_e01_dts"/>
+        <field name="design">DEMO-E01-DTS/W</field>
+        <field name="qty">10</field>
+        <field name="unit_price">265.0</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_item_inv_2" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_invoice"/>
+        <field name="product_id" ref="demo_prod_p01_dts"/>
+        <field name="design">DEMO-P01-DTS/W</field>
+        <field name="qty">4</field>
+        <field name="unit_price">295.0</field>
+        <field name="sequence">2</field>
+    </record>
+
 </odoo>
