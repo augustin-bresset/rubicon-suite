@@ -20,13 +20,19 @@ python3 -c "import secrets; print(secrets.token_hex(24))"
 # 3. Start the stack
 docker compose -f docker-compose.demo.yml up -d
 
-# 4. Initialize the database (first time only)
+# 4. Fix filestore permissions (required after every fresh volume creation)
+#    Docker creates volumes as root; Odoo needs to own them.
+sleep 8
+docker compose -f docker-compose.demo.yml exec --user root odoo_demo \
+  chown -R odoo:odoo /var/lib/odoo
+
+# 5. Initialize the database (first time only — takes ~3 minutes)
 docker compose -f docker-compose.demo.yml exec odoo_demo odoo \
   -d rubicondemo \
-  -i rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom,metal_price \
+  -i rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom \
   --stop-after-init
 
-# 5. Restart Odoo in normal mode
+# 6. Restart Odoo in normal mode
 docker compose -f docker-compose.demo.yml up -d
 
 # 6. Open http://localhost:8070
