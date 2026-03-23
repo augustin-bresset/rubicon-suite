@@ -617,6 +617,7 @@
 
     <record id="demo_party_bkk" model="res.partner">
         <field name="name">Siam Jewels Co. Ltd.</field>
+        <field name="is_company" eval="True"/>
         <field name="sis_code">SJC</field>
         <field name="sis_is_customer" eval="True"/>
         <field name="country_id" ref="base.th"/>
@@ -627,6 +628,7 @@
 
     <record id="demo_party_tky" model="res.partner">
         <field name="name">Tokyo Fine Jewelry KK</field>
+        <field name="is_company" eval="True"/>
         <field name="sis_code">TFJ</field>
         <field name="sis_is_customer" eval="True"/>
         <field name="country_id" ref="base.jp"/>
@@ -637,6 +639,7 @@
 
     <record id="demo_party_par" model="res.partner">
         <field name="name">Maison Dor&#233;e SARL</field>
+        <field name="is_company" eval="True"/>
         <field name="sis_code">MDO</field>
         <field name="sis_is_customer" eval="True"/>
         <field name="country_id" ref="base.fr"/>
@@ -647,6 +650,7 @@
 
     <record id="demo_party_dxb" model="res.partner">
         <field name="name">Gulf Prestige Trading LLC</field>
+        <field name="is_company" eval="True"/>
         <field name="sis_code">GPT</field>
         <field name="sis_is_customer" eval="True"/>
         <field name="country_id" ref="base.ae"/>
@@ -656,6 +660,7 @@
 
     <record id="demo_party_nyc" model="res.partner">
         <field name="name">Manhattan Gems Inc.</field>
+        <field name="is_company" eval="True"/>
         <field name="sis_code">MGI</field>
         <field name="sis_is_customer" eval="True"/>
         <field name="country_id" ref="base.us"/>
