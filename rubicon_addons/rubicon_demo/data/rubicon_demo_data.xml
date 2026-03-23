@@ -156,7 +156,27 @@
     </record>
 
     <!-- =========================================================
-         4. PRODUCTS
+         4. STONE COMPOSITIONS
+         ========================================================= -->
+
+    <record id="demo_comp_r01_dts" model="pdp.product.stone.composition">
+        <field name="code">SC-R01-DTS</field>
+    </record>
+
+    <record id="demo_comp_r01_ruby" model="pdp.product.stone.composition">
+        <field name="code">SC-R01-RUB</field>
+    </record>
+
+    <record id="demo_comp_e01_dts" model="pdp.product.stone.composition">
+        <field name="code">SC-E01-DTS</field>
+    </record>
+
+    <record id="demo_comp_p01_dts" model="pdp.product.stone.composition">
+        <field name="code">SC-P01-DTS</field>
+    </record>
+
+    <!-- =========================================================
+         5. PRODUCTS
          ========================================================= -->
 
     <record id="demo_prod_r01_dts" model="pdp.product">
@@ -165,6 +185,7 @@
         <field name="category_id" ref="demo_cat_rng"/>
         <field name="metal">W</field>
         <field name="active" eval="True"/>
+        <field name="stone_composition_id" ref="demo_comp_r01_dts"/>
     </record>
 
     <record id="demo_prod_r01_ruby" model="pdp.product">
@@ -173,6 +194,7 @@
         <field name="category_id" ref="demo_cat_rng"/>
         <field name="metal">Y</field>
         <field name="active" eval="True"/>
+        <field name="stone_composition_id" ref="demo_comp_r01_ruby"/>
     </record>
 
     <record id="demo_prod_e01_dts" model="pdp.product">
@@ -181,6 +203,7 @@
         <field name="category_id" ref="demo_cat_ear"/>
         <field name="metal">W</field>
         <field name="active" eval="True"/>
+        <field name="stone_composition_id" ref="demo_comp_e01_dts"/>
     </record>
 
     <record id="demo_prod_e01_pln" model="pdp.product">
@@ -197,6 +220,7 @@
         <field name="category_id" ref="demo_cat_pnd"/>
         <field name="metal">W</field>
         <field name="active" eval="True"/>
+        <field name="stone_composition_id" ref="demo_comp_p01_dts"/>
     </record>
 
     <record id="demo_prod_p01_ruby" model="pdp.product">
@@ -224,7 +248,45 @@
     </record>
 
     <!-- =========================================================
-         6. PRODUCT PARTS
+         6. PRODUCT STONES
+         ========================================================= -->
+
+    <!-- demo_comp_r01_dts: 8 x Diamond RD 1.2 -->
+    <record id="demo_stone_r01_dts_1" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_r01_dts"/>
+        <field name="stone_id" ref="pdp_stone.stone_DTSBR_RD_1_2"/>
+        <field name="pieces">8</field>
+    </record>
+
+    <!-- demo_comp_r01_ruby: 1 x Ruby OV 4X3 -->
+    <record id="demo_stone_r01_ruby_1" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_r01_ruby"/>
+        <field name="stone_id" ref="pdp_stone.stone_RU_OV_4X3"/>
+        <field name="pieces">1</field>
+    </record>
+
+    <!-- demo_comp_e01_dts: 6 x Diamond RD 1.5 -->
+    <record id="demo_stone_e01_dts_1" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_e01_dts"/>
+        <field name="stone_id" ref="pdp_stone.stone_DTSBR_RD_1_5"/>
+        <field name="pieces">6</field>
+    </record>
+
+    <!-- demo_comp_p01_dts: 1 x Ruby OV 5X4 + 4 x Diamond RD 1.2 -->
+    <record id="demo_stone_p01_dts_1" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_p01_dts"/>
+        <field name="stone_id" ref="pdp_stone.stone_RU_OV_5X4"/>
+        <field name="pieces">1</field>
+    </record>
+
+    <record id="demo_stone_p01_dts_2" model="pdp.product.stone">
+        <field name="composition_id" ref="demo_comp_p01_dts"/>
+        <field name="stone_id" ref="pdp_stone.stone_DTSBR_RD_1_2"/>
+        <field name="pieces">4</field>
+    </record>
+
+    <!-- =========================================================
+         7. PRODUCT PARTS
          ========================================================= -->
 
     <record id="demo_part_r01_dts_1" model="pdp.product.part">
@@ -477,6 +539,34 @@
         <field name="rate">2.0</field>
     </record>
 
+
+    <!-- =========================================================
+         14. MARGIN STONE RULES
+         ========================================================= -->
+
+    <record id="demo_mstone_retail_dts" model="pdp.margin.stone">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="stone_type_id" ref="pdp_stone.type_DTS"/>
+        <field name="rate">2.5</field>
+    </record>
+
+    <record id="demo_mstone_retail_ru" model="pdp.margin.stone">
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="stone_type_id" ref="pdp_stone.type_RU"/>
+        <field name="rate">2.8</field>
+    </record>
+
+    <record id="demo_mstone_wholesale_dts" model="pdp.margin.stone">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="stone_type_id" ref="pdp_stone.type_DTS"/>
+        <field name="rate">2.0</field>
+    </record>
+
+    <record id="demo_mstone_wholesale_ru" model="pdp.margin.stone">
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="stone_type_id" ref="pdp_stone.type_RU"/>
+        <field name="rate">2.2</field>
+    </record>
 
     <!-- =========================================================
          15. MARGIN PART RULES
