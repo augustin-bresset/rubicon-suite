@@ -18,6 +18,7 @@ class TestPdpProductCopy(TransactionCase):
             'model_id': cls.model.id,
             'category_id': cls.category.id,
             'active': True,
+            'metal': 'YG',
         })
 
         # Add Stones
@@ -90,6 +91,7 @@ class TestPdpProductCopy(TransactionCase):
         self.assertEqual(new_product.code, 'NEW-BLK-01')
         self.assertEqual(new_product.model_id.id, self.source_product.model_id.id)
         self.assertTrue(new_product.active)
+        self.assertEqual(new_product.metal, 'YG')
 
         # Check that nothing else was copied
         self.assertFalse(new_product.stone_composition_id)
@@ -109,6 +111,7 @@ class TestPdpProductCopy(TransactionCase):
         new_product = self.env['pdp.product'].browse(new_id)
 
         self.assertEqual(new_product.code, 'NEW-STN-01')
+        self.assertEqual(new_product.metal, 'YG')
 
         # Check stones copied
         self.assertTrue(new_product.stone_composition_id)
@@ -134,6 +137,7 @@ class TestPdpProductCopy(TransactionCase):
         new_product = self.env['pdp.product'].browse(new_id)
 
         self.assertEqual(new_product.code, 'NEW-ALL-01')
+        self.assertEqual(new_product.metal, 'YG')
 
         # Check stones
         self.assertTrue(new_product.stone_composition_id)

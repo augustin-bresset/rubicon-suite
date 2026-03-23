@@ -154,6 +154,7 @@ class Product(models.Model):
             'code': new_code,
             'model_id': source.model_id.id if source.model_id else False,
             'active': True,
+            'metal': source.metal,
         })
 
         # 2. Copy stones
