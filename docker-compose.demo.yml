@@ -1,0 +1,30 @@
+services:
+  db_demo:
+    image: postgres:13
+    env_file: .env.demo
+    environment:
+      POSTGRES_DB: ${DEMO_DB_NAME}
+      POSTGRES_USER: ${DEMO_DB_USER}
+      POSTGRES_PASSWORD: ${DEMO_DB_PASS}
+    volumes:
+      - db_demo_data:/var/lib/postgresql/data
+
+  odoo_demo:
+    image: odoo:18.0
+    env_file: .env.demo
+    depends_on:
+      - db_demo
+    ports:
+      - "8070:8069"
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - odoo_demo_data:/var/lib/odoo/.local/share/Odoo
+      - ./rubicon_addons:/mnt/extra-addons
+      - ./data/pictures:/mnt/extra-addons/pictures:ro
+      - ./external_addons:/mnt/external-addons
+      - ./odoo_conf/odoo_demo.conf:/etc/odoo/odoo.conf:ro
+
+volumes:
+  db_demo_data:
+  odoo_demo_data:
