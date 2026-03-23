@@ -156,7 +156,27 @@
     </record>
 
     <!-- =========================================================
-         4. PRODUCTS
+         4. STONE COMPOSITIONS
+         ========================================================= -->
+
+    <record id="demo_comp_r01_dts" model="pdp.product.stone.composition">
+        <field name="code">SC-R01-DTS</field>
+    </record>
+
+    <record id="demo_comp_r01_ruby" model="pdp.product.stone.composition">
+        <field name="code">SC-R01-RUB</field>
+    </record>
+
+    <record id="demo_comp_e01_dts" model="pdp.product.stone.composition">
+        <field name="code">SC-E01-DTS</field>
+    </record>
+
+    <record id="demo_comp_p01_dts" model="pdp.product.stone.composition">
+        <field name="code">SC-P01-DTS</field>
+    </record>
+
+    <!-- =========================================================
+         5. PRODUCTS
          ========================================================= -->
 
     <record id="demo_prod_r01_dts" model="pdp.product">
@@ -165,6 +185,7 @@
         <field name="category_id" ref="demo_cat_rng"/>
         <field name="metal">W</field>
         <field name="active" eval="True"/>
+        <field name="stone_composition_id" ref="demo_comp_r01_dts"/>
     </record>
 
     <record id="demo_prod_r01_ruby" model="pdp.product">
@@ -173,6 +194,7 @@
         <field name="category_id" ref="demo_cat_rng"/>
         <field name="metal">Y</field>
         <field name="active" eval="True"/>
+        <field name="stone_composition_id" ref="demo_comp_r01_ruby"/>
     </record>
 
     <record id="demo_prod_e01_dts" model="pdp.product">
@@ -181,6 +203,7 @@
         <field name="category_id" ref="demo_cat_ear"/>
         <field name="metal">W</field>
         <field name="active" eval="True"/>
+        <field name="stone_composition_id" ref="demo_comp_e01_dts"/>
     </record>
 
     <record id="demo_prod_e01_pln" model="pdp.product">
@@ -197,6 +220,7 @@
         <field name="category_id" ref="demo_cat_pnd"/>
         <field name="metal">W</field>
         <field name="active" eval="True"/>
+        <field name="stone_composition_id" ref="demo_comp_p01_dts"/>
     </record>
 
     <record id="demo_prod_p01_ruby" model="pdp.product">
@@ -221,26 +245,6 @@
         <field name="category_id" ref="demo_cat_rng"/>
         <field name="metal">Y</field>
         <field name="active" eval="True"/>
-    </record>
-
-    <!-- =========================================================
-         5. STONE COMPOSITIONS
-         ========================================================= -->
-
-    <record id="demo_comp_r01_dts" model="pdp.product.stone.composition">
-        <field name="code">SC-R01-DTS</field>
-    </record>
-
-    <record id="demo_comp_r01_ruby" model="pdp.product.stone.composition">
-        <field name="code">SC-R01-RUB</field>
-    </record>
-
-    <record id="demo_comp_e01_dts" model="pdp.product.stone.composition">
-        <field name="code">SC-E01-DTS</field>
-    </record>
-
-    <record id="demo_comp_p01_dts" model="pdp.product.stone.composition">
-        <field name="code">SC-P01-DTS</field>
     </record>
 
     <!-- =========================================================
@@ -282,27 +286,7 @@
     </record>
 
     <!-- =========================================================
-         7. LINK COMPOSITIONS TO PRODUCTS
-         ========================================================= -->
-
-    <record id="demo_prod_r01_dts" model="pdp.product">
-        <field name="stone_composition_id" ref="demo_comp_r01_dts"/>
-    </record>
-
-    <record id="demo_prod_r01_ruby" model="pdp.product">
-        <field name="stone_composition_id" ref="demo_comp_r01_ruby"/>
-    </record>
-
-    <record id="demo_prod_e01_dts" model="pdp.product">
-        <field name="stone_composition_id" ref="demo_comp_e01_dts"/>
-    </record>
-
-    <record id="demo_prod_p01_dts" model="pdp.product">
-        <field name="stone_composition_id" ref="demo_comp_p01_dts"/>
-    </record>
-
-    <!-- =========================================================
-         8. PRODUCT PARTS
+         7. PRODUCT PARTS
          ========================================================= -->
 
     <record id="demo_part_r01_dts_1" model="pdp.product.part">
@@ -318,7 +302,7 @@
     </record>
 
     <!-- =========================================================
-         9. LABOR COSTS AT MODEL LEVEL
+         8. LABOR COSTS AT MODEL LEVEL
          ========================================================= -->
 
     <!-- demo_model_r01 (metal W) -->
@@ -414,7 +398,7 @@
     </record>
 
     <!-- =========================================================
-         10. ADDON COSTS
+         9. ADDON COSTS
          ========================================================= -->
 
     <record id="demo_ac_r01_dts_laz" model="pdp.addon.cost">
@@ -432,7 +416,7 @@
     </record>
 
     <!-- =========================================================
-         11. MARGINS
+         10. MARGINS
          ========================================================= -->
 
     <record id="demo_margin_retail" model="pdp.margin">
@@ -446,7 +430,7 @@
     </record>
 
     <!-- =========================================================
-         12. MARGIN METAL RULES
+         11. MARGIN METAL RULES
          ========================================================= -->
 
     <record id="demo_mmetal_retail_18k" model="pdp.margin.metal">
@@ -462,7 +446,7 @@
     </record>
 
     <!-- =========================================================
-         13. MARGIN LABOR RULES
+         12. MARGIN LABOR RULES
          ========================================================= -->
 
     <!-- DEMO-RETAIL labor margins -->
@@ -528,7 +512,7 @@
     </record>
 
     <!-- =========================================================
-         14. MARGIN ADDON RULES
+         13. MARGIN ADDON RULES
          ========================================================= -->
 
     <record id="demo_maddon_retail_laz" model="pdp.margin.addon">
@@ -556,7 +540,7 @@
     </record>
 
     <!-- =========================================================
-         15. MARGIN STONE RULES
+         14. MARGIN STONE RULES
          ========================================================= -->
 
     <record id="demo_mstone_retail_dts" model="pdp.margin.stone">
@@ -584,7 +568,7 @@
     </record>
 
     <!-- =========================================================
-         16. MARGIN PART RULES
+         15. MARGIN PART RULES
          ========================================================= -->
 
     <record id="demo_mpart_retail" model="pdp.margin.part">
@@ -598,7 +582,7 @@
     </record>
 
     <!-- =========================================================
-         17. MODEL MATCHING
+         16. MODEL MATCHING
          ========================================================= -->
 
     <record id="demo_matching_r01_e01" model="pdp.product.model.matching">
@@ -607,7 +591,7 @@
     </record>
 
     <!-- =========================================================
-         18. SIS REFERENCE DATA — PAY TERMS AND SHIPPERS
+         17. SIS REFERENCE DATA — PAY TERMS AND SHIPPERS
          ========================================================= -->
 
     <record id="demo_pay_tt30" model="sis.pay.term">
@@ -627,7 +611,7 @@
     </record>
 
     <!-- =========================================================
-         19. SIS PARTIES (res.partner with SIS extension fields)
+         18. SIS PARTIES (res.partner with SIS extension fields)
          ========================================================= -->
 
     <record id="demo_party_bkk" model="res.partner">
@@ -680,7 +664,7 @@
     </record>
 
     <!-- =========================================================
-         20. SIS DOCUMENTS
+         19. SIS DOCUMENTS
          Doc types from sis_document module (sis.doc.type.csv):
            sis_document.sis_doctype_SQ  = Sales Quotation
            sis_document.sis_doctype_SO  = Sales Order
@@ -718,7 +702,7 @@
     </record>
 
     <!-- =========================================================
-         21. DOCUMENT ITEMS
+         20. DOCUMENT ITEMS
          ========================================================= -->
 
     <!-- demo_doc_quot items (3 lines) -->
