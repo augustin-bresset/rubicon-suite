@@ -79,3 +79,4 @@ migrations/versions/*.pyc
 
 external_addons/*
 .worktrees
+.env.demo
