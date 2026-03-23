@@ -1,11 +1,12 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
 
 const rubiconUomService = {
-    dependencies: ["orm", "user"],
+    dependencies: ["orm"],
 
-    start(env, { orm, user }) {
+    start(env, { orm }) {
         let _categories = [];
         let _units = [];
         let _userPrefs = {};   // { category_id: uom_id }
