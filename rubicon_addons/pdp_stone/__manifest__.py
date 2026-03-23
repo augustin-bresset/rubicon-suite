@@ -9,15 +9,13 @@
         # Security
         'security/ir.model.access.csv',
         # Data
-        # 'data/pdp.stone.category.csv',
-        # 'data/pdp.stone.type.csv',
-        # 'data/pdp.stone.shape.csv',
-        # 'data/pdp.stone.size.csv',
-        # 'data/pdp.stone.shade.csv',
-        # 'data/pdp.stone.weight.csv',
-        # 'data/pdp.stone.csv',
-        
-        
+        'data/pdp.stone.category.csv',
+        'data/pdp.stone.type.csv',
+        'data/pdp.stone.shape.csv',
+        'data/pdp.stone.size.csv',
+        'data/pdp.stone.shade.csv',
+        'data/pdp.stone.weight.csv',
+        'data/pdp.stone.csv',
         # Views
         'views/pdp_views.xml',
         'views/pdp_menus.xml',
