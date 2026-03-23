@@ -680,6 +680,7 @@
     <record id="demo_doc_quot" model="sis.document">
         <field name="name">DEMO-Q-001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SQ"/>
+        <field name="doc_type_code">SQ</field>
         <field name="party_id" ref="demo_party_bkk"/>
         <field name="margin_id" ref="demo_margin_retail"/>
         <field name="currency_id" ref="base.USD"/>
@@ -688,9 +689,32 @@
         <field name="notes">Demo quotation for review</field>
     </record>
 
+    <record id="demo_doc_quot2" model="sis.document">
+        <field name="name">DEMO-Q-002</field>
+        <field name="doc_type_id" ref="sis_document.sis_doctype_SQ"/>
+        <field name="doc_type_code">SQ</field>
+        <field name="party_id" ref="demo_party_tky"/>
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="date_created">2026-01-28</field>
+        <field name="date_due">2026-02-28</field>
+    </record>
+
+    <record id="demo_doc_quot3" model="sis.document">
+        <field name="name">DEMO-Q-003</field>
+        <field name="doc_type_id" ref="sis_document.sis_doctype_SQ"/>
+        <field name="doc_type_code">SQ</field>
+        <field name="party_id" ref="demo_party_par"/>
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="date_created">2026-02-10</field>
+        <field name="date_due">2026-03-10</field>
+    </record>
+
     <record id="demo_doc_order" model="sis.document">
         <field name="name">DEMO-O-001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SO"/>
+        <field name="doc_type_code">SO</field>
         <field name="party_id" ref="demo_party_bkk"/>
         <field name="margin_id" ref="demo_margin_retail"/>
         <field name="currency_id" ref="base.USD"/>
@@ -698,13 +722,56 @@
         <field name="date_due">2026-03-01</field>
     </record>
 
+    <record id="demo_doc_order2" model="sis.document">
+        <field name="name">DEMO-O-002</field>
+        <field name="doc_type_id" ref="sis_document.sis_doctype_SO"/>
+        <field name="doc_type_code">SO</field>
+        <field name="party_id" ref="demo_party_dxb"/>
+        <field name="margin_id" ref="demo_margin_wholesale"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="date_created">2026-02-20</field>
+        <field name="date_due">2026-03-20</field>
+    </record>
+
+    <record id="demo_doc_order3" model="sis.document">
+        <field name="name">DEMO-O-003</field>
+        <field name="doc_type_id" ref="sis_document.sis_doctype_SO"/>
+        <field name="doc_type_code">SO</field>
+        <field name="party_id" ref="demo_party_nyc"/>
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="date_created">2026-03-05</field>
+        <field name="date_due">2026-04-05</field>
+    </record>
+
     <record id="demo_doc_invoice" model="sis.document">
         <field name="name">DEMO-I-001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SI"/>
+        <field name="doc_type_code">SI</field>
         <field name="party_id" ref="demo_party_tky"/>
         <field name="margin_id" ref="demo_margin_wholesale"/>
         <field name="currency_id" ref="base.USD"/>
         <field name="date_created">2026-02-15</field>
+    </record>
+
+    <record id="demo_doc_invoice2" model="sis.document">
+        <field name="name">DEMO-I-002</field>
+        <field name="doc_type_id" ref="sis_document.sis_doctype_SI"/>
+        <field name="doc_type_code">SI</field>
+        <field name="party_id" ref="demo_party_bkk"/>
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="date_created">2026-03-01</field>
+    </record>
+
+    <record id="demo_doc_invoice3" model="sis.document">
+        <field name="name">DEMO-I-003</field>
+        <field name="doc_type_id" ref="sis_document.sis_doctype_SI"/>
+        <field name="doc_type_code">SI</field>
+        <field name="party_id" ref="demo_party_par"/>
+        <field name="margin_id" ref="demo_margin_retail"/>
+        <field name="currency_id" ref="base.USD"/>
+        <field name="date_created">2026-03-15</field>
     </record>
 
     <!-- =========================================================
@@ -764,6 +831,109 @@
         <field name="sequence">2</field>
     </record>
 
+    <!-- demo_doc_quot2 items (2 lines) -->
+    <record id="demo_item_quot2_1" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_quot2"/>
+        <field name="product_id" ref="demo_prod_r01_ruby"/>
+        <field name="design">DEMO-R01-RUB/Y</field>
+        <field name="qty">6</field>
+        <field name="unit_price">510.0</field>
+        <field name="metal_code">Y</field>
+        <field name="purity">18K</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_item_quot2_2" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_quot2"/>
+        <field name="product_id" ref="demo_prod_set_r"/>
+        <field name="design">DEMO-SET-R/W</field>
+        <field name="qty">2</field>
+        <field name="unit_price">890.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <!-- demo_doc_quot3 items (2 lines) -->
+    <record id="demo_item_quot3_1" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_quot3"/>
+        <field name="product_id" ref="demo_prod_e01_pln"/>
+        <field name="design">DEMO-E01-PLN/Y</field>
+        <field name="qty">4</field>
+        <field name="unit_price">195.0</field>
+        <field name="metal_code">Y</field>
+        <field name="purity">18K</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_item_quot3_2" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_quot3"/>
+        <field name="product_id" ref="demo_prod_p01_ruby"/>
+        <field name="design">DEMO-P01-RUB/Y</field>
+        <field name="qty">2</field>
+        <field name="unit_price">420.0</field>
+        <field name="metal_code">Y</field>
+        <field name="purity">18K</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <!-- demo_doc_order2 items (3 lines) -->
+    <record id="demo_item_order2_1" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_order2"/>
+        <field name="product_id" ref="demo_prod_r01_dts"/>
+        <field name="design">DEMO-R01-DTS/W</field>
+        <field name="qty">10</field>
+        <field name="unit_price">390.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_item_order2_2" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_order2"/>
+        <field name="product_id" ref="demo_prod_e01_dts"/>
+        <field name="design">DEMO-E01-DTS/W</field>
+        <field name="qty">10</field>
+        <field name="unit_price">245.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <record id="demo_item_order2_3" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_order2"/>
+        <field name="product_id" ref="demo_prod_set_e"/>
+        <field name="design">DEMO-SET-E/W</field>
+        <field name="qty">5</field>
+        <field name="unit_price">720.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">3</field>
+    </record>
+
+    <!-- demo_doc_order3 items (2 lines) -->
+    <record id="demo_item_order3_1" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_order3"/>
+        <field name="product_id" ref="demo_prod_p01_dts"/>
+        <field name="design">DEMO-P01-DTS/W</field>
+        <field name="qty">3</field>
+        <field name="unit_price">340.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_item_order3_2" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_order3"/>
+        <field name="product_id" ref="demo_prod_r01_ruby"/>
+        <field name="design">DEMO-R01-RUB/Y</field>
+        <field name="qty">4</field>
+        <field name="unit_price">480.0</field>
+        <field name="metal_code">Y</field>
+        <field name="purity">18K</field>
+        <field name="sequence">2</field>
+    </record>
+
     <!-- demo_doc_invoice items (2 lines) -->
     <record id="demo_item_inv_1" model="sis.document.item">
         <field name="document_id" ref="demo_doc_invoice"/>
@@ -780,6 +950,52 @@
         <field name="design">DEMO-P01-DTS/W</field>
         <field name="qty">4</field>
         <field name="unit_price">295.0</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <!-- demo_doc_invoice2 items (2 lines) -->
+    <record id="demo_item_inv2_1" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_invoice2"/>
+        <field name="product_id" ref="demo_prod_r01_dts"/>
+        <field name="design">DEMO-R01-DTS/W</field>
+        <field name="qty">5</field>
+        <field name="unit_price">420.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_item_inv2_2" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_invoice2"/>
+        <field name="product_id" ref="demo_prod_e01_dts"/>
+        <field name="design">DEMO-E01-DTS/W</field>
+        <field name="qty">8</field>
+        <field name="unit_price">265.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <!-- demo_doc_invoice3 items (2 lines) -->
+    <record id="demo_item_inv3_1" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_invoice3"/>
+        <field name="product_id" ref="demo_prod_p01_ruby"/>
+        <field name="design">DEMO-P01-RUB/Y</field>
+        <field name="qty">3</field>
+        <field name="unit_price">410.0</field>
+        <field name="metal_code">Y</field>
+        <field name="purity">18K</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_item_inv3_2" model="sis.document.item">
+        <field name="document_id" ref="demo_doc_invoice3"/>
+        <field name="product_id" ref="demo_prod_set_r"/>
+        <field name="design">DEMO-SET-R/W</field>
+        <field name="qty">2</field>
+        <field name="unit_price">850.0</field>
+        <field name="metal_code">W</field>
+        <field name="purity">18K</field>
         <field name="sequence">2</field>
     </record>
 
