@@ -4,7 +4,8 @@ addons_path = /mnt/extra-addons,/mnt/external-addons/oca_currency,/usr/lib/pytho
 db_host = db_demo
 db_port = 5432
 db_user = odoo
-db_password = odoo
+; Must match POSTGRES_PASSWORD in .env.demo
+db_password = CHANGE_ME
 
 http_interface = 0.0.0.0
 
@@ -12,5 +13,5 @@ dbfilter = ^rubicondemo$
 without_demo = False
 
 ; SECURITY: Protects the database manager (/web/database/manager).
-; REQUIRED before going online. Generate with: python3 -c "import secrets; print(secrets.token_hex(24))"
-admin_passwd = CHANGE_ME_BEFORE_GOING_ONLINE
+; Generate with: python3 -c "import secrets; print(secrets.token_hex(24))"
+admin_passwd = CHANGE_ME

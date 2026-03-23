@@ -80,3 +80,4 @@ migrations/versions/*.pyc
 external_addons/*
 .worktrees
 .env.demo
+odoo_conf/odoo_demo.conf
