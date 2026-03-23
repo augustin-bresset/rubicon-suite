@@ -6,7 +6,6 @@
         'pdp_frontend',
         'sis_frontend',
         'rubicon_uom',
-        'metal_price',
     ],
     'data': ['data/rubicon_demo_data.xml'],
     'post_init_hook': 'post_init_hook',
