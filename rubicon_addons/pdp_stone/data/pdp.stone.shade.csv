@@ -1,0 +1,118 @@
+id,code,shade
+shade_0,0,None
+shade_1,1,All
+shade_2,2,2 Good
+shade_3,3,3 Medium
+shade_A,A,A Light Color
+shade_AA,AA,AA Medium Color
+shade_AAA,AAA,AAA Dark Color
+shade_AAAA,AAAA,AAAA Darker Color
+shade_AK,AK,Akoya
+shade_AUB,AUB,Aubergine
+shade_B2,B2,B2 Australian Blue Blue
+shade_BB,BB,BB Australian Blue Black
+shade_BG,BG,BG Australian Blue Green
+shade_BK,BK,Black
+shade_BL,BL,Blue
+shade_BLO,BLO,Blood
+shade_BLST,BLST,Blue Star
+shade_BR,BR,Brown
+shade_BST,BST,Black Star
+shade_C,C,C Bad
+shade_CA,CA,Canary
+shade_CD,CD,Chrome deep
+shade_CDA,CDA,Chrome Dark
+shade_CDY,CDY,CLOUDY
+shade_CH,CH,Charcoal
+shade_CHP,CHP,Champaign
+shade_CS,CS,CS Medium/Austr. Medium
+shade_CVD,CVD,SPECIAL DIA
+shade_DD,DD,DD Kanchana Dark Dull
+shade_DF,DF,DF Kanchana Dark Fire
+shade_DM,DM,Dark Milky
+shade_EB,EB,Ebony
+shade_FF,FF,FF First Fire
+shade_GBL,GBL,Grey/Blue
+shade_GD,GD,Good
+shade_GO,GO,Gold
+shade_GR,GR,Green
+shade_GY,GY,Grey
+shade_GYA,GYA,Grey A
+shade_GYAA,GYAA,Grey AA
+shade_GYAAA,GYAAA,Grey AAA
+shade_IC,IC,Ice Ceylan
+shade_ICE,ICE,Ice Dts
+shade_JAD,JAD,Jadeite
+shade_LAV,LAV,Lavender
+shade_LBL,LBL,Light Blue
+shade_LBR,LBR,Light Brown
+shade_LC,LC,LC Light Ceylon
+shade_LCM,LCM,LCM Light Ceylon Medium
+shade_LD,LD,LD Kanchana Light Dull
+shade_LF,LF,LF Kanchana Light Fire
+shade_LI,LI,Lime
+shade_LPL,LPL,Lingt PL Pink Light
+shade_LVIO,LVIO,VIOLET LIGHT
+shade_M,M,M medium
+shade_ML,ML,Milky
+shade_MLY,MLY,Malaya
+shade_MT,MT,Mint
+shade_MUL,MUL,Multi
+shade_MVIO,MVIO,VIOLET MEDIUM
+shade_NAT,NAT,Nats
+shade_OC,OC,OC Open Color Ceylon
+shade_OR,OR,Orange
+shade_ORL,ORL,Orange Light
+shade_ORM,ORM,Orange Medium
+shade_PAD,PAD,Padparasha
+shade_PARA,PARA,Paraiba
+shade_PCK,PCK,Peacock
+shade_PF,PF,PF Pink Dark
+shade_PK,PK,PINK
+shade_PL,PL,PL Pink Light
+shade_PLM,PLM,PLM LIGHT PINK MEDIUM
+shade_PM,PM,PM Pink Medium
+shade_PMM,PMM,PMM Pink Medium Medium
+shade_PURP,PURP,PURPLE
+shade_R,R,Light Nats
+shade_RB,RB,RAINBOW
+shade_RBG,RBG,RAINBOW GOOD
+shade_RCT,RCT,Reconstructed
+shade_REA,REA,Real
+shade_REC,REC,RECON
+shade_RED,RED,Red
+shade_RSN,RSN,Resin
+shade_RT,RT,Root
+shade_SA,SA,Sand
+shade_SAL,SAL,Salmon
+shade_SI,SI,SI Ballou
+shade_SIL,SIL,Silver
+shade_SMO,SMO,Smocky
+shade_SP,SP,Special
+shade_SR,SR,Star
+shade_SSP,SSP,South Seas Pearl
+shade_ST,ST,Stabilized
+shade_T1,T1,TLB
+shade_T2,T2,TTLB
+shade_T3,T3,TLC
+shade_TAH,TAH,Tahitian
+shade_TL,TL,Teal
+shade_VIO,VIO,VIOLET
+shade_W_SA,W.SA,White Sapphire
+shade_W1,W1,White1 = Si-P1
+shade_W2,W2,White2 = VS
+shade_W3,W3,White3 = VVS
+shade_WA,WA,W.A
+shade_WH,WH,White
+shade_WHB,WHB,White B
+shade_WHCE,WHCE,White Cat Eye
+shade_WHD,WHD,White D
+shade_WHY,WHY,Whiskey
+shade_WI1,WI1,White I1
+shade_WI2,WI2,White I2
+shade_WI3,WI3,White I3
+shade_WY,WY,Wang Yeung
+shade_YL,YL,YL Yellow Light
+shade_YLM,YLM,YLM YELLOW LIGHT MEDIUM
+shade_YM,YM,YM Yellow Medium
+shade_YS,YS,YS Yellow Dark

@@ -1,0 +1,7 @@
+id,code,name
+type_CAS,CAS,Casting
+type_FIL,FIL,Filing
+type_ASS,ASS,Assembly
+type_POL,POL,Polishing
+type_REC,REC,Recutting
+type_SET,SET,Setting

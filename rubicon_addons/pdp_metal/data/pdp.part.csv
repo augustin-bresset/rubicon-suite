@@ -1,0 +1,96 @@
+id,code,name
+part_004,004,CH.CB DC 1.95
+part_025,025,CH.CB DC 0.9 L
+part_330,330,CH.CB 1.17
+part_435,435,CH.CB DC 1.2
+part_440HJ,440HJ,CH.CB DC 1.35
+part_445HJ,445HJ,CH.CB DC 1.5
+part_680,680,CH.CB DBL 2.0
+part_92,92,CH.CB 0.9
+part_ALP,ALP,Alpa Guard 7mm set
+part_ALP1,ALP1,Alpa Small Post set
+part_ALP2,ALP2,1/2 Alpa Guard set
+part_ALPS,ALPS,Alpa Altor 6mm set
+part_ALPT,ALPT,Alpa Altor 7mm set
+part_ALSL,ALSL,Alpa SL 7mm set
+part_B_BR,B.BR,Dble Brooch 10mm
+part_BG,BG,Flex Bgl 18/0.3
+part_BG2_5,BG2.5,Flex Bgl 2.5/0.3
+part_BG3_0,BG3.0,Flex Bgl 3.0/0.3
+part_BRH,BRH,Brooch Catch
+part_BUT,BUT,Butterfly set 7mm
+part_BUTB,BUTB,Butterfly set 9mm
+part_CC025,CC025,CH.CB 0.9 OV
+part_CC028,CC028,CH.CB 1.05
+part_CC18,CC18,CH.CB 1.18 OV
+part_CCL,CCL,CLIP COBB LARGE set
+part_CCLX,CCLX,CLIP COBB X LARG set
+part_CCM,CCM,CLIP COBB MED set
+part_CCS,CCS,CLIP COBB S set
+part_CCS2,CCS2,1/2 CLIP COBB S set
+part_CH0,CH0,CH.CB 1.86
+part_CHC,CHC,CH.CB 1.3
+part_CHC1,CHC1,CH.CB 1.5
+part_CHR,CHR,CH.CB DC 0.9
+part_CLA,CLA,CLAL Clip (FRENCH)
+part_CLP,CLP,Omega Cobb Large set
+part_CLT,CLT,Cuff Link Rd Tube
+part_CTC,CTC,CERTIFICATE
+part_CUF,CUF,Cuff Link Oval
+part_DDB,DDB,Dble Brooch 16mm
+part_DMS,DMS,Dormeuse set
+part_DMS2,DMS2,Domeuse  B Clal set
+part_DMS3,DMS3,1/2 Dormeuse B Clal
+part_ENT,ENT,Butterfly only 
+part_EPT,EPT,Ear Post only
+part_FGD08,FGD08,CH.FIG DC 2.85
+part_FN3_0,FN3.0,Flex Neck 3/0.4
+part_HB_25,HB.25,Flex 1/2 Bgl 2.5/0.5
+part_HB2_5,HB2.5,Flex 1/2 Bgl 2.5/0.3
+part_HB25,HB25,Flex 1/2 Bgl 2.5/0.4
+part_HBUT,HBUT,1/2 Butterfly set
+part_HN2_5,HN2.5,Flex1/2 Neck 2.5/0.3
+part_LBT,LBT,Mousq. Lobst 11mm
+part_LCN,LCN,Lock Chain 5.5mm
+part_LCNB,LCNB,Lock Chain 6mm
+part_LK,LK,LOCK KOHLE 19516
+part_LTC,LTC,Mousq. Lobst 13 m.
+part_LTP,LTP,Lock Pin
+part_ML2,ML2,Magn Lock 2 rows
+part_ML4,ML4,Magn Lock 4 rows
+part_MOU,MOU,Mousq. Lobst 9mm
+part_MOUS,MOUS,Mousq Lobst 8mm
+part_OCL,OCL,Omega Cobb Large set
+part_OCM,OCM,Omega Cobb Med set
+part_OMG,OMG,Omega Cobb Small set
+part_P0_9,P0.9,1/2 Post set 0.9mm
+part_PUP,PUP,Pump 8MM
+part_PUPS,PUPS,Pump 6MM
+part_RH065,RH065,CH.R.HAMM 2.8 
+part_SB2_5,SB2.5,Flex1/2SqBgl 2.5/0.3
+part_SBBB,SBBB,Stain Mesh L Bgl Bk
+part_SBBR,SBBR,Stain Mesh L Bgl Br
+part_SBBW,SBBW,Stain Mesh L Bgl Wt
+part_SBY,SBY,Silicone Butterfly B
+part_SBYS,SBYS,Silicone Butterfly S
+part_SKC,SKC,CH.SPK
+part_SPN3_,SPN3.,Flex Sp Neck 3/0.4
+part_SPS,SPS,Flex Bgl Sq 2.3
+part_SRBK,SRBK,Stain Mesh R Bk
+part_SRBR,SRBR,Stain Mesh R Br
+part_SRW,SRW,Stain Mesh R Wt
+part_SSBB,SSBB,Stain Mesh S Bgl Br
+part_SSBR,SSBR,Stain Mesh S Bgl Bk
+part_SSBW,SSBW,Stain Mesh S Bgl Wt
+part_ST,ST,Stud Barrel
+part_STBB,STBB,Stain Braid BA Bk
+part_STBR,STBR,Stain Braid BA Br
+part_STBW,STBW,Stain Braid BA Wt
+part_STNB,STNB,Stain Braid N Bk
+part_STNR,STNR,Stain Braid N Br
+part_STNW,STNW,Stain Braid N Wt
+part_STRB,STRB,Stain Braid R Bk
+part_STRR,STRR,Stain Braid R Br
+part_STRW,STRW,Stain Braid R Wt
+part_STS,STS,1/2 Post+Silic set
+part_THRE,THRE,Threaded set

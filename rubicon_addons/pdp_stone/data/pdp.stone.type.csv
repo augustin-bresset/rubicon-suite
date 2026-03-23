@@ -1,0 +1,115 @@
+id,code,name,density,category_id
+type_0,0,None,0.0,
+type_1,1,All,0.0,1
+type_ABA,ABA,Abalone,2.65,H
+type_AGA,AGA,Agate,2.65,H
+type_AK1,AK1,Akoya 1 Hole,0.0,R
+type_AK2,AK2,Akoya 2 Holes,0.0,R
+type_ALX,ALX,Alexandrite,3.73,S
+type_AME,AME,Amethyst,2.65,S
+type_AMET,AMET,Ametrine,2.65,S
+type_AMZ,AMZ,Amazonite,2.57,H
+type_AP,AP,Apatite,3.19,S
+type_AQ,AQ,Aquamarine,2.71,S
+type_AQP,AQP,AQUAPRASE,2.65,H
+type_AVT,AVT,Aventurine,2.65,H
+type_BAG,BAG,Blue Agate,2.65,H
+type_BDI,BDI,Black Diopside,3.29,H
+type_BKTOU,BKTOU,Black Tourmaline,3.10,S
+type_BON,BON,Bone,2.00,H
+type_BRL,BRL,Beryl,2.72,S
+type_BRZ,BRZ,Bronzite,3.25,H
+type_BT,BT,Blue Topaz,3.53,S
+type_BTOUR,BTOUR,Brown Tourmaline,3.10,S
+type_BUT,BUT,Pearl Button,0.0,R
+type_BZ,BZ,Blue Zircon,4.70,S
+type_CAC,CAC,Calcite,2.71,H
+type_CAM,CAM,Came,2.65,H
+type_CAR,CAR,CARNELIAN,2.65,H
+type_CCT,CCT,Concrete,2.30,H
+type_CER,CER,CERAMIC,2.50,H
+type_CHA,CHA,Chalcedony,2.65,H
+type_CHP,CHP,Champaign Quartz,2.65,S
+type_CHR,CHR,Chrysoberyl,3.73,S
+type_CHRP,CHRP,Chrysophase,2.63,S
+type_CIT,CIT,Citrine,2.65,S
+type_COG,COG,Cognac,2.65,S
+type_CORAL,CORAL,Coral,2.65,H
+type_CRY,CRY,Crystal ,2.25,H
+type_CUB,CUB,Cubic,5.80,S
+type_DIO,DIO,Diopside,3.29,H
+type_DRE,DRE,Dragon Eye,2.65,H
+type_DTS,DTS,Diamond,3.52,D
+type_DYJ,DYJ,Dyed Jade,3.33,H
+type_EAG,EAG,Eagle Eye,2.65,H
+type_EM,EM,Emerald,2.72,P
+type_FLU,FLU,Fluorite,3.18,S
+type_FOP,FOP,Fire Opal,2.10,S
+type_FYTOU,FYTOU,Fancy Toumaline,3.10,S
+type_GA,GA,Garnet,3.78,S
+type_GQ,GQ,GREEN QUARTZ,2.65,S
+type_GTOUR,GTOUR,Green Tourmaline,3.10,S
+type_HMT,HMT,Hematite,5.10,H
+type_IOL,IOL,Iolite,2.61,S
+type_JAD,JAD,Jade,3.33,H
+type_JET,JET,Jet,2.12,H
+type_JSP,JSP,JASPER,2.65,H
+type_KUN,KUN,Kunzite,3.18,S
+type_KYA,KYA,Kyanite,3.65,S
+type_LAB,LAB,Labradorite,2.70,H
+type_LAP,LAP,Lapis,2.80,H
+type_LAQ,LAQ,Lemon Quartz,2.65,S
+type_MAB,MAB,Mabe,0.0,R
+type_MGA,MGA,Mandarin Garnet,4.16,S
+type_MIS,MIS,Miscellanous,2.65,S
+type_MLK,MLK,Malachite,3.80,H
+type_MOI,MOI,Moissanite,3.22,D
+type_MON,MON,Moon Stone,2.58,H
+type_MOP,MOP,Mother of Pearl,2.68,H
+type_MOR,MOR,Morganite,2.80,S
+type_NEP,NEP,Nephrite,3.00,H
+type_OBS,OBS,Obsidian,2.50,H
+type_OLQ,OLQ,Olive Quartz,2.65,S
+type_ONY,ONY,Onyx,2.65,H
+type_OP,OP,Opal,2.10,S
+type_PAR,PAR,Paraiba,3.10,S
+type_PER,PER,Peridot,3.34,S
+type_POR,POR,Porcelain,2.40,S
+type_PQA,PQA,Pink Quartz,2.65,S
+type_PR1,PR1,Pearl 1 Hole,0.0,R
+type_PR2,PR2,Pearl 2 Holes,0.0,R
+type_PREH,PREH,PREHNITE,2.88,H
+type_PRL,PRL,Pearl,0.0,R
+type_PTOUR,PTOUR,Pink Tourmaline,3.10,S
+type_QUB,QUB,Qubic,5.80,S
+type_RCR,RCR,Rock Crystal,2.65,H
+type_RDC,RDC,Rhodochrosite,3.60,H
+type_RDF,RDF,Rose de France,2.65,S
+type_RHO,RHO,Rhodolite,3.84,S
+type_RU,RU,Ruby,4.00,P
+type_RUBE,RUBE,Rubelite,3.10,S
+type_RUT,RUT,Rutile Quartz,2.65,S
+type_SA,SA,Sapphire,4.00,P
+type_SB,SB,Sea Bamboo,2.65,H
+type_SIL,SIL,Silver,10.50,H
+type_SK,SK,Sapphire Kanchana,4.00,P
+type_SMQ,SMQ,Smokey Quartz,2.65,S
+type_SPE,SPE,Spessartite,4.16,S
+type_SPH,SPH,Sphalerite,4.10,S
+type_SPI,SPI,Spinel,3.60,S
+type_STS,STS,Stainless,0.0,H
+type_SUN,SUN,Sunstone,2.65,H
+type_SYN,SYN,Synthetic,2.65,S
+type_TAN,TAN,Tanzanite,3.35,P
+type_THP,THP,Tahiti Pearl,0.0,R
+type_TIG,TIG,Tiger Eye,2.65,H
+type_TOP,TOP,Topaz,3.53,S
+type_TOU,TOU,Tourmaline,3.10,S
+type_TSAV,TSAV,Tsavorite,3.61,P
+type_TU,TU,Real Turquoise,2.70,H
+type_TURQ,TURQ,Turquoise,2.70,H
+type_UV,UV,Uvite,3.10,S
+type_WD,WD,Wood,2.65,H
+type_WQA,WQA,White Quartz,2.65,H
+type_WT,WT,White Topaz,3.53,S
+type_ZC,ZC,Zircon,4.70,S

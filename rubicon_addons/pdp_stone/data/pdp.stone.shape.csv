@@ -1,0 +1,181 @@
+id,code,shape
+shape_0,0,None
+shape_1,1,All
+shape_A118,A118,A118
+shape_A120,A120,A120
+shape_A122,A122,A122
+shape_A123,A123,A123
+shape_A124,A124,A124
+shape_A129,A129,A129
+shape_A13,A13,A13
+shape_A14,A14,A14
+shape_A145,A145,A145
+shape_A177,A177,A177
+shape_A184,A184,A184
+shape_A185,A185,A185
+shape_A187,A187,A187
+shape_A315,A315,A315
+shape_A390,A390,A390
+shape_A45,A45,A45
+shape_A653,A653,A653
+shape_A69S,A69S,A69S
+shape_A71,A71,A71
+shape_A72,A72,A72
+shape_A73,A73,A73
+shape_BAF,BAF,Ball Facetted
+shape_BAGF,BAGF,Bag Fancy
+shape_BAL,BAL,Ball
+shape_BAR,BAR,BARRE
+shape_BEA,BEA,Bead Smooth
+shape_BEAD,BEAD,Bead Facet
+shape_BG,BG,Bagguete
+shape_BGBR,BGBR,Bagguete Bri
+shape_BGBT,BGBT,Bagguet bufftop
+shape_BGCAB,BGCAB,Cabochon Bg
+shape_BQ,BQ,Baroque
+shape_BR_RD,BR RD,Brio Rd
+shape_BRD,BRD,Button Round
+shape_BUFTO,BUFTO,Buf Top
+shape_BUL,BUL,Bullet
+shape_BUT,BUT,Button
+shape_CCBRI,CCBRI,Cabochon Cus Bri
+shape_CHM,CHM,Cabochon Half Moon
+shape_CIR,CIR,CIR
+shape_CONCA,CONCA,Concave
+shape_COTCC,COTCC,Octagon Concave
+shape_CUBRI,CUBRI,Cushion Briolette
+shape_CUBUF,CUBUF,Cushion Bufftop
+shape_CUCAB,CUCAB,Cabochon Cushion
+shape_CUS,CUS,Cushion
+shape_CUV,CUV,Curve
+shape_DBC,DBC,Double Briolette Cus
+shape_DBCF,DBCF,Double Cushion Facet
+shape_DBO,DBO,Double Briolette Ov
+shape_DBP,DBP,Drop Barok Pearl
+shape_DBR,DBR,Drop Briolet
+shape_DCC,DCC,Double Cab Cushion
+shape_DCD,DCD,Double Cab Diamond
+shape_DCDP,DCDP,Double Cab Drop
+shape_DCMQ,DCMQ,Double Cab Marquise
+shape_DCO,DCO,Double Cab Oval
+shape_DCPS,DCPS,Double Cab Pear
+shape_DCR,DCR,Double Cab Round
+shape_DFB,DFB,Double Flat Bri
+shape_DFOV,DFOV,Double Facet Oval
+shape_DFPS,DFPS,Double Facet Ps
+shape_DFS,DFS,Double Flat Smooth
+shape_DKF,DKF,Disk Flat
+shape_DKS,DKS,Disk Smooth
+shape_DN,DN,Donut
+shape_DNOV,DNOV,Donut Oval
+shape_DOB,DOB,Double Facet
+shape_DP,DP,Drop for Pearl
+shape_DRF,DRF,Drop Speacial
+shape_DRL,DRL,Drop Long
+shape_DRP,DRP,Drop Polished
+shape_DRS,DRS,Drop Small
+shape_DSK,DSK,Disk
+shape_FAN,FAN,Fan
+shape_FCU,FCU,Flat Cushion
+shape_FKT,FKT,Flat Kite
+shape_FMQ,FMQ,Flat Marquise
+shape_FOV,FOV,Flat Oval
+shape_FPS,FPS,Flat Pear Shape
+shape_FRB,FRB,French Baguette
+shape_FRD,FRD,Flat Round
+shape_FRP,FRP,Franch Pear Shape
+shape_FRS,FRS,French square
+shape_FRT,FRT,French Tapper
+shape_FSQ,FSQ,Flat Square
+shape_FTBG,FTBG,Flat Baguette
+shape_FTP,FTP,Flat Taper
+shape_FTR,FTR,Flat Trillion
+shape_HAFM,HAFM,HALF MOON
+shape_HALF,HALF,Half Cab/Facet
+shape_HB,HB,Heart Shape Briolet
+shape_HEX,HEX,Hexagon
+shape_HMBR,HMBR,Half Moon Bri
+shape_HS,HS,Heart Shape
+shape_HSB,HSB,Heart Shape Bead
+shape_HSCAB,HSCAB,Cabochon Heart
+shape_HSF,HSF,Heart Shape Flat
+shape_HSS,HSS,Heart Shape Smooth
+shape_HST,HST,HEART SHAPE BUFFTOP
+shape_KIT,KIT,KITE
+shape_LF,LF,LEAF
+shape_LFBR,LFBR,LEAF BRIOLET
+shape_LG,LG,LONG
+shape_LK,LK,LING
+shape_LOT,LOT,LOTUS BRIO
+shape_LOZ,LOZ,LOZENGE
+shape_MIS,MIS,MIS
+shape_MIX,MIX,MIX
+shape_MQ,MQ,Marquise
+shape_MQB,MQB,Marquise Buf Top
+shape_MQBR,MQBR,Marquise Briolette
+shape_MQBRI,MQBRI,Cabochon MQ Bri
+shape_MQCAB,MQCAB,Cabochon Marquise
+shape_MXCAB,MXCAB,Cabochon Mix
+shape_NTM,NTM,Necklace Twist Mesh
+shape_OCBRI,OCBRI,Octagon Briolet
+shape_OCBT,OCBT,Octagon Buff Top
+shape_OCRC,OCRC,Octagone Rose Cut
+shape_OCT,OCT,Octagone
+shape_ORC,ORC,Oval Rose Cut
+shape_OTCAB,OTCAB,Cabochon Oct
+shape_OV,OV,Oval
+shape_OV_BR,OV BR,Cabochon Ov Bri
+shape_OVB,OVB,Oval Bufftop
+shape_OVBRI,OVBRI,Oval Briolet
+shape_OVCAB,OVCAB,Cabochon Oval
+shape_OVCAV,OVCAV,Carving Oval
+shape_OVT,OVT,Oval Tumbled
+shape_PR,PR,Princess Square
+shape_PS,PS,Pear Shape
+shape_PS_BR,PS BR,Cabochon Ps Bri
+shape_PSBRI,PSBRI,Pear Shape Briolet
+shape_PSBT,PSBT,Pear shape Buf
+shape_PSCAB,PSCAB,Cabochon Pear
+shape_PSCAV,PSCAV,Carving Pear
+shape_PSF,PSF,Pear Shape Flat
+shape_PSS,PSS,Pear Shape Smooth
+shape_PUK,PUK,Pumkin
+shape_RADI,RADI,Radiant Cut
+shape_RD,RD,Round
+shape_RD_BR,RD BR,Cabochon Rd Bri
+shape_RDBT,RDBT,Round Bufftop
+shape_RDCAB,RDCAB,Cabochon Round
+shape_RDF,RDF,Rondel Facet
+shape_RDMC,RDMC,Rond Machine Cut
+shape_RDT,RDT,Rond Tumbled
+shape_RDWFC,RDWFC,Round Full Cut
+shape_RDWSC,RDWSC,Round Single Cut
+shape_REC,REC,Rectangular
+shape_RO,RO,Rose
+shape_ROF,ROF,Row Facet
+shape_ROOV,ROOV,Rose Cut OV
+shape_ROPS,ROPS,Rose Cut PS
+shape_RORD,RORD,Rose Cut RD
+shape_ROTR,ROTR,Rose Cut Trillion
+shape_RST,RST,Rough Strand
+shape_SQ,SQ,Square
+shape_SQBF,SQBF,Square Bufftop
+shape_SQBR,SQBR,Square Briolet
+shape_SQCAB,SQCAB,Cabochon Square
+shape_SQF,SQF,Square French cut
+shape_SQS,SQS,Square Shape Smooth
+shape_STA,STA,Star
+shape_TP,TP,Tapper
+shape_TPBT,TPBT,Tapper bufftop
+shape_TPCAB,TPCAB,Cabochon Tap
+shape_TR,TR,Trillion
+shape_TRB,TRB,Trillion Briolet
+shape_TRBT,TRBT,Trilion bufftop
+shape_TRCAB,TRCAB,Cabochon Trillion
+shape_TRCBR,TRCBR,Cabpchon Trllion Bri
+shape_TRG,TRG,Triangle
+shape_TUB,TUB,Tumble
+shape_TUBFC,TUBFC,Tumble Facet
+shape_TWI1,TWI1,Twisted Ring
+shape_TWI2,TWI2,Twisted B
+shape_TWI3,TWI3,Twisted N
