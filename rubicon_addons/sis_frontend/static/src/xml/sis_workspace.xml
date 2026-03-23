@@ -65,7 +65,7 @@
                         <label class="form-label mb-0 text-nowrap small fw-semibold text-primary">Code</label>
                         <input type="text"
                                class="form-control form-control-sm border-primary" style="width:100px; font-weight: 600;"
-                               t-att-value="state.party.sis_code || ''"
+                               t-att-value="state.party ? state.party.sis_code || '' : ''"
                                t-on-input="ev => this.setPartyField('sis_code', ev.target.value)"/>
                     </div>
                     <div class="form-check mb-0 ms-2">
