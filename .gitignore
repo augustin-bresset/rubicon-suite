@@ -69,14 +69,28 @@ mssql_backups/
 !rubicon_addons/**/security/*.csv
 
 # For module reference data (whitelist explicite — données métier exclues)
-!rubicon_addons/sis_document/data/sis.doc.type.csv
-!rubicon_addons/sis_document/data/sis.doc.in.mode.csv
-!rubicon_addons/sis_party/data/sis.pay.term.csv
-!rubicon_addons/sis_party/data/sis.shipper.csv
-!rubicon_addons/sis_party/data/sis.trade.fair.csv
+# pdp_metal
 !rubicon_addons/pdp_metal/data/pdp.metal.purity.csv
 !rubicon_addons/pdp_metal/data/pdp.metal.csv
 !rubicon_addons/pdp_metal/data/pdp.part.csv
+# pdp_labor
+!rubicon_addons/pdp_labor/data/pdp.addon.type.csv
+!rubicon_addons/pdp_labor/data/pdp.labor.type.csv
+# pdp_stone
+!rubicon_addons/pdp_stone/data/pdp.stone.category.csv
+!rubicon_addons/pdp_stone/data/pdp.stone.csv
+!rubicon_addons/pdp_stone/data/pdp.stone.shade.csv
+!rubicon_addons/pdp_stone/data/pdp.stone.shape.csv
+!rubicon_addons/pdp_stone/data/pdp.stone.size.csv
+!rubicon_addons/pdp_stone/data/pdp.stone.type.csv
+!rubicon_addons/pdp_stone/data/pdp.stone.weight.csv
+# sis_document
+!rubicon_addons/sis_document/data/sis.doc.type.csv
+!rubicon_addons/sis_document/data/sis.doc.in.mode.csv
+# sis_party
+!rubicon_addons/sis_party/data/sis.pay.term.csv
+!rubicon_addons/sis_party/data/sis.shipper.csv
+!rubicon_addons/sis_party/data/sis.trade.fair.csv
 
 # Static / generated assets (si tu en as)
 staticfiles/
