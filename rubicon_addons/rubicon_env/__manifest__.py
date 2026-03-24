@@ -5,9 +5,8 @@
 
     'depends': [
         'base',
-        'currency_rate_update',
-        
-        ],
+        # currency_rate_update est optionnel — installable séparément en production
+    ],
     'data': [
         'data/res_currency.xml',
         'data/res_company.xml',

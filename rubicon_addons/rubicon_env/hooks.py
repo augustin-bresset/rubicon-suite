@@ -9,13 +9,22 @@ def post_init_currency_setup(cr, registry=None):
         if currency:
             currency.active = True
 
-    company = env.ref('base.main_company')
-    company.write({
-        'currency_provider': 'ecb',
-        'currency_interval_unit': 'daily',
-        'currency_next_execution_date': fields.Date.today(),
-        'currency_id': env['res.currency'].search([('name', '=', 'THB')], limit=1).id,
-    })
+    # Devise principale de la company : THB
+    thb = env['res.currency'].search([('name', '=', 'THB')], limit=1)
+    if thb:
+        company = env.ref('base.main_company')
+        company.write({'currency_id': thb.id})
 
-    # Import initial
-    env['res.currency.rate.provider']._cron_fetch_currency_rates()
+    # Fonctionnalités currency_rate_update (optionnel — module OCA)
+    cru_installed = env['ir.module.module'].search([
+        ('name', '=', 'currency_rate_update'),
+        ('state', '=', 'installed'),
+    ], limit=1)
+    if cru_installed:
+        company = env.ref('base.main_company')
+        company.write({
+            'currency_provider': 'ecb',
+            'currency_interval_unit': 'daily',
+            'currency_next_execution_date': fields.Date.today(),
+        })
+        env['res.currency.rate.provider']._cron_fetch_currency_rates()
