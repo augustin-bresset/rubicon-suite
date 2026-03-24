@@ -249,7 +249,7 @@ export class PdpWorkspace extends Component {
     get weightDisplay() {
         return {
             metalWeight: (value) => this.uomService.format(value, 'metal_weight', 3),
-            stoneWeight: (value) => this.uomService.format(value, 'stone_weight', 3),
+            stoneWeight: (value) => this.uomService.format(parseFloat(value) || 0, 'stone_weight', 3),
             metalSymbol: () => this.uomService.symbol('metal_weight'),
             stoneSymbol: () => this.uomService.symbol('stone_weight'),
         };

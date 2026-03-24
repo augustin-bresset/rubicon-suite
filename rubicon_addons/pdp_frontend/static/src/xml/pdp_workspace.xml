@@ -245,7 +245,7 @@
                                             <td><t t-esc="s.shade"/></td>
                                             <td><t t-esc="s.shape"/></td>
                                             <td class="text-end"><t t-esc="s.pieces"/></td>
-                                            <td class="text-end"><t t-esc="weightDisplay.stoneWeight(parseFloat(s.weight) || 0)"/></td>
+                                            <td class="text-end"><t t-esc="weightDisplay.stoneWeight(s.weight)"/></td>
                                         </tr>
                                     </t>
                                     <t t-if="state.stoneOriginal.length === 0"><tr><td colspan="5" class="text-muted text-center">None</td></tr></t>
@@ -263,7 +263,7 @@
                                             <td><t t-esc="s.shade"/></td>
                                             <td><t t-esc="s.shape"/></td>
                                             <td class="text-end"><t t-esc="s.pieces"/></td>
-                                            <td class="text-end"><t t-esc="weightDisplay.stoneWeight(parseFloat(s.weight) || 0)"/></td>
+                                            <td class="text-end"><t t-esc="weightDisplay.stoneWeight(s.weight)"/></td>
                                         </tr>
                                     </t>
                                     <t t-if="state.stoneRecut.length === 0"><tr><td colspan="5" class="text-muted text-center">None</td></tr></t>
