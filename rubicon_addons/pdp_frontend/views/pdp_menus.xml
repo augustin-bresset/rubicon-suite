@@ -1,12 +1,12 @@
 <odoo>
-  <!-- Root menu -->
-  <menuitem id="menu_pdp_frontend_root" name="PDP" action="action_pdp_frontend_workspace" sequence="1"/>
-
   <!-- PDP Workspace action (used by client tag) -->
   <record id="action_pdp_frontend_workspace" model="ir.actions.client">
     <field name="name">PDP Workspace</field>
     <field name="tag">pdp_frontend.workspace</field>
   </record>
+
+  <!-- Root menu -->
+  <menuitem id="menu_pdp_frontend_root" name="PDP" action="action_pdp_frontend_workspace" sequence="1"/>
 
   <!-- ============ Manage ============ -->
   <menuitem id="menu_pdp_frontend_manage"

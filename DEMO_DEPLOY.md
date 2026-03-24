@@ -38,8 +38,21 @@ docker compose -f docker-compose.demo.yml up -d
 # 6. Open http://localhost:8070
 #    Login: admin / admin
 ```
+If failing with a filestore error (e.g. FileNotFoundError), it means the filestore volume is in a bad state. To reset it, run:
 
----
+```sh
+docker compose -f docker-compose.demo.yml down -v
+docker compose -f docker-compose.demo.yml up -d
+                                       
+docker compose -f docker-compose.demo.yml exec --user root odoo_demo chown -R odoo:odoo /var/lib/odoo
+
+docker compose -f docker-compose.demo.yml exec odoo_demo odoo \
+  -d rubicondemo -i rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom \
+  --stop-after-init
+
+docker compose -f docker-compose.demo.yml up -d  
+
+```
 
 ## VPS deployment (publicly accessible demo)
 
