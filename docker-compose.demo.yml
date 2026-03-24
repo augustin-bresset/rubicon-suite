@@ -17,8 +17,7 @@ services:
       - odoo_demo_data:/var/lib/odoo/.local/share/Odoo
       - ./rubicon_addons:/mnt/extra-addons
       - ./data/pictures:/mnt/extra-addons/pictures:ro
-      - ./external_addons:/mnt/external-addons
-      - ./odoo_conf/odoo_demo.conf:/etc/odoo/odoo.conf:ro
+- ./odoo_conf/odoo_demo.conf:/etc/odoo/odoo.conf:ro
 
 volumes:
   db_demo_data:
