@@ -1,0 +1,22 @@
+id,name,city,country_id/id,date_start,date_end
+sis_tradefair_1,Vichenza Oro1 10-Jan-01 to 17-Jan-01,Vichenza,base.it,2001-01-10,2001-01-17
+sis_tradefair_2,Bangkok Fair September 2002,Bangkok,base.th,2002-09-18,2002-09-22
+sis_tradefair_3,Basel March 2001,Basel,base.ch,2001-03-20,2001-03-27
+sis_tradefair_4,Las Vegas May 2002,Las Vegas,base.us,2002-05-31,2002-06-04
+sis_tradefair_5,JANY New York July 28-31 2002,New York,base.us,2002-07-28,2002-07-31
+sis_tradefair_6,JANY New York Jan 26-28 2003,New York,base.us,2003-01-26,2003-01-28
+sis_tradefair_7,"HK MARCH 4-7,2003",,base.hk,2003-03-04,2003-03-07
+sis_tradefair_8,"Bangkok Fair Feb 26 - Mar 2, 03",Bangkok,base.th,2003-02-26,2003-03-02
+sis_tradefair_9,Basel April 2003,Basel,base.ch,2003-04-03,2003-04-10
+sis_tradefair_10,Las Vegas May 2003,Las Vegas,base.us,2003-05-30,2003-06-03
+sis_tradefair_11,"Bangkok Fair Sep 11-14, 03",Bangkok,base.th,2003-09-11,2003-09-14
+sis_tradefair_12,"HK September 17-21,2003",Hong Kong,base.hk,2003-09-17,2003-09-21
+sis_tradefair_13,JANY New York Jan 25-27 2004,New York,base.us,2004-01-25,2004-01-27
+sis_tradefair_14,"Bangkok Fair Feb 24-28, 2004",Bangkok,base.th,2004-02-24,2004-02-28
+sis_tradefair_15,"HK March 2-5, 2004",Hong Kong,base.hk,2004-03-02,2004-03-05
+sis_tradefair_16,LAS VEGAS 2004,,,,
+sis_tradefair_17,JANY NEW YORK JAN22-28 2005,,,,
+sis_tradefair_18,BKK FAIRS SEP'2004,Bangkok,base.th,,
+sis_tradefair_19,JANY NEW YORK,New York,base.us,2009-01-18,2009-01-20
+sis_tradefair_20,BKK FARIS,Bangkok,base.th,,
+sis_tradefair_21,SWEDEN,,base.se,,

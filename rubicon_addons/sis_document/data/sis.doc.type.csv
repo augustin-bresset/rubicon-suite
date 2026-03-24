@@ -1,0 +1,7 @@
+id,code,name,category
+sis_doctype_CO,CO,Casting Order,W
+sis_doctype_SE,SE,Sales Repair,S
+sis_doctype_SI,SI,Invoice,S
+sis_doctype_SO,SO,Sales Order,S
+sis_doctype_SQ,SQ,Sales Quotation,S
+sis_doctype_SR,SR,Sales Return,S
