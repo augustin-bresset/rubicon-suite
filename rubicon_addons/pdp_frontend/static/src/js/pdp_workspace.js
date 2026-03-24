@@ -81,9 +81,12 @@ export class PdpWorkspace extends Component {
 
             // Image viewer
             imageMode: "model",
+            pictureId: null,
             pictureUrl: null,
             drawingUrl: null,
             showFullScreenImage: false,
+            showPictureManager: false,
+            allPictures: [],
 
             // Pricing
             priceLines: [],
@@ -503,19 +506,82 @@ export class PdpWorkspace extends Component {
     async fetchModelPicture() {
         try {
             const pics = await this.orm.searchRead(
-                "pdp.picture", [["model_id", "=", this.state.selectedModelId]], ["id"], { limit: 1 }
+                "pdp.picture",
+                [["model_id", "=", this.state.selectedModelId]],
+                ["id", "filename"],
             );
+            this.state.allPictures = pics;
             if (pics.length > 0) {
+                this.state.pictureId = pics[0].id;
                 this.state.pictureUrl = `/web/image/pdp.picture/${pics[0].id}/image_1920`;
                 this.state.drawingUrl = `/web/image/pdp.picture/${pics[0].id}/drawing_1920`;
             } else {
+                this.state.pictureId = null;
                 this.state.pictureUrl = null;
                 this.state.drawingUrl = null;
             }
         } catch (e) {
+            this.state.pictureId = null;
             this.state.pictureUrl = null;
             this.state.drawingUrl = null;
+            this.state.allPictures = [];
         }
+    }
+
+    triggerImageUpload(field) {
+        const input = document.getElementById(`pdp-upload-${field}`);
+        if (input) { input.value = ""; input.click(); }
+    }
+
+    async onImageFileSelected(ev, field) {
+        const file = ev.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64 = e.target.result.split(",")[1];
+            try {
+                if (this.state.pictureId) {
+                    await this.orm.write("pdp.picture", [this.state.pictureId], {
+                        [field]: base64,
+                        [`${field === "image_1920" ? "filename" : "drawing_filename"}`]: file.name,
+                    });
+                } else {
+                    const newId = await this.orm.create("pdp.picture", [{
+                        model_id: this.state.selectedModelId,
+                        image_1920: base64,
+                        filename: file.name,
+                    }]);
+                    this.state.pictureId = newId;
+                }
+                await this.fetchModelPicture();
+            } catch (e) {
+                this.notification.add("Failed to upload image", { type: "danger" });
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async deletePictureField(field) {
+        if (!this.state.pictureId) return;
+        const isDrawing = field === "drawing_1920";
+        const otherField = isDrawing ? "image_1920" : "drawing_1920";
+        // Check if the other field also has data; if not, delete the whole record
+        const rec = await this.orm.read("pdp.picture", [this.state.pictureId], [otherField]);
+        if (rec[0][otherField]) {
+            await this.orm.write("pdp.picture", [this.state.pictureId], {
+                [field]: false,
+                [`${isDrawing ? "drawing_filename" : "filename"}`]: false,
+            });
+        } else {
+            await this.orm.unlink("pdp.picture", [this.state.pictureId]);
+        }
+        await this.fetchModelPicture();
+    }
+
+    async deletePictureById(picId) {
+        await this.orm.unlink("pdp.picture", [picId]);
+        await this.fetchModelPicture();
+        if (this.state.allPictures.length === 0) this.state.showPictureManager = false;
     }
 
     async fetchModelMetals() {
