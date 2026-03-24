@@ -158,7 +158,7 @@ export class SisWorkspace extends Component {
             "id", "name", "category_id", "active",
             "title", "street", "city", "state_id", "zip", "country_id",
             "phone", "email", "website", "comment",
-            "margin_id", "sis_pay_term_id", "customer_rank",
+            "margin_id", "sis_pay_term_id",
             "sis_contact",
             // New fields:
             "sis_is_customer", "sis_is_vendor",
@@ -240,8 +240,7 @@ export class SisWorkspace extends Component {
             phone: "", email: "", website: "", comment: "",
             sis_contact: "",
             margin_id: false, sis_pay_term_id: false,
-            customer_rank: 1, // keeping this for legacy, but now we use sis_is_customer/vendor
-            sis_is_customer: true,
+sis_is_customer: true,
             sis_is_vendor: false,
             sis_account: "", sis_vendor_account: "", sis_vendor_pay_term_id: false,
             sis_ship_address: "", sis_ship_country_id: false, sis_ship_method_id: false, sis_ship_fedex_acc: "", sis_ship_stamp: "",
