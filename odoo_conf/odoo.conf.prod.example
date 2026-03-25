@@ -1,0 +1,39 @@
+[options]
+; Template de configuration pour le SERVEUR DE PRODUCTION (réseau local entreprise).
+; Copier vers odoo.conf et adapter les valeurs.
+; NE PAS commiter ce fichier une fois rempli avec de vrais credentials.
+
+; Chemins d'addons (sans oca_currency si non installé)
+addons_path = /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+
+; Base de données
+db_host = db
+db_port = 5432
+db_user = CHANGER_MOI
+db_password = CHANGER_MOI
+
+; Réseau — écoute sur tout le réseau local (accessible depuis l'interne et le VPN)
+http_interface = 0.0.0.0
+
+; Filtrer la base de données exposée
+dbfilter = ^rubicon$
+
+; Sécurité — Protège /web/database/manager
+; Générer avec : python3 -c "import secrets; print(secrets.token_hex(24))"
+admin_passwd = CHANGER_MOI
+
+; Masquer la liste et l'accès aux bases de données
+list_db = False
+
+; Performance — activer le mode multi-process
+workers = 4
+max_cron_threads = 2
+
+; Limites de sécurité
+limit_time_cpu = 60
+limit_time_real = 120
+limit_memory_hard = 2684354560
+
+; Logging
+logfile = /var/log/odoo/odoo.log
+log_level = warn

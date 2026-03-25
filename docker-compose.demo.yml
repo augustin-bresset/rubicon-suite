@@ -4,13 +4,18 @@ services:
     env_file: .env.demo
     volumes:
       - db_demo_data:/var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
 
   odoo_demo:
     image: odoo:18.0
     depends_on:
       - db_demo
     ports:
-      - "8070:8069"
+      - "127.0.0.1:8070:8069"
     environment:
       PYTHONDONTWRITEBYTECODE: "1"
     volumes:
@@ -18,6 +23,11 @@ services:
       - ./rubicon_addons:/mnt/extra-addons
       - ./data/pictures:/mnt/extra-addons/pictures:ro
       - ./odoo_conf/odoo_demo.conf:/etc/odoo/odoo.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
 
 volumes:
   db_demo_data:

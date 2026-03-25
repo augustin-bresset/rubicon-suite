@@ -8,6 +8,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
     volumes:
       - db-data:/var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
 
   odoo:
     image: odoo:18.0
@@ -25,6 +30,11 @@ services:
       - ./data/pictures:/mnt/extra-addons/pictures:ro
       - ./external_addons:/mnt/external-addons
       - ./odoo_conf/odoo.conf:/etc/odoo/odoo.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
 
 volumes:
   db-data:
