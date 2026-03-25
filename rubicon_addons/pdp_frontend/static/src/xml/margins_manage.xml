@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<t t-name="pdp_frontend.margins_manage">
+  <div class="o_action pdp-manage" style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
+
+    <!-- Top bar -->
+    <div class="pdp-manage-topbar d-flex align-items-center gap-2 px-3 py-2 border-bottom bg-light">
+      <h5 class="mb-0 me-auto">Margins</h5>
+      <button class="btn btn-sm btn-outline-secondary" t-on-click="() => { this.state.showNewMarginForm = !this.state.showNewMarginForm; }">
+        <t t-if="state.showNewMarginForm">Cancel</t>
+        <t t-else="">+ New Margin</t>
+      </button>
+    </div>
+
+    <!-- New margin inline form -->
+    <t t-if="state.showNewMarginForm">
+      <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom bg-white">
+        <input class="form-control form-control-sm" style="width:120px;" placeholder="Code"
+               t-att-value="state.newMarginCode"
+               t-on-input="(e) => this.state.newMarginCode = e.target.value"/>
+        <input class="form-control form-control-sm" style="width:200px;" placeholder="Name"
+               t-att-value="state.newMarginName"
+               t-on-input="(e) => this.state.newMarginName = e.target.value"/>
+        <button class="btn btn-sm btn-primary" t-on-click="createMargin">Create</button>
+      </div>
+    </t>
+
+    <!-- Body: list + detail -->
+    <div class="d-flex flex-grow-1" style="overflow:hidden;">
+
+      <!-- Left: margins list -->
+      <div class="pdp-margins-list border-end" style="width:240px; min-width:240px; overflow-y:auto;">
+        <t t-foreach="state.margins" t-as="margin" t-key="margin.id">
+          <div class="pdp-list-item px-3 py-2 border-bottom"
+               style="cursor:pointer;"
+               t-att-class="margin.id === state.selectedMarginId ? 'bg-primary text-white' : 'hover-highlight'"
+               t-on-click="() => this.selectMargin(margin.id)">
+            <div class="fw-semibold small"><t t-esc="margin.code"/></div>
+            <div class="small text-truncate" t-att-class="margin.id === state.selectedMarginId ? 'text-white-50' : 'text-muted'"><t t-esc="margin.name"/></div>
+          </div>
+        </t>
+        <t t-if="!state.margins.length">
+          <div class="text-muted small p-3">No margins yet.</div>
+        </t>
+      </div>
+
+      <!-- Right: detail panel -->
+      <div class="flex-grow-1 p-3" style="overflow-y:auto;">
+        <t t-if="selectedMargin">
+
+          <!-- Header: code, name, save, delete -->
+          <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+            <input class="form-control form-control-sm" style="width:100px;" placeholder="Code"
+                   t-att-value="state.marginCode"
+                   t-on-input="(e) => this.onHeaderFieldChange('marginCode', e.target.value)"/>
+            <input class="form-control form-control-sm" style="width:220px;" placeholder="Name"
+                   t-att-value="state.marginName"
+                   t-on-input="(e) => this.onHeaderFieldChange('marginName', e.target.value)"/>
+            <button class="btn btn-sm btn-primary ms-2" t-on-click="saveMargin"
+                    t-att-disabled="!state.isDirty and !state.marginHeaderDirty">Save</button>
+            <button class="btn btn-sm btn-outline-danger ms-auto" t-on-click="deleteMargin">Delete</button>
+          </div>
+
+          <!-- Tab nav -->
+          <div class="d-flex gap-1 mb-3">
+            <button class="btn btn-sm"
+                    t-att-class="state.activeTab === 'misc' ? 'btn-secondary' : 'btn-outline-secondary'"
+                    t-on-click="() => this.state.activeTab = 'misc'">Misc</button>
+            <button class="btn btn-sm"
+                    t-att-class="state.activeTab === 'metal' ? 'btn-secondary' : 'btn-outline-secondary'"
+                    t-on-click="() => this.state.activeTab = 'metal'">Metal</button>
+            <button class="btn btn-sm"
+                    t-att-class="state.activeTab === 'stone' ? 'btn-secondary' : 'btn-outline-secondary'"
+                    t-on-click="() => this.state.activeTab = 'stone'">Stone</button>
+          </div>
+
+          <!-- ===== Tab: Misc ===== -->
+          <t t-if="state.activeTab === 'misc'">
+
+            <!-- Parts rate -->
+            <div class="mb-4">
+              <div class="fw-semibold small text-uppercase text-muted mb-1">Parts Rate</div>
+              <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 small">Factor (e.g. 1.10 = 10%)</label>
+                <input type="number" step="0.001" class="form-control form-control-sm" style="width:120px;"
+                       t-att-value="state.partRate ? state.partRate.rate : ''"
+                       t-on-input="(e) => this.onPartRateChange(e.target.value)"
+                       placeholder="e.g. 1.10"/>
+              </div>
+            </div>
+
+            <!-- Labor rates table -->
+            <div class="mb-4">
+              <div class="d-flex align-items-center mb-1">
+                <span class="fw-semibold small text-uppercase text-muted me-auto">Labor Rates</span>
+                <button class="btn btn-sm btn-outline-primary" t-on-click="addLabor">+ Add</button>
+              </div>
+              <table class="table table-sm table-bordered pdp-manage-table">
+                <thead class="table-light">
+                  <tr>
+                    <th>Labor Type</th>
+                    <th style="width:110px;">Rate</th>
+                    <th style="width:36px;"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <t t-foreach="state.labors" t-as="row" t-key="row._key">
+                    <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                      <td>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(e) => this.onFieldChange(row, 'labor_id', parseInt(e.target.value))">
+                          <option value="">-- Select --</option>
+                          <t t-foreach="this.laborTypes" t-as="lt" t-key="lt.id">
+                            <option t-att-value="lt.id"
+                                    t-att-selected="this.m2oId(row.labor_id) === lt.id">
+                              <t t-esc="lt.code"/>
+                            </option>
+                          </t>
+                        </select>
+                      </td>
+                      <td>
+                        <input type="number" step="0.001" class="form-control form-control-sm"
+                               t-att-value="row.rate"
+                               t-on-input="(e) => this.onFieldChange(row, 'rate', e.target.value)"/>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeLabor(row)">×</button>
+                      </td>
+                    </tr>
+                  </t>
+                  <t t-if="!state.labors.length">
+                    <tr><td colspan="3" class="text-muted small text-center">No labor rates</td></tr>
+                  </t>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Addon rates table -->
+            <div class="mb-4">
+              <div class="d-flex align-items-center mb-1">
+                <span class="fw-semibold small text-uppercase text-muted me-auto">Misc Rates</span>
+                <button class="btn btn-sm btn-outline-primary" t-on-click="addAddon">+ Add</button>
+              </div>
+              <table class="table table-sm table-bordered pdp-manage-table">
+                <thead class="table-light">
+                  <tr>
+                    <th>Misc Type</th>
+                    <th style="width:110px;">Rate</th>
+                    <th style="width:36px;"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <t t-foreach="state.addons" t-as="row" t-key="row._key">
+                    <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                      <td>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(e) => this.onFieldChange(row, 'addon_id', parseInt(e.target.value))">
+                          <option value="">-- Select --</option>
+                          <t t-foreach="this.addonTypes" t-as="at" t-key="at.id">
+                            <option t-att-value="at.id"
+                                    t-att-selected="this.m2oId(row.addon_id) === at.id">
+                              <t t-esc="at.code"/>
+                            </option>
+                          </t>
+                        </select>
+                      </td>
+                      <td>
+                        <input type="number" step="0.001" class="form-control form-control-sm"
+                               t-att-value="row.rate"
+                               t-on-input="(e) => this.onFieldChange(row, 'rate', e.target.value)"/>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeAddon(row)">×</button>
+                      </td>
+                    </tr>
+                  </t>
+                  <t t-if="!state.addons.length">
+                    <tr><td colspan="3" class="text-muted small text-center">No misc rates</td></tr>
+                  </t>
+                </tbody>
+              </table>
+            </div>
+          </t>
+
+          <!-- ===== Tab: Metal ===== -->
+          <t t-elif="state.activeTab === 'metal'">
+            <div class="d-flex align-items-center mb-2">
+              <span class="fw-semibold small text-uppercase text-muted me-auto">Metal Purity Rates</span>
+              <button class="btn btn-sm btn-outline-primary" t-on-click="addMetal">+ Add</button>
+            </div>
+            <table class="table table-sm table-bordered pdp-manage-table">
+              <thead class="table-light">
+                <tr>
+                  <th>Purity</th>
+                  <th style="width:110px;">Rate</th>
+                  <th style="width:36px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-foreach="state.metals" t-as="row" t-key="row._key">
+                  <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                    <td>
+                      <select class="form-select form-select-sm"
+                              t-on-change="(e) => this.onFieldChange(row, 'metal_purity_id', parseInt(e.target.value))">
+                        <option value="">-- Select --</option>
+                        <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
+                          <option t-att-value="pur.id"
+                                  t-att-selected="this.m2oId(row.metal_purity_id) === pur.id">
+                            <t t-esc="pur.code"/>
+                          </option>
+                        </t>
+                      </select>
+                    </td>
+                    <td>
+                      <input type="number" step="0.001" class="form-control form-control-sm"
+                             t-att-value="row.rate"
+                             t-on-input="(e) => this.onFieldChange(row, 'rate', e.target.value)"/>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeMetal(row)">×</button>
+                    </td>
+                  </tr>
+                </t>
+                <t t-if="!state.metals.length">
+                  <tr><td colspan="3" class="text-muted small text-center">No metal rates</td></tr>
+                </t>
+              </tbody>
+            </table>
+          </t>
+
+          <!-- ===== Tab: Stone ===== -->
+          <t t-elif="state.activeTab === 'stone'">
+            <!-- Stone sub-tabs -->
+            <div class="d-flex gap-1 mb-3">
+              <button class="btn btn-sm"
+                      t-att-class="state.stoneSubTab === 'conditional' ? 'btn-dark' : 'btn-outline-dark'"
+                      t-on-click="() => this.state.stoneSubTab = 'conditional'">Conditional</button>
+              <button class="btn btn-sm"
+                      t-att-class="state.stoneSubTab === 'normal' ? 'btn-dark' : 'btn-outline-dark'"
+                      t-on-click="() => this.state.stoneSubTab = 'normal'">Normal</button>
+            </div>
+
+            <!-- Conditional sub-tab -->
+            <t t-if="state.stoneSubTab === 'conditional'">
+              <div class="d-flex align-items-center mb-2">
+                <span class="fw-semibold small text-uppercase text-muted me-auto">Conditional Stone Rates</span>
+                <button class="btn btn-sm btn-outline-primary" t-on-click="addStoneCond">+ Add</button>
+              </div>
+              <table class="table table-sm table-bordered pdp-manage-table">
+                <thead class="table-light">
+                  <tr>
+                    <th>Category</th>
+                    <th style="width:70px;">Op</th>
+                    <th style="width:110px;">Cost</th>
+                    <th style="width:90px;">Currency</th>
+                    <th style="width:90px;">Rate</th>
+                    <th style="width:36px;"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <t t-foreach="state.stonesConditional" t-as="row" t-key="row._key">
+                    <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                      <td>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(e) => this.onFieldChange(row, 'stone_cat_id', parseInt(e.target.value))">
+                          <option value="">-- Select --</option>
+                          <t t-foreach="this.stoneCategories" t-as="sc" t-key="sc.id">
+                            <option t-att-value="sc.id"
+                                    t-att-selected="this.m2oId(row.stone_cat_id) === sc.id">
+                              <t t-esc="sc.code"/>
+                            </option>
+                          </t>
+                        </select>
+                      </td>
+                      <td>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(e) => this.onFieldChange(row, 'operator', e.target.value)">
+                          <option value="&lt;" t-att-selected="row.operator === '&lt;'">&lt;</option>
+                          <option value="&lt;=" t-att-selected="row.operator === '&lt;='">&lt;=</option>
+                          <option value="=" t-att-selected="row.operator === '='">=</option>
+                          <option value="&gt;" t-att-selected="row.operator === '&gt;'">&gt;</option>
+                          <option value="&gt;=" t-att-selected="row.operator === '&gt;='">&gt;=</option>
+                        </select>
+                      </td>
+                      <td>
+                        <input type="number" step="0.01" class="form-control form-control-sm"
+                               t-att-value="row.comparative_cost"
+                               t-on-input="(e) => this.onFieldChange(row, 'comparative_cost', e.target.value)"/>
+                      </td>
+                      <td>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(e) => this.onFieldChange(row, 'currency_id', parseInt(e.target.value))">
+                          <t t-foreach="this.currencies" t-as="cur" t-key="cur.id">
+                            <option t-att-value="cur.id"
+                                    t-att-selected="this.m2oId(row.currency_id) === cur.id">
+                              <t t-esc="cur.name"/>
+                            </option>
+                          </t>
+                        </select>
+                      </td>
+                      <td>
+                        <input type="number" step="0.001" class="form-control form-control-sm"
+                               t-att-value="row.rate"
+                               t-on-input="(e) => this.onFieldChange(row, 'rate', e.target.value)"/>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeStoneCond(row)">×</button>
+                      </td>
+                    </tr>
+                  </t>
+                  <t t-if="!state.stonesConditional.length">
+                    <tr><td colspan="6" class="text-muted small text-center">No conditional rates</td></tr>
+                  </t>
+                </tbody>
+              </table>
+            </t>
+
+            <!-- Normal sub-tab -->
+            <t t-elif="state.stoneSubTab === 'normal'">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="fw-semibold small text-uppercase text-muted">Normal Stone Rates</span>
+                <select class="form-select form-select-sm ms-3" style="width:160px;"
+                        t-on-change="(e) => this.state.stoneCatFilter = e.target.value">
+                  <option value="">All Categories</option>
+                  <t t-foreach="this.stoneCategories" t-as="sc" t-key="sc.id">
+                    <option t-att-value="sc.id"
+                            t-att-selected="this.state.stoneCatFilter == sc.id">
+                      <t t-esc="sc.code"/>
+                    </option>
+                  </t>
+                </select>
+                <button class="btn btn-sm btn-outline-primary ms-auto" t-on-click="addStoneNorm">+ Add</button>
+              </div>
+              <table class="table table-sm table-bordered pdp-manage-table">
+                <thead class="table-light">
+                  <tr>
+                    <th>Stone Type</th>
+                    <th style="width:110px;">Rate</th>
+                    <th style="width:36px;"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <t t-foreach="filteredStoneNormal" t-as="row" t-key="row._key">
+                    <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                      <td>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(e) => this.onFieldChange(row, 'stone_type_id', parseInt(e.target.value))">
+                          <option value="">-- Select --</option>
+                          <t t-foreach="this.stoneTypes" t-as="st" t-key="st.id">
+                            <option t-att-value="st.id"
+                                    t-att-selected="this.m2oId(row.stone_type_id) === st.id">
+                              <t t-esc="st.code"/>
+                            </option>
+                          </t>
+                        </select>
+                      </td>
+                      <td>
+                        <input type="number" step="0.001" class="form-control form-control-sm"
+                               t-att-value="row.rate"
+                               t-on-input="(e) => this.onFieldChange(row, 'rate', e.target.value)"/>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeStoneNorm(row)">×</button>
+                      </td>
+                    </tr>
+                  </t>
+                  <t t-if="!filteredStoneNormal.length">
+                    <tr><td colspan="3" class="text-muted small text-center">No normal rates</td></tr>
+                  </t>
+                </tbody>
+              </table>
+            </t>
+          </t>
+
+        </t>
+        <t t-else="">
+          <div class="text-center text-muted mt-5">Select a margin from the list</div>
+        </t>
+      </div>
+    </div>
+  </div>
+</t>
+
+</templates>

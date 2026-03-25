@@ -111,6 +111,7 @@ docker compose -f docker-compose.demo.yml up -d
 ```
 
 The demo is now running on `http://YOUR_VPS_IP:8070`.
+* http://89.168.58.215:8070
 
 #### 4. HTTPS with nginx + Let's Encrypt (required for a real public demo)
 

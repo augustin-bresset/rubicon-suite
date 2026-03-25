@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<t t-name="pdp_frontend.stone_manage">
+    <div class="o_action pdp-manage d-flex flex-column" style="height: 100%; font-size: 13px;">
+
+        <!-- ===== TOP BAR ===== -->
+        <div class="pdp-manage-topbar d-flex align-items-center gap-2 px-3 py-2 border-bottom bg-white shadow-sm">
+            <span class="fw-bold fs-5 me-3">Stones and Diamonds</span>
+
+            <!-- Tab buttons -->
+            <ul class="nav nav-pills nav-sm mb-0">
+                <li class="nav-item">
+                    <a href="#"
+                        class="nav-link py-1 px-2"
+                        t-att-class="state.activeTab === 'cats_types' ? 'active' : ''"
+                        t-on-click.prevent="() => this.setTab('cats_types')">
+                        Categories &amp; Types
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"
+                        class="nav-link py-1 px-2"
+                        t-att-class="state.activeTab === 'other_info' ? 'active' : ''"
+                        t-on-click.prevent="() => this.setTab('other_info')">
+                        Other Info
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"
+                        class="nav-link py-1 px-2"
+                        t-att-class="state.activeTab === 'costs' ? 'active' : ''"
+                        t-on-click.prevent="() => this.setTab('costs')">
+                        Unit Costs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"
+                        class="nav-link py-1 px-2"
+                        t-att-class="state.activeTab === 'weights' ? 'active' : ''"
+                        t-on-click.prevent="() => this.setTab('weights')">
+                        Unit Weights
+                    </a>
+                </li>
+            </ul>
+
+            <t t-if="state.isDirty">
+                <span class="badge bg-warning text-dark ms-2">Unsaved changes</span>
+            </t>
+        </div>
+
+        <!-- ===== BODY ===== -->
+        <div class="pdp-manage-body" style="flex: 1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column;">
+
+            <!-- ==================== TAB 1: Categories & Types ==================== -->
+            <t t-if="state.activeTab === 'cats_types'">
+                <div class="d-flex flex-column h-100" style="overflow: hidden;">
+
+                    <!-- Categories panel (top half) -->
+                    <div class="d-flex flex-column border-bottom" style="flex: 0 0 45%; min-height: 0; overflow: hidden;">
+                        <div class="d-flex align-items-center gap-2 px-3 py-2 bg-light border-bottom">
+                            <span class="fw-semibold me-auto">Stone Categories</span>
+                            <button
+                                class="btn btn-primary btn-sm"
+                                t-att-disabled="this.dirtyCatsTypesCount === 0"
+                                t-on-click="() => this.saveCatsTypes()">
+                                Save
+                                <t t-if="this.dirtyCatsTypesCount > 0">
+                                    (<t t-esc="this.dirtyCatsTypesCount"/>)
+                                </t>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" t-on-click="() => this.addCategory()">
+                                Add Category
+                            </button>
+                        </div>
+                        <div class="overflow-auto p-2" style="flex: 1 1 0;">
+                            <table class="table table-sm table-hover table-bordered pdp-manage-table mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th style="width: 120px;">Code</th>
+                                        <th>Name</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.categories" t-as="row" t-key="row._key">
+                                        <tr
+                                            style="cursor: pointer;"
+                                            t-att-class="(state.selectedCatKey === row._key ? 'table-primary' : '') + (row._dirty ? ' table-warning' : '')"
+                                            t-on-click="() => this.selectCategory(row)">
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Code"
+                                                    t-att-value="row.code"
+                                                    t-on-click.stop="() => {}"
+                                                    t-on-input="(e) => this.onCatFieldChange(row, 'code', e.target.value)"
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Name"
+                                                    t-att-value="row.name"
+                                                    t-on-click.stop="() => {}"
+                                                    t-on-input="(e) => this.onCatFieldChange(row, 'name', e.target.value)"
+                                                />
+                                            </td>
+                                            <td t-on-click.stop="() => {}">
+                                                <button
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    t-on-click.stop="() => this.removeCategory(row)">
+                                                    ✕
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.categories.length === 0">
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted fst-italic py-3">
+                                                No categories. Click Add Category.
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Types panel (bottom half) -->
+                    <div class="d-flex flex-column" style="flex: 1 1 0; min-height: 0; overflow: hidden;">
+                        <div class="d-flex align-items-center gap-2 px-3 py-2 bg-light border-bottom">
+                            <span class="fw-semibold me-auto">
+                                Stone Types
+                                <t t-if="this.selectedCategory">
+                                    — filtered by: <span class="text-primary"><t t-esc="this.selectedCategory.code"/></span>
+                                </t>
+                            </span>
+                            <button class="btn btn-secondary btn-sm" t-on-click="() => this.addType()">
+                                Add Type
+                            </button>
+                        </div>
+                        <div class="overflow-auto p-2" style="flex: 1 1 0;">
+                            <table class="table table-sm table-hover table-bordered pdp-manage-table mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th style="width: 100px;">Code</th>
+                                        <th>Name</th>
+                                        <th style="width: 120px;">Density (g/cm³)</th>
+                                        <th style="width: 160px;">Category</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="this.filteredTypes" t-as="row" t-key="row._key">
+                                        <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Code"
+                                                    t-att-value="row.code"
+                                                    t-on-input="(e) => this.onTypeFieldChange(row, 'code', e.target.value)"
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Name"
+                                                    t-att-value="row.name"
+                                                    t-on-input="(e) => this.onTypeFieldChange(row, 'name', e.target.value)"
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="number"
+                                                    step="0.0001"
+                                                    class="form-control form-control-sm"
+                                                    t-att-value="row.density"
+                                                    t-on-input="(e) => this.onTypeFieldChange(row, 'density', e.target.value)"
+                                                />
+                                            </td>
+                                            <td>
+                                                <select
+                                                    class="form-select form-select-sm"
+                                                    t-on-change="(e) => this.onTypeFieldChange(row, 'category_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                    <option value="">— none —</option>
+                                                    <t t-foreach="state.categories" t-as="cat" t-key="cat._key">
+                                                        <t t-if="cat.id">
+                                                            <option
+                                                                t-att-value="cat.id"
+                                                                t-att-selected="this.m2oId(row.category_id) === cat.id">
+                                                                <t t-esc="cat.code"/> — <t t-esc="cat.name"/>
+                                                            </option>
+                                                        </t>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    t-on-click.stop="() => this.removeType(row)">
+                                                    ✕
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="this.filteredTypes.length === 0">
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted fst-italic py-3">
+                                                No types.
+                                                <t t-if="this.selectedCategory">
+                                                    Click Add Type (will be assigned to selected category).
+                                                </t>
+                                                <t t-else="">
+                                                    Click Add Type or select a category to filter.
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+
+            <!-- ==================== TAB 2: Other Info ==================== -->
+            <t t-elif="state.activeTab === 'other_info'">
+                <div class="d-flex flex-row h-100" style="overflow: hidden;">
+
+                    <!-- Shapes panel -->
+                    <div class="d-flex flex-column border-end" style="flex: 1 1 0; min-width: 0; overflow: hidden;">
+                        <div class="d-flex align-items-center gap-2 px-2 py-2 bg-light border-bottom">
+                            <span class="fw-semibold me-auto">Shapes</span>
+                            <button
+                                class="btn btn-primary btn-sm"
+                                t-att-disabled="this.dirtyOtherInfoCount === 0"
+                                t-on-click="() => this.saveOtherInfo()">
+                                Save
+                                <t t-if="this.dirtyOtherInfoCount > 0">
+                                    (<t t-esc="this.dirtyOtherInfoCount"/>)
+                                </t>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" t-on-click="() => this.addShape()">Add</button>
+                        </div>
+                        <div class="overflow-auto p-2" style="flex: 1 1 0;">
+                            <table class="table table-sm table-hover table-bordered pdp-manage-table mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th style="width: 80px;">Code</th>
+                                        <th>Shape</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.shapes" t-as="row" t-key="row._key">
+                                        <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Code"
+                                                    t-att-value="row.code"
+                                                    t-on-input="(e) => this.onShapeFieldChange(row, 'code', e.target.value)"
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Shape"
+                                                    t-att-value="row.shape"
+                                                    t-on-input="(e) => this.onShapeFieldChange(row, 'shape', e.target.value)"
+                                                />
+                                            </td>
+                                            <td>
+                                                <button
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    t-on-click.stop="() => this.removeShape(row)">
+                                                    ✕
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.shapes.length === 0">
+                                        <tr><td colspan="3" class="text-center text-muted fst-italic py-3">No shapes.</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Shades panel -->
+                    <div class="d-flex flex-column border-end" style="flex: 1 1 0; min-width: 0; overflow: hidden;">
+                        <div class="d-flex align-items-center gap-2 px-2 py-2 bg-light border-bottom">
+                            <span class="fw-semibold me-auto">Shades</span>
+                            <button class="btn btn-secondary btn-sm" t-on-click="() => this.addShade()">Add</button>
+                        </div>
+                        <div class="overflow-auto p-2" style="flex: 1 1 0;">
+                            <table class="table table-sm table-hover table-bordered pdp-manage-table mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th style="width: 80px;">Code</th>
+                                        <th>Shade</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.shades" t-as="row" t-key="row._key">
+                                        <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Code"
+                                                    t-att-value="row.code"
+                                                    t-on-input="(e) => this.onShadeFieldChange(row, 'code', e.target.value)"
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Shade"
+                                                    t-att-value="row.shade"
+                                                    t-on-input="(e) => this.onShadeFieldChange(row, 'shade', e.target.value)"
+                                                />
+                                            </td>
+                                            <td>
+                                                <button
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    t-on-click.stop="() => this.removeShade(row)">
+                                                    ✕
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.shades.length === 0">
+                                        <tr><td colspan="3" class="text-center text-muted fst-italic py-3">No shades.</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sizes panel -->
+                    <div class="d-flex flex-column" style="flex: 1 1 0; min-width: 0; overflow: hidden;">
+                        <div class="d-flex align-items-center gap-2 px-2 py-2 bg-light border-bottom">
+                            <span class="fw-semibold me-auto">Sizes</span>
+                            <button class="btn btn-secondary btn-sm" t-on-click="() => this.addSize()">Add</button>
+                        </div>
+                        <div class="overflow-auto p-2" style="flex: 1 1 0;">
+                            <table class="table table-sm table-hover table-bordered pdp-manage-table mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Size</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.sizes" t-as="row" t-key="row._key">
+                                        <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Size name"
+                                                    t-att-value="row.name"
+                                                    t-on-input="(e) => this.onSizeFieldChange(row, 'name', e.target.value)"
+                                                />
+                                            </td>
+                                            <td>
+                                                <button
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    t-on-click.stop="() => this.removeSize(row)">
+                                                    ✕
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="state.sizes.length === 0">
+                                        <tr><td colspan="2" class="text-center text-muted fst-italic py-3">No sizes.</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+
+            <!-- ==================== TAB 3: Unit Costs ==================== -->
+            <t t-elif="state.activeTab === 'costs'">
+                <div class="d-flex flex-column h-100" style="overflow: hidden;">
+
+                    <!-- Filter row + action bar -->
+                    <div class="d-flex align-items-center flex-wrap gap-2 px-3 py-2 bg-light border-bottom">
+                        <span class="fw-semibold me-1">Filter:</span>
+
+                        <!-- Type filter -->
+                        <select
+                            class="form-select form-select-sm"
+                            style="width: 180px;"
+                            t-on-change="(e) => { this.state.costFilterTypeId = e.target.value; this.loadStones(); }">
+                            <option value="">All Types</option>
+                            <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
+                                <option
+                                    t-att-value="t_opt.id"
+                                    t-att-selected="this.state.costFilterTypeId == t_opt.id">
+                                    [<t t-esc="t_opt.code"/>] <t t-esc="t_opt.name"/>
+                                </option>
+                            </t>
+                        </select>
+
+                        <!-- Shape filter -->
+                        <select
+                            class="form-select form-select-sm"
+                            style="width: 160px;"
+                            t-on-change="(e) => { this.state.costFilterShapeId = e.target.value; this.loadStones(); }">
+                            <option value="">All Shapes</option>
+                            <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
+                                <option
+                                    t-att-value="s_opt.id"
+                                    t-att-selected="this.state.costFilterShapeId == s_opt.id">
+                                    <t t-esc="s_opt.code"/>
+                                </option>
+                            </t>
+                        </select>
+
+                        <!-- Shade filter -->
+                        <select
+                            class="form-select form-select-sm"
+                            style="width: 160px;"
+                            t-on-change="(e) => { this.state.costFilterShadeId = e.target.value; this.loadStones(); }">
+                            <option value="">All Shades</option>
+                            <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
+                                <option
+                                    t-att-value="sh_opt.id"
+                                    t-att-selected="this.state.costFilterShadeId == sh_opt.id">
+                                    <t t-esc="sh_opt.code"/>
+                                </option>
+                            </t>
+                        </select>
+
+                        <span class="text-muted small">
+                            <t t-esc="state.stones.length"/> rows
+                        </span>
+
+                        <div class="ms-auto d-flex gap-2">
+                            <button
+                                class="btn btn-primary btn-sm"
+                                t-att-disabled="this.dirtyStonesCount === 0"
+                                t-on-click="() => this.saveStones()">
+                                Save
+                                <t t-if="this.dirtyStonesCount > 0">
+                                    (<t t-esc="this.dirtyStonesCount"/>)
+                                </t>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" t-on-click="() => this.addStoneRow()">
+                                Add Row
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stones table -->
+                    <div class="overflow-auto p-2" style="flex: 1 1 0;">
+                        <table class="table table-sm table-hover table-bordered pdp-manage-table mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 160px;">Type</th>
+                                    <th style="width: 130px;">Shape</th>
+                                    <th style="width: 130px;">Shade</th>
+                                    <th style="width: 130px;">Size</th>
+                                    <th style="width: 130px;">Stock Code</th>
+                                    <th style="width: 110px;">Cost</th>
+                                    <th style="width: 120px;">Currency</th>
+                                    <th style="width: 40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.stones" t-as="row" t-key="row._key">
+                                    <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'type_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
+                                                    <option
+                                                        t-att-value="t_opt.id"
+                                                        t-att-selected="this.m2oId(row.type_id) === t_opt.id">
+                                                        [<t t-esc="t_opt.code"/>] <t t-esc="t_opt.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'shape_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
+                                                    <option
+                                                        t-att-value="s_opt.id"
+                                                        t-att-selected="this.m2oId(row.shape_id) === s_opt.id">
+                                                        <t t-esc="s_opt.code"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'shade_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
+                                                    <option
+                                                        t-att-value="sh_opt.id"
+                                                        t-att-selected="this.m2oId(row.shade_id) === sh_opt.id">
+                                                        <t t-esc="sh_opt.code"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'size_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.stoneSizes" t-as="sz_opt" t-key="sz_opt.id">
+                                                    <option
+                                                        t-att-value="sz_opt.id"
+                                                        t-att-selected="this.m2oId(row.size_id) === sz_opt.id">
+                                                        <t t-esc="sz_opt.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="text"
+                                                class="form-control form-control-sm"
+                                                placeholder="Code"
+                                                t-att-value="row.code"
+                                                t-on-input="(e) => this.onStoneFieldChange(row, 'code', e.target.value)"
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                class="form-control form-control-sm"
+                                                t-att-value="row.cost"
+                                                t-on-input="(e) => this.onStoneFieldChange(row, 'cost', e.target.value)"
+                                            />
+                                        </td>
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'currency_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.currencies" t-as="cur" t-key="cur.id">
+                                                    <option
+                                                        t-att-value="cur.id"
+                                                        t-att-selected="this.m2oId(row.currency_id) === cur.id">
+                                                        <t t-esc="cur.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button
+                                                class="btn btn-sm btn-outline-danger"
+                                                t-on-click.stop="() => this.removeStoneRow(row)">
+                                                ✕
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-if="state.stones.length === 0">
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted fst-italic py-3">
+                                            No stones found. Adjust filters or click Add Row.
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </t>
+
+            <!-- ==================== TAB 4: Unit Weights ==================== -->
+            <t t-elif="state.activeTab === 'weights'">
+                <div class="d-flex flex-column h-100" style="overflow: hidden;">
+
+                    <!-- Filter row + action bar -->
+                    <div class="d-flex align-items-center flex-wrap gap-2 px-3 py-2 bg-light border-bottom">
+                        <span class="fw-semibold me-1">Filter:</span>
+
+                        <!-- Type filter -->
+                        <select
+                            class="form-select form-select-sm"
+                            style="width: 180px;"
+                            t-on-change="(e) => { this.state.weightFilterTypeId = e.target.value; this.loadWeights(); }">
+                            <option value="">All Types</option>
+                            <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
+                                <option
+                                    t-att-value="t_opt.id"
+                                    t-att-selected="this.state.weightFilterTypeId == t_opt.id">
+                                    [<t t-esc="t_opt.code"/>] <t t-esc="t_opt.name"/>
+                                </option>
+                            </t>
+                        </select>
+
+                        <!-- Shape filter -->
+                        <select
+                            class="form-select form-select-sm"
+                            style="width: 160px;"
+                            t-on-change="(e) => { this.state.weightFilterShapeId = e.target.value; this.loadWeights(); }">
+                            <option value="">All Shapes</option>
+                            <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
+                                <option
+                                    t-att-value="s_opt.id"
+                                    t-att-selected="this.state.weightFilterShapeId == s_opt.id">
+                                    <t t-esc="s_opt.code"/>
+                                </option>
+                            </t>
+                        </select>
+
+                        <!-- Shade filter -->
+                        <select
+                            class="form-select form-select-sm"
+                            style="width: 160px;"
+                            t-on-change="(e) => { this.state.weightFilterShadeId = e.target.value; this.loadWeights(); }">
+                            <option value="">All Shades</option>
+                            <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
+                                <option
+                                    t-att-value="sh_opt.id"
+                                    t-att-selected="this.state.weightFilterShadeId == sh_opt.id">
+                                    <t t-esc="sh_opt.code"/>
+                                </option>
+                            </t>
+                        </select>
+
+                        <span class="text-muted small">
+                            <t t-esc="state.weights.length"/> rows
+                        </span>
+
+                        <div class="ms-auto d-flex gap-2">
+                            <button
+                                class="btn btn-primary btn-sm"
+                                t-att-disabled="this.dirtyWeightsCount === 0"
+                                t-on-click="() => this.saveWeights()">
+                                Save
+                                <t t-if="this.dirtyWeightsCount > 0">
+                                    (<t t-esc="this.dirtyWeightsCount"/>)
+                                </t>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" t-on-click="() => this.addWeightRow()">
+                                Add Row
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Weights table -->
+                    <div class="overflow-auto p-2" style="flex: 1 1 0;">
+                        <table class="table table-sm table-hover table-bordered pdp-manage-table mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 160px;">Type</th>
+                                    <th style="width: 130px;">Shape</th>
+                                    <th style="width: 130px;">Shade</th>
+                                    <th style="width: 130px;">Size</th>
+                                    <th style="width: 130px;">Weight (ct)</th>
+                                    <th style="width: 40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.weights" t-as="row" t-key="row._key">
+                                    <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onWeightFieldChange(row, 'type_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
+                                                    <option
+                                                        t-att-value="t_opt.id"
+                                                        t-att-selected="this.m2oId(row.type_id) === t_opt.id">
+                                                        [<t t-esc="t_opt.code"/>] <t t-esc="t_opt.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onWeightFieldChange(row, 'shape_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
+                                                    <option
+                                                        t-att-value="s_opt.id"
+                                                        t-att-selected="this.m2oId(row.shape_id) === s_opt.id">
+                                                        <t t-esc="s_opt.code"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onWeightFieldChange(row, 'shade_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
+                                                    <option
+                                                        t-att-value="sh_opt.id"
+                                                        t-att-selected="this.m2oId(row.shade_id) === sh_opt.id">
+                                                        <t t-esc="sh_opt.code"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onWeightFieldChange(row, 'size_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.stoneSizes" t-as="sz_opt" t-key="sz_opt.id">
+                                                    <option
+                                                        t-att-value="sz_opt.id"
+                                                        t-att-selected="this.m2oId(row.size_id) === sz_opt.id">
+                                                        <t t-esc="sz_opt.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                step="0.0001"
+                                                class="form-control form-control-sm"
+                                                t-att-value="row.weight"
+                                                t-on-input="(e) => this.onWeightFieldChange(row, 'weight', e.target.value)"
+                                            />
+                                        </td>
+                                        <td>
+                                            <button
+                                                class="btn btn-sm btn-outline-danger"
+                                                t-on-click.stop="() => this.removeWeightRow(row)">
+                                                ✕
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-if="state.weights.length === 0">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted fst-italic py-3">
+                                            No weights found. Adjust filters or click Add Row.
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </t>
+
+        </div>
+    </div>
+</t>
+
+</templates>

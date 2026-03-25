@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<t t-name="pdp_frontend.parts_manage">
+    <div class="o_action pdp-manage d-flex flex-column" style="height: 100%;">
+
+        <!-- ===== TOP BAR ===== -->
+        <div class="pdp-manage-topbar d-flex align-items-center gap-2 px-3 py-2 border-bottom bg-white shadow-sm">
+            <span class="fw-bold fs-5">Parts</span>
+        </div>
+
+        <!-- ===== MASTER-DETAIL BODY ===== -->
+        <div class="d-flex flex-row" style="flex: 1 1 0; min-height: 0; overflow: hidden;">
+
+            <!-- ── LEFT: Parts list (30%) ───────────────────────────────── -->
+            <div class="d-flex flex-column border-end bg-white" style="width: 30%; min-width: 200px;">
+                <!-- Parts sub-topbar -->
+                <div class="d-flex align-items-center gap-2 px-2 py-2 border-bottom bg-light">
+                    <span class="fw-semibold me-auto">Parts</span>
+                    <button
+                        class="btn btn-primary btn-sm"
+                        t-att-disabled="!state.isDirtyParts"
+                        t-on-click="() => this.saveParts()">
+                        Save
+                        <t t-if="this.dirtyPartsCount > 0">
+                            (<t t-esc="this.dirtyPartsCount"/>)
+                        </t>
+                    </button>
+                    <button class="btn btn-secondary btn-sm" t-on-click="() => this.addPart()">
+                        Add
+                    </button>
+                </div>
+
+                <!-- Parts list body -->
+                <div class="overflow-auto" style="flex: 1 1 0;">
+                    <t t-if="state.parts.length === 0">
+                        <div class="text-center text-muted fst-italic py-4">
+                            No parts. Click Add to create one.
+                        </div>
+                    </t>
+                    <t t-foreach="state.parts" t-as="part" t-key="part._key">
+                        <div
+                            class="d-flex align-items-center px-2 py-2 border-bottom"
+                            style="cursor: pointer;"
+                            t-att-class="(state.selectedPartId === part.id ? 'bg-primary text-white' : '') + (part._dirty ? ' fw-semibold' : '')"
+                            t-on-click="() => this.selectPart(part.id)">
+
+                            <t t-if="part.id === null">
+                                <!-- Inline editing for new unsaved parts -->
+                                <input
+                                    type="text"
+                                    class="form-control form-control-sm me-1"
+                                    style="width: 80px;"
+                                    placeholder="Code"
+                                    t-att-value="part.code"
+                                    t-on-click.stop="() => {}"
+                                    t-on-input="(e) => this.onPartFieldChange(part, 'code', e.target.value)"
+                                />
+                                <input
+                                    type="text"
+                                    class="form-control form-control-sm me-auto"
+                                    placeholder="Name"
+                                    t-att-value="part.name"
+                                    t-on-click.stop="() => {}"
+                                    t-on-input="(e) => this.onPartFieldChange(part, 'name', e.target.value)"
+                                />
+                            </t>
+                            <t t-else="">
+                                <div class="me-auto d-flex flex-column" style="min-width: 0;">
+                                    <input
+                                        type="text"
+                                        class="form-control form-control-sm mb-1"
+                                        t-att-class="state.selectedPartId === part.id ? 'bg-primary text-white border-white' : ''"
+                                        style="font-weight: 600;"
+                                        placeholder="Code"
+                                        t-att-value="part.code"
+                                        t-on-click.stop="() => {}"
+                                        t-on-input="(e) => this.onPartFieldChange(part, 'code', e.target.value)"
+                                    />
+                                    <input
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        t-att-class="state.selectedPartId === part.id ? 'bg-primary text-white border-white' : ''"
+                                        placeholder="Name"
+                                        t-att-value="part.name"
+                                        t-on-click.stop="() => {}"
+                                        t-on-input="(e) => this.onPartFieldChange(part, 'name', e.target.value)"
+                                    />
+                                </div>
+                            </t>
+
+                            <button
+                                class="btn btn-sm ms-1 flex-shrink-0"
+                                t-att-class="state.selectedPartId === part.id ? 'btn-outline-light' : 'btn-outline-danger'"
+                                t-on-click.stop="() => this.removePart(part)">
+                                ✕
+                            </button>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- ── RIGHT: Costs panel (70%) ────────────────────────────── -->
+            <div class="d-flex flex-column bg-white" style="flex: 1 1 0; min-width: 0;">
+                <t t-if="this.selectedPart">
+                    <!-- Costs sub-topbar -->
+                    <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom bg-light">
+                        <span class="fw-semibold me-auto">
+                            Costs for
+                            <span class="text-primary">
+                                <t t-esc="this.selectedPart.code"/>
+                            </span>
+                            <t t-if="this.selectedPart.name">
+                                — <t t-esc="this.selectedPart.name"/>
+                            </t>
+                        </span>
+                        <button
+                            class="btn btn-primary btn-sm"
+                            t-att-disabled="!state.isDirtyCosts"
+                            t-on-click="() => this.saveCosts()">
+                            Save Costs
+                            <t t-if="this.dirtyCostsCount > 0">
+                                (<t t-esc="this.dirtyCostsCount"/>)
+                            </t>
+                        </button>
+                        <button class="btn btn-secondary btn-sm" t-on-click="() => this.addCostRow()">
+                            Add Row
+                        </button>
+                    </div>
+
+                    <!-- Costs table -->
+                    <div class="p-3 overflow-auto" style="flex: 1 1 0;">
+                        <table class="table table-sm table-bordered table-hover pdp-manage-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 160px;">Purity</th>
+                                    <th style="width: 140px;">Cost</th>
+                                    <th style="width: 130px;">Currency</th>
+                                    <th style="width: 40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.costs" t-as="row" t-key="row._key">
+                                    <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onCostFieldChange(row, 'purity_id', parseInt(e.target.value))">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
+                                                    <option
+                                                        t-att-value="pur.id"
+                                                        t-att-selected="this.m2oId(row.purity_id) === pur.id">
+                                                        <t t-esc="pur.code"/>
+                                                        <t t-if="pur.percent"> (<t t-esc="pur.percent"/>%)</t>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                class="form-control form-control-sm"
+                                                t-att-value="row.cost"
+                                                t-on-input="(e) => this.onCostFieldChange(row, 'cost', e.target.value)"
+                                            />
+                                        </td>
+                                        <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onCostFieldChange(row, 'currency_id', parseInt(e.target.value))">
+                                                <option value="">— select —</option>
+                                                <t t-foreach="this.currencies" t-as="cur" t-key="cur.id">
+                                                    <option
+                                                        t-att-value="cur.id"
+                                                        t-att-selected="this.m2oId(row.currency_id) === cur.id">
+                                                        <t t-esc="cur.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button
+                                                class="btn btn-sm btn-outline-danger"
+                                                t-on-click.stop="() => this.removeCostRow(row)">
+                                                ✕
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-if="state.costs.length === 0">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted fst-italic py-3">
+                                            No costs defined. Click Add Row.
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="d-flex align-items-center justify-content-center h-100 text-muted fst-italic fs-5">
+                        Select a part from the list.
+                    </div>
+                </t>
+            </div>
+
+        </div>
+    </div>
+</t>
+
+</templates>

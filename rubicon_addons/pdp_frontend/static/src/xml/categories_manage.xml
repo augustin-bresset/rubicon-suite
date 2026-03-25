@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<t t-name="pdp_frontend.categories_manage">
+    <div class="o_action pdp-manage">
+
+        <div class="pdp-manage-topbar d-flex align-items-center gap-2 px-3 py-2 border-bottom">
+            <span class="fw-bold fs-5 me-auto">Ornament Categories</span>
+            <button
+                class="btn btn-primary btn-sm"
+                t-att-disabled="!state.isDirty"
+                t-on-click="() => this.saveAll()">
+                Save
+                <t t-if="this.dirtyCount > 0">
+                    (<t t-esc="this.dirtyCount"/>)
+                </t>
+            </button>
+            <button class="btn btn-secondary btn-sm" t-on-click="() => this.addRow()">
+                Add
+            </button>
+        </div>
+
+        <div class="p-3">
+            <table class="table table-sm table-hover pdp-manage-table">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Code</th>
+                        <th>Name</th>
+                        <th style="width: 130px;">Metal Waste %</th>
+                        <th style="width: 40px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="state.categories" t-as="row" t-key="row._key">
+                        <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                            <td>
+                                <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    t-att-value="row.code"
+                                    t-on-input="(e) => this.onFieldChange(row, 'code', e.target.value)"
+                                />
+                            </td>
+                            <td>
+                                <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    t-att-value="row.name"
+                                    t-on-input="(e) => this.onFieldChange(row, 'name', e.target.value)"
+                                />
+                            </td>
+                            <td>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    class="form-control form-control-sm"
+                                    t-att-value="row.waste"
+                                    t-on-input="(e) => this.onFieldChange(row, 'waste', e.target.value)"
+                                />
+                            </td>
+                            <td>
+                                <button
+                                    class="btn btn-sm btn-outline-danger"
+                                    t-on-click.stop="() => this.removeRow(row)">
+                                    ✕
+                                </button>
+                            </td>
+                        </tr>
+                    </t>
+                    <t t-if="state.categories.length === 0">
+                        <tr>
+                            <td colspan="4" class="text-center text-muted fst-italic py-3">
+                                No categories. Click Add to create one.
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</t>
+
+</templates>
