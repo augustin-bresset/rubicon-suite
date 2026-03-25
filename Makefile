@@ -1,26 +1,24 @@
-# Create commands for the project.
-
-
+# Rubicon Suite — development and operations commands.
 
 # --- Config ---
 -include .env
 export
 
-ODOO_BIN        ?= odoo
-DB_NAME         ?= $(DB_NAME)
-DB_HOST         ?= $(DB_HOST)
-DB_PORT         ?= $(DB_PORT)
-DB_USER         ?= $(DB_USER)
-DB_PASS         ?= $(DB_PASS)
+DB_NAME         ?= rubicon
+DB_HOST         ?= localhost
+DB_PORT         ?= 5432
+DB_USER         ?= rubicondev
+DB_PASS         ?= rubicondev
 
 IMPORT_CSV_SCRIPT   ?= ops/import/import_csv.py
-CREATE_DIAGRAM		?= rubicon_addons/rubicon_import/analysis/diagram.py
+CREATE_DIAGRAM      ?= rubicon_addons/rubicon_import/analysis/diagram.py
 
 LOG_DIR         ?= meta/logs
 TIMESTAMP       := $(shell date +%F_%H%M)
 
-DB := $(if $(DB_NAME),$(DB_NAME),rubicon)	
+DB := $(if $(DB_NAME),$(DB_NAME),rubicon)
 
+ODOO_BIN        ?= odoo
 ODOO = docker compose exec -T odoo $(ODOO_BIN) -d $(DB)
 PY   := python3
 
@@ -35,17 +33,45 @@ PDP_MODULES = pdp_stone,pdp_metal,pdp_labor,pdp_margin,pdp_product,pdp_frontend
 
 SIS_MODULES = sis_party,sis_document,sis_frontend
 
-
 export PYTHONPATH := $(abspath rubicon_addons):$(PYTHONPATH)
 
-LOG_DIR ?= meta/logs
-TIMESTAMP = $(SHELL date +%F_%H%M)
+.PHONY: help reset_odoo_db init-data-modules update-data-modules update-pdp-modules \
+        update-sis-modules upgrade deploy-demo logs-demo logs-prod \
+        raw_to_data_all import_all import_csv import_pictures audit_counts create_diagram \
+        stone-data stone-install stone-import stone-all backup-help
 
 
+# --- General ---
 
-# --- General ---- 
-
-help: cat README.md
+help:
+	@echo ""
+	@echo "Rubicon Suite — available commands"
+	@echo ""
+	@echo "  Database"
+	@echo "    make reset_odoo_db          Drop volumes and restart stack"
+	@echo "    make init-data-modules      Install core data modules from scratch"
+	@echo "    make update-data-modules    Update core data modules (pdp_*)"
+	@echo "    make update-pdp-modules     Update all PDP modules including frontend"
+	@echo "    make update-sis-modules     Update all SIS modules including frontend"
+	@echo "    make upgrade                Update all modules (PDP + SIS)"
+	@echo ""
+	@echo "  Deploy"
+	@echo "    make deploy-demo            Pull latest code and restart demo stack"
+	@echo "    make logs-demo              Follow demo Odoo logs"
+	@echo "    make logs-prod              Follow production Odoo logs"
+	@echo ""
+	@echo "  Import"
+	@echo "    make import_all             Run full CSV import"
+	@echo "    make import_csv WHAT=...    Import a specific CSV"
+	@echo "    make import_pictures        Import product pictures"
+	@echo "    make audit_counts           Print record counts to log"
+	@echo ""
+	@echo "  Stone pipeline"
+	@echo "    make stone-data             Generate stone CSV from raw data"
+	@echo "    make stone-install          Install pdp_stone module"
+	@echo "    make stone-import           Import stone data"
+	@echo "    make stone-all              Full stone pipeline"
+	@echo ""
 
 
 reset_odoo_db:
@@ -58,9 +84,31 @@ init-data-modules:
 update-data-modules:
 	$(ODOO) -u $(CORE_DATA_MODULES) --stop-after-init --workers=0
 
-update-sis-modules:
-	$(ODOO) -u $(CORE_DATA_MODULES) --stop-after-init --workers=0
+update-pdp-modules:
+	$(ODOO) -u $(PDP_MODULES) --stop-after-init --workers=0
 
+update-sis-modules:
+	$(ODOO) -u $(SIS_MODULES) --stop-after-init --workers=0
+
+upgrade:
+	$(ODOO) -u $(PDP_MODULES),$(SIS_MODULES) --stop-after-init --workers=0
+
+# --- Deploy ---
+
+deploy-demo:
+	git pull
+	$(MAKE) update-pdp-modules
+	$(MAKE) update-sis-modules
+	docker compose -f docker-compose.demo.yml restart odoo_demo
+
+logs-demo:
+	docker compose -f docker-compose.demo.yml logs -f odoo_demo
+
+logs-prod:
+	docker compose logs -f odoo
+
+
+# --- Data pipeline ---
 
 raw_to_data_all:
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_stone
@@ -74,52 +122,37 @@ import_all:
 	@echo "→ DB=$(DB)  script=$(IMPORT_CSV_SCRIPT)"
 	$(ODOO_SHELL) < $(IMPORT_CSV_SCRIPT) 2>&1 | tee $(LOG_DIR)/import_$(TIMESTAMP).log
 
-
-
 import_csv:
 	@WHAT=$(WHAT) $(ODOO_SHELL) < ops/import/import_csv.py
 
 import_pictures:
 	@$(ODOO_SHELL) < ops/import/import_pictures.py
 
-
-# ODOO_SHELL = docker compose exec -T odoo odoo shell -d $(DB_NAME) --no-http
-
 audit_counts:
 	@mkdir -p $(LOG_DIR)
 	@$(ODOO_SHELL) < ops/audit/audit_counts.py | tee $(LOG_DIR)/counts_$(TIMESTAMP).log
 
 create_diagram:
+	@mkdir -p $(LOG_DIR)
 	@$(ODOO_SHELL) < ${CREATE_DIAGRAM} | tee $(LOG_DIR)/diagram.log
-		@mkdir -p $(LOG_DIR)
 	docker compose cp odoo:/var/lib/odoo/odoo_erd.puml ./odoo_erd.puml
 
-# --- Pipeline STONE ---
 
-.PHONY: stone-data stone-install stone-import stone-all db-reset
+# --- Stone pipeline ---
 
 stone-data:
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_stone
+
 stone-install:
-	$(ODOO) odoo -d $(DB) -i pdp_stone --without-demo=all --stop-after-init --workers=0
+	$(ODOO) -i pdp_stone --without-demo=all --stop-after-init --workers=0
 
 stone-import:
-	$(ODOO) odoo shell -d $(DB) < /mnt/extra-addons/rubicon-suite/scripts/stone_import.py
-
-stone-import-standalone:
-	$(ODOO) python3 /mnt/extra-addons/rubicon-suite/scripts/stone_import_standalone.py -d $(DB) -c /etc/odoo/odoo.conf
+	$(ODOO_SHELL) < ops/import/stone_import.py
 
 stone-all: stone-data stone-install stone-import
 
-# --- Reset DB quand tu veux repartir de zéro ---
-# db-reset:
-# 	-$(PSQL) -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='$(DB)';"
-# 	-$(PSQL) -c "DROP DATABASE IF EXISTS $(DB);"
-# 	$(PSQL) -c "CREATE DATABASE $(DB) ENCODING 'UTF8' TEMPLATE template0;"
 
-
-# Restore Backup DB to CSV
+# --- Misc ---
 
 backup-help:
-	cat meta/doc/backup.md
-
+	@cat meta/doc/backup.md

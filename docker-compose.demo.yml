@@ -15,7 +15,7 @@ services:
     depends_on:
       - db_demo
     ports:
-      - "127.0.0.1:8070:8069"
+      - "0.0.0.0:8070:8069"
     environment:
       PYTHONDONTWRITEBYTECODE: "1"
     volumes:

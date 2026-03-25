@@ -1,13 +1,13 @@
 #!/bin/bash
-# Backup de la base de données et du filestore Odoo.
+# Backup the Odoo database and filestore.
 # Usage: ./ops/backup.sh [demo|prod] [--no-oci]
-#   demo     : sauvegarde rubicondemo (local seulement)
-#   prod     : sauvegarde rubicon (local + Oracle Object Storage)
-#   --no-oci : désactive l'upload OCI même pour prod
+#   demo     : backup rubicondemo (local only)
+#   prod     : backup rubicon (local + Oracle Object Storage)
+#   --no-oci : disable OCI upload even for prod
 #
-# Prérequis:
-#   - Docker Compose stack démarrée
-#   - Pour prod avec OCI: oci CLI configuré (voir ops/setup_oci_backup.md)
+# Prerequisites:
+#   - Docker Compose stack running
+#   - For prod with OCI: oci CLI configured (see ops/setup_oci_backup.md)
 
 set -euo pipefail
 
@@ -29,7 +29,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-# ── Paramètres selon l'environnement ──────────────────────────────────────
+# ── Environment parameters ─────────────────────────────────────────────────
 if [ "$ENV" = "demo" ]; then
   COMPOSE_FILE="$SCRIPT_DIR/docker-compose.demo.yml"
   DB_SERVICE="db_demo"
@@ -42,7 +42,7 @@ elif [ "$ENV" = "prod" ]; then
   COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
   DB_SERVICE="db"
   ODOO_SERVICE="odoo"
-  # Charger DB_NAME depuis .env si disponible
+  # Load DB_NAME from .env if available
   if [ -f "$SCRIPT_DIR/.env" ]; then
     source "$SCRIPT_DIR/.env"
     DB_NAME="${DB_NAME:-rubicon}"
@@ -58,74 +58,74 @@ else
   exit 1
 fi
 
-# ── Initialisation ────────────────────────────────────────────────────────
+# ── Initialization ─────────────────────────────────────────────────────────
 mkdir -p "$BACKUP_DIR/$DATE_DIR"
-exec >> "$LOG_FILE" 2>&1 || true  # Log si possible (non-fatal si /var/log non accessible)
+exec >> "$LOG_FILE" 2>&1 || true  # Log if possible (non-fatal if /var/log not writable)
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
-fail() { echo -e "${RED}[$(date '+%Y-%m-%d %H:%M:%S')] ERREUR: $*${NC}"; exit 1; }
+fail() { echo -e "${RED}[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*${NC}"; exit 1; }
 
-log "=== Début backup $ENV ($TIMESTAMP) ==="
+log "=== Starting backup $ENV ($TIMESTAMP) ==="
 
-# ── 1. Vérifier que les containers tournent ───────────────────────────────
+# ── 1. Check containers are running ───────────────────────────────────────
 if ! docker compose -f "$COMPOSE_FILE" ps "$DB_SERVICE" 2>/dev/null | grep -q "running\|Up"; then
-  fail "Le container $DB_SERVICE n'est pas en cours d'exécution. Démarrer la stack d'abord."
+  fail "Container $DB_SERVICE is not running. Start the stack first."
 fi
 
-# ── 2. Backup de la base de données ──────────────────────────────────────
+# ── 2. Database backup ─────────────────────────────────────────────────────
 DB_FILE="$BACKUP_DIR/$DATE_DIR/${PREFIX}_db_${TIMESTAMP}.sql.gz"
-log "Backup DB $DB_NAME → $DB_FILE"
+log "Backing up DB $DB_NAME → $DB_FILE"
 
 docker compose -f "$COMPOSE_FILE" exec -T "$DB_SERVICE" \
   pg_dump -U "$DB_USER" "$DB_NAME" | gzip > "$DB_FILE" \
-  || fail "pg_dump échoué"
+  || fail "pg_dump failed"
 
 DB_SIZE=$(du -sh "$DB_FILE" | cut -f1)
-log "DB backup OK — taille: $DB_SIZE"
+log "DB backup OK — size: $DB_SIZE"
 
-# ── 3. Backup du filestore (volume Docker) ────────────────────────────────
+# ── 3. Filestore backup (Docker volume) ───────────────────────────────────
 FILESTORE_FILE="$BACKUP_DIR/$DATE_DIR/${PREFIX}_filestore_${TIMESTAMP}.tar.gz"
-log "Backup filestore (volume $VOLUME_NAME) → $FILESTORE_FILE"
+log "Backing up filestore (volume $VOLUME_NAME) → $FILESTORE_FILE"
 
-# Utilise un container Alpine temporaire pour accéder au volume
+# Use a temporary Alpine container to access the volume
 docker run --rm \
   -v "${VOLUME_NAME}:/data:ro" \
   -v "$BACKUP_DIR/$DATE_DIR:/backup" \
   alpine \
   tar czf "/backup/${PREFIX}_filestore_${TIMESTAMP}.tar.gz" -C /data . \
-  || fail "Backup filestore échoué"
+  || fail "Filestore backup failed"
 
 FS_SIZE=$(du -sh "$FILESTORE_FILE" | cut -f1)
-log "Filestore backup OK — taille: $FS_SIZE"
+log "Filestore backup OK — size: $FS_SIZE"
 
-# ── 4. Upload vers Oracle Object Storage (prod uniquement) ─────────────────
+# ── 4. Upload to Oracle Object Storage (prod only) ─────────────────────────
 if [ "$ENV" = "prod" ] && [ "$NO_OCI" != "--no-oci" ]; then
   if ! command -v oci &>/dev/null; then
-    log "AVERTISSEMENT: oci CLI non installé — upload OCI ignoré. Voir ops/setup_oci_backup.md"
+    log "WARNING: oci CLI not installed — OCI upload skipped. See ops/setup_oci_backup.md"
   else
-    log "Upload vers Oracle Object Storage (bucket: $OCI_BUCKET)..."
+    log "Uploading to Oracle Object Storage (bucket: $OCI_BUCKET)..."
 
     oci os object put \
       --bucket-name "$OCI_BUCKET" \
       --file "$DB_FILE" \
       --name "$ENV/$DATE_DIR/${PREFIX}_db_${TIMESTAMP}.sql.gz" \
       --force \
-      && log "Upload DB OCI OK" \
-      || log "AVERTISSEMENT: Upload DB OCI échoué (backup local conservé)"
+      && log "OCI DB upload OK" \
+      || log "WARNING: OCI DB upload failed (local backup retained)"
 
     oci os object put \
       --bucket-name "$OCI_BUCKET" \
       --file "$FILESTORE_FILE" \
       --name "$ENV/$DATE_DIR/${PREFIX}_filestore_${TIMESTAMP}.tar.gz" \
       --force \
-      && log "Upload filestore OCI OK" \
-      || log "AVERTISSEMENT: Upload filestore OCI échoué (backup local conservé)"
+      && log "OCI filestore upload OK" \
+      || log "WARNING: OCI filestore upload failed (local backup retained)"
 
-    # Rotation OCI (supprimer objets > RETENTION_OCI_DAYS jours)
+    # OCI rotation (delete objects older than RETENTION_OCI_DAYS days)
     CUTOFF_DATE=$(date -d "-${RETENTION_OCI_DAYS} days" +%Y%m%d 2>/dev/null || \
                   date -v-${RETENTION_OCI_DAYS}d +%Y%m%d 2>/dev/null || echo "")
     if [ -n "$CUTOFF_DATE" ]; then
-      log "Nettoyage OCI : suppression objets antérieurs à $CUTOFF_DATE"
+      log "OCI cleanup: deleting objects older than $CUTOFF_DATE"
       oci os object list --bucket-name "$OCI_BUCKET" --prefix "$ENV/" \
         --query "data[?\"time-created\" < '${CUTOFF_DATE}'].name" \
         --raw-output 2>/dev/null | \
@@ -133,23 +133,23 @@ if [ "$ENV" = "prod" ] && [ "$NO_OCI" != "--no-oci" ]; then
         while read -r obj; do
           [ -n "$obj" ] && oci os object delete \
             --bucket-name "$OCI_BUCKET" --object-name "$obj" --force 2>/dev/null \
-            && log "OCI supprimé: $obj" || true
+            && log "OCI deleted: $obj" || true
         done
     fi
   fi
 fi
 
-# ── 5. Rotation locale ─────────────────────────────────────────────────────
-log "Rotation locale (>$RETENTION_LOCAL_DAYS jours)..."
+# ── 5. Local rotation ──────────────────────────────────────────────────────
+log "Local rotation (>$RETENTION_LOCAL_DAYS days)..."
 find "$BACKUP_DIR" -name "${PREFIX}_*.sql.gz" -mtime "+$RETENTION_LOCAL_DAYS" -delete 2>/dev/null || true
 find "$BACKUP_DIR" -name "${PREFIX}_*.tar.gz" -mtime "+$RETENTION_LOCAL_DAYS" -delete 2>/dev/null || true
-# Supprimer les répertoires de date vides
+# Remove empty date directories
 find "$BACKUP_DIR" -type d -empty -delete 2>/dev/null || true
 
-# ── 6. Résumé ─────────────────────────────────────────────────────────────
+# ── 6. Summary ─────────────────────────────────────────────────────────────
 TOTAL_LOCAL=$(du -sh "$BACKUP_DIR" 2>/dev/null | cut -f1 || echo "?")
-log "=== Backup $ENV terminé — stockage local total: $TOTAL_LOCAL ==="
-echo -e "${GREEN}Backup $ENV terminé avec succès.${NC}"
+log "=== Backup $ENV complete — total local storage: $TOTAL_LOCAL ==="
+echo -e "${GREEN}Backup $ENV completed successfully.${NC}"
 echo "  DB        : $DB_FILE ($DB_SIZE)"
 echo "  Filestore : $FILESTORE_FILE ($FS_SIZE)"
 echo "  Log       : $LOG_FILE"

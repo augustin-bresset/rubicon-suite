@@ -1,25 +1,25 @@
-# Sécurité — Rubicon Suite
+# Security — Rubicon Suite
 
-## Vue d'ensemble des environnements
+## Environment Overview
 
-| Env | Accès | HTTPS | Firewall |
-|-----|-------|-------|---------|
-| Dev (localhost:8069) | Local uniquement | Non (inutile) | UFW désactivé |
-| Demo (Oracle Cloud :8070) | Internet via Cloudflare Tunnel | Oui (Cloudflare) | UFW + Oracle Security List |
-| Prod (local entreprise :8069) | Réseau interne + WireGuard VPN | Optionnel | UFW (réseau interne seulement) |
+| Env | Access | HTTPS | Firewall |
+|-----|--------|-------|---------|
+| Dev (localhost:8069) | Local only | No (not needed) | UFW disabled |
+| Demo (Oracle Cloud :8070) | Internet via Cloudflare Tunnel | Yes (Cloudflare) | UFW + Oracle Security List |
+| Prod (on-premises :8069) | Internal network + WireGuard VPN | Optional | UFW (internal network only) |
 
 ---
 
 ## Demo — Cloudflare Tunnel
 
-Le port 8070 n'est **jamais** accessible directement depuis Internet.
-Cloudflare Tunnel crée une connexion **sortante** du VPS vers Cloudflare.
+Port 8070 is **never** directly accessible from the Internet.
+Cloudflare Tunnel creates an **outbound** connection from the VPS to Cloudflare.
 
 ```
 Internet → Cloudflare → tunnel → localhost:8070
 ```
 
-Pour installer/redémarrer le tunnel :
+To install/restart the tunnel:
 ```bash
 ./ops/setup_cloudflare_tunnel.sh --service
 ```
@@ -28,84 +28,84 @@ Pour installer/redémarrer le tunnel :
 
 ## Demo — Oracle Cloud Security List
 
-Dans la console Oracle Cloud → **Networking → Virtual Cloud Networks → Security Lists** :
+In the Oracle Cloud console → **Networking → Virtual Cloud Networks → Security Lists**:
 
-### Ingress Rules (à conserver)
-| Source CIDR | Protocol | Port | Commentaire |
-|-------------|----------|------|-------------|
+### Ingress Rules (keep)
+| Source CIDR | Protocol | Port | Note |
+|-------------|----------|------|------|
 | 0.0.0.0/0 | TCP | 22 | SSH |
-| 0.0.0.0/0 | TCP | 80 | HTTP (futur redirect HTTPS) |
-| 0.0.0.0/0 | TCP | 443 | HTTPS (futur) |
+| 0.0.0.0/0 | TCP | 80 | HTTP (future HTTPS redirect) |
+| 0.0.0.0/0 | TCP | 443 | HTTPS (future) |
 
-### Ingress Rules (à supprimer/bloquer)
+### Ingress Rules (remove/block)
 | Port | Action |
 |------|--------|
-| 8070 | Supprimer la règle |
-| 5432 | Supprimer la règle (PostgreSQL) |
+| 8070 | Remove the rule |
+| 5432 | Remove the rule (PostgreSQL) |
 
-**Note :** Cloudflare Tunnel utilise uniquement des connexions **sortantes** — aucun port entrant n'est nécessaire pour le fonctionnement du tunnel.
+**Note:** Cloudflare Tunnel uses only **outbound** connections — no inbound port is required for the tunnel to work.
 
 ---
 
-## Demo — Durcissement Odoo
+## Demo — Odoo Hardening
 
-Exécuter une seule fois (ou après chaque réinstallation) :
+Run once (or after each reinstall):
 ```bash
 ./ops/harden_demo.sh --restart
 ```
 
-Ce script configure :
-- `admin_passwd` fort (48 chars) — protège `/web/database/manager`
-- `list_db = False` — cache la liste et l'accès aux bases
-- `workers = 2` — isolation entre requêtes
-- Limites CPU/mémoire — protection contre les requêtes abusives
+This script configures:
+- Strong `admin_passwd` (48 chars) — protects `/web/database/manager`
+- `list_db = False` — hides the database list and manager
+- `workers = 2` — request isolation
+- CPU/memory limits — protection against abusive requests
 
 ---
 
 ## Production — WireGuard VPN
 
-Les employés nomades se connectent via WireGuard (UDP 51820).
-Le port 8069 n'est accessible que depuis le réseau interne (192.168.x.x) ou via le VPN (10.8.x.x).
+Remote employees connect via WireGuard (UDP 51820).
+Port 8069 is only accessible from the internal network (192.168.x.x) or via VPN (10.8.x.x).
 
 ```bash
-# Installer WireGuard
+# Install WireGuard
 ./ops/setup_wireguard.sh
 
-# Ajouter un utilisateur
-./ops/add_vpn_user.sh prenom_nom
+# Add a user
+./ops/add_vpn_user.sh firstname_lastname
 
-# Guide employé
+# Employee guide
 cat ops/VPN_GUIDE.md
 ```
 
 ---
 
-## Checklist de sécurité
+## Security Checklist
 
-### Demo (à faire une fois)
-- [ ] `./ops/harden_demo.sh --restart` exécuté
-- [ ] `./ops/setup_cloudflare_tunnel.sh --service` actif
-- [ ] `./ops/setup_firewall.sh demo` actif
-- [ ] Oracle Cloud Security List : port 8070 fermé
-- [ ] `DEMO_ADMIN_PASSWORD` défini dans `.env.demo` (≠ `CHANGE_ME`)
-- [ ] Backup cron configuré (voir `ops/CRON.md`)
-- [ ] UptimeRobot configuré (voir `ops/MONITORING.md`)
+### Demo (run once)
+- [ ] `./ops/harden_demo.sh --restart` executed
+- [ ] `./ops/setup_cloudflare_tunnel.sh --service` active
+- [ ] `./ops/setup_firewall.sh demo` active
+- [ ] Oracle Cloud Security List: port 8070 closed
+- [ ] `DEMO_ADMIN_PASSWORD` set in `.env.demo` (≠ `CHANGE_ME`)
+- [ ] Backup cron configured (see `ops/CRON.md`)
+- [ ] UptimeRobot configured (see `ops/MONITORING.md`)
 
-### Production (à faire avant mise en service)
-- [ ] `./ops/setup_wireguard.sh` exécuté
-- [ ] `./ops/setup_firewall.sh prod` actif
-- [ ] `odoo.conf` avec `admin_passwd` fort et `list_db = False`
-- [ ] Backup cron configuré + OCI testé
-- [ ] `./ops/healthcheck.sh prod` passe sans erreur
-- [ ] Au moins 1 backup de test restauré avec `./ops/restore.sh`
+### Production (run before go-live)
+- [ ] `./ops/setup_wireguard.sh` executed
+- [ ] `./ops/setup_firewall.sh prod` active
+- [ ] `odoo.conf` with strong `admin_passwd` and `list_db = False`
+- [ ] Backup cron configured + OCI tested
+- [ ] `./ops/healthcheck.sh prod` passes without errors
+- [ ] At least 1 test backup restored with `./ops/restore.sh`
 
 ---
 
-## Secrets et fichiers sensibles
+## Secrets and Sensitive Files
 
-Ces fichiers ne doivent **jamais** être commités dans git (vérifiés par .gitignore) :
-- `.env` — credentials production
-- `.env.demo` — credentials demo
-- `.demo_secrets` — admin_passwd généré par harden_demo.sh
-- `odoo_conf/odoo_demo.conf` — config demo avec admin_passwd
-- `/etc/wireguard/` — clés WireGuard (sur le serveur uniquement)
+These files must **never** be committed to git (enforced by .gitignore):
+- `.env` — production credentials
+- `.env.demo` — demo credentials
+- `.demo_secrets` — admin_passwd generated by harden_demo.sh
+- `odoo_conf/odoo_demo.conf` — demo config with admin_passwd
+- `/etc/wireguard/` — WireGuard keys (on server only)

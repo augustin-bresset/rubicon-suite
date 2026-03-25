@@ -1,17 +1,17 @@
 #!/bin/bash
-# Ajoute un utilisateur WireGuard VPN.
-# Usage: ./ops/add_vpn_user.sh <prenom_nom>
-# Exemple: ./ops/add_vpn_user.sh jean_dupont
+# Add a WireGuard VPN user.
+# Usage: ./ops/add_vpn_user.sh <first_last>
+# Example: ./ops/add_vpn_user.sh john_doe
 #
-# Génère la configuration client et l'affiche en QR code (mobile) et en texte.
-# Le peer est automatiquement ajouté à /etc/wireguard/wg0.conf.
+# Generates the client configuration and displays it as a QR code (mobile) and plain text.
+# The peer is automatically added to /etc/wireguard/wg0.conf.
 
 set -e
 
 USERNAME="$1"
 if [ -z "$USERNAME" ]; then
-  echo "Usage: $0 <prenom_nom>"
-  echo "Exemple: $0 jean_dupont"
+  echo "Usage: $0 <first_last>"
+  echo "Example: $0 john_doe"
   exit 1
 fi
 
@@ -23,26 +23,26 @@ KEYS_DIR="/etc/wireguard/keys"
 WG_CONF="/etc/wireguard/wg0.conf"
 USER_DIR="$KEYS_DIR/users/$USERNAME"
 
-# ── Vérifier que WireGuard est installé ───────────────────────────────────
+# ── Check WireGuard is installed ───────────────────────────────────────────
 if [ ! -f "$WG_CONF" ]; then
-  echo "WireGuard non configuré. Lancer d'abord: ./ops/setup_wireguard.sh"
+  echo "WireGuard not configured. Run first: ./ops/setup_wireguard.sh"
   exit 1
 fi
 
-# ── Trouver la prochaine IP disponible dans 10.8.0.0/24 ───────────────────
+# ── Find the next available IP in 10.8.0.0/24 ─────────────────────────────
 LAST_IP=$(grep -oP "AllowedIPs = 10\.8\.0\.\K\d+" "$WG_CONF" 2>/dev/null | sort -n | tail -1 || echo "1")
 NEXT_IP=$((LAST_IP + 1))
 if [ "$NEXT_IP" -gt 254 ]; then
-  echo "Erreur: toutes les IPs VPN sont utilisées (max 253 utilisateurs)."
+  echo "Error: all VPN IPs are in use (max 253 users)."
   exit 1
 fi
 CLIENT_IP="10.8.0.$NEXT_IP"
 
-# ── Récupérer les infos serveur ───────────────────────────────────────────
+# ── Get server info ────────────────────────────────────────────────────────
 SERVER_PUBLIC=$(sudo cat "$KEYS_DIR/server_public.key")
 SERVER_ADDR=$(hostname -I | awk '{print $1}')
 
-# ── Générer les clés client ───────────────────────────────────────────────
+# ── Generate client keys ───────────────────────────────────────────────────
 sudo mkdir -p "$USER_DIR"
 sudo chmod 700 "$USER_DIR"
 
@@ -55,7 +55,7 @@ CLIENT_PRIVATE=$(sudo cat "$USER_DIR/private.key")
 CLIENT_PUBLIC=$(sudo cat "$USER_DIR/public.key")
 CLIENT_PSK=$(sudo cat "$USER_DIR/preshared.key")
 
-# ── Créer le fichier de config client ─────────────────────────────────────
+# ── Create client config file ──────────────────────────────────────────────
 CLIENT_CONF="$USER_DIR/${USERNAME}.conf"
 sudo tee "$CLIENT_CONF" > /dev/null <<CONF
 [Interface]
@@ -73,36 +73,36 @@ CONF
 
 sudo chmod 600 "$CLIENT_CONF"
 
-# ── Ajouter le peer dans wg0.conf ─────────────────────────────────────────
+# ── Add peer to wg0.conf ───────────────────────────────────────────────────
 sudo tee -a "$WG_CONF" > /dev/null <<PEER
 
 [Peer]
-# Utilisateur: $USERNAME ($CLIENT_IP)
+# User: $USERNAME ($CLIENT_IP)
 PublicKey = $CLIENT_PUBLIC
 PresharedKey = $CLIENT_PSK
 AllowedIPs = $CLIENT_IP/32
 PEER
 
-# ── Recharger WireGuard (sans couper les connexions actives) ───────────────
+# ── Reload WireGuard (without dropping active connections) ─────────────────
 sudo wg addconf wg0 <(sudo wg-quick strip wg0 2>/dev/null || true) 2>/dev/null || \
   sudo systemctl reload wg-quick@wg0 2>/dev/null || \
   sudo wg set wg0 peer "$CLIENT_PUBLIC" preshared-key "$USER_DIR/preshared.key" allowed-ips "$CLIENT_IP/32"
 
-echo -e "${GREEN}=== Utilisateur VPN '$USERNAME' créé ===${NC}"
-echo "  IP VPN client : $CLIENT_IP"
-echo "  Config client : $CLIENT_CONF"
+echo -e "${GREEN}=== VPN user '$USERNAME' created ===${NC}"
+echo "  VPN client IP : $CLIENT_IP"
+echo "  Client config : $CLIENT_CONF"
 echo ""
 
-# ── Afficher QR code (pour mobile) ───────────────────────────────────────
+# ── Display QR code (for mobile) ──────────────────────────────────────────
 if command -v qrencode &>/dev/null; then
-  echo -e "${YELLOW}QR Code (importer dans l'app WireGuard sur mobile) :${NC}"
+  echo -e "${YELLOW}QR Code (import in the WireGuard app on mobile):${NC}"
   sudo qrencode -t ansiutf8 < "$CLIENT_CONF"
   echo ""
 fi
 
-echo -e "${YELLOW}Config texte (pour import manuel sur Windows/Mac) :${NC}"
-echo "Fichier : $CLIENT_CONF"
+echo -e "${YELLOW}Plain text config (for manual import on Windows/Mac):${NC}"
+echo "File: $CLIENT_CONF"
 echo ""
 sudo cat "$CLIENT_CONF"
 echo ""
-echo "Voir ops/VPN_GUIDE.md pour les instructions d'installation client."
+echo "See ops/VPN_GUIDE.md for client installation instructions."

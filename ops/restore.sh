@@ -1,12 +1,12 @@
 #!/bin/bash
-# Restaure la base de données et le filestore depuis un backup.
+# Restore the database and filestore from a backup.
 # Usage: ./ops/restore.sh [demo|prod] <YYYYMMDD> [--from-oci]
-#   demo         : restaure rubicondemo
-#   prod         : restaure rubicon
-#   YYYYMMDD     : date du backup (ex: 20260325)
-#   --from-oci   : télécharge d'abord depuis Oracle Object Storage
+#   demo         : restore rubicondemo
+#   prod         : restore rubicon
+#   YYYYMMDD     : backup date (e.g. 20260325)
+#   --from-oci   : download from Oracle Object Storage first
 #
-# ATTENTION : opération destructive. La base de données existante sera remplacée.
+# WARNING: destructive operation. The existing database will be replaced.
 
 set -euo pipefail
 
@@ -21,7 +21,7 @@ NC='\033[0m'
 
 if [ -z "$ENV" ] || [ -z "$DATE_ARG" ]; then
   echo "Usage: $0 [demo|prod] <YYYYMMDD> [--from-oci]"
-  echo "Exemple: $0 prod 20260325"
+  echo "Example: $0 prod 20260325"
   exit 1
 fi
 
@@ -29,7 +29,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BACKUP_DIR="/opt/rubicon-backups"
 OCI_BUCKET="rubicon-backups"
 
-# ── Paramètres selon l'environnement ──────────────────────────────────────
+# ── Environment parameters ─────────────────────────────────────────────────
 if [ "$ENV" = "demo" ]; then
   COMPOSE_FILE="$SCRIPT_DIR/docker-compose.demo.yml"
   DB_SERVICE="db_demo"
@@ -53,19 +53,19 @@ elif [ "$ENV" = "prod" ]; then
   VOLUME_NAME="rubicon-suite_odoo_data"
   PREFIX="prod"
 else
-  echo "Environnement inconnu: $ENV"
+  echo "Unknown environment: $ENV"
   exit 1
 fi
 
 DATE_DIR="$BACKUP_DIR/$DATE_ARG"
 
-# ── Téléchargement depuis OCI si demandé ──────────────────────────────────
+# ── Download from OCI if requested ────────────────────────────────────────
 if [ "$FROM_OCI" = "--from-oci" ]; then
   if ! command -v oci &>/dev/null; then
-    echo -e "${RED}oci CLI non installé. Voir ops/setup_oci_backup.md${NC}"
+    echo -e "${RED}oci CLI not installed. See ops/setup_oci_backup.md${NC}"
     exit 1
   fi
-  echo "Téléchargement des backups du $DATE_ARG depuis OCI..."
+  echo "Downloading backups for $DATE_ARG from OCI..."
   mkdir -p "$DATE_DIR"
 
   # DB
@@ -73,12 +73,12 @@ if [ "$FROM_OCI" = "--from-oci" ]; then
     --prefix "$ENV/$DATE_ARG/${PREFIX}_db_" \
     --query "data[0].name" --raw-output 2>/dev/null | tr -d '"' || echo "")
   if [ -z "$DB_OCI_KEY" ]; then
-    echo -e "${RED}Aucun backup DB trouvé dans OCI pour $ENV/$DATE_ARG${NC}"
+    echo -e "${RED}No DB backup found in OCI for $ENV/$DATE_ARG${NC}"
     exit 1
   fi
   oci os object get --bucket-name "$OCI_BUCKET" --name "$DB_OCI_KEY" \
     --file "$DATE_DIR/$(basename "$DB_OCI_KEY")"
-  echo "DB téléchargée: $(basename "$DB_OCI_KEY")"
+  echo "DB downloaded: $(basename "$DB_OCI_KEY")"
 
   # Filestore
   FS_OCI_KEY=$(oci os object list --bucket-name "$OCI_BUCKET" \
@@ -87,84 +87,84 @@ if [ "$FROM_OCI" = "--from-oci" ]; then
   if [ -n "$FS_OCI_KEY" ]; then
     oci os object get --bucket-name "$OCI_BUCKET" --name "$FS_OCI_KEY" \
       --file "$DATE_DIR/$(basename "$FS_OCI_KEY")"
-    echo "Filestore téléchargé: $(basename "$FS_OCI_KEY")"
+    echo "Filestore downloaded: $(basename "$FS_OCI_KEY")"
   fi
 fi
 
-# ── Trouver les fichiers de backup ────────────────────────────────────────
+# ── Find backup files ──────────────────────────────────────────────────────
 DB_FILE=$(ls "$DATE_DIR/${PREFIX}_db_"*.sql.gz 2>/dev/null | sort | tail -1 || echo "")
 FS_FILE=$(ls "$DATE_DIR/${PREFIX}_filestore_"*.tar.gz 2>/dev/null | sort | tail -1 || echo "")
 
 if [ -z "$DB_FILE" ]; then
-  echo -e "${RED}Aucun backup DB trouvé dans $DATE_DIR/${NC}"
-  echo "Fichiers disponibles:"
-  ls "$BACKUP_DIR"/ 2>/dev/null || echo "(aucun backup trouvé)"
+  echo -e "${RED}No DB backup found in $DATE_DIR/${NC}"
+  echo "Available backups:"
+  ls "$BACKUP_DIR"/ 2>/dev/null || echo "(no backups found)"
   exit 1
 fi
 
 echo ""
-echo -e "${RED}=== RESTAURATION $ENV depuis $(basename "$DB_FILE") ===${NC}"
+echo -e "${RED}=== RESTORE $ENV from $(basename "$DB_FILE") ===${NC}"
 echo ""
 echo "  DB backup   : $DB_FILE"
 echo "  FS backup   : ${FS_FILE:-N/A}"
-echo "  DB cible    : $DB_NAME"
+echo "  Target DB   : $DB_NAME"
 echo ""
-echo -e "${RED}ATTENTION : Toutes les données actuelles de $DB_NAME seront SUPPRIMÉES.${NC}"
-read -p "Confirmer la restauration ? [y/N] " -n 1 -r
+echo -e "${RED}WARNING: All current data in $DB_NAME will be DELETED.${NC}"
+read -p "Confirm restore? [y/N] " -n 1 -r
 echo ""
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  echo "Annulé."
+  echo "Cancelled."
   exit 0
 fi
 
-# ── 1. Arrêter Odoo ───────────────────────────────────────────────────────
-echo "Arrêt de $ODOO_SERVICE..."
+# ── 1. Stop Odoo ───────────────────────────────────────────────────────────
+echo "Stopping $ODOO_SERVICE..."
 docker compose -f "$COMPOSE_FILE" stop "$ODOO_SERVICE" 2>/dev/null || true
 
-# ── 2. Supprimer et recréer la base ───────────────────────────────────────
-echo "Suppression de la base $DB_NAME..."
+# ── 2. Drop and recreate the database ─────────────────────────────────────
+echo "Dropping database $DB_NAME..."
 docker compose -f "$COMPOSE_FILE" exec -T "$DB_SERVICE" \
   psql -U "$DB_USER" -c "DROP DATABASE IF EXISTS $DB_NAME;" postgres
 
 docker compose -f "$COMPOSE_FILE" exec -T "$DB_SERVICE" \
   psql -U "$DB_USER" -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;" postgres
 
-# ── 3. Restaurer la DB ────────────────────────────────────────────────────
-echo "Restauration de la base depuis $(basename "$DB_FILE")..."
+# ── 3. Restore the database ───────────────────────────────────────────────
+echo "Restoring database from $(basename "$DB_FILE")..."
 gunzip -c "$DB_FILE" | \
   docker compose -f "$COMPOSE_FILE" exec -T "$DB_SERVICE" \
     psql -U "$DB_USER" -d "$DB_NAME" -q
 
-echo "Base restaurée."
+echo "Database restored."
 
-# ── 4. Restaurer le filestore ─────────────────────────────────────────────
+# ── 4. Restore the filestore ──────────────────────────────────────────────
 if [ -n "$FS_FILE" ]; then
-  echo "Restauration du filestore depuis $(basename "$FS_FILE")..."
+  echo "Restoring filestore from $(basename "$FS_FILE")..."
   docker run --rm \
     -v "${VOLUME_NAME}:/data" \
     -v "$(dirname "$FS_FILE"):/backup:ro" \
     alpine \
     sh -c "rm -rf /data/* && tar xzf /backup/$(basename "$FS_FILE") -C /data"
-  echo "Filestore restauré."
+  echo "Filestore restored."
 else
-  echo -e "${YELLOW}Aucun backup filestore disponible — le filestore n'est pas restauré.${NC}"
+  echo -e "${YELLOW}No filestore backup available — filestore not restored.${NC}"
 fi
 
-# ── 5. Redémarrer Odoo ────────────────────────────────────────────────────
-echo "Redémarrage de $ODOO_SERVICE..."
+# ── 5. Restart Odoo ───────────────────────────────────────────────────────
+echo "Starting $ODOO_SERVICE..."
 docker compose -f "$COMPOSE_FILE" start "$ODOO_SERVICE"
 
-# ── 6. Vérifier le healthcheck ────────────────────────────────────────────
-echo "Attente du healthcheck..."
+# ── 6. Healthcheck ────────────────────────────────────────────────────────
+echo "Waiting for healthcheck..."
 PORT=$([ "$ENV" = "demo" ] && echo "8070" || echo "8069")
 for i in $(seq 1 20); do
   if curl -sf "http://localhost:$PORT/web/health" > /dev/null 2>&1; then
-    echo -e "${GREEN}Odoo répond sur le port $PORT.${NC}"
+    echo -e "${GREEN}Odoo responding on port $PORT.${NC}"
     break
   fi
-  echo "  Attente... ($i/20)"
+  echo "  Waiting... ($i/20)"
   sleep 3
 done
 
 echo ""
-echo -e "${GREEN}=== Restauration $ENV terminée ===${NC}"
+echo -e "${GREEN}=== Restore $ENV complete ===${NC}"

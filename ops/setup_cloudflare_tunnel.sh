@@ -1,51 +1,51 @@
 #!/bin/bash
-# Installe cloudflared et démarre un tunnel HTTPS anonyme vers Odoo demo.
+# Install cloudflared and start an anonymous HTTPS tunnel to Odoo demo.
 # Usage: ./ops/setup_cloudflare_tunnel.sh [--service]
-#   --service : installe cloudflared en service systemd persistant (redémarre au boot)
+#   --service : install cloudflared as a persistent systemd service (restarts on boot)
 #
-# Sans --service : lance le tunnel en foreground (pour tester).
-# L'URL https://*.trycloudflare.com est affichée dans les logs.
+# Without --service: runs the tunnel in the foreground (for testing).
+# The https://*.trycloudflare.com URL is shown in the logs.
 #
-# IMPORTANT : après installation, ajouter proxy_mode = True dans odoo_demo.conf
-# puis redémarrer odoo_demo.
+# IMPORTANT: after installation, add proxy_mode = True to odoo_demo.conf
+# then restart odoo_demo.
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 AS_SERVICE="${1:-}"
 
-# ── Vérifications ──────────────────────────────────────────────────────────
+# ── Pre-flight checks ──────────────────────────────────────────────────────
 if ! command -v curl &>/dev/null; then
-  echo "Erreur: curl requis" && exit 1
+  echo "Error: curl is required" && exit 1
 fi
 
-# ── Installation cloudflared ───────────────────────────────────────────────
+# ── Install cloudflared ────────────────────────────────────────────────────
 if command -v cloudflared &>/dev/null; then
-  echo "cloudflared déjà installé : $(cloudflared --version)"
+  echo "cloudflared already installed: $(cloudflared --version)"
 else
-  echo "Installation de cloudflared..."
-  # Clé GPG Cloudflare
+  echo "Installing cloudflared..."
+  # Cloudflare GPG key
   curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg \
     | sudo gpg --dearmor -o /usr/share/keyrings/cloudflare-main.gpg
 
-  # Source APT
+  # APT source
   echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] \
 https://pkg.cloudflare.com/cloudflared $(lsb_release -cs) main" \
     | sudo tee /etc/apt/sources.list.d/cloudflared.list > /dev/null
 
   sudo apt-get update -qq
   sudo apt-get install -y cloudflared
-  echo "cloudflared installé : $(cloudflared --version)"
+  echo "cloudflared installed: $(cloudflared --version)"
 fi
 
-# ── Mode service systemd ───────────────────────────────────────────────────
+# ── Systemd service mode ───────────────────────────────────────────────────
 if [ "$AS_SERVICE" = "--service" ]; then
   echo ""
-  echo "Installation du service systemd cloudflared..."
-  echo "Le tunnel sera lancé automatiquement au démarrage du serveur."
+  echo "Installing cloudflared systemd service..."
+  echo "The tunnel will start automatically on server boot."
   echo ""
 
-  # Créer le fichier de service
+  # Create the service unit file
   sudo tee /etc/systemd/system/cloudflared-tunnel.service > /dev/null <<'UNIT'
 [Unit]
 Description=Cloudflare Tunnel (Rubicon demo)
@@ -70,23 +70,23 @@ UNIT
   sudo systemctl restart cloudflared-tunnel
 
   echo ""
-  echo "Service démarré. Attente de l'URL du tunnel..."
+  echo "Service started. Waiting for tunnel URL..."
   sleep 8
   echo ""
-  echo "URL du tunnel (chercher 'trycloudflare.com' dans les logs) :"
+  echo "Tunnel URL (look for 'trycloudflare.com' in the logs):"
   sudo journalctl -u cloudflared-tunnel -n 30 --no-pager | grep -i "trycloudflare\|https://" || true
   echo ""
-  echo "Pour voir les logs en direct :"
+  echo "To follow logs live:"
   echo "  sudo journalctl -u cloudflared-tunnel -f"
   echo ""
-  echo "RAPPEL : ajouter 'proxy_mode = True' dans odoo_conf/odoo_demo.conf"
-  echo "puis : docker compose -f docker-compose.demo.yml restart odoo_demo"
+  echo "REMINDER: add 'proxy_mode = True' to odoo_conf/odoo_demo.conf"
+  echo "then: docker compose -f docker-compose.demo.yml restart odoo_demo"
 
 else
-  # ── Mode foreground (test) ─────────────────────────────────────────────
+  # ── Foreground mode (test) ─────────────────────────────────────────────
   echo ""
-  echo "Lancement du tunnel en foreground (Ctrl+C pour arrêter)..."
-  echo "L'URL https://*.trycloudflare.com apparaîtra dans quelques secondes."
+  echo "Starting tunnel in foreground (Ctrl+C to stop)..."
+  echo "The https://*.trycloudflare.com URL will appear in a few seconds."
   echo ""
   cloudflared tunnel --url http://localhost:8070 --no-autoupdate
 fi

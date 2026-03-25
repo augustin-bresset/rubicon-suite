@@ -1,66 +1,66 @@
 # Monitoring — Rubicon Suite
 
-## UptimeRobot (externe, gratuit)
+## UptimeRobot (external, free)
 
-UptimeRobot surveille votre service depuis l'extérieur et envoie des alertes email si le service tombe.
+UptimeRobot monitors your service from the outside and sends email alerts if the service goes down.
 
-### Configuration (demo)
+### Setup (demo)
 
-1. Créer un compte sur https://uptimerobot.com (plan gratuit = 50 monitors, check toutes les 5 min)
-2. Cliquer **"Add New Monitor"**
-3. Paramètres :
-   - **Monitor Type :** HTTP(s)
-   - **Friendly Name :** Rubicon Demo
-   - **URL :** `https://<votre-url>.trycloudflare.com/web/health`
-   - **Monitoring Interval :** 5 minutes
-4. **Alert Contacts :** ajouter votre email
-5. Sauvegarder
+1. Create an account at https://uptimerobot.com (free plan = 50 monitors, checks every 5 min)
+2. Click **"Add New Monitor"**
+3. Settings:
+   - **Monitor Type:** HTTP(s)
+   - **Friendly Name:** Rubicon Demo
+   - **URL:** `https://<your-url>.trycloudflare.com/web/health`
+   - **Monitoring Interval:** 5 minutes
+4. **Alert Contacts:** add your email
+5. Save
 
-UptimeRobot enverra un email si le service ne répond pas pendant > 5 minutes.
+UptimeRobot will send an email if the service does not respond for > 5 minutes.
 
-### Configuration (production avec VPN)
+### Setup (production with VPN)
 
-Pour la production (non exposée sur Internet), utiliser le healthcheck local + cron :
+For production (not exposed to the Internet), use local healthcheck + cron:
 
 ```bash
-# Dans crontab -e :
+# In crontab -e:
 */5 * * * * /opt/rubicon/ops/healthcheck.sh prod > /tmp/rubicon_health_check.txt 2>&1 || \
-  mail -s "ALERTE: Rubicon prod DOWN" admin@entreprise.com < /tmp/rubicon_health_check.txt
+  mail -s "ALERT: Rubicon prod DOWN" admin@company.com < /tmp/rubicon_health_check.txt
 ```
 
-Prérequis : `apt install mailutils` + serveur SMTP configuré.
+Prerequisites: `apt install mailutils` + configured SMTP server.
 
 ---
 
-## Healthcheck local
+## Local Healthcheck
 
 ```bash
-# Vérification manuelle
+# Manual check
 ./ops/healthcheck.sh demo
 ./ops/healthcheck.sh prod
 
-# Voir les logs de healthcheck
+# View healthcheck logs
 tail -50 /var/log/rubicon-health.log
 ```
 
 ---
 
-## Logs Odoo
+## Odoo Logs
 
 ```bash
-# Logs en temps réel (demo)
+# Live logs (demo)
 docker compose -f docker-compose.demo.yml logs -f odoo_demo
 
-# Logs en temps réel (prod)
+# Live logs (prod)
 docker compose logs -f odoo
 
-# Dernières erreurs uniquement
+# Errors only
 docker compose -f docker-compose.demo.yml logs odoo_demo 2>&1 | grep -i "error\|critical\|traceback"
 ```
 
 ---
 
-## Logs backup
+## Backup Logs
 
 ```bash
 tail -f /var/log/rubicon-backup.log
@@ -68,11 +68,11 @@ tail -f /var/log/rubicon-backup.log
 
 ---
 
-## Indicateurs à surveiller
+## Metrics to Watch
 
-| Indicateur | Seuil d'alerte | Commande |
-|-----------|---------------|---------|
-| Espace disque | > 80% | `df -h /` |
-| Mémoire | > 90% | `free -h` |
-| Backup absent | > 25h | voir `healthcheck.sh` |
-| Containers down | toute panne | `docker compose ps` |
+| Metric | Alert threshold | Command |
+|--------|----------------|---------|
+| Disk space | > 80% used | `df -h /` |
+| Memory | > 90% used | `free -h` |
+| Missing backup | > 25h | see `healthcheck.sh` |
+| Containers down | any outage | `docker compose ps` |

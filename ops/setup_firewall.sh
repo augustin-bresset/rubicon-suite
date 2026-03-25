@@ -1,10 +1,10 @@
 #!/bin/bash
-# Configure UFW (firewall) pour le serveur demo ou production.
+# Configure UFW (firewall) for the demo or production server.
 # Usage: ./ops/setup_firewall.sh [demo|prod]
-#   demo : ouvre 22, 80, 443 — ferme 8070 (Odoo via tunnel uniquement)
-#   prod : ouvre 22 (interne), 51820/udp (WireGuard) — ferme tout le reste
+#   demo : open 22, 80, 443 — close 8070 (Odoo via tunnel only)
+#   prod : open 22 (internal), 51820/udp (WireGuard) — block everything else
 #
-# ATTENTION : nécessite sudo. Vérifie que SSH est bien autorisé avant d'activer.
+# WARNING: requires sudo. Verify SSH is allowed before enabling.
 
 set -e
 
@@ -15,75 +15,75 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 if ! command -v ufw &>/dev/null; then
-  echo "Installation de ufw..."
+  echo "Installing ufw..."
   sudo apt-get install -y ufw
 fi
 
-echo -e "${YELLOW}=== Configuration firewall (mode: $MODE) ===${NC}"
+echo -e "${YELLOW}=== Firewall configuration (mode: $MODE) ===${NC}"
 echo ""
-echo -e "${RED}ATTENTION: Vérifiez que votre session SSH restera active avant de continuer.${NC}"
-echo "Ce script va activer UFW. Si SSH (port 22) n'est pas autorisé, vous perdrez l'accès."
+echo -e "${RED}WARNING: Verify your SSH session will remain active before continuing.${NC}"
+echo "This script will enable UFW. If SSH (port 22) is not allowed, you will lose access."
 echo ""
-read -p "Continuer ? [y/N] " -n 1 -r
+read -p "Continue? [y/N] " -n 1 -r
 echo ""
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  echo "Annulé."
+  echo "Cancelled."
   exit 0
 fi
 
-# ── Règles communes ───────────────────────────────────────────────────────
+# ── Common rules ───────────────────────────────────────────────────────────
 sudo ufw --force reset
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 
-# SSH toujours ouvert (évite lockout)
+# SSH always open (prevents lockout)
 sudo ufw allow 22/tcp comment 'SSH'
 
 if [ "$MODE" = "demo" ]; then
-  # ── Mode demo (Oracle Cloud VPS) ────────────────────────────────────────
-  # Port 80/443 pour futur Let's Encrypt ou nginx
-  sudo ufw allow 80/tcp  comment 'HTTP (futur redirect HTTPS)'
-  sudo ufw allow 443/tcp comment 'HTTPS (futur direct)'
-  # Port 8070 intentionnellement FERMÉ
-  # cloudflared se connecte en outbound (pas besoin d'inbound)
+  # ── Demo mode (Oracle Cloud VPS) ──────────────────────────────────────
+  # Port 80/443 for future Let's Encrypt or nginx
+  sudo ufw allow 80/tcp  comment 'HTTP (future HTTPS redirect)'
+  sudo ufw allow 443/tcp comment 'HTTPS (future direct)'
+  # Port 8070 intentionally CLOSED
+  # cloudflared connects outbound (no inbound needed)
   echo ""
-  echo "Règles demo appliquées :"
+  echo "Demo rules applied:"
   echo "  ✓ 22/tcp   — SSH"
-  echo "  ✓ 80/tcp   — HTTP (futur Let's Encrypt)"
+  echo "  ✓ 80/tcp   — HTTP (future Let's Encrypt)"
   echo "  ✓ 443/tcp  — HTTPS"
-  echo "  ✗ 8070     — FERMÉ (accès via Cloudflare Tunnel uniquement)"
-  echo "  ✗ 5432     — FERMÉ (PostgreSQL interne uniquement)"
+  echo "  ✗ 8070     — CLOSED (access via Cloudflare Tunnel only)"
+  echo "  ✗ 5432     — CLOSED (PostgreSQL internal only)"
 
 elif [ "$MODE" = "prod" ]; then
-  # ── Mode production (serveur local entreprise) ───────────────────────────
-  # 8069 uniquement depuis le réseau interne
-  # Adapter 192.168.0.0/16 selon le sous-réseau réel de l'entreprise
-  sudo ufw allow from 192.168.0.0/16 to any port 8069 proto tcp comment 'Odoo (réseau interne)'
+  # ── Production mode (on-premises server) ──────────────────────────────
+  # 8069 from internal network only
+  # Adjust 192.168.0.0/16 to match the actual company subnet
+  sudo ufw allow from 192.168.0.0/16 to any port 8069 proto tcp comment 'Odoo (internal network)'
   # WireGuard VPN (UDP)
   sudo ufw allow 51820/udp comment 'WireGuard VPN'
   echo ""
-  echo "Règles production appliquées :"
-  echo "  ✓ 22/tcp          — SSH (tout)"
-  echo "  ✓ 8069/tcp        — Odoo (réseau 192.168.0.0/16 uniquement)"
+  echo "Production rules applied:"
+  echo "  ✓ 22/tcp          — SSH (all)"
+  echo "  ✓ 8069/tcp        — Odoo (192.168.0.0/16 only)"
   echo "  ✓ 51820/udp       — WireGuard VPN"
-  echo "  ✗ tout le reste   — BLOQUÉ"
+  echo "  ✗ everything else — BLOCKED"
   echo ""
-  echo -e "${YELLOW}Adapter le sous-réseau 192.168.0.0/16 si nécessaire.${NC}"
+  echo -e "${YELLOW}Adjust the 192.168.0.0/16 subnet if needed.${NC}"
 
 else
-  echo "Mode inconnu: $MODE (utiliser 'demo' ou 'prod')"
+  echo "Unknown mode: $MODE (use 'demo' or 'prod')"
   exit 1
 fi
 
-# ── Activer UFW ───────────────────────────────────────────────────────────
+# ── Enable UFW ─────────────────────────────────────────────────────────────
 sudo ufw --force enable
 echo ""
-echo -e "${GREEN}UFW activé.${NC}"
+echo -e "${GREEN}UFW enabled.${NC}"
 echo ""
 sudo ufw status verbose
 echo ""
-echo -e "${YELLOW}RAPPEL Oracle Cloud (mode demo) :${NC}"
-echo "Dans la console Oracle Cloud → Networking → Security Lists :"
-echo "  - Ouvrir : 22/tcp, 80/tcp, 443/tcp"
-echo "  - Fermer : 8070/tcp, 5432/tcp"
-echo "Voir ops/SECURITY.md pour les instructions détaillées."
+echo -e "${YELLOW}Oracle Cloud reminder (demo mode):${NC}"
+echo "In the Oracle Cloud console → Networking → Security Lists:"
+echo "  - Open:  22/tcp, 80/tcp, 443/tcp"
+echo "  - Close: 8070/tcp, 5432/tcp"
+echo "See ops/SECURITY.md for detailed instructions."

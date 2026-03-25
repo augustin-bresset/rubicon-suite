@@ -1,95 +1,95 @@
-# Guide WireGuard VPN — Accès distant à Rubicon
+# WireGuard VPN Guide — Remote Access to Rubicon
 
-Ce guide explique comment les employés nomades peuvent accéder à Odoo Rubicon depuis l'extérieur.
+This guide explains how remote employees can access Odoo Rubicon from outside the office.
 
-## Principe
+## How it works
 
-WireGuard crée un tunnel chiffré entre votre appareil et le serveur Rubicon. Une fois connecté, vous accédez à Odoo comme si vous étiez sur le réseau interne de l'entreprise.
+WireGuard creates an encrypted tunnel between your device and the Rubicon server. Once connected, you access Odoo as if you were on the company's internal network.
 
 ```
-Votre PC/mobile  ──── WireGuard VPN ────  Serveur Rubicon  ──── Odoo
-                     (chiffré, UDP 51820)   (10.8.0.1)      (http://10.8.0.1:8069)
+Your PC/mobile  ──── WireGuard VPN ────  Rubicon Server  ──── Odoo
+                     (encrypted, UDP 51820)  (10.8.0.1)    (http://10.8.0.1:8069)
 ```
 
-## Pré-requis
+## Prerequisites
 
-Votre administrateur IT doit avoir exécuté `./ops/add_vpn_user.sh <votre_nom>` pour créer votre profil VPN.
+Your IT administrator must have run `./ops/add_vpn_user.sh <your_name>` to create your VPN profile.
 
 ---
 
 ## Installation — Windows
 
-1. Télécharger WireGuard : https://www.wireguard.com/install/
-2. Installer et lancer l'application
-3. Cliquer **"Add Tunnel"** → **"Import tunnel(s) from file"**
-4. Sélectionner le fichier `.conf` fourni par l'administrateur (ex: `jean_dupont.conf`)
-5. Cliquer **"Activate"** pour se connecter
+1. Download WireGuard: https://www.wireguard.com/install/
+2. Install and launch the application
+3. Click **"Add Tunnel"** → **"Import tunnel(s) from file"**
+4. Select the `.conf` file provided by your administrator (e.g. `john_doe.conf`)
+5. Click **"Activate"** to connect
 
-**Accès Odoo :** http://10.8.0.1:8069
+**Odoo access:** http://10.8.0.1:8069
 
 ---
 
 ## Installation — macOS
 
-1. Télécharger WireGuard depuis l'App Store : chercher "WireGuard"
-2. Ouvrir l'app → cliquer **"+"** → **"Add empty tunnel..."**
-3. Coller le contenu du fichier `.conf` fourni, ou importer via **"Import tunnel(s) from file"**
-4. Activer le tunnel
+1. Download WireGuard from the App Store: search "WireGuard"
+2. Open the app → click **"+"** → **"Add empty tunnel..."**
+3. Paste the contents of the `.conf` file provided, or import via **"Import tunnel(s) from file"**
+4. Activate the tunnel
 
-**Accès Odoo :** http://10.8.0.1:8069
+**Odoo access:** http://10.8.0.1:8069
 
 ---
 
 ## Installation — Android / iOS
 
-1. Installer l'app WireGuard depuis Google Play ou App Store
-2. Votre administrateur vous enverra un **QR code**
-3. Dans l'app : toucher **"+"** → **"Scanner un QR code"**
-4. Scanner le QR code
-5. Activer le tunnel
+1. Install the WireGuard app from Google Play or the App Store
+2. Your administrator will send you a **QR code**
+3. In the app: tap **"+"** → **"Scan a QR code"**
+4. Scan the QR code
+5. Activate the tunnel
 
-**Accès Odoo :** http://10.8.0.1:8069
-
----
-
-## Connexion
-
-Une fois le tunnel activé :
-- Ouvrir un navigateur
-- Aller sur **http://10.8.0.1:8069**
-- Se connecter avec vos identifiants Odoo habituels
+**Odoo access:** http://10.8.0.1:8069
 
 ---
 
-## Dépannage
+## Connecting
 
-| Problème | Solution |
-|----------|----------|
-| Impossible de se connecter au tunnel | Vérifier que le port UDP 51820 n'est pas bloqué par votre réseau (Wi-Fi hôtel, etc.) |
-| Odoo ne répond pas | Vérifier que le tunnel est bien actif (icône verte dans l'app) |
-| Connexion lente | Normal sur une connexion mobile — le VPN ajoute une légère latence |
-| QR code expiré | Contacter l'administrateur pour regénérer la config |
+Once the tunnel is active:
+- Open a browser
+- Go to **http://10.8.0.1:8069**
+- Log in with your usual Odoo credentials
 
 ---
 
-## Sécurité
+## Troubleshooting
 
-- **Ne partagez jamais** votre fichier `.conf` ou QR code avec quelqu'un d'autre
-- Si vous perdez votre appareil, contactez immédiatement l'administrateur pour révoquer votre accès
-- Le VPN ne remplace pas votre mot de passe Odoo — utilisez un mot de passe fort
+| Issue | Solution |
+|-------|----------|
+| Cannot connect to the tunnel | Check that UDP port 51820 is not blocked by your network (hotel Wi-Fi, etc.) |
+| Odoo not responding | Verify the tunnel is active (green icon in the app) |
+| Slow connection | Normal on a mobile connection — VPN adds slight latency |
+| QR code expired | Contact your administrator to regenerate the config |
 
 ---
 
-## Administration — Révoquer un accès
+## Security
+
+- **Never share** your `.conf` file or QR code with anyone else
+- If you lose your device, immediately contact your administrator to revoke your access
+- The VPN does not replace your Odoo password — use a strong password
+
+---
+
+## Administration — Revoking Access
 
 ```bash
-# Supprimer un utilisateur
-USERNAME=jean_dupont
-# 1. Récupérer la clé publique
+# Remove a user
+USERNAME=john_doe
+# 1. Get the public key
 CLIENT_PUBLIC=$(sudo cat /etc/wireguard/keys/users/$USERNAME/public.key)
-# 2. Supprimer le peer actif
+# 2. Remove the active peer
 sudo wg set wg0 peer "$CLIENT_PUBLIC" remove
-# 3. Supprimer le bloc [Peer] dans /etc/wireguard/wg0.conf manuellement
-# 4. Supprimer les fichiers de clés
+# 3. Manually remove the [Peer] block in /etc/wireguard/wg0.conf
+# 4. Delete the key files
 sudo rm -rf /etc/wireguard/keys/users/$USERNAME
 ```
