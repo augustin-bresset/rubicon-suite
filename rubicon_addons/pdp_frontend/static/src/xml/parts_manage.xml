@@ -49,20 +49,20 @@
                                 <!-- Inline editing for new unsaved parts -->
                                 <input
                                     type="text"
+                                    class="form-control form-control-sm me-auto"
+                                    placeholder="Name"
+                                    t-att-value="part.name"
+                                    t-on-click.stop="() => {}"
+                                    t-on-input="(e) => this.onPartFieldChange(part, 'name', e.target.value)"
+                                />
+                                <input
+                                    type="text"
                                     class="form-control form-control-sm me-1"
                                     style="width: 80px;"
                                     placeholder="Code"
                                     t-att-value="part.code"
                                     t-on-click.stop="() => {}"
                                     t-on-input="(e) => this.onPartFieldChange(part, 'code', e.target.value)"
-                                />
-                                <input
-                                    type="text"
-                                    class="form-control form-control-sm me-auto"
-                                    placeholder="Name"
-                                    t-att-value="part.name"
-                                    t-on-click.stop="() => {}"
-                                    t-on-input="(e) => this.onPartFieldChange(part, 'name', e.target.value)"
                                 />
                             </t>
                             <t t-else="">
@@ -72,19 +72,19 @@
                                         class="form-control form-control-sm mb-1"
                                         t-att-class="state.selectedPartId === part.id ? 'bg-primary text-white border-white' : ''"
                                         style="font-weight: 600;"
-                                        placeholder="Code"
-                                        t-att-value="part.code"
+                                        placeholder="Name"
+                                        t-att-value="part.name"
                                         t-on-click.stop="() => {}"
-                                        t-on-input="(e) => this.onPartFieldChange(part, 'code', e.target.value)"
+                                        t-on-input="(e) => this.onPartFieldChange(part, 'name', e.target.value)"
                                     />
                                     <input
                                         type="text"
                                         class="form-control form-control-sm"
                                         t-att-class="state.selectedPartId === part.id ? 'bg-primary text-white border-white' : ''"
-                                        placeholder="Name"
-                                        t-att-value="part.name"
+                                        placeholder="Code"
+                                        t-att-value="part.code"
                                         t-on-click.stop="() => {}"
-                                        t-on-input="(e) => this.onPartFieldChange(part, 'name', e.target.value)"
+                                        t-on-input="(e) => this.onPartFieldChange(part, 'code', e.target.value)"
                                     />
                                 </div>
                             </t>
@@ -108,10 +108,10 @@
                         <span class="fw-semibold me-auto">
                             Costs for
                             <span class="text-primary">
-                                <t t-esc="this.selectedPart.code"/>
+                                <t t-esc="this.selectedPart.name"/>
                             </span>
-                            <t t-if="this.selectedPart.name">
-                                — <t t-esc="this.selectedPart.name"/>
+                            <t t-if="this.selectedPart.code">
+                                <span class="text-muted fw-normal small"> (<t t-esc="this.selectedPart.code"/>)</span>
                             </t>
                         </span>
                         <button

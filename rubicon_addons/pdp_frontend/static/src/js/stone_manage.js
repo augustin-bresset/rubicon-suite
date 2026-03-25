@@ -699,6 +699,66 @@ export class StoneManage extends Component {
             this._deletedWeightIds.length > 0
         );
     }
+
+    // ── Print / Export ─────────────────────────────────────────────
+
+    _downloadCsv(filename, headers, rows) {
+        const esc = (v) => {
+            const s = String(v ?? "");
+            return s.includes(",") || s.includes('"') || s.includes("\n")
+                ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const lines = [headers.map(esc).join(",")];
+        for (const row of rows) lines.push(row.map(esc).join(","));
+        const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    printCosts() {
+        const headers = ["Type", "Shape", "Shade", "Size", "Stock Code", "Cost", "Currency"];
+        const rows = this.state.stones.map(r => {
+            const type = this.stoneTypes.find(t => t.id === this.m2oId(r.type_id));
+            const shape = this.stoneShapes.find(s => s.id === this.m2oId(r.shape_id));
+            const shade = this.stoneShades.find(s => s.id === this.m2oId(r.shade_id));
+            const size = this.stoneSizes.find(s => s.id === this.m2oId(r.size_id));
+            const currency = this.currencies.find(c => c.id === this.m2oId(r.currency_id));
+            return [
+                type ? `[${type.code}] ${type.name}` : "",
+                shape ? shape.code : "",
+                shade ? shade.code : "",
+                size ? size.name : "",
+                r.code || "",
+                r.cost || 0,
+                currency ? currency.name : "",
+            ];
+        });
+        this._downloadCsv("stone_costs.csv", headers, rows);
+    }
+
+    printWeights() {
+        const headers = ["Type", "Shape", "Shade", "Size", "Weight (ct)"];
+        const rows = this.state.weights.map(r => {
+            const type = this.stoneTypes.find(t => t.id === this.m2oId(r.type_id));
+            const shape = this.stoneShapes.find(s => s.id === this.m2oId(r.shape_id));
+            const shade = this.stoneShades.find(s => s.id === this.m2oId(r.shade_id));
+            const size = this.stoneSizes.find(s => s.id === this.m2oId(r.size_id));
+            return [
+                type ? `[${type.code}] ${type.name}` : "",
+                shape ? shape.code : "",
+                shade ? shade.code : "",
+                size ? size.name : "",
+                r.weight || 0,
+            ];
+        });
+        this._downloadCsv("stone_weights.csv", headers, rows);
+    }
 }
 
 StoneManage.template = "pdp_frontend.stone_manage";

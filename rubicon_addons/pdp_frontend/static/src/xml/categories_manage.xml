@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="pdp_frontend.categories_manage">
-    <div class="o_action pdp-manage">
+    <div class="o_action pdp-manage d-flex flex-column" style="height: 100%;">
 
         <div class="pdp-manage-topbar d-flex align-items-center gap-2 px-3 py-2 border-bottom">
             <span class="fw-bold fs-5 me-auto">Ornament Categories</span>
@@ -20,7 +20,7 @@
             </button>
         </div>
 
-        <div class="p-3">
+        <div class="overflow-auto p-3" style="flex: 1 1 0;">
             <table class="table table-sm table-hover pdp-manage-table">
                 <thead>
                     <tr>

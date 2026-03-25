@@ -14,22 +14,6 @@
             parent="menu_pdp_frontend_root"
             sequence="10"/>
 
-  <record id="action_pdp_product_model" model="ir.actions.act_window">
-    <field name="name">Models</field>
-    <field name="res_model">pdp.product.model</field>
-    <field name="view_mode">list,form</field>
-  </record>
-  <menuitem id="menu_pdp_frontend_models"
-            name="Models"
-            parent="menu_pdp_frontend_manage"
-            action="action_pdp_product_model"
-            sequence="1"/>
-
-  <menuitem id="menu_pdp_frontend_products"
-            name="Products"
-            parent="menu_pdp_frontend_manage"
-            action="pdp_product.action_pdp_product"
-            sequence="2"/>
 
   <record id="action_pdp_stone_manage" model="ir.actions.client">
     <field name="name">Stones and Diamonds</field>
@@ -81,14 +65,6 @@
             action="action_pdp_categories_manage"
             sequence="30"/>
 
-  <menuitem id="menu_pdp_manage_labor_type"
-            name="Labor Types"
-            parent="menu_pdp_frontend_manage"
-            action="pdp_labor.action_pdp_labor_type"/>
-  <menuitem id="menu_pdp_manage_labor_cost_model"
-            name="Labor Costs (Model)"
-            parent="menu_pdp_frontend_manage"
-            action="pdp_labor.action_pdp_labor_cost_model"/>
 
   <!-- ============ Tools ============ -->
   <menuitem id="menu_pdp_frontend_tools"
@@ -137,5 +113,54 @@
             parent="menu_pdp_frontend_settings"
             action="rubicon_uom.action_rubicon_uom_category"
             sequence="2"/>
+
+  <!-- ============ Odoo Manager (Technical Features only) ============ -->
+  <!-- Visible uniquement avec "Technical Features" activé sur le profil utilisateur -->
+  <menuitem id="menu_pdp_odoo_manager"
+            name="Odoo Manager"
+            parent="menu_pdp_frontend_root"
+            groups="base.group_no_one"
+            sequence="99"/>
+
+  <!-- pdp_metal -->
+  <menuitem id="menu_odoo_mgr_metal" name="Metals" parent="menu_pdp_odoo_manager" sequence="10"/>
+  <menuitem id="menu_odoo_mgr_metal_metals"    name="Metals"       parent="menu_odoo_mgr_metal" action="pdp_metal.action_pdp_metal"         sequence="1"/>
+  <menuitem id="menu_odoo_mgr_metal_purities"  name="Purities"     parent="menu_odoo_mgr_metal" action="pdp_metal.action_pdp_metal_purity"  sequence="2"/>
+  <menuitem id="menu_odoo_mgr_metal_parts"     name="Parts"        parent="menu_odoo_mgr_metal" action="pdp_metal.action_pdp_part"          sequence="3"/>
+  <menuitem id="menu_odoo_mgr_metal_partcosts" name="Part Costs"   parent="menu_odoo_mgr_metal" action="pdp_metal.action_pdp_part_cost"     sequence="4"/>
+
+  <!-- pdp_stone -->
+  <menuitem id="menu_odoo_mgr_stone" name="Stones" parent="menu_pdp_odoo_manager" sequence="20"/>
+  <menuitem id="menu_odoo_mgr_stone_cats"     name="Categories"   parent="menu_odoo_mgr_stone" action="pdp_stone.action_pdp_stone_category" sequence="1"/>
+  <menuitem id="menu_odoo_mgr_stone_types"    name="Types"        parent="menu_odoo_mgr_stone" action="pdp_stone.action_pdp_stone_type"     sequence="2"/>
+  <menuitem id="menu_odoo_mgr_stone_shapes"   name="Shapes"       parent="menu_odoo_mgr_stone" action="pdp_stone.action_pdp_stone_shape"   sequence="3"/>
+  <menuitem id="menu_odoo_mgr_stone_shades"   name="Shades"       parent="menu_odoo_mgr_stone" action="pdp_stone.action_pdp_stone_shade"   sequence="4"/>
+  <menuitem id="menu_odoo_mgr_stone_sizes"    name="Sizes"        parent="menu_odoo_mgr_stone" action="pdp_stone.action_pdp_stone_size"    sequence="5"/>
+  <menuitem id="menu_odoo_mgr_stone_costs"    name="Unit Costs"   parent="menu_odoo_mgr_stone" action="pdp_stone.action_pdp_stone"         sequence="6"/>
+  <menuitem id="menu_odoo_mgr_stone_weights"  name="Unit Weights" parent="menu_odoo_mgr_stone" action="pdp_stone.action_pdp_stone_weight"  sequence="7"/>
+
+  <!-- pdp_labor -->
+  <menuitem id="menu_odoo_mgr_labor" name="Labor" parent="menu_pdp_odoo_manager" sequence="30"/>
+  <menuitem id="menu_odoo_mgr_labor_types"      name="Labor Types"           parent="menu_odoo_mgr_labor" action="pdp_labor.action_pdp_labor_type"          sequence="1"/>
+  <menuitem id="menu_odoo_mgr_labor_cost_model" name="Labor Costs (Model)"   parent="menu_odoo_mgr_labor" action="pdp_labor.action_pdp_labor_cost_model"    sequence="2"/>
+  <menuitem id="menu_odoo_mgr_labor_cost_prod"  name="Labor Costs (Product)" parent="menu_odoo_mgr_labor" action="pdp_labor.action_pdp_labor_cost_product"  sequence="3"/>
+  <menuitem id="menu_odoo_mgr_addon_types"      name="Addon Types"           parent="menu_odoo_mgr_labor" action="pdp_labor.action_pdp_addon_type"          sequence="4"/>
+  <menuitem id="menu_odoo_mgr_addon_costs"      name="Addon Costs"           parent="menu_odoo_mgr_labor" action="pdp_labor.action_pdp_addon_cost"          sequence="5"/>
+
+  <!-- pdp_product -->
+  <menuitem id="menu_odoo_mgr_product" name="Products" parent="menu_pdp_odoo_manager" sequence="40"/>
+  <menuitem id="menu_odoo_mgr_prod_cats"       name="Categories"         parent="menu_odoo_mgr_product" action="pdp_product.action_pdp_product_category"          sequence="1"/>
+  <menuitem id="menu_odoo_mgr_prod_models"     name="Models"             parent="menu_odoo_mgr_product" action="pdp_product.action_pdp_product_model"             sequence="2"/>
+  <menuitem id="menu_odoo_mgr_prod_products"   name="Products"           parent="menu_odoo_mgr_product" action="pdp_product.action_pdp_product"                   sequence="3"/>
+  <menuitem id="menu_odoo_mgr_prod_metals"     name="Model Metals"       parent="menu_odoo_mgr_product" action="pdp_product.action_pdp_product_model_metal"       sequence="4"/>
+  <menuitem id="menu_odoo_mgr_prod_parts"      name="Product Parts"      parent="menu_odoo_mgr_product" action="pdp_product.action_pdp_product_part"              sequence="5"/>
+  <menuitem id="menu_odoo_mgr_prod_stones"     name="Product Stones"     parent="menu_odoo_mgr_product" action="pdp_product.action_pdp_product_stone"             sequence="6"/>
+  <menuitem id="menu_odoo_mgr_prod_matching"   name="Model Matching"     parent="menu_odoo_mgr_product" action="pdp_product.action_pdp_product_model_matching"    sequence="7"/>
+  <menuitem id="menu_odoo_mgr_prod_stone_comp" name="Stone Composition"  parent="menu_odoo_mgr_product" action="pdp_product.action_pdp_product_stone_composition" sequence="8"/>
+
+  <!-- pdp_picture -->
+  <menuitem id="menu_odoo_mgr_picture"  name="Pictures" parent="menu_pdp_odoo_manager" sequence="50"/>
+  <menuitem id="menu_odoo_mgr_pictures" name="Pictures" parent="menu_odoo_mgr_picture" action="pdp_picture.action_pdp_picture" sequence="1"/>
+
 
 </odoo>

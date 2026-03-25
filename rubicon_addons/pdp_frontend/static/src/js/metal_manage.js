@@ -23,6 +23,7 @@ export class MetalManage extends Component {
             selectedMetalKey: null,
             activeTab: "conversion",
             isDirty: false,
+            splitTopHeight: 240,
         });
 
         onWillStart(async () => {
@@ -41,7 +42,7 @@ export class MetalManage extends Component {
             this.orm.searchRead(
                 "pdp.metal.parameter",
                 [],
-                ["id", "metal_id", "name", "loss_percentage", "risk_factor"],
+                ["id", "metal_id", "name", "loss_percentage", "risk_factor", "density_difference"],
                 { order: "id asc" }
             ),
             this.orm.searchRead(
@@ -150,6 +151,7 @@ export class MetalManage extends Component {
             name: "",
             loss_percentage: 0,
             risk_factor: 1.0,
+            density_difference: 0,
         });
         this.state.isDirty = true;
     }
@@ -201,6 +203,22 @@ export class MetalManage extends Component {
         this.state.isDirty = true;
     }
 
+    // ── Resize ─────────────────────────────────────────────────────
+
+    onResizeStart(e) {
+        const startY = e.clientY;
+        const startH = this.state.splitTopHeight;
+        const onMove = (ev) => {
+            this.state.splitTopHeight = Math.max(80, Math.min(600, startH + ev.clientY - startY));
+        };
+        const onUp = () => {
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onUp);
+        };
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+    }
+
     // ── Tab ────────────────────────────────────────────────────────
 
     setTab(tab) {
@@ -228,6 +246,7 @@ export class MetalManage extends Component {
             name: r.name,
             loss_percentage: parseFloat(r.loss_percentage) || 0,
             risk_factor: parseFloat(r.risk_factor) || 1,
+            density_difference: parseFloat(r.density_difference) || 0,
         };
     }
 

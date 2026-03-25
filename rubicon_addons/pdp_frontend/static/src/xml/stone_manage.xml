@@ -452,6 +452,9 @@
                         </span>
 
                         <div class="ms-auto d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" t-on-click="() => this.printCosts()">
+                                Export CSV
+                            </button>
                             <button
                                 class="btn btn-primary btn-sm"
                                 t-att-disabled="this.dirtyStonesCount === 0"
@@ -654,6 +657,9 @@
                         </span>
 
                         <div class="ms-auto d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" t-on-click="() => this.printWeights()">
+                                Export CSV
+                            </button>
                             <button
                                 class="btn btn-primary btn-sm"
                                 t-att-disabled="this.dirtyWeightsCount === 0"

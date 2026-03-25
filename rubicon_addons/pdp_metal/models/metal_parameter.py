@@ -9,5 +9,6 @@ class MetalParameter(models.Model):
     
     loss_percentage = fields.Float(string='Material Loss (%)', help="Percentage of metal lost during process")
     risk_factor = fields.Float(string='Risk Factor', default=1.0, help="Multiplier for risk (e.g. 1.05 for 5% risk)")
-    
+    density_difference = fields.Float(string='Density Diff. (%)', help="Percentage of difference between alloy density and reference density")
+
     composition = fields.Text(string='Composition Details', help="Description of the alloy composition")

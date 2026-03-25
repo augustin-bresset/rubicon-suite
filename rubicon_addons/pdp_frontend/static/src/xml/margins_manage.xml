@@ -111,10 +111,10 @@
                         <select class="form-select form-select-sm"
                                 t-on-change="(e) => this.onFieldChange(row, 'labor_id', parseInt(e.target.value))">
                           <option value="">-- Select --</option>
-                          <t t-foreach="this.laborTypes" t-as="lt" t-key="lt.id">
-                            <option t-att-value="lt.id"
-                                    t-att-selected="this.m2oId(row.labor_id) === lt.id">
-                              <t t-esc="lt.code"/>
+                          <t t-foreach="this.laborTypes" t-as="ltype" t-key="ltype.id">
+                            <option t-att-value="ltype.id"
+                                    t-att-selected="this.m2oId(row.labor_id) === ltype.id">
+                              <t t-esc="ltype.code"/>
                             </option>
                           </t>
                         </select>

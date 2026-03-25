@@ -60,7 +60,7 @@ export class PartsManage extends Component {
                 "pdp.part",
                 [],
                 ["id", "code", "name"],
-                { order: "code asc" }
+                { order: "name asc" }
             ),
             this.orm.searchRead(
                 "pdp.metal.purity",
