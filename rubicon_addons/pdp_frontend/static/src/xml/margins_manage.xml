@@ -22,7 +22,7 @@
         <input class="form-control form-control-sm" style="width:200px;" placeholder="Name"
                t-att-value="state.newMarginName"
                t-on-input="(e) => this.state.newMarginName = e.target.value"/>
-        <button class="btn btn-sm btn-primary" t-on-click="createMargin">Create</button>
+        <button class="btn btn-sm btn-primary" t-on-click="() => this.createMargin()">Create</button>
       </div>
     </t>
 
@@ -57,9 +57,9 @@
             <input class="form-control form-control-sm" style="width:220px;" placeholder="Name"
                    t-att-value="state.marginName"
                    t-on-input="(e) => this.onHeaderFieldChange('marginName', e.target.value)"/>
-            <button class="btn btn-sm btn-primary ms-2" t-on-click="saveMargin"
+            <button class="btn btn-sm btn-primary ms-2" t-on-click="() => this.saveMargin()"
                     t-att-disabled="!state.isDirty and !state.marginHeaderDirty">Save</button>
-            <button class="btn btn-sm btn-outline-danger ms-auto" t-on-click="deleteMargin">Delete</button>
+            <button class="btn btn-sm btn-outline-danger ms-auto" t-on-click="() => this.deleteMargin()">Delete</button>
           </div>
 
           <!-- Tab nav -->
@@ -94,7 +94,7 @@
             <div class="mb-4">
               <div class="d-flex align-items-center mb-1">
                 <span class="fw-semibold small text-uppercase text-muted me-auto">Labor Rates</span>
-                <button class="btn btn-sm btn-outline-primary" t-on-click="addLabor">+ Add</button>
+                <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.addLabor()">+ Add</button>
               </div>
               <table class="table table-sm table-bordered pdp-manage-table">
                 <thead class="table-light">
@@ -140,7 +140,7 @@
             <div class="mb-4">
               <div class="d-flex align-items-center mb-1">
                 <span class="fw-semibold small text-uppercase text-muted me-auto">Misc Rates</span>
-                <button class="btn btn-sm btn-outline-primary" t-on-click="addAddon">+ Add</button>
+                <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.addAddon()">+ Add</button>
               </div>
               <table class="table table-sm table-bordered pdp-manage-table">
                 <thead class="table-light">
@@ -187,7 +187,7 @@
           <t t-elif="state.activeTab === 'metal'">
             <div class="d-flex align-items-center mb-2">
               <span class="fw-semibold small text-uppercase text-muted me-auto">Metal Purity Rates</span>
-              <button class="btn btn-sm btn-outline-primary" t-on-click="addMetal">+ Add</button>
+              <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.addMetal()">+ Add</button>
             </div>
             <table class="table table-sm table-bordered pdp-manage-table">
               <thead class="table-light">
@@ -245,7 +245,7 @@
             <t t-if="state.stoneSubTab === 'conditional'">
               <div class="d-flex align-items-center mb-2">
                 <span class="fw-semibold small text-uppercase text-muted me-auto">Conditional Stone Rates</span>
-                <button class="btn btn-sm btn-outline-primary" t-on-click="addStoneCond">+ Add</button>
+                <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.addStoneCond()">+ Add</button>
               </div>
               <table class="table table-sm table-bordered pdp-manage-table">
                 <thead class="table-light">
@@ -330,7 +330,7 @@
                     </option>
                   </t>
                 </select>
-                <button class="btn btn-sm btn-outline-primary ms-auto" t-on-click="addStoneNorm">+ Add</button>
+                <button class="btn btn-sm btn-outline-primary ms-auto" t-on-click="() => this.addStoneNorm()">+ Add</button>
               </div>
               <table class="table table-sm table-bordered pdp-manage-table">
                 <thead class="table-light">

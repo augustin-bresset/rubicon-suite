@@ -196,7 +196,7 @@
                                                 </div>
                                             </t>
                                         </t>
-                                        <button class="btn btn-sm btn-link p-0 text-decoration-none small" t-on-click="addPartyPhone">
+                                        <button class="btn btn-sm btn-link p-0 text-decoration-none small" t-on-click="() => this.addPartyPhone()">
                                             <i class="fa fa-plus"></i> Add Phone Number
                                         </button>
                                     </div>

@@ -5,7 +5,7 @@
             <select class="form-select form-select-sm py-0"
                     style="width: auto; font-size: 11px;"
                     t-att-value="activeUomId"
-                    t-on-change="onChangeUom">
+                    t-on-change="(ev) => this.onChangeUom(ev)">
                 <t t-foreach="units" t-as="unit" t-key="unit.id">
                     <option t-att-value="unit.id">
                         <t t-esc="unit.symbol"/>
@@ -13,7 +13,7 @@
                 </t>
             </select>
             <button t-if="userHasPref"
-                    t-on-click="onReset"
+                    t-on-click="() => this.onReset()"
                     class="btn btn-sm btn-link p-0 text-muted"
                     title="Reset to default">↺</button>
         </span>

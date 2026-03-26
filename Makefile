@@ -54,6 +54,7 @@ help:
 	@echo "    make update-pdp-modules     Update all PDP modules including frontend"
 	@echo "    make update-sis-modules     Update all SIS modules including frontend"
 	@echo "    make upgrade                Update all modules (PDP + SIS)"
+	@echo "    make update MODULE=name     Update a specific module"
 	@echo ""
 	@echo "  Deploy"
 	@echo "    make deploy-demo            Pull latest code and restart demo stack"
@@ -92,6 +93,12 @@ update-sis-modules:
 
 upgrade:
 	$(ODOO) -u $(PDP_MODULES),$(SIS_MODULES) --stop-after-init --workers=0
+
+update:
+ifndef MODULE
+	$(error MODULE is required — usage: make update MODULE=pdp_frontend)
+endif
+	$(ODOO) -u $(MODULE) --stop-after-init --workers=0
 
 # --- Deploy ---
 
@@ -151,8 +158,13 @@ stone-import:
 
 stone-all: stone-data stone-install stone-import
 
+# --- Demo ---
+
+
 
 # --- Misc ---
 
 backup-help:
 	@cat meta/doc/backup.md
+
+

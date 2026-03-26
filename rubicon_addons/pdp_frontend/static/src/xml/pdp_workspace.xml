@@ -8,14 +8,14 @@
                 <div class="fw-bold fs-5 text-primary">PDP</div>
                 <div class="d-flex align-items-center gap-2">
                     <label class="fw-bold mb-0">Model</label>
-                    <select class="form-select form-select-sm" style="width: 200px;" t-on-change="onModelSelectChange">
+                    <select class="form-select form-select-sm" style="width: 200px;" t-on-change="(ev) => this.onModelSelectChange(ev)">
                         <t t-foreach="filteredModels" t-as="model" t-key="model.id">
                             <option t-att-value="model.id" t-att-selected="model.id === state.selectedModelId">
                                 <t t-esc="model.code"/>
                             </option>
                         </t>
                     </select>
-                    <input type="text" class="form-control form-control-sm" placeholder="Filter..." style="width: 120px;" t-on-input="onSearchInput"/>
+                    <input type="text" class="form-control form-control-sm" placeholder="Filter..." style="width: 120px;" t-on-input="(ev) => this.onSearchInput(ev)"/>
                     <span class="text-muted ms-2 px-2 py-1 bg-light border rounded small"><t t-esc="state.products.length"/> products</span>
                 </div>
                 <div class="ms-auto d-flex align-items-center gap-2">
@@ -103,7 +103,7 @@
                         <t t-if="state.imageMode === 'model'">
                             <t t-if="state.pictureUrl">
                                 <div class="position-relative h-100 w-100 d-flex align-items-center justify-content-center">
-                                    <img t-att-src="state.pictureUrl" class="img-fluid" style="max-height: 100%; object-fit: contain; cursor: zoom-in;" alt="Model" t-on-click="openFullScreenImage"/>
+                                    <img t-att-src="state.pictureUrl" class="img-fluid" style="max-height: 100%; object-fit: contain; cursor: zoom-in;" alt="Model" t-on-click="() => this.openFullScreenImage()"/>
                                     <div class="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-2 pb-1">
                                         <button type="button" class="btn btn-sm btn-light border opacity-75"
                                                 t-on-click="() => this.triggerImageUpload('image_1920')">
@@ -140,7 +140,7 @@
                                     <div class="col-8">
                                         <input type="text" class="form-control form-control-sm p-0 px-1 border-0 border-bottom rounded-0" style="font-size: 11px;"
                                                t-att-value="activeModel ? activeModel.drawing : ''"
-                                               t-on-change="onDrawingChange"/>
+                                               t-on-change="(ev) => this.onDrawingChange(ev)"/>
                                     </div>
                                 </div>
                                 <div class="row g-0">
@@ -148,13 +148,13 @@
                                     <div class="col-8">
                                         <input type="text" class="form-control form-control-sm p-0 px-1 border-0 border-bottom rounded-0" style="font-size: 11px;"
                                                t-att-value="activeModel ? activeModel.quotation : ''"
-                                               t-on-change="onQuotationChange"/>
+                                               t-on-change="(ev) => this.onQuotationChange(ev)"/>
                                     </div>
                                 </div>
                             </div>
                             <t t-if="state.drawingUrl">
                                 <div class="position-relative h-100 w-100 d-flex align-items-center justify-content-center">
-                                    <img t-att-src="state.drawingUrl" class="img-fluid" style="max-height: 100%; object-fit: contain; cursor: zoom-in;" alt="Drawing" t-on-click="openFullScreenImage"/>
+                                    <img t-att-src="state.drawingUrl" class="img-fluid" style="max-height: 100%; object-fit: contain; cursor: zoom-in;" alt="Drawing" t-on-click="() => this.openFullScreenImage()"/>
                                     <div class="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-2 pb-1">
                                         <button type="button" class="btn btn-sm btn-light border opacity-75"
                                                 t-on-click="() => this.triggerImageUpload('drawing_1920')">
@@ -223,7 +223,7 @@
             </div>
 
             <!-- ===== SPLITTER ===== -->
-            <div t-on-mousedown="onBottomSplitterMouseDown"
+            <div t-on-mousedown="(ev) => this.onBottomSplitterMouseDown(ev)"
                  style="height: 6px; cursor: ns-resize; background: #ccc; flex: 0 0 6px; display: flex; align-items: center; justify-content: center; user-select: none;"
                  title="Drag to resize">
                 <div style="width: 40px; height: 3px; background: #999; border-radius: 2px;"></div>
@@ -254,7 +254,7 @@
                             <div class="row mb-1 align-items-center">
                                 <label class="col-4 fw-bold small">Margin</label>
                                 <div class="col-8">
-                                    <select class="form-select form-select-sm" t-on-change="onMarginChange">
+                                    <select class="form-select form-select-sm" t-on-change="(ev) => this.onMarginChange(ev)">
                                         <t t-foreach="state.margins" t-as="margin" t-key="margin.id">
                                             <option t-att-value="margin.id" t-att-selected="margin.id === state.selectedMarginId"><t t-esc="margin.name"/></option>
                                         </t>
@@ -264,7 +264,7 @@
                             <div class="row mb-1 align-items-center">
                                 <label class="col-4 fw-bold small">Purity</label>
                                 <div class="col-5">
-                                    <select class="form-select form-select-sm" t-on-change="onPurityChange">
+                                    <select class="form-select form-select-sm" t-on-change="(ev) => this.onPurityChange(ev)">
                                         <option value="">All</option>
                                         <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
                                             <option t-att-value="pur.id" t-att-selected="pur.id === state.selectedPurityId"><t t-esc="pur.code"/></option>
@@ -275,7 +275,7 @@
                             <div class="row mb-1 align-items-center">
                                 <label class="col-4 fw-bold small">Currency</label>
                                 <div class="col-5">
-                                    <select class="form-select form-select-sm" t-on-change="onCurrencyChange">
+                                    <select class="form-select form-select-sm" t-on-change="(ev) => this.onCurrencyChange(ev)">
                                         <t t-foreach="state.currencies" t-as="currency" t-key="currency.id">
                                             <option t-att-value="currency.id" t-att-selected="currency.id === state.selectedCurrencyId"><t t-esc="currency.name"/></option>
                                         </t>
@@ -539,7 +539,7 @@
                             <!-- Select Purity filter -->
                             <div class="d-flex align-items-center gap-2 mt-1">
                                 <small class="fw-bold">Filter Purity:</small>
-                                <select class="form-select form-select-sm" style="width:100px; font-size:11px;" t-on-change="onPurityChange">
+                                <select class="form-select form-select-sm" style="width:100px; font-size:11px;" t-on-change="(ev) => this.onPurityChange(ev)">
                                     <option value="">All</option>
                                     <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
                                         <option t-att-value="pur.id" t-att-selected="pur.id === state.selectedPurityId"><t t-esc="pur.code"/></option>
@@ -838,13 +838,13 @@
                         <button class="btn btn-light border" title="Last" t-on-click="() => this.productNav('last')"><i class="fa fa-step-forward"></i></button>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-light border px-3" t-on-click="showNewProductModal" t-att-disabled="!state.selectedModelId">New</button>
-                        <button class="btn btn-sm btn-light border px-3 text-danger" t-on-click="deleteProduct" t-att-disabled="!state.selectedProductId">Delete</button>
-                        <button class="btn btn-sm btn-primary border px-3 fw-bold" t-on-click="saveAll" t-att-disabled="!state.isDirty">Save</button>
+                        <button class="btn btn-sm btn-light border px-3" t-on-click="() => this.showNewProductModal()" t-att-disabled="!state.selectedModelId">New</button>
+                        <button class="btn btn-sm btn-light border px-3 text-danger" t-on-click="() => this.deleteProduct()" t-att-disabled="!state.selectedProductId">Delete</button>
+                        <button class="btn btn-sm btn-primary border px-3 fw-bold" t-on-click="() => this.saveAll()" t-att-disabled="!state.isDirty">Save</button>
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-sm btn-light border px-3 text-primary" t-on-click="() => this.recalculatePrice()">Recalculate</button>
-                        <button class="btn btn-sm btn-light border px-3 text-secondary" t-on-click="openMarginsModal" t-att-disabled="!state.selectedMarginId">Margins</button>
+                        <button class="btn btn-sm btn-light border px-3 text-secondary" t-on-click="() => this.openMarginsModal()" t-att-disabled="!state.selectedMarginId">Margins</button>
                     </div>
                 </div>
             </div>
@@ -858,7 +858,7 @@
                         <!-- Title bar -->
                         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-light">
                             <span class="fw-bold" style="font-size:13px;">Make new product.</span>
-                            <button class="btn-close btn-sm" t-on-click="closeNewModal"></button>
+                            <button class="btn-close btn-sm" t-on-click="() => this.closeNewModal()"></button>
                         </div>
 
                         <div class="d-flex p-3 gap-3" style="font-size:12px;">
@@ -895,7 +895,7 @@
                                     <span class="fw-bold text-nowrap">New Ref. #</span>
                                     <input type="text" class="form-control form-control-sm"
                                            t-att-value="state.newCode"
-                                           t-on-input="onNewCodeInput"
+                                           t-on-input="(ev) => this.onNewCodeInput(ev)"
                                            style="flex:1; font-size:12px;"/>
                                 </div>
 
@@ -932,13 +932,13 @@
                                 <!-- Buttons -->
                                 <div class="d-flex gap-2 mt-auto pt-2">
                                     <button class="btn btn-sm btn-light border px-3"
-                                            t-on-click="confirmCopy"
+                                            t-on-click="() => this.confirmCopy()"
                                             t-att-disabled="!state.newCode.trim() || !state.copySourceProductId">Copy</button>
                                     <button class="btn btn-sm btn-light border px-3"
-                                            t-on-click="confirmMakeBlank"
+                                            t-on-click="() => this.confirmMakeBlank()"
                                             t-att-disabled="!state.newCode.trim()">Make Blank</button>
                                     <button class="btn btn-sm btn-outline-secondary px-3"
-                                            t-on-click="closeNewModal">Cancel</button>
+                                            t-on-click="() => this.closeNewModal()">Cancel</button>
                                 </div>
                             </div>
                         </div>
@@ -949,7 +949,7 @@
             <!-- ===== FULL SCREEN IMAGE MODAL ===== -->
             <t t-if="state.showFullScreenImage">
                 <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-                     style="background: rgba(0,0,0,0.85); z-index: 10000;" t-on-click="closeFullScreenImage">
+                     style="background: rgba(0,0,0,0.85); z-index: 10000;" t-on-click="() => this.closeFullScreenImage()">
                     <button class="btn btn-close btn-close-white position-absolute top-0 end-0 m-4" style="z-index: 10001;" t-on-click.stop="closeFullScreenImage"></button>
                     <img t-if="state.imageMode === 'model' and state.pictureUrl" t-att-src="state.pictureUrl" style="max-width: 90%; max-height: 90%; object-fit: contain; box-shadow: 0 0 20px rgba(0,0,0,0.5);" t-on-click.stop=""/>
                     <img t-if="state.imageMode === 'drawing' and state.drawingUrl" t-att-src="state.drawingUrl" style="max-width: 90%; max-height: 90%; object-fit: contain; box-shadow: 0 0 20px rgba(0,0,0,0.5);" t-on-click.stop=""/>
@@ -967,18 +967,18 @@
                     <!-- Title bar -->
                     <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-light">
                         <span class="fw-bold" style="font-size:13px;">Margins</span>
-                        <button class="btn-close btn-sm" t-on-click="closeMarginsModal"></button>
+                        <button class="btn-close btn-sm" t-on-click="() => this.closeMarginsModal()"></button>
                     </div>
 
                     <!-- Header: ID + Name selector -->
                     <div class="px-3 pt-2 pb-2 d-flex gap-3 align-items-center border-bottom bg-light" style="font-size:12px;">
                         <span class="fw-bold">Margin:</span>
-                        <select class="form-select form-select-sm" style="width: auto; min-width: 250px; font-weight: bold;" t-on-change="onMarginModalSelectionChange">
+                        <select class="form-select form-select-sm" style="width: auto; min-width: 250px; font-weight: bold;" t-on-change="(ev) => this.onMarginModalSelectionChange(ev)">
                             <t t-foreach="state.margins" t-as="margin" t-key="margin.id">
                                 <option t-att-value="margin.id" t-att-selected="margin.id === state.selectedMarginId"><t t-esc="margin.code"/> - <t t-esc="margin.name"/></option>
                             </t>
                         </select>
-                        <button class="btn btn-sm btn-outline-primary py-0 px-2 ms-2" t-on-click="openNewMarginModal">+ New Margin</button>
+                        <button class="btn btn-sm btn-outline-primary py-0 px-2 ms-2" t-on-click="() => this.openNewMarginModal()">+ New Margin</button>
                     </div>
 
                     <!-- Tabs: Misc | Metal | Stone -->
@@ -1036,7 +1036,7 @@
                                             </t>
                                         </tbody>
                                     </table>
-                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginLabor">+ Add</button>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="() => this.addMarginLabor()">+ Add</button>
                                 </div>
 
                                 <!-- Right: Misc (Addon) -->
@@ -1073,7 +1073,7 @@
                                             </t>
                                         </tbody>
                                     </table>
-                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginAddon">+ Add</button>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="() => this.addMarginAddon()">+ Add</button>
                                 </div>
                             </div>
                         </t>
@@ -1082,7 +1082,7 @@
                         <t t-if="state.marginTab === 'metal'">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="fw-bold small">Metal Margins (by Purity)</span>
-                                <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginMetal">+ Add</button>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="() => this.addMarginMetal()">+ Add</button>
                             </div>
                             <table class="table table-sm table-bordered" style="font-size:11px;">
                                 <thead class="bg-light"><tr><th>Purity</th><th style="width:100px;" class="text-end">Margin</th><th style="width:24px;"></th></tr></thead>
@@ -1138,7 +1138,7 @@
                                             </t>
                                         </select>
                                     </div>
-                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginStoneCond">+ Add</button>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="() => this.addMarginStoneCond()">+ Add</button>
                                 </div>
                                 <table class="table table-sm table-bordered" style="font-size:11px;">
                                     <thead class="bg-light">
@@ -1213,7 +1213,7 @@
                                             </t>
                                         </select>
                                     </div>
-                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="addMarginStoneNorm">+ Add</button>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="() => this.addMarginStoneNorm()">+ Add</button>
                                 </div>
                                 <table class="table table-sm table-bordered" style="font-size:11px;">
                                     <thead class="bg-light"><tr><th>Stone Type</th><th>Category</th><th style="width:90px;" class="text-end">Margin</th><th style="width:24px;"></th></tr></thead>
@@ -1255,7 +1255,7 @@
 
                     <!-- Footer: Save -->
                     <div class="px-3 py-2 border-top bg-light d-flex justify-content-end">
-                        <button class="btn btn-sm btn-primary px-4" t-on-click="saveMarginData">Save</button>
+                        <button class="btn btn-sm btn-primary px-4" t-on-click="() => this.saveMarginData()">Save</button>
                     </div>
                 </div>
             </div>
@@ -1268,7 +1268,7 @@
                     <div class="bg-white shadow-lg d-flex flex-column" style="width: 400px; border: 1px solid #999;">
                         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-light">
                             <span class="fw-bold" style="font-size:13px;">Create New Margin</span>
-                            <button class="btn-close btn-sm" t-on-click="closeNewMarginModal"></button>
+                            <button class="btn-close btn-sm" t-on-click="() => this.closeNewMarginModal()"></button>
                         </div>
                         <div class="p-3" style="font-size:12px;">
                             <div class="mb-2 row align-items-center">
@@ -1301,10 +1301,10 @@
                             </div>
                             <div class="d-flex gap-2 justify-content-end mt-4">
                                 <button class="btn btn-sm btn-primary px-3"
-                                        t-on-click="confirmCreateMargin"
+                                        t-on-click="() => this.confirmCreateMargin()"
                                         t-att-disabled="!state.newMarginCode.trim() || !state.newMarginName.trim()">Create Margin</button>
                                 <button class="btn btn-sm btn-outline-secondary px-3"
-                                        t-on-click="closeNewMarginModal">Cancel</button>
+                                        t-on-click="() => this.closeNewMarginModal()">Cancel</button>
                             </div>
                         </div>
                     </div>
