@@ -20,6 +20,11 @@
         "web.assets_backend": [
             "pdp_frontend/static/src/**/*",
         ],
+        "web.assets_tests": [
+            "pdp_frontend/static/tests/tours/tour_stone_manage.js",
+            "pdp_frontend/static/tests/tours/tour_metal_parts.js",
+            "pdp_frontend/static/tests/tours/tour_pdp_workspace.js",
+        ],
     },
     "application": True,
     "installable": True,

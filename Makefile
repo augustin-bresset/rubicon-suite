@@ -35,10 +35,18 @@ SIS_MODULES = sis_party,sis_document,sis_frontend
 
 export PYTHONPATH := $(abspath rubicon_addons):$(PYTHONPATH)
 
+TEST_DB          ?= rubicon_test
+ODOO_TEST        = docker compose exec -T odoo odoo \
+  --db_host=$(DB_HOST) --db_port=$(DB_PORT) \
+  --db_user=$(DB_USER) --db_password=$(DB_PASS) \
+  -d $(TEST_DB)
+TEST_TAGS        ?= pdp_frontend
+
 .PHONY: help reset_odoo_db init-data-modules update-data-modules update-pdp-modules \
         update-sis-modules upgrade deploy-demo logs-demo logs-prod \
         raw_to_data_all import_all import_csv import_pictures audit_counts create_diagram \
-        stone-data stone-install stone-import stone-all backup-help
+        stone-data stone-install stone-import stone-all backup-help \
+        test-db-init test-tours test-tours-fresh
 
 
 # --- General ---
@@ -166,5 +174,25 @@ stone-all: stone-data stone-install stone-import
 
 backup-help:
 	@cat meta/doc/backup.md
+
+
+# --- Tours / Tests ---
+
+test-db-init:
+	@echo "→ Dropping test DB $(TEST_DB) (if exists)…"
+	docker compose exec -T db psql -U $(DB_USER) -d postgres \
+	  -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='$(TEST_DB)';" \
+	  -c "DROP DATABASE IF EXISTS $(TEST_DB);"
+	@echo "→ Installing modules into $(TEST_DB)…"
+	$(ODOO_TEST) -i rubicon_env,$(PDP_MODULES) --without-demo=all --stop-after-init --workers=0
+
+test-tours:
+	$(ODOO_TEST) -u pdp_frontend \
+	  --test-enable --stop-after-init --workers=0 \
+	  --http-port=8072 \
+	  --db-filter=rubicon_test \
+	  --test-tags $(TEST_TAGS)
+
+test-tours-fresh: test-db-init test-tours
 
 
