@@ -174,12 +174,24 @@ registry.category("web_tour.tours").add("pdp_tour_stone_manage", {
 
         clickTab("Unit Costs"),
 
-        // Wait for initial loadStones() (no filter) to finish — avoids race with filter reload.
-        // Real data rows have td without colspan; placeholder has colspan.
-        // Timeout 30s: loadStones() ORM call can take ~10s on full dataset.
-        { trigger: ".pdp-manage-table tbody tr td:not([colspan])", timeout: 30000 },
+        // Select TTYP in the type filter to trigger loadStones() with a domain.
+        // The placeholder "Select a stone type to load costs." must be visible first.
+        {
+            trigger: ".pdp-manage-table tbody tr td[colspan]",
+            run() {
+                const selects = document.querySelectorAll(
+                    ".pdp-manage .bg-light.border-bottom select.form-select"
+                );
+                const typeSelect = selects[0];
+                if (!typeSelect) throw new Error("Type filter select not found");
+                const opt = [...typeSelect.options].find(o => o.text.includes("TTYP"));
+                if (!opt) throw new Error("TTYP option not found in type filter");
+                typeSelect.value = opt.value;
+                typeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            },
+        },
 
-        // Add row (default type from stoneTypes[0] is pre-selected)
+        // Add row — TTYP is now the active filter, loadStones() ran (may return 0 rows; that's fine)
         { trigger: ".pdp-manage .ms-auto .btn-secondary.btn-sm", run: "click" },
 
         // Fill stock code (type pre-selected via default)
@@ -201,11 +213,23 @@ registry.category("web_tour.tours").add("pdp_tour_stone_manage", {
 
         clickTab("Unit Weights"),
 
-        // Wait for initial loadWeights() (no filter) to finish before adding
-        // Timeout 30s: loadWeights() ORM call can take ~10s on full dataset.
-        { trigger: ".pdp-manage-table tbody tr td:not([colspan])", timeout: 30000 },
+        // Select TTYP in the weight type filter to trigger loadWeights() with a domain.
+        {
+            trigger: ".pdp-manage-table tbody tr td[colspan]",
+            run() {
+                const selects = document.querySelectorAll(
+                    ".pdp-manage .bg-light.border-bottom select.form-select"
+                );
+                const typeSelect = selects[0];
+                if (!typeSelect) throw new Error("Weight type filter select not found");
+                const opt = [...typeSelect.options].find(o => o.text.includes("TTYP"));
+                if (!opt) throw new Error("TTYP option not found in weight type filter");
+                typeSelect.value = opt.value;
+                typeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            },
+        },
 
-        // Add row (default type/shape/shade/size pre-set from DB data)
+        // Add row
         { trigger: ".pdp-manage .ms-auto .btn-secondary.btn-sm", run: "click" },
 
         // Fill weight — new row has defaults; just set the weight value

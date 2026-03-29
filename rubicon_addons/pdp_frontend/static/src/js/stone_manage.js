@@ -174,12 +174,6 @@ export class StoneManage extends Component {
 
     async setTab(tab) {
         this.state.activeTab = tab;
-        if (tab === "costs" && this.state.stones.length === 0) {
-            await this.loadStones();
-        }
-        if (tab === "weights" && this.state.weights.length === 0) {
-            await this.loadWeights();
-        }
     }
 
     // ── Stone domain helpers ───────────────────────────────────────
@@ -547,6 +541,32 @@ export class StoneManage extends Component {
         };
     }
 
+    // ── Validation helper ──────────────────────────────────────────
+
+    /**
+     * Check that every dirty/new row has all required fields non-empty.
+     * @param {Array} rows  - reactive row array
+     * @param {Array} fields - [{key, label, numeric?}] pairs to check
+     *   numeric: true  → field must be a number > 0
+     *   numeric: false → field must be a non-empty string
+     * @returns {string|null} - error message, or null if valid
+     */
+    _validateDirtyRows(rows, fields) {
+        for (const r of rows) {
+            if (!r._dirty) continue;
+            for (const { key, label, numeric } of fields) {
+                const v = r[key];
+                const invalid = numeric
+                    ? !(parseFloat(v) > 0)
+                    : (v === null || v === undefined || String(v).trim() === "");
+                if (invalid) {
+                    return `"${label}" is required.`;
+                }
+            }
+        }
+        return null;
+    }
+
     // ── Generic save helper ────────────────────────────────────────
 
     async _saveSection(model, rows, deletedIds, valsFunc) {
@@ -575,6 +595,16 @@ export class StoneManage extends Component {
     // ── Save Tab 1 ─────────────────────────────────────────────────
 
     async saveCatsTypes() {
+        const errCat = this._validateDirtyRows(this.state.categories, [
+            { key: "code", label: "Code" }, { key: "name", label: "Name" },
+        ]);
+        const errType = this._validateDirtyRows(this.state.types, [
+            { key: "code", label: "Code" }, { key: "name", label: "Name" },
+        ]);
+        if (errCat || errType) {
+            this.notification.add(errCat || errType, { type: "warning" });
+            return;
+        }
         try {
             await this._saveSection(
                 "pdp.stone.category",
@@ -607,6 +637,19 @@ export class StoneManage extends Component {
     // ── Save Tab 2 ─────────────────────────────────────────────────
 
     async saveOtherInfo() {
+        const errShape = this._validateDirtyRows(this.state.shapes, [
+            { key: "code", label: "Code" }, { key: "shape", label: "Shape" },
+        ]);
+        const errShade = this._validateDirtyRows(this.state.shades, [
+            { key: "code", label: "Code" }, { key: "shade", label: "Shade" },
+        ]);
+        const errSize = this._validateDirtyRows(this.state.sizes, [
+            { key: "name", label: "Size name" },
+        ]);
+        if (errShape || errShade || errSize) {
+            this.notification.add(errShape || errShade || errSize, { type: "warning" });
+            return;
+        }
         try {
             await this._saveSection(
                 "pdp.stone.shape",
@@ -648,6 +691,10 @@ export class StoneManage extends Component {
     // ── Save Tab 3 ─────────────────────────────────────────────────
 
     async saveStones() {
+        const err = this._validateDirtyRows(this.state.stones, [
+            { key: "code", label: "Code" },
+        ]);
+        if (err) { this.notification.add(err, { type: "warning" }); return; }
         try {
             await this._saveSection(
                 "pdp.stone",
@@ -665,6 +712,10 @@ export class StoneManage extends Component {
     // ── Save Tab 4 ─────────────────────────────────────────────────
 
     async saveWeights() {
+        const err = this._validateDirtyRows(this.state.weights, [
+            { key: "weight", label: "Weight", numeric: true },
+        ]);
+        if (err) { this.notification.add(err, { type: "warning" }); return; }
         try {
             await this._saveSection(
                 "pdp.stone.weight",

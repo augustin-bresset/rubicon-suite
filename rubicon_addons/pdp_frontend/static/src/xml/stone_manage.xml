@@ -588,7 +588,12 @@
                                 <t t-if="state.stones.length === 0">
                                     <tr>
                                         <td colspan="8" class="text-center text-muted fst-italic py-3">
-                                            No stones found. Adjust filters or click Add Row.
+                                            <t t-if="!state.costFilterTypeId">
+                                                Select a stone type to load costs.
+                                            </t>
+                                            <t t-else="">
+                                                No costs found for this filter.
+                                            </t>
                                         </td>
                                     </tr>
                                 </t>
@@ -768,7 +773,12 @@
                                 <t t-if="state.weights.length === 0">
                                     <tr>
                                         <td colspan="6" class="text-center text-muted fst-italic py-3">
-                                            No weights found. Adjust filters or click Add Row.
+                                            <t t-if="!state.weightFilterTypeId">
+                                                Select a stone type to load weights.
+                                            </t>
+                                            <t t-else="">
+                                                No weights found for this filter.
+                                            </t>
                                         </td>
                                     </tr>
                                 </t>
