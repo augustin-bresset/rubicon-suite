@@ -129,7 +129,7 @@
                                     <div class="col-4">
                                         <label class="form-label mb-1 small">State</label>
                                         <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setPartyField('state_id', parseInt(ev.target.value) || false)">
+                                                t-on-change="ev => this.setPartyField('state_id', +ev.target.value || false)">
                                             <option value="">—</option>
                                             <t t-foreach="this.partyStates" t-as="s" t-key="s.id">
                                                 <option t-att-value="s.id"
@@ -148,7 +148,7 @@
                                     <div class="col-12">
                                         <label class="form-label mb-1 small">Country</label>
                                         <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setPartyField('country_id', parseInt(ev.target.value) || false)">
+                                                t-on-change="ev => this.setPartyField('country_id', +ev.target.value || false)">
                                             <option value="">—</option>
                                             <t t-foreach="this.sisCountries" t-as="c" t-key="c.id">
                                                 <option t-att-value="c.id"
@@ -256,7 +256,7 @@
                                     <div class="col-4 small fw-semibold">Margin</div>
                                     <div class="col-8">
                                         <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setPartyField('margin_id', parseInt(ev.target.value) || false)">
+                                                t-on-change="ev => this.setPartyField('margin_id', +ev.target.value || false)">
                                             <option value="">—</option>
                                             <t t-foreach="this.margins" t-as="m" t-key="m.id">
                                                 <option t-att-value="m.id"
@@ -269,7 +269,7 @@
                                     <div class="col-4 small fw-semibold">PayTerm</div>
                                     <div class="col-8">
                                         <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setPartyField('sis_pay_term_id', parseInt(ev.target.value) || false)">
+                                                t-on-change="ev => this.setPartyField('sis_pay_term_id', +ev.target.value || false)">
                                             <option value="">—</option>
                                             <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
                                                 <option t-att-value="pt.id"
@@ -294,7 +294,7 @@
                                     <div class="col-4 small fw-semibold">PayTerm</div>
                                     <div class="col-8">
                                         <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setPartyField('sis_vendor_pay_term_id', parseInt(ev.target.value) || false)">
+                                                t-on-change="ev => this.setPartyField('sis_vendor_pay_term_id', +ev.target.value || false)">
                                             <option value="">—</option>
                                             <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
                                                 <option t-att-value="pt.id"
@@ -322,7 +322,7 @@
                                 <div>
                                     <label class="form-label mb-1 small">Country</label>
                                     <select class="form-select form-select-sm"
-                                            t-on-change="ev => this.setPartyField('sis_ship_country_id', parseInt(ev.target.value) || false)">
+                                            t-on-change="ev => this.setPartyField('sis_ship_country_id', +ev.target.value || false)">
                                         <option value="">—</option>
                                         <t t-foreach="this.sisCountries" t-as="c" t-key="c.id">
                                             <option t-att-value="c.id"
@@ -337,7 +337,7 @@
                                 <div class="mb-3">
                                     <label class="form-label mb-1 small">Default Method Courier</label>
                                     <select class="form-select form-select-sm"
-                                            t-on-change="ev => this.setPartyField('sis_ship_method_id', parseInt(ev.target.value) || false)">
+                                            t-on-change="ev => this.setPartyField('sis_ship_method_id', +ev.target.value || false)">
                                         <option value="">—</option>
                                         <t t-foreach="this.shippers" t-as="s" t-key="s.id">
                                             <option t-att-value="s.id"
@@ -455,7 +455,7 @@
                 <div class="d-flex align-items-center gap-3 px-3 py-1 bg-light border-bottom flex-wrap">
                     <span class="small fw-semibold text-nowrap">Margin</span>
                     <select class="form-select form-select-sm" style="width:140px;"
-                            t-on-change="ev => this.setDocField('margin_id', parseInt(ev.target.value) || false)">
+                            t-on-change="ev => this.setDocField('margin_id', +ev.target.value || false)">
                         <option value="">—</option>
                         <t t-foreach="this.margins" t-as="m" t-key="m.id">
                             <option t-att-value="m.id"
@@ -535,7 +535,7 @@
                                 <div class="d-flex gap-2 mb-2 align-items-center">
                                     <label class="small text-nowrap mb-0" style="width:52px;">Ship By</label>
                                     <select class="form-select form-select-sm"
-                                            t-on-change="ev => this.setDocField('ship_method_id', parseInt(ev.target.value) || false)">
+                                            t-on-change="ev => this.setDocField('ship_method_id', +ev.target.value || false)">
                                         <option value="">—</option>
                                         <t t-foreach="this.shippers" t-as="s" t-key="s.id">
                                             <option t-att-value="s.id"
@@ -546,7 +546,7 @@
                                     </select>
                                     <label class="small text-nowrap mb-0 ms-1">Payment</label>
                                     <select class="form-select form-select-sm"
-                                            t-on-change="ev => this.setDocField('pay_term_id', parseInt(ev.target.value) || false)">
+                                            t-on-change="ev => this.setDocField('pay_term_id', +ev.target.value || false)">
                                         <option value="">—</option>
                                         <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
                                             <option t-att-value="pt.id"
@@ -790,7 +790,7 @@
                                     <div class="col-4 small fw-semibold">Rcv. Mode</div>
                                     <div class="col-8">
                                         <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setDocField('rcv_mode_id', parseInt(ev.target.value) || false)">
+                                                t-on-change="ev => this.setDocField('rcv_mode_id', +ev.target.value || false)">
                                             <option value="">—</option>
                                             <t t-foreach="this.receivingModes" t-as="rm" t-key="rm.id">
                                                 <option t-att-value="rm.id"
@@ -803,7 +803,7 @@
                                     <div class="col-4 small fw-semibold">Trade Fair</div>
                                     <div class="col-8">
                                         <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setDocField('trade_fair_id', parseInt(ev.target.value) || false)">
+                                                t-on-change="ev => this.setDocField('trade_fair_id', +ev.target.value || false)">
                                             <option value="">—</option>
                                             <t t-foreach="this.tradeFairs" t-as="tf" t-key="tf.id">
                                                 <option t-att-value="tf.id"
@@ -929,7 +929,7 @@
                                     <input type="number" class="form-control form-control-sm text-end py-0"
                                            style="height:22px; font-size:12px;"
                                            t-att-value="state.doc ? state.doc.deposit || 0 : 0"
-                                           t-on-change="ev => this.setDocField('deposit', parseFloat(ev.target.value) || 0)"/>
+                                           t-on-change="ev => this.setDocField('deposit', +ev.target.value || 0)"/>
                                 </div>
                                 <div class="col-7 fw-bold">Total:</div>
                                 <div class="col-5 text-end fw-bold text-danger">
@@ -1050,7 +1050,7 @@
                                 <input type="number" class="form-control form-control-sm" style="width:80px;"
                                        step="0.01"
                                        t-att-value="state.printMarkup"
-                                       t-on-change="ev => this.state.printMarkup = parseFloat(ev.target.value) || 0"/>
+                                       t-on-change="ev => this.state.printMarkup = +ev.target.value || 0"/>
                             </div>
                         </div>
                         <div class="modal-footer py-2 gap-2">

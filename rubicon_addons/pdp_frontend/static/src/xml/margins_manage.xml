@@ -109,7 +109,7 @@
                     <tr t-att-class="row._dirty ? 'table-warning' : ''">
                       <td>
                         <select class="form-select form-select-sm"
-                                t-on-change="(e) => this.onFieldChange(row, 'labor_id', parseInt(e.target.value))">
+                                t-on-change="(e) => this.onFieldChange(row, 'labor_id', +e.target.value)">
                           <option value="">-- Select --</option>
                           <t t-foreach="this.laborTypes" t-as="ltype" t-key="ltype.id">
                             <option t-att-value="ltype.id"
@@ -155,7 +155,7 @@
                     <tr t-att-class="row._dirty ? 'table-warning' : ''">
                       <td>
                         <select class="form-select form-select-sm"
-                                t-on-change="(e) => this.onFieldChange(row, 'addon_id', parseInt(e.target.value))">
+                                t-on-change="(e) => this.onFieldChange(row, 'addon_id', +e.target.value)">
                           <option value="">-- Select --</option>
                           <t t-foreach="this.addonTypes" t-as="at" t-key="at.id">
                             <option t-att-value="at.id"
@@ -202,7 +202,7 @@
                   <tr t-att-class="row._dirty ? 'table-warning' : ''">
                     <td>
                       <select class="form-select form-select-sm"
-                              t-on-change="(e) => this.onFieldChange(row, 'metal_purity_id', parseInt(e.target.value))">
+                              t-on-change="(e) => this.onFieldChange(row, 'metal_purity_id', +e.target.value)">
                         <option value="">-- Select --</option>
                         <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
                           <option t-att-value="pur.id"
@@ -263,7 +263,7 @@
                     <tr t-att-class="row._dirty ? 'table-warning' : ''">
                       <td>
                         <select class="form-select form-select-sm"
-                                t-on-change="(e) => this.onFieldChange(row, 'stone_cat_id', parseInt(e.target.value))">
+                                t-on-change="(e) => this.onFieldChange(row, 'stone_cat_id', +e.target.value)">
                           <option value="">-- Select --</option>
                           <t t-foreach="this.stoneCategories" t-as="sc" t-key="sc.id">
                             <option t-att-value="sc.id"
@@ -290,7 +290,7 @@
                       </td>
                       <td>
                         <select class="form-select form-select-sm"
-                                t-on-change="(e) => this.onFieldChange(row, 'currency_id', parseInt(e.target.value))">
+                                t-on-change="(e) => this.onFieldChange(row, 'currency_id', +e.target.value)">
                           <t t-foreach="this.currencies" t-as="cur" t-key="cur.id">
                             <option t-att-value="cur.id"
                                     t-att-selected="this.m2oId(row.currency_id) === cur.id">
@@ -345,7 +345,7 @@
                     <tr t-att-class="row._dirty ? 'table-warning' : ''">
                       <td>
                         <select class="form-select form-select-sm"
-                                t-on-change="(e) => this.onFieldChange(row, 'stone_type_id', parseInt(e.target.value))">
+                                t-on-change="(e) => this.onFieldChange(row, 'stone_type_id', +e.target.value)">
                           <option value="">-- Select --</option>
                           <t t-foreach="this.stoneTypes" t-as="st" t-key="st.id">
                             <option t-att-value="st.id"

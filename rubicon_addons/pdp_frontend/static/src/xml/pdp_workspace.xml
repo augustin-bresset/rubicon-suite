@@ -1291,7 +1291,7 @@
                                 <label class="col-4 fw-bold text-muted">Copy Rules From</label>
                                 <div class="col-8">
                                     <select class="form-select form-select-sm"
-                                            t-on-change="(ev) => this.state.newMarginCopySourceId = parseInt(ev.target.value) || null">
+                                            t-on-change="(ev) => this.state.newMarginCopySourceId = +ev.target.value || null">
                                         <option value="">-- Start Empty --</option>
                                         <t t-foreach="state.margins" t-as="margin" t-key="'copy_' + margin.id">
                                             <option t-att-value="margin.id" t-att-selected="margin.id === state.newMarginCopySourceId"><t t-esc="margin.code"/> - <t t-esc="margin.name"/></option>

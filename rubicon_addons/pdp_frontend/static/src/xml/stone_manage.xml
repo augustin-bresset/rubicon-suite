@@ -186,7 +186,7 @@
                                             <td>
                                                 <select
                                                     class="form-select form-select-sm"
-                                                    t-on-change="(e) => this.onTypeFieldChange(row, 'category_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                    t-on-change="(e) => this.onTypeFieldChange(row, 'category_id', e.target.value ? +e.target.value : false)">
                                                     <option value="">— none —</option>
                                                     <t t-foreach="state.categories" t-as="cat" t-key="cat._key">
                                                         <t t-if="cat.id">
@@ -491,7 +491,7 @@
                                         <td>
                                             <select
                                                 class="form-select form-select-sm"
-                                                t-on-change="(e) => this.onStoneFieldChange(row, 'type_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'type_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
                                                 <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
                                                     <option
@@ -505,7 +505,7 @@
                                         <td>
                                             <select
                                                 class="form-select form-select-sm"
-                                                t-on-change="(e) => this.onStoneFieldChange(row, 'shape_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'shape_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
                                                 <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
                                                     <option
@@ -519,7 +519,7 @@
                                         <td>
                                             <select
                                                 class="form-select form-select-sm"
-                                                t-on-change="(e) => this.onStoneFieldChange(row, 'shade_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'shade_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
                                                 <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
                                                     <option
@@ -533,7 +533,7 @@
                                         <td>
                                             <select
                                                 class="form-select form-select-sm"
-                                                t-on-change="(e) => this.onStoneFieldChange(row, 'size_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'size_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
                                                 <t t-foreach="this.stoneSizes" t-as="sz_opt" t-key="sz_opt.id">
                                                     <option
@@ -565,7 +565,7 @@
                                         <td>
                                             <select
                                                 class="form-select form-select-sm"
-                                                t-on-change="(e) => this.onStoneFieldChange(row, 'currency_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                t-on-change="(e) => this.onStoneFieldChange(row, 'currency_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
                                                 <t t-foreach="this.currencies" t-as="cur" t-key="cur.id">
                                                     <option
@@ -694,7 +694,7 @@
                                         <td>
                                             <select
                                                 class="form-select form-select-sm"
-                                                t-on-change="(e) => this.onWeightFieldChange(row, 'type_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                t-on-change="(e) => this.onWeightFieldChange(row, 'type_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
                                                 <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
                                                     <option
@@ -708,7 +708,7 @@
                                         <td>
                                             <select
                                                 class="form-select form-select-sm"
-                                                t-on-change="(e) => this.onWeightFieldChange(row, 'shape_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                t-on-change="(e) => this.onWeightFieldChange(row, 'shape_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
                                                 <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
                                                     <option
@@ -722,7 +722,7 @@
                                         <td>
                                             <select
                                                 class="form-select form-select-sm"
-                                                t-on-change="(e) => this.onWeightFieldChange(row, 'shade_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                t-on-change="(e) => this.onWeightFieldChange(row, 'shade_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
                                                 <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
                                                     <option
@@ -736,7 +736,7 @@
                                         <td>
                                             <select
                                                 class="form-select form-select-sm"
-                                                t-on-change="(e) => this.onWeightFieldChange(row, 'size_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                t-on-change="(e) => this.onWeightFieldChange(row, 'size_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
                                                 <t t-foreach="this.stoneSizes" t-as="sz_opt" t-key="sz_opt.id">
                                                     <option
