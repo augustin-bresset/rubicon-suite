@@ -408,7 +408,7 @@
                             style="width: 180px;"
                             t-on-change="(e) => { this.state.costFilterTypeId = e.target.value; this.loadStones(); }">
                             <option value="">All Types</option>
-                            <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
+                            <t t-foreach="state.stoneTypes" t-as="t_opt" t-key="t_opt.id">
                                 <option
                                     t-att-value="t_opt.id"
                                     t-att-selected="this.state.costFilterTypeId == t_opt.id">
@@ -423,7 +423,7 @@
                             style="width: 160px;"
                             t-on-change="(e) => { this.state.costFilterShapeId = e.target.value; this.loadStones(); }">
                             <option value="">All Shapes</option>
-                            <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
+                            <t t-foreach="state.stoneShapes" t-as="s_opt" t-key="s_opt.id">
                                 <option
                                     t-att-value="s_opt.id"
                                     t-att-selected="this.state.costFilterShapeId == s_opt.id">
@@ -438,7 +438,7 @@
                             style="width: 160px;"
                             t-on-change="(e) => { this.state.costFilterShadeId = e.target.value; this.loadStones(); }">
                             <option value="">All Shades</option>
-                            <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
+                            <t t-foreach="state.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
                                 <option
                                     t-att-value="sh_opt.id"
                                     t-att-selected="this.state.costFilterShadeId == sh_opt.id">
@@ -493,7 +493,7 @@
                                                 class="form-select form-select-sm"
                                                 t-on-change="(e) => this.onStoneFieldChange(row, 'type_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
-                                                <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
+                                                <t t-foreach="state.stoneTypes" t-as="t_opt" t-key="t_opt.id">
                                                     <option
                                                         t-att-value="t_opt.id"
                                                         t-att-selected="this.m2oId(row.type_id) === t_opt.id">
@@ -507,7 +507,7 @@
                                                 class="form-select form-select-sm"
                                                 t-on-change="(e) => this.onStoneFieldChange(row, 'shape_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
-                                                <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
+                                                <t t-foreach="state.stoneShapes" t-as="s_opt" t-key="s_opt.id">
                                                     <option
                                                         t-att-value="s_opt.id"
                                                         t-att-selected="this.m2oId(row.shape_id) === s_opt.id">
@@ -521,7 +521,7 @@
                                                 class="form-select form-select-sm"
                                                 t-on-change="(e) => this.onStoneFieldChange(row, 'shade_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
-                                                <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
+                                                <t t-foreach="state.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
                                                     <option
                                                         t-att-value="sh_opt.id"
                                                         t-att-selected="this.m2oId(row.shade_id) === sh_opt.id">
@@ -535,7 +535,7 @@
                                                 class="form-select form-select-sm"
                                                 t-on-change="(e) => this.onStoneFieldChange(row, 'size_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
-                                                <t t-foreach="this.stoneSizes" t-as="sz_opt" t-key="sz_opt.id">
+                                                <t t-foreach="state.stoneSizes" t-as="sz_opt" t-key="sz_opt.id">
                                                     <option
                                                         t-att-value="sz_opt.id"
                                                         t-att-selected="this.m2oId(row.size_id) === sz_opt.id">
@@ -618,7 +618,7 @@
                             style="width: 180px;"
                             t-on-change="(e) => { this.state.weightFilterTypeId = e.target.value; this.loadWeights(); }">
                             <option value="">All Types</option>
-                            <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
+                            <t t-foreach="state.stoneTypes" t-as="t_opt" t-key="t_opt.id">
                                 <option
                                     t-att-value="t_opt.id"
                                     t-att-selected="this.state.weightFilterTypeId == t_opt.id">
@@ -633,7 +633,7 @@
                             style="width: 160px;"
                             t-on-change="(e) => { this.state.weightFilterShapeId = e.target.value; this.loadWeights(); }">
                             <option value="">All Shapes</option>
-                            <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
+                            <t t-foreach="state.stoneShapes" t-as="s_opt" t-key="s_opt.id">
                                 <option
                                     t-att-value="s_opt.id"
                                     t-att-selected="this.state.weightFilterShapeId == s_opt.id">
@@ -648,7 +648,7 @@
                             style="width: 160px;"
                             t-on-change="(e) => { this.state.weightFilterShadeId = e.target.value; this.loadWeights(); }">
                             <option value="">All Shades</option>
-                            <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
+                            <t t-foreach="state.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
                                 <option
                                     t-att-value="sh_opt.id"
                                     t-att-selected="this.state.weightFilterShadeId == sh_opt.id">
@@ -701,7 +701,7 @@
                                                 class="form-select form-select-sm"
                                                 t-on-change="(e) => this.onWeightFieldChange(row, 'type_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
-                                                <t t-foreach="this.stoneTypes" t-as="t_opt" t-key="t_opt.id">
+                                                <t t-foreach="state.stoneTypes" t-as="t_opt" t-key="t_opt.id">
                                                     <option
                                                         t-att-value="t_opt.id"
                                                         t-att-selected="this.m2oId(row.type_id) === t_opt.id">
@@ -715,7 +715,7 @@
                                                 class="form-select form-select-sm"
                                                 t-on-change="(e) => this.onWeightFieldChange(row, 'shape_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
-                                                <t t-foreach="this.stoneShapes" t-as="s_opt" t-key="s_opt.id">
+                                                <t t-foreach="state.stoneShapes" t-as="s_opt" t-key="s_opt.id">
                                                     <option
                                                         t-att-value="s_opt.id"
                                                         t-att-selected="this.m2oId(row.shape_id) === s_opt.id">
@@ -729,7 +729,7 @@
                                                 class="form-select form-select-sm"
                                                 t-on-change="(e) => this.onWeightFieldChange(row, 'shade_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
-                                                <t t-foreach="this.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
+                                                <t t-foreach="state.stoneShades" t-as="sh_opt" t-key="sh_opt.id">
                                                     <option
                                                         t-att-value="sh_opt.id"
                                                         t-att-selected="this.m2oId(row.shade_id) === sh_opt.id">
@@ -743,7 +743,7 @@
                                                 class="form-select form-select-sm"
                                                 t-on-change="(e) => this.onWeightFieldChange(row, 'size_id', e.target.value ? +e.target.value : false)">
                                                 <option value="">— select —</option>
-                                                <t t-foreach="this.stoneSizes" t-as="sz_opt" t-key="sz_opt.id">
+                                                <t t-foreach="state.stoneSizes" t-as="sz_opt" t-key="sz_opt.id">
                                                     <option
                                                         t-att-value="sz_opt.id"
                                                         t-att-selected="this.m2oId(row.size_id) === sz_opt.id">

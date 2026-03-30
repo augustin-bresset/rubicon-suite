@@ -29,7 +29,7 @@ ODOO_SHELL = docker compose exec -T odoo odoo shell \
 
 CORE_DATA_MODULES = pdp_stone,pdp_metal,pdp_labor,pdp_margin,pdp_product
 
-PDP_MODULES = pdp_stone,pdp_metal,pdp_labor,pdp_margin,pdp_product,pdp_frontend
+PDP_MODULES = pdp_stone,pdp_metal,pdp_labor,pdp_margin,pdp_product,pdp_picture,pdp_frontend
 
 SIS_MODULES = sis_party,sis_document,sis_frontend
 

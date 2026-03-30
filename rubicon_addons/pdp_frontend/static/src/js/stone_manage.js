@@ -11,10 +11,6 @@ export class StoneManage extends Component {
 
         // Non-reactive lookups loaded once
         this.stoneCategories = [];
-        this.stoneTypes = [];
-        this.stoneShapes = [];
-        this.stoneSizes = [];
-        this.stoneShades = [];
         this.currencies = [];
 
         // Non-reactive deleted-ID trackers
@@ -38,6 +34,12 @@ export class StoneManage extends Component {
             shapes: [],
             shades: [],
             sizes: [],
+
+            // Reactive lookup lists (re-render filter selects after save)
+            stoneTypes: [],
+            stoneShapes: [],
+            stoneShades: [],
+            stoneSizes: [],
 
             // Tab 3: Unit Costs
             costFilterTypeId: "",
@@ -157,11 +159,11 @@ export class StoneManage extends Component {
         ]);
 
         this.stoneCategories = cats.map(c => ({ ...c }));
-        this.stoneTypes = types.map(t => ({ ...t }));
-        this.stoneShapes = shapes.map(s => ({ ...s }));
-        this.stoneShades = shades.map(s => ({ ...s }));
-        this.stoneSizes = sizes.map(s => ({ ...s }));
         this.currencies = currencies;
+        this.state.stoneTypes = types.map(t => ({ ...t }));
+        this.state.stoneShapes = shapes.map(s => ({ ...s }));
+        this.state.stoneShades = shades.map(s => ({ ...s }));
+        this.state.stoneSizes = sizes.map(s => ({ ...s }));
 
         this.state.categories = cats.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.types = types.map(r => ({ ...r, _key: r.id, _dirty: false }));
@@ -397,19 +399,19 @@ export class StoneManage extends Component {
             : false;
         const typeId = this.state.costFilterTypeId
             ? parseInt(this.state.costFilterTypeId)
-            : (this.stoneTypes.length ? this.stoneTypes[0].id : null);
+            : (this.state.stoneTypes.length ? this.state.stoneTypes[0].id : null);
         const shapeId = this.state.costFilterShapeId
             ? parseInt(this.state.costFilterShapeId)
-            : (this.stoneShapes.length ? this.stoneShapes[0].id : null);
+            : (this.state.stoneShapes.length ? this.state.stoneShapes[0].id : null);
         const shadeId = this.state.costFilterShadeId
             ? parseInt(this.state.costFilterShadeId)
-            : (this.stoneShades.length ? this.stoneShades[0].id : null);
-        const sizeId = this.stoneSizes.length ? this.stoneSizes[0].id : null;
+            : (this.state.stoneShades.length ? this.state.stoneShades[0].id : null);
+        const sizeId = this.state.stoneSizes.length ? this.state.stoneSizes[0].id : null;
 
-        const typeObj = this.stoneTypes.find(t => t.id === typeId);
-        const shapeObj = this.stoneShapes.find(s => s.id === shapeId);
-        const shadeObj = this.stoneShades.find(s => s.id === shadeId);
-        const sizeObj = this.stoneSizes.find(s => s.id === sizeId);
+        const typeObj = this.state.stoneTypes.find(t => t.id === typeId);
+        const shapeObj = this.state.stoneShapes.find(s => s.id === shapeId);
+        const shadeObj = this.state.stoneShades.find(s => s.id === shadeId);
+        const sizeObj = this.state.stoneSizes.find(s => s.id === sizeId);
 
         this.state.stones.push({
             id: null,
@@ -448,19 +450,19 @@ export class StoneManage extends Component {
     addWeightRow() {
         const typeId = this.state.weightFilterTypeId
             ? parseInt(this.state.weightFilterTypeId)
-            : (this.stoneTypes.length ? this.stoneTypes[0].id : null);
+            : (this.state.stoneTypes.length ? this.state.stoneTypes[0].id : null);
         const shapeId = this.state.weightFilterShapeId
             ? parseInt(this.state.weightFilterShapeId)
-            : (this.stoneShapes.length ? this.stoneShapes[0].id : null);
+            : (this.state.stoneShapes.length ? this.state.stoneShapes[0].id : null);
         const shadeId = this.state.weightFilterShadeId
             ? parseInt(this.state.weightFilterShadeId)
-            : (this.stoneShades.length ? this.stoneShades[0].id : null);
-        const sizeId = this.stoneSizes.length ? this.stoneSizes[0].id : null;
+            : (this.state.stoneShades.length ? this.state.stoneShades[0].id : null);
+        const sizeId = this.state.stoneSizes.length ? this.state.stoneSizes[0].id : null;
 
-        const typeObj = this.stoneTypes.find(t => t.id === typeId);
-        const shapeObj = this.stoneShapes.find(s => s.id === shapeId);
-        const shadeObj = this.stoneShades.find(s => s.id === shadeId);
-        const sizeObj = this.stoneSizes.find(s => s.id === sizeId);
+        const typeObj = this.state.stoneTypes.find(t => t.id === typeId);
+        const shapeObj = this.state.stoneShapes.find(s => s.id === shapeId);
+        const shadeObj = this.state.stoneShades.find(s => s.id === shadeId);
+        const sizeObj = this.state.stoneSizes.find(s => s.id === sizeId);
 
         this.state.weights.push({
             id: null,
@@ -623,7 +625,7 @@ export class StoneManage extends Component {
                 this._deletedTypeIds,
                 r => this._typeVals(r)
             );
-            this.stoneTypes = this.state.types
+            this.state.stoneTypes = this.state.types
                 .filter(r => r.id)
                 .map(r => ({ id: r.id, code: r.code, name: r.name, density: r.density, category_id: r.category_id }));
 
@@ -657,7 +659,7 @@ export class StoneManage extends Component {
                 this._deletedShapeIds,
                 r => this._shapeVals(r)
             );
-            this.stoneShapes = this.state.shapes
+            this.state.stoneShapes = this.state.shapes
                 .filter(r => r.id)
                 .map(r => ({ id: r.id, code: r.code, shape: r.shape }));
 
@@ -667,7 +669,7 @@ export class StoneManage extends Component {
                 this._deletedShadeIds,
                 r => this._shadeVals(r)
             );
-            this.stoneShades = this.state.shades
+            this.state.stoneShades = this.state.shades
                 .filter(r => r.id)
                 .map(r => ({ id: r.id, code: r.code, shade: r.shade }));
 
@@ -677,7 +679,7 @@ export class StoneManage extends Component {
                 this._deletedSizeIds,
                 r => this._sizeVals(r)
             );
-            this.stoneSizes = this.state.sizes
+            this.state.stoneSizes = this.state.sizes
                 .filter(r => r.id)
                 .map(r => ({ id: r.id, name: r.name }));
 
@@ -775,10 +777,10 @@ export class StoneManage extends Component {
     printCosts() {
         const headers = ["Type", "Shape", "Shade", "Size", "Stock Code", "Cost", "Currency"];
         const rows = this.state.stones.map(r => {
-            const type = this.stoneTypes.find(t => t.id === this.m2oId(r.type_id));
-            const shape = this.stoneShapes.find(s => s.id === this.m2oId(r.shape_id));
-            const shade = this.stoneShades.find(s => s.id === this.m2oId(r.shade_id));
-            const size = this.stoneSizes.find(s => s.id === this.m2oId(r.size_id));
+            const type = this.state.stoneTypes.find(t => t.id === this.m2oId(r.type_id));
+            const shape = this.state.stoneShapes.find(s => s.id === this.m2oId(r.shape_id));
+            const shade = this.state.stoneShades.find(s => s.id === this.m2oId(r.shade_id));
+            const size = this.state.stoneSizes.find(s => s.id === this.m2oId(r.size_id));
             const currency = this.currencies.find(c => c.id === this.m2oId(r.currency_id));
             return [
                 type ? `[${type.code}] ${type.name}` : "",
@@ -796,10 +798,10 @@ export class StoneManage extends Component {
     printWeights() {
         const headers = ["Type", "Shape", "Shade", "Size", "Weight (ct)"];
         const rows = this.state.weights.map(r => {
-            const type = this.stoneTypes.find(t => t.id === this.m2oId(r.type_id));
-            const shape = this.stoneShapes.find(s => s.id === this.m2oId(r.shape_id));
-            const shade = this.stoneShades.find(s => s.id === this.m2oId(r.shade_id));
-            const size = this.stoneSizes.find(s => s.id === this.m2oId(r.size_id));
+            const type = this.state.stoneTypes.find(t => t.id === this.m2oId(r.type_id));
+            const shape = this.state.stoneShapes.find(s => s.id === this.m2oId(r.shape_id));
+            const shade = this.state.stoneShades.find(s => s.id === this.m2oId(r.shade_id));
+            const size = this.state.stoneSizes.find(s => s.id === this.m2oId(r.size_id));
             return [
                 type ? `[${type.code}] ${type.name}` : "",
                 shape ? shape.code : "",
