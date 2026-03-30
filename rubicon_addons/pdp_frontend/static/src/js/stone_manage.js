@@ -273,6 +273,7 @@ export class StoneManage extends Component {
 
     addType() {
         const cat = this.selectedCategory;
+        console.log("[DEBUG addType] called, before push types.length:", this.state.types.length, "cat:", cat ? cat.code : "null");
         this.state.types.push({
             id: null,
             _key: -Date.now(),
@@ -625,13 +626,14 @@ export class StoneManage extends Component {
                 this._deletedTypeIds,
                 r => this._typeVals(r)
             );
-            this.state.stoneTypes = this.state.types
-                .filter(r => r.id)
+            const withId = this.state.types.filter(r => r.id);
+            console.log("[DEBUG saveCatsTypes] state.types:", this.state.types.length, "withId:", withId.length, "TTYP:", withId.some(t => t.code === "TTYP"));
+            this.state.stoneTypes = withId
                 .map(r => ({ id: r.id, code: r.code, name: r.name, density: r.density, category_id: r.category_id }));
-
             this.state.isDirty = this._anyDirty();
             this.notification.add("Categories and types saved.", { type: "success" });
         } catch (e) {
+            console.log("[DEBUG saveCatsTypes CATCH] error:", e.message || String(e));
             this.notification.add("Error: " + (e.message || String(e)), { type: "danger" });
         }
     }

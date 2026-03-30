@@ -63,6 +63,7 @@ logs/
 *.sqlite3
 *.bak
 mssql_backups/
+meta/backups/
 *.csv
 
 # For model security

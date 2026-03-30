@@ -16,15 +16,15 @@ class StoneWeight(models.Model):
 
     type_id  = fields.Many2one("pdp.stone.type",  string="Stone Type",  required=True, index=True)
     shape_id = fields.Many2one("pdp.stone.shape", string="Stone Shape", required=True, index=True)
-    shade_id = fields.Many2one("pdp.stone.shade", string="Stone Shade", required=True, index=True)
+    shade_id = fields.Many2one("pdp.stone.shade", string="Stone Shade", index=True)
     size_id  = fields.Many2one("pdp.stone.size",  string="Stone Size",  required=True, index=True)
 
 
     _sql_constraints = [
         (
             "stone_weight_uniq",
-            "unique(type_id, shape_id, shade_id, size_id)",
-            "A weight already exists for this type/shape/shade/size combination."
+            "unique(type_id, shape_id, size_id)",
+            "A weight already exists for this type/shape/size combination."
         ),
         (
             "weight_positive",

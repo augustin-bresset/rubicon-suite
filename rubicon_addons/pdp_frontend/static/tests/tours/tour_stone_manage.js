@@ -36,13 +36,14 @@ function clickTab(text) {
     };
 }
 
-/** Click "Add" (btn-secondary) in a panel identified by its heading text. */
+/** Click "Add" (btn-secondary) in a panel identified by its heading text.
+ *  Matches headings that START WITH headingText (tolerates appended filter info). */
 function clickPanelAdd(headingText) {
     return {
         trigger: ".pdp-manage .fw-semibold.me-auto",
         run: () => {
             for (const h of document.querySelectorAll(".pdp-manage .fw-semibold.me-auto")) {
-                if (h.textContent.trim() === headingText) {
+                if (h.textContent.trim().startsWith(headingText)) {
                     h.parentElement.querySelector(".btn-secondary").click();
                     return;
                 }
@@ -184,8 +185,10 @@ registry.category("web_tour.tours").add("pdp_tour_stone_manage", {
                 );
                 const typeSelect = selects[0];
                 if (!typeSelect) throw new Error("Type filter select not found");
+                const allOpts = [...typeSelect.options].map(o => o.text.trim());
+                console.log("[DEBUG step32] opts count:", allOpts.length, "T-codes:", allOpts.filter(t => /^\[T/.test(t)));
                 const opt = [...typeSelect.options].find(o => o.text.includes("TTYP"));
-                if (!opt) throw new Error("TTYP option not found in type filter");
+                if (!opt) throw new Error("TTYP option not found in type filter. T-options: " + allOpts.filter(t => /^\[T/.test(t)).join("|"));
                 typeSelect.value = opt.value;
                 typeSelect.dispatchEvent(new Event("change", { bubbles: true }));
             },

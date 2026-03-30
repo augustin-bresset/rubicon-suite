@@ -19,7 +19,7 @@ class Stone(models.Model):
 
     type_id  = fields.Many2one("pdp.stone.type",  string="Stone Type",  required=True, index=True)
     shape_id = fields.Many2one("pdp.stone.shape", string="Stone Shape", required=True, index=True)
-    shade_id = fields.Many2one("pdp.stone.shade", string="Stone Shade", required=True, index=True)
+    shade_id = fields.Many2one("pdp.stone.shade", string="Stone Shade", index=True)
     size_id  = fields.Many2one("pdp.stone.size",  string="Stone Size",  required=True, index=True)
     weight_id = fields.Many2one(
         'pdp.stone.weight',
@@ -47,18 +47,17 @@ class Stone(models.Model):
     
     _sql_constraints = [
         ("stone_code_uniq", "unique(code)", "Stone code must be unique."),
-        ("stone_tuple_uniq", "unique(type_id, shade_id, shape_id, size_id)", "This stone combination already exists."),
+        ("stone_tuple_uniq", "unique(type_id, shape_id, size_id)", "This stone combination already exists."),
         ("cost_currency_chk", "CHECK (cost IS NULL OR currency_id IS NOT NULL)", "Currency required when a cost is set."),
     ]
     
-    @api.depends('type_id', 'shape_id', 'shade_id', 'size_id')
+    @api.depends('type_id', 'shape_id', 'size_id')
     def _compute_weight_id(self):
         for record in self:
-            if record.type_id and record.shape_id and record.shade_id and record.size_id:
+            if record.type_id and record.shape_id and record.size_id:
                 domain = [
                     ('type_id', '=', record.type_id.id),
                     ('shape_id', '=', record.shape_id.id),
-                    ('shade_id', '=', record.shade_id.id),
                     ('size_id', '=', record.size_id.id),
                 ]
                 weight_record = self.env['pdp.stone.weight'].search(domain, limit=1)

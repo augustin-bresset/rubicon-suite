@@ -14,6 +14,8 @@ IMPORT_CSV_SCRIPT   ?= ops/import/import_csv.py
 CREATE_DIAGRAM      ?= rubicon_addons/rubicon_import/analysis/diagram.py
 
 LOG_DIR         ?= meta/logs
+BACKUP_DIR      ?= meta/backups
+BACKUP_LSN_FILE ?= $(BACKUP_DIR)/.last_lsn
 TIMESTAMP       := $(shell date +%F_%H%M)
 
 DB := $(if $(DB_NAME),$(DB_NAME),rubicon)
@@ -46,7 +48,8 @@ TEST_TAGS        ?= pdp_frontend
         update-sis-modules upgrade deploy-demo logs-demo logs-prod \
         raw_to_data_all import_all import_csv import_pictures import-pictures \
         export-pictures audit_counts create_diagram \
-        stone-data stone-install stone-import stone-all backup-help \
+        stone-data stone-install stone-import stone-all backup backup-help \
+        cleanup-none-all \
         test-db-init test-tours test-tours-fresh
 
 
@@ -58,11 +61,12 @@ help:
 	@echo ""
 	@echo "  Database"
 	@echo "    make reset_odoo_db          Drop volumes and restart stack"
+	@echo "    make backup                 pg_dump rubicon → meta/backups/"
 	@echo "    make init-data-modules      Install core data modules from scratch"
 	@echo "    make update-data-modules    Update core data modules (pdp_*)"
 	@echo "    make update-pdp-modules     Update all PDP modules including frontend"
 	@echo "    make update-sis-modules     Update all SIS modules including frontend"
-	@echo "    make upgrade                Update all modules (PDP + SIS)"
+	@echo "    make upgrade                Update all modules (PDP + SIS) — runs backup first"
 	@echo "    make update MODULE=name     Update a specific module"
 	@echo ""
 	@echo "  Deploy"
@@ -85,6 +89,22 @@ help:
 	@echo ""
 
 
+backup:
+	@mkdir -p $(BACKUP_DIR)
+	@CURRENT_LSN=$$(docker compose exec -T db psql -U $(DB_USER) $(DB_NAME) -Atc \
+	  "SELECT pg_current_wal_lsn();") && \
+	LAST_LSN=$$(cat $(BACKUP_LSN_FILE) 2>/dev/null || echo "") && \
+	if [ "$$CURRENT_LSN" = "$$LAST_LSN" ]; then \
+	  echo "→ No changes since last backup (LSN=$$CURRENT_LSN) — skipping."; \
+	else \
+	  OUTFILE=$(BACKUP_DIR)/$(DB_NAME)_$(TIMESTAMP).sql && \
+	  echo "→ Dumping $(DB_NAME) → $$OUTFILE" && \
+	  docker compose exec -T db pg_dump -U $(DB_USER) $(DB_NAME) > $$OUTFILE && \
+	  echo "$$CURRENT_LSN" > $(BACKUP_LSN_FILE) && \
+	  find $(BACKUP_DIR) -name "*.sql" -mtime +30 -delete && \
+	  echo "→ Backup done: $$OUTFILE"; \
+	fi
+
 reset_odoo_db:
 	docker compose down -v
 	docker compose up -d
@@ -101,7 +121,7 @@ update-pdp-modules:
 update-sis-modules:
 	$(ODOO) -u $(SIS_MODULES) --stop-after-init --workers=0
 
-upgrade:
+upgrade: backup
 	$(ODOO) -u $(PDP_MODULES),$(SIS_MODULES) --stop-after-init --workers=0
 
 update:
@@ -134,7 +154,7 @@ raw_to_data_all:
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_labor
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_margin
 
-import_all:
+import_all: backup
 	@mkdir -p $(LOG_DIR)
 	@echo "→ DB=$(DB)  script=$(IMPORT_CSV_SCRIPT)"
 	$(ODOO_SHELL) < $(IMPORT_CSV_SCRIPT) 2>&1 | tee $(LOG_DIR)/import_$(TIMESTAMP).log
@@ -204,6 +224,9 @@ stone-all: stone-data stone-install stone-import
 
 
 # --- Misc ---
+
+cleanup-none-all: backup
+	$(ODOO_SHELL) < ops/cleanup/cleanup_none_all.py
 
 backup-help:
 	@cat meta/doc/backup.md
