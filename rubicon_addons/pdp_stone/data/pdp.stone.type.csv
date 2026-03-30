@@ -1,6 +1,4 @@
 id,code,name,density,category_id
-type_0,0,None,0.0,
-type_1,1,All,0.0,1
 type_ABA,ABA,Abalone,2.65,H
 type_AGA,AGA,Agate,2.65,H
 type_AK1,AK1,Akoya 1 Hole,0.0,R

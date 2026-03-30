@@ -1,6 +1,4 @@
 id,code,name,cost,reference,gold,plating
-metal_0,0,None,3255.0,False,False,True
-metal_1,1,All,1960.0,False,False,False
 metal_B,B,Bronze,7.0,False,False,False
 metal_L,L,Palladium Gold,3460.0,False,True,True
 metal_P,P,Pink Gold,3255.0,False,True,True
