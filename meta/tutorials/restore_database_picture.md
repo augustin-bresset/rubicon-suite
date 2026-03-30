@@ -1,227 +1,110 @@
-# Tutoriel : Récupérer et intégrer les images de `Pictures.bak` dans Odoo
+# Pictures — Extract from backup and import into Odoo
+
+## Overview
+
+Photos and drawings are stored in a SQL Server database (`Pictures.bak`).
+Each photo is linked to a **model** (fallback) and to all **products** of that model via a Many2many relationship.
+
+Workflow:
+1. `make export-pictures` — restores `Pictures.bak` and exports JPGs to `data/pictures/`
+2. `make import-pictures` — imports `data/pictures/` into Odoo (`pdp.picture`)
 
 ---
 
-## 1  Objectif
-
-L’ancien logiciel PDP stockait ses images (dessins, modèles, croquis, etc.) dans une base SQL Server appelée `Pictures`.
-L’objectif est de :
-
-* restaurer cette base `.bak` dans un conteneur SQL Server,
-* extraire les images réelles sur disque,
-* puis les importer proprement dans Odoo (via un module `pdp_picture`).
-
----
-
-## 2  Restaurer la base `Pictures.bak`
-
-### Étape 1 – Créer le conteneur SQL Server
-
-Dans ton dossier de projet (ex. `~/rubicon-suite/`), tu dois avoir ton backup :
-
-```
-mssql_backups/Pictures.bak
-```
-
-Lance un conteneur SQL Server avec ce dossier monté :
+## Quick start (automated)
 
 ```bash
-docker rm -f sqlsrv
-docker run -d \
-  --name sqlsrv \
-  -e "ACCEPT_EULA=Y" \
-  -e "SA_PASSWORD=Strong@Passw0rd" \
+# Full pipeline: restore backup → export JPGs → import into Odoo
+make export-pictures
+make import-pictures
+```
+
+`export-pictures` requires Docker and `mssql_backups/Pictures.bak`.
+
+---
+
+## Manual steps (if the Makefile targets don't work)
+
+### Step 1 — Start SQL Server container
+
+```bash
+docker run -d --name sqlsrv \
+  -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Strong@Passw0rd" \
   -p 1433:1433 \
-  -v /home/smaug/rubicon-suite/mssql_backups:/var/opt/mssql/backup \
+  -v $(pwd)/mssql_backups:/var/opt/mssql/backup \
   mcr.microsoft.com/mssql/server:2019-latest
+sleep 20
 ```
 
----
-
-### Étape 2 – Vérifier que le backup est visible
+### Step 2 — Restore the backup
 
 ```bash
-docker exec -it sqlsrv ls -lh /var/opt/mssql/backup
-```
-
-→ tu dois voir `Pictures.bak`.
-
----
-
-### Étape 3 – Identifier les fichiers logiques
-
-```bash
-docker exec -it sqlsrv /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U SA -P 'Strong@Passw0rd' -C \
-  -Q "RESTORE FILELISTONLY FROM DISK = '/var/opt/mssql/backup/Pictures.bak';"
-```
-
-Tu obtiens par exemple :
-
-```
-LogicalName      PhysicalName
------------------------------------------------
-Pictures_Data    C:\Program Files\...\Pictures.mdf
-Pictures_Log     C:\Program Files\...\Pictures_0.ldf
-```
-
----
-
-### Étape 4 – Restaurer la base
-
-```bash
-docker exec -it sqlsrv /opt/mssql-tools18/bin/sqlcmd \
+docker exec sqlsrv /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U SA -P 'Strong@Passw0rd' -C \
   -Q "RESTORE DATABASE PICTURES
       FROM DISK = '/var/opt/mssql/backup/Pictures.bak'
-      WITH 
-        MOVE 'Pictures_Data' TO '/var/opt/mssql/data/Pictures.mdf',
-        MOVE 'Pictures_Log'  TO '/var/opt/mssql/data/Pictures_log.ldf',
-        REPLACE;"
+      WITH MOVE 'Pictures_Data' TO '/var/opt/mssql/data/Pictures.mdf',
+           MOVE 'Pictures_Log'  TO '/var/opt/mssql/data/Pictures_log.ldf',
+      REPLACE;"
 ```
 
----
+### Step 3 — Export photos and drawings
 
-### Étape 5 – Vérifier la restauration
+Run inside a temporary Python container (no local install needed):
 
 ```bash
-docker exec -it sqlsrv /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U SA -P 'Strong@Passw0rd' -C \
-  -Q "SELECT name FROM sys.databases;"
+docker run --rm --network=host \
+  -v $(pwd):/app \
+  -e PICTURES_OUT_DIR=/app/data/pictures \
+  python:3.11-slim bash -c "
+    apt-get update -qq && apt-get install -y -qq unixodbc unixodbc-dev freetds-dev tdsodbc gcc > /dev/null 2>&1
+    pip install -q pyodbc tqdm
+    cd /app && python3 ops/export/export_pictures_products.py"
 ```
 
-Tu devrais voir `PICTURES`.
+Output files:
+- `data/pictures/{Model}.jpg` — model photo
+- `data/pictures/{Model}_drawing.jpg` — drawing/sketch for that model
 
----
-
-## 3 Exporter les images depuis SQL Server
-
-### Étape 1 – Lancer un conteneur Python temporaire
-
-On utilise un conteneur Python pour extraire les images sans rien installer sur ta machine :
+### Step 4 — Import into Odoo
 
 ```bash
-docker run -it --rm \
-  --network=host \
-  -v "$PWD":/app \
-  python:3.11-slim bash
+make import-pictures
+# equivalent to:
+docker compose exec -T odoo odoo shell -d rubicon --no-http < ops/import/import_pictures.py
 ```
+
+The import script:
+- Matches `{Model}.jpg` against `pdp.product.model.code`
+- Creates one `pdp.picture` per model with `model_id` set
+- Links all products of that model via `product_ids` (Many2many)
+- Adds `drawing_1920` from `{Model}_drawing.jpg` to the same record
+- Deduplicates by MD5 checksum (no duplicate records)
 
 ---
 
-### Étape 2 – Installer les dépendances dans le conteneur
+## Data model
+
+```
+pdp.picture
+  model_id    → pdp.product.model   (fallback; shown if no product-specific picture)
+  product_ids → pdp.product (M2M)   (primary link; unlink = remove from M2M, record stays)
+  image_1920  — product/model photo
+  drawing_1920 — sketch/drawing
+```
+
+**Deleting a picture from a product** removes the product from `product_ids` only.
+The `pdp.picture` record is deleted automatically only if it has no remaining links
+(no `model_id` and empty `product_ids`).
+
+---
+
+## Cleanup
+
+Old extracted directories (`exported_pictures/`, `exported_pictures_v2/`, `exported_drawings/`) at the repo root are obsolete and can be deleted:
 
 ```bash
-apt update && apt install -y unixodbc unixodbc-dev freetds-dev tdsodbc gcc g++
-pip install pyodbc tqdm
-cd /app
+rm -rf exported_pictures exported_pictures_v2 exported_drawings
 ```
 
----
-
-### Étape 3 – Créer le script `export_pictures.py`
-
-Dans ton dossier `/app` (donc `rubicon-suite` sur ton hôte) :
-
-```python
-import os
-import pyodbc
-from tqdm import tqdm
-
-server = 'localhost,1433'
-database = 'PICTURES'
-username = 'SA'
-password = 'Strong@Passw0rd'
-
-out_dir = 'exported_pictures/Sketches'
-os.makedirs(out_dir, exist_ok=True)
-
-conn = pyodbc.connect(
-    f"DRIVER={{FreeTDS}};"
-    f"SERVER={server};DATABASE={database};UID={username};PWD={password};"
-    f"TrustServerCertificate=yes;"
-)
-cursor = conn.cursor()
-
-TABLE_NAME = 'Sketches'
-COLUMN_NAME = 'Picture'
-ID_COLUMNS = ['CatID', 'OrnID', 'Model']
-
-cols = ", ".join(ID_COLUMNS + [COLUMN_NAME])
-query = f"SELECT {cols} FROM {TABLE_NAME} WHERE {COLUMN_NAME} IS NOT NULL"
-cursor.execute(query)
-
-for row in tqdm(cursor, desc="Exporting pictures"):
-    *ids, image_data = row
-    name = '_'.join(str(i) for i in ids if i is not None)
-    filename = os.path.join(out_dir, f"{name}.jpg")
-    with open(filename, 'wb') as f:
-        f.write(image_data)
-
-cursor.close()
-conn.close()
-print(f"✅ Export terminé. Les fichiers sont dans {out_dir}/")
-```
-
----
-
-### Étape 4 – Exécuter le script
-
-```bash
-python3 export_pictures.py
-```
-
-👉 Les fichiers `.jpg` sont exportés dans `rubicon-suite/exported_pictures/Sketches/`.
-
----
-
-## 4️⃣  Intégrer les images dans Odoo
-
-### Étape 1 – Créer le module `pdp_picture`
-
-Dans `rubicon_addons/pdp_picture/` :
-
-#### `__manifest__.py`
-
-```python
-{
-    "name": "PDP Picture",
-    "version": "1.0",
-    "depends": ["pdp_model", "pdp_ornament"],
-    "data": [
-        "security/ir.model.access.csv",
-        "views/picture_views.xml",
-    ],
-    "installable": True,
-}
-```
-
-### Étape 2 – Importer les images extraites dans Odoo
-
-Exécute dans l’Odoo shell :
-
-```bash
-docker compose exec -T odoo odoo shell -d rubicon
-```
-
-Puis :
-
-```python
-import os, base64
-Picture = env['pdp.picture']
-base_path = '/mnt/extra-addons/pictures/Sketches'
-
-for filename in os.listdir(base_path):
-    if not filename.lower().endswith('.jpg'):
-        continue
-    name = filename.replace('.jpg', '')
-    with open(os.path.join(base_path, filename), 'rb') as f:
-        Picture.create({
-            'name': name,
-            'sketch_type': 'model',
-            'picture': base64.b64encode(f.read()),
-        })
-```
-
----
-
+The canonical output directory is `data/pictures/` (mounted into Odoo at `/mnt/extra-addons/pictures`).

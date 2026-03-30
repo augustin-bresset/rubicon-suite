@@ -11,7 +11,17 @@ class Picture(models.Model):
         string='Model',
         ondelete='set null',
         index=True,
-        required=False
+        required=False,
+        help="Model-level fallback: shown when no product-specific picture exists.",
+    )
+
+    product_ids = fields.Many2many(
+        comodel_name='pdp.product',
+        relation='pdp_picture_product_rel',
+        column1='picture_id',
+        column2='product_id',
+        string='Products',
+        help="Products this picture is linked to. Removing a product here does not delete the picture.",
     )
 
     # Actual image payload -> stored in filestore thanks to attachment=True

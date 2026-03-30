@@ -81,12 +81,13 @@ export class PdpWorkspace extends Component {
 
             // Image viewer
             imageMode: "model",
-            pictureId: null,
+            pictureId: null,        // currently displayed picture (product-specific or model fallback)
+            productPictureId: null, // non-null only when the displayed picture is product-specific
             pictureUrl: null,
             drawingUrl: null,
             showFullScreenImage: false,
             showPictureManager: false,
-            allPictures: [],
+            allPictures: [],        // model-level pictures list (for picture manager)
 
             // Pricing
             priceLines: [],
@@ -345,6 +346,19 @@ export class PdpWorkspace extends Component {
 
     onSearchInput(ev) {
         this.state.modelSearch = ev.target.value;
+        const matches = this.filteredModels;
+        if (matches.length === 1 && matches[0].id !== this.state.selectedModelId) {
+            this.selectModel(matches[0].id);
+        }
+    }
+
+    onSearchKeydown(ev) {
+        if (ev.key === "Enter") {
+            const matches = this.filteredModels;
+            if (matches.length >= 1) {
+                this.selectModel(matches[0].id);
+            }
+        }
     }
 
     async onModelSelectChange(ev) {
@@ -451,6 +465,7 @@ export class PdpWorkspace extends Component {
         this.state.selectedProductId = parseInt(productId);
         try {
             await Promise.all([
+                this.fetchProductPicture(productId),
                 this.fetchProductStones(),
                 this.fetchProductParts(),
                 this.fetchProductLabor(),
@@ -528,6 +543,36 @@ export class PdpWorkspace extends Component {
         }
     }
 
+    /** Look for a product-specific picture; fall back to model picture if none. */
+    async fetchProductPicture(productId) {
+        try {
+            const pics = await this.orm.searchRead(
+                "pdp.picture",
+                [["product_ids", "in", [parseInt(productId)]]],
+                ["id", "filename"],
+                { limit: 1 }
+            );
+            if (pics.length > 0) {
+                const pic = pics[0];
+                this.state.productPictureId = pic.id;
+                this.state.pictureId  = pic.id;
+                this.state.pictureUrl = `/web/image/pdp.picture/${pic.id}/image_1920`;
+                this.state.drawingUrl = `/web/image/pdp.picture/${pic.id}/drawing_1920`;
+            } else {
+                // Fall back to model picture already loaded by fetchModelPicture()
+                this.state.productPictureId = null;
+                const modelPic = this.state.allPictures[0] || null;
+                this.state.pictureId  = modelPic ? modelPic.id : null;
+                this.state.pictureUrl = modelPic
+                    ? `/web/image/pdp.picture/${modelPic.id}/image_1920` : null;
+                this.state.drawingUrl = modelPic
+                    ? `/web/image/pdp.picture/${modelPic.id}/drawing_1920` : null;
+            }
+        } catch (e) {
+            this.state.productPictureId = null;
+        }
+    }
+
     triggerImageUpload(field) {
         const input = document.getElementById(`pdp-upload-${field}`);
         if (input) { input.value = ""; input.click(); }
@@ -539,22 +584,43 @@ export class PdpWorkspace extends Component {
         const reader = new FileReader();
         reader.onload = async (e) => {
             const base64 = e.target.result.split(",")[1];
+            const productId = this.state.selectedProductId;
             try {
-                if (this.state.pictureId) {
-                    await this.orm.write("pdp.picture", [this.state.pictureId], {
+                if (productId && this.state.productPictureId) {
+                    // Update the existing product-specific picture
+                    await this.orm.write("pdp.picture", [this.state.productPictureId], {
                         [field]: base64,
-                        [`${field === "image_1920" ? "filename" : "drawing_filename"}`]: file.name,
+                        [field === "image_1920" ? "filename" : "drawing_filename"]: file.name,
                     });
-                } else {
-                    const newId = await this.orm.create("pdp.picture", [{
-                        model_id: this.state.selectedModelId,
+                } else if (productId) {
+                    // Create a new product-specific picture
+                    const [newId] = await this.orm.create("pdp.picture", [{
+                        model_id:  this.state.selectedModelId,
+                        product_ids: [[4, productId]],
                         image_1920: base64,
-                        filename: file.name,
+                        filename:  file.name,
                     }]);
+                    this.state.productPictureId = newId;
                     this.state.pictureId = newId;
+                } else {
+                    // No product selected — fall back to model-level picture
+                    if (this.state.pictureId) {
+                        await this.orm.write("pdp.picture", [this.state.pictureId], {
+                            [field]: base64,
+                            [field === "image_1920" ? "filename" : "drawing_filename"]: file.name,
+                        });
+                    } else {
+                        const [newId] = await this.orm.create("pdp.picture", [{
+                            model_id:  this.state.selectedModelId,
+                            image_1920: base64,
+                            filename:  file.name,
+                        }]);
+                        this.state.pictureId = newId;
+                    }
                 }
                 await this.fetchModelPicture();
-            } catch (e) {
+                if (productId) await this.fetchProductPicture(productId);
+            } catch (err) {
                 this.notification.add("Failed to upload image", { type: "danger" });
             }
         };
@@ -563,19 +629,40 @@ export class PdpWorkspace extends Component {
 
     async deletePictureField(field) {
         if (!this.state.pictureId) return;
-        const isDrawing = field === "drawing_1920";
-        const otherField = isDrawing ? "image_1920" : "drawing_1920";
-        // Check if the other field also has data; if not, delete the whole record
-        const rec = await this.orm.read("pdp.picture", [this.state.pictureId], [otherField]);
-        if (rec[0][otherField]) {
-            await this.orm.write("pdp.picture", [this.state.pictureId], {
-                [field]: false,
-                [`${isDrawing ? "drawing_filename" : "filename"}`]: false,
+        const productId   = this.state.selectedProductId;
+        const picId       = this.state.pictureId;
+        const isProductPic = !!this.state.productPictureId;
+
+        if (isProductPic && productId) {
+            // Remove the M2M link between picture and product.
+            // The picture record itself stays (other products keep their link).
+            await this.orm.write("pdp.picture", [picId], {
+                product_ids: [[3, productId]],
             });
+            // Auto-delete the record only if it has no remaining links
+            const remaining = await this.orm.read(
+                "pdp.picture", [picId], ["model_id", "product_ids"]
+            );
+            if (!remaining[0].model_id && !remaining[0].product_ids.length) {
+                await this.orm.unlink("pdp.picture", [picId]);
+            }
+            this.state.productPictureId = null;
         } else {
-            await this.orm.unlink("pdp.picture", [this.state.pictureId]);
+            // Model-level picture — delete the field (or the whole record if no other field)
+            const isDrawing  = field === "drawing_1920";
+            const otherField = isDrawing ? "image_1920" : "drawing_1920";
+            const rec = await this.orm.read("pdp.picture", [picId], [otherField]);
+            if (rec[0][otherField]) {
+                await this.orm.write("pdp.picture", [picId], {
+                    [field]: false,
+                    [isDrawing ? "drawing_filename" : "filename"]: false,
+                });
+            } else {
+                await this.orm.unlink("pdp.picture", [picId]);
+            }
         }
         await this.fetchModelPicture();
+        if (productId) await this.fetchProductPicture(productId);
     }
 
     async deletePictureById(picId) {

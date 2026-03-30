@@ -44,7 +44,8 @@ TEST_TAGS        ?= pdp_frontend
 
 .PHONY: help reset_odoo_db init-data-modules update-data-modules update-pdp-modules \
         update-sis-modules upgrade deploy-demo logs-demo logs-prod \
-        raw_to_data_all import_all import_csv import_pictures audit_counts create_diagram \
+        raw_to_data_all import_all import_csv import_pictures import-pictures \
+        export-pictures audit_counts create_diagram \
         stone-data stone-install stone-import stone-all backup-help \
         test-db-init test-tours test-tours-fresh
 
@@ -72,7 +73,8 @@ help:
 	@echo "  Import"
 	@echo "    make import_all             Run full CSV import"
 	@echo "    make import_csv WHAT=...    Import a specific CSV"
-	@echo "    make import_pictures        Import product pictures"
+	@echo "    make export-pictures        Extract photos/drawings from Pictures.bak → data/pictures/"
+	@echo "    make import-pictures        Import data/pictures/ into Odoo (pdp.picture)"
 	@echo "    make audit_counts           Print record counts to log"
 	@echo ""
 	@echo "  Stone pipeline"
@@ -139,6 +141,37 @@ import_all:
 
 import_csv:
 	@WHAT=$(WHAT) $(ODOO_SHELL) < ops/import/import_csv.py
+
+export-pictures:
+	@echo "→ Starting temporary SQL Server container…"
+	docker run -d --name sqlsrv_pics --rm \
+	  -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Strong@Passw0rd" \
+	  -p 1433:1433 \
+	  -v $(abspath mssql_backups):/var/opt/mssql/backup \
+	  mcr.microsoft.com/mssql/server:2019-latest
+	@echo "→ Waiting for SQL Server to be ready…"
+	sleep 20
+	@echo "→ Restoring Pictures.bak…"
+	docker exec sqlsrv_pics /opt/mssql-tools18/bin/sqlcmd \
+	  -S localhost -U SA -P 'Strong@Passw0rd' -C \
+	  -Q "RESTORE DATABASE PICTURES \
+	      FROM DISK = '/var/opt/mssql/backup/Pictures.bak' \
+	      WITH MOVE 'Pictures_Data' TO '/var/opt/mssql/data/Pictures.mdf', \
+	           MOVE 'Pictures_Log'  TO '/var/opt/mssql/data/Pictures_log.ldf', \
+	      REPLACE;"
+	@echo "→ Exporting photos and drawings to data/pictures/ …"
+	docker run --rm --network=host \
+	  -v $(abspath .):/app \
+	  -e PICTURES_OUT_DIR=/app/data/pictures \
+	  python:3.11-slim bash -c " \
+	    apt-get update -qq && apt-get install -y -qq unixodbc unixodbc-dev freetds-dev tdsodbc gcc > /dev/null 2>&1; \
+	    pip install -q pyodbc tqdm; \
+	    cd /app && python3 ops/export/export_pictures_products.py"
+	docker stop sqlsrv_pics || true
+	@echo "→ Done. Run 'make import-pictures' to import into Odoo."
+
+import-pictures:
+	$(ODOO_SHELL) < ops/import/import_pictures.py
 
 import_pictures:
 	@$(ODOO_SHELL) < ops/import/import_pictures.py

@@ -58,7 +58,7 @@ docker exec -it sqlsrv \
 
 ```
 
-For Pictures
+For Pictures (manual — see `meta/tutorials/restore_database_picture.md` for the automated pipeline)
 ```
 docker exec -it sqlsrv \
   /opt/mssql-tools18/bin/sqlcmd \

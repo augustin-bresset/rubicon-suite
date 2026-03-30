@@ -1,154 +1,240 @@
 """
-Import pictures; create/update when model exists,
-otherwise create an orphan picture (model_id = False).
-Run with: docker compose exec -T odoo odoo shell -d <DB> < ops/import/import_picture.py
+Import photos and drawings into pdp.picture from data/pictures/.
+
+Reads manifest.csv produced by ops/export/export_pictures_products.py.
+
+Behaviour per manifest row type
+---------------------------------
+model          → create/update pdp.picture with model_id=<model>
+                 and product_ids = all products belonging to that model (M2M)
+
+model_drawing  → add drawing_1920 to the existing pdp.picture for that model
+                 (picture must have been imported first by a 'model' row)
+
+product        → create pdp.picture with product_ids=[<product>]
+                 (product-specific photo from Snapshots; overrides model fallback
+                  when displayed in the workspace)
+
+Deduplication: by MD5 checksum — if same blob already exists, only update links.
+
+Run
+---
+  make import-pictures
+  # or directly:
+  docker compose exec -T odoo odoo shell -d rubicon --no-http < ops/import/import_pictures.py
 """
 import base64
 import binascii
+import csv
 import hashlib
 import io
 import os
-import re
 import traceback
 
-from odoo.exceptions import UserError
+# ── Guard ──────────────────────────────────────────────────────────────────
+if "pdp.picture" not in env.registry.models:
+    raise RuntimeError("Module pdp_picture not installed.")
 
-# Garde-fous
-if 'pdp.picture' not in env.registry.models:
-    raise RuntimeError("Module pdp_picture non installé.")
+Picture = env["pdp.picture"]
+Model   = env["pdp.product.model"]
+Product = env["pdp.product"]
 
-Picture = env['pdp.picture']
-Model = env['pdp.product.model']
-
-base_path = '/mnt/extra-addons/pictures'
-if not os.path.isdir(base_path):
-    raise RuntimeError(f"Dossier introuvable: {base_path}")
-
-pat = re.compile(r'^(?P<code>[^.]+)\.(jpg|jpeg|png)$', re.I)
-
-created = updated = skipped = orphaned = errors = 0
-total = 0
-
+BASE_PATH  = "/mnt/extra-addons/pictures"
+MANIFEST   = os.path.join(BASE_PATH, "manifest.csv")
 BATCH_SIZE = int(os.environ.get("PICTURE_IMPORT_BATCH", "25"))
 CHUNK_SIZE = int(os.environ.get("PICTURE_IMPORT_CHUNK", str(3 * 1024 * 1024)))
 
+if not os.path.isdir(BASE_PATH):
+    raise RuntimeError(f"Directory not found: {BASE_PATH}")
+if not os.path.isfile(MANIFEST):
+    raise RuntimeError(f"manifest.csv not found in {BASE_PATH}. Run make export-pictures first.")
 
-def commit_batch(processed):
-    if not processed:
-        return
 
-    env.cr.commit()
-    env.clear()
-    print(f"💾  committed batch of {processed} pictures")
-
+# ── Helpers ────────────────────────────────────────────────────────────────
 
 def iter_base64(path, chunk_size):
-    """Return (base64_bytes, md5_hexdigest) without loading the whole file."""
-
+    """Stream-encode a file to base64, returning (b64_bytes, md5_hex)."""
     digest = hashlib.md5()
-    buffer = io.BytesIO()
-    remainder = b""
-
-    with open(path, "rb") as stream:
+    buf    = io.BytesIO()
+    tail   = b""
+    with open(path, "rb") as fh:
         while True:
-            chunk = stream.read(chunk_size)
+            chunk = fh.read(chunk_size)
             if not chunk:
                 break
-
             digest.update(chunk)
-
-            if remainder:
-                chunk = remainder + chunk
-                remainder = b""
-
-            # keep a tail that is not a multiple of 3 for the next iteration
+            chunk  = tail + chunk
+            tail   = b""
             length = (len(chunk) // 3) * 3
             if length:
-                buffer.write(base64.b64encode(chunk[:length]))
-                remainder = chunk[length:]
+                buf.write(base64.b64encode(chunk[:length]))
+                tail = chunk[length:]
             else:
-                remainder = chunk
+                tail = chunk
+        if tail:
+            buf.write(base64.b64encode(tail))
+    return buf.getvalue(), digest.hexdigest()
 
-        if remainder:
-            buffer.write(base64.b64encode(remainder))
 
-    return buffer.getvalue(), digest.hexdigest()
+def commit(n):
+    env.cr.commit()
+    env.clear()
+    print(f"  💾 committed {n} records")
 
-batch_count = 0
 
-for fname in sorted(os.listdir(base_path)):
-    m = pat.match(fname)
-    if not m:
+# ── Pre-load caches ────────────────────────────────────────────────────────
+
+print("Loading model → products map …")
+all_prods = Product.search([])
+model_to_product_ids = {}
+for p in all_prods:
+    if p.model_id:
+        model_to_product_ids.setdefault(p.model_id.id, []).append(p.id)
+print(f"  {len(all_prods)} products across {len(model_to_product_ids)} models.\n")
+
+
+# ── Read manifest ──────────────────────────────────────────────────────────
+
+with open(MANIFEST, newline="") as f:
+    rows = list(csv.DictReader(f))
+
+# Process in order: model photos first, then drawings, then product photos
+ORDER = {"model": 0, "model_drawing": 1, "product": 2}
+rows.sort(key=lambda r: ORDER.get(r["type"], 9))
+
+print(f"Processing {len(rows)} manifest entries …\n")
+
+created = updated = linked = drawing_added = skipped = errors = 0
+batch_n = 0
+
+for entry in rows:
+    fname    = entry["filename"]
+    row_type = entry["type"]
+    code     = entry["code"].strip()
+    full_path = os.path.join(BASE_PATH, fname)
+
+    if not os.path.isfile(full_path):
+        skipped += 1
         continue
-    total += 1
-
-    code = (m.group('code') or '').upper()
-    full = os.path.join(base_path, fname)
 
     try:
-        b64, chk = iter_base64(full, CHUNK_SIZE)
+        b64, chk = iter_base64(full_path, CHUNK_SIZE)
     except (OSError, MemoryError, binascii.Error) as exc:
-        skipped += 1
+        print(f"  ⚠️  {fname}: read error ({exc})")
         errors += 1
-        print(f"⚠️  {fname}: import failed ({exc.__class__.__name__}: {exc})")
-        traceback.print_exc()
         continue
-
-    # ✅ utiliser la bonne clé: 'code' (pas 'name')
-    model = Model.search([('code', '=', code)], limit=1)
-
-    vals = {
-        'model_id': model.id if model else False,   # ← orphelin si pas de modèle
-        'filename': fname,
-        'image': b64,
-        'checksum': chk,
-    }
 
     try:
         with env.cr.savepoint():
-            if model:
-                pic = Picture.search([('model_id', '=', model.id)], limit=1)
-                if pic:
-                    if pic.checksum != chk:
-                        pic.write(vals)
-                        updated += 1
+
+            # ── Model photo ────────────────────────────────────────────────
+            if row_type == "model":
+                model = Model.search([("code", "=", code)], limit=1)
+                if not model:
+                    skipped += 1
+                    continue
+                product_ids = model_to_product_ids.get(model.id, [])
+
+                # Dedup by checksum
+                existing = Picture.search([("checksum", "=", chk)], limit=1)
+                if existing:
+                    # Same blob — ensure links are set
+                    needs = {}
+                    if not existing.model_id:
+                        needs["model_id"] = model.id
+                    new_pids = [p for p in product_ids if p not in existing.product_ids.ids]
+                    if new_pids:
+                        needs["product_ids"] = [(4, pid) for pid in new_pids]
+                    if needs:
+                        existing.write(needs)
+                        linked += 1
                     else:
                         skipped += 1
                 else:
-                    Picture.create(vals)
-                    created += 1
-            else:
-                # créer une image orpheline (model_id = False)
-                Picture.create(vals)
-                orphaned += 1
-    except UserError as exc:
-        skipped += 1
-        errors += 1
-        try:
-            message = str(exc)
-        except Exception:
-            message = repr(exc)
-        print(f"⚠️  {fname}: import failed ({exc.__class__.__name__}: {message})")
+                    pic = Picture.search([("model_id", "=", model.id)], limit=1)
+                    vals = {
+                        "model_id":    model.id,
+                        "filename":    fname,
+                        "image":       b64,
+                        "checksum":    chk,
+                        "product_ids": [(6, 0, product_ids)],
+                    }
+                    if pic:
+                        if pic.checksum != chk:
+                            pic.write(vals)
+                            updated += 1
+                        else:
+                            skipped += 1
+                    else:
+                        Picture.create(vals)
+                        created += 1
+
+            # ── Drawing ────────────────────────────────────────────────────
+            elif row_type == "model_drawing":
+                model = Model.search([("code", "=", code)], limit=1)
+                if not model:
+                    skipped += 1
+                    continue
+                pic = Picture.search([("model_id", "=", model.id)], limit=1)
+                if pic and not pic.drawing_1920:
+                    pic.write({"drawing_1920": b64, "drawing_filename": fname})
+                    drawing_added += 1
+                else:
+                    skipped += 1
+
+            # ── Product-specific photo (from Snapshots) ────────────────────
+            elif row_type == "product":
+                product = Product.search([("code", "=", code)], limit=1)
+                if not product:
+                    skipped += 1
+                    continue
+
+                # Dedup by checksum
+                existing = Picture.search([("checksum", "=", chk)], limit=1)
+                if existing:
+                    if product.id not in existing.product_ids.ids:
+                        existing.write({"product_ids": [(4, product.id)]})
+                        linked += 1
+                    else:
+                        skipped += 1
+                else:
+                    # Check if this product already has a picture
+                    pic = Picture.search(
+                        [("product_ids", "in", [product.id])], limit=1
+                    )
+                    vals = {
+                        "filename":    fname,
+                        "image":       b64,
+                        "checksum":    chk,
+                        "product_ids": [(6, 0, [product.id])],
+                    }
+                    if pic:
+                        if pic.checksum != chk:
+                            pic.write(vals)
+                            updated += 1
+                        else:
+                            skipped += 1
+                    else:
+                        Picture.create(vals)
+                        created += 1
+
+    except Exception as exc:
+        print(f"  ⚠️  {fname}: failed ({exc.__class__.__name__}: {exc})")
         traceback.print_exc()
         env.clear()
+        errors += 1
         continue
 
-    batch_count += 1
-    if BATCH_SIZE and batch_count >= BATCH_SIZE:
-        commit_batch(batch_count)
-        batch_count = 0
+    batch_n += 1
+    if BATCH_SIZE and batch_n >= BATCH_SIZE:
+        commit(batch_n)
+        batch_n = 0
 
-if batch_count:
-    commit_batch(batch_count)
+if batch_n:
+    commit(batch_n)
 
 print(
-    "Done. total={total}, created={created}, updated={updated}, skipped={skipped}, "
-    "orphaned={orphaned}, errors={errors}".format(
-        total=total,
-        created=created,
-        updated=updated,
-        skipped=skipped,
-        orphaned=orphaned,
-        errors=errors,
-    )
+    f"\nDone."
+    f"\n  created={created}, updated={updated}, linked={linked},"
+    f"\n  drawings_added={drawing_added}, skipped={skipped}, errors={errors}"
 )
