@@ -112,6 +112,8 @@ By clicking on `Stones` the lower part have changed.
 
 This is the list of the sones used. You can modify those lines according to the order here. But you can add only stones that are already registered in the database. 
 
+We have those columns : `LineNum`, `Stone`, `Shade`, `Shape`, `Size`, `Pcs`, `Weight`, `U.Cost`, `Curr`, `Setting`, `RecShape`, `RecSize`, `RecWgt`. 
+
 Some fields deserves a few explanations: 
 
 * `LineNum` : the key of the line, it have to be unique but there is currently no naming standards.
@@ -121,7 +123,15 @@ Some fields deserves a few explanations:
 * `RecShape` : The shape in which the stone will be reshaped (if needed)
 * `RecSize`, `RecWgt` : The recutting size and weight. This is with those fields than the recutting cost is compute.
 
+And when focused on a specific line, under the table we have from left to right :
+* Three buttons : `Stones`, `Cost`, `Weights`
+* Recut to: Shape [drop-down menu of shapes]
+* Size: [input field]
+* Weight: [input field] 
+
 If there is a reshaping, PDP will compute the cost of it. (We see later how)
+
+
 
 #### Metals
 By clicking on `Metals` the lower part have changed.
@@ -306,11 +316,41 @@ Create reports, really usefull.
 You can notice the `Make Excel Sheet` option.
 ![reports](./images/pdp_tools_reports.png)
 
+This window permit to create reports on the database. We have three columns of options.
+The first one contains `Select Report`, a check box : 
+* Price List 
+* Pictures
+* Item List by Date
+* Item List by Stone
+
+Then the two other columns avec the same design. 
+The first contains :
+* Margin (drop-down menu of margins)
+* Purity (drop-down menu of purities)
+* Metal Conv. (drop-down menu of metals)
+* Currency (drop-down menu of currencies)
+* Price List Type (choice between `Single Column` and `Multi Column`)
+The second contains :
+* Orn. Cat: (drop-down menu of ornament categories)
+* From Date (number default 0) Till : (number default 100)
+* Updated: (date)
+* Appl. From: (date)
+* Items (choice between `All` and `Selected` and `In Collection`)
+
+
 #### Check Data
 Check in the databse for missing fields.
 
 ![checkdata](./images/pdp_tools_checkdata.png)
 
+It contains a menu on the left with those options :
+* Blank Stone MArgins
+* Blank Stone Costs
+* Blank Stone Weights
+* Print
+
+Those options will check the database for missing fields and print a report of it. For example if you click on `Blank Stone Costs` you will have a report of all the stones that are used in the products but that do not have a cost in the database. This is really usefull to avoid errors when creating a new product.
+Print will create a PDF of the report generated.
 The process take some time. 
 
 ## Process

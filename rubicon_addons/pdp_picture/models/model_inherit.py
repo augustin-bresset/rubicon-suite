@@ -10,8 +10,10 @@ class ProductModel(models.Model):
 
     def _compute_image(self):
         Pic = self.env['pdp.picture']
+        Product = self.env['pdp.product']
         for rec in self:
-            pic = Pic.search([('model_id', '=', rec.id)], limit=1)
+            products = Product.search([('model_id', '=', rec.id)])
+            pic = Pic.search([('product_ids', 'in', products.ids)], limit=1) if products else Pic.browse()
             if pic:
                 rec.picture_image = pic.image_1920
                 rec.drawing_image = pic.drawing_1920

@@ -12,5 +12,7 @@ class PDPPictureTestWizard(models.TransientModel):
 
     def _compute_picture(self):
         Pic = self.env['pdp.picture']
+        Product = self.env['pdp.product']
         for w in self:
-            w.picture_id = Pic.search([('model_id', '=', w.model_id.id)], limit=1)
+            products = Product.search([('model_id', '=', w.model_id.id)])
+            w.picture_id = Pic.search([('product_ids', 'in', products.ids)], limit=1) if products else Pic.browse()

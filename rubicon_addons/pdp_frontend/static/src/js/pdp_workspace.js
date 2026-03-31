@@ -81,13 +81,13 @@ export class PdpWorkspace extends Component {
 
             // Image viewer
             imageMode: "model",
-            pictureId: null,        // currently displayed picture (product-specific or model fallback)
-            productPictureId: null, // non-null only when the displayed picture is product-specific
+            pictureId: null,        // currently displayed picture
+            productPictureId: null, // non-null when the displayed picture is product-specific
             pictureUrl: null,
             drawingUrl: null,
             showFullScreenImage: false,
             showPictureManager: false,
-            allPictures: [],        // model-level pictures list (for picture manager)
+            allPictures: [],        // all pictures for the current model (across all its products)
 
             // Pricing
             priceLines: [],
@@ -464,6 +464,9 @@ export class PdpWorkspace extends Component {
     async selectProduct(productId) {
         this.state.selectedProductId = parseInt(productId);
         try {
+            // fetchModelPicture must finish first: it populates allPictures,
+            // which fetchProductPicture reads to decide what to display.
+            await this.fetchModelPicture();
             await Promise.all([
                 this.fetchProductPicture(productId),
                 this.fetchProductStones(),
@@ -520,20 +523,30 @@ export class PdpWorkspace extends Component {
 
     async fetchModelPicture() {
         try {
+            const modelId   = this.state.selectedModelId;
+            const productId = this.state.selectedProductId ? parseInt(this.state.selectedProductId) : null;
+
+            // Model-scoped photos visible from any product of this model
+            const modelDomain = ["&", ["scope", "=", "model"], ["product_ids.model_id", "=", modelId]];
+
+            // Product-scoped photos only for the currently selected product
+            const productDomain = productId
+                ? ["&", ["scope", "=", "product"], ["product_ids", "in", [productId]]]
+                : null;
+
+            const domain = productDomain ? ["|", ...modelDomain, ...productDomain] : modelDomain;
+
             const pics = await this.orm.searchRead(
                 "pdp.picture",
-                [["model_id", "=", this.state.selectedModelId]],
-                ["id", "filename"],
+                domain,
+                ["id", "filename", "product_ids", "scope"],
             );
             this.state.allPictures = pics;
-            if (pics.length > 0) {
-                this.state.pictureId = pics[0].id;
-                this.state.pictureUrl = `/web/image/pdp.picture/${pics[0].id}/image_1920`;
-                this.state.drawingUrl = `/web/image/pdp.picture/${pics[0].id}/drawing_1920`;
-            } else {
-                this.state.pictureId = null;
-                this.state.pictureUrl = null;
-                this.state.drawingUrl = null;
+            if (!pics.some(p => p.id === this.state.pictureId)) {
+                const display = pics.find(p => p.scope === "model") || pics[0] || null;
+                this.state.pictureId  = display ? display.id : null;
+                this.state.pictureUrl = display ? `/web/image/pdp.picture/${display.id}/image_1920` : null;
+                this.state.drawingUrl = display ? `/web/image/pdp.picture/${display.id}/drawing_1920` : null;
             }
         } catch (e) {
             this.state.pictureId = null;
@@ -543,107 +556,153 @@ export class PdpWorkspace extends Component {
         }
     }
 
-    /** Look for a product-specific picture; fall back to model picture if none. */
+    /** Prioritise a product-scoped picture; fall back to a model-scoped thumbnail. */
     async fetchProductPicture(productId) {
         try {
-            const pics = await this.orm.searchRead(
-                "pdp.picture",
-                [["product_ids", "in", [parseInt(productId)]]],
-                ["id", "filename"],
-                { limit: 1 }
-            );
-            if (pics.length > 0) {
-                const pic = pics[0];
-                this.state.productPictureId = pic.id;
-                this.state.pictureId  = pic.id;
-                this.state.pictureUrl = `/web/image/pdp.picture/${pic.id}/image_1920`;
-                this.state.drawingUrl = `/web/image/pdp.picture/${pic.id}/drawing_1920`;
+            const pid = parseInt(productId);
+            const inList = p => Array.isArray(p.product_ids) && p.product_ids.includes(pid);
+
+            // 1. Product-specific (scope='product', explicitly linked to this product)
+            const productPic = this.state.allPictures.find(p => p.scope === "product" && inList(p));
+            if (productPic) {
+                this.state.productPictureId = productPic.id;
+                this.state.pictureId  = productPic.id;
+                this.state.pictureUrl = `/web/image/pdp.picture/${productPic.id}/image_1920`;
+                this.state.drawingUrl = `/web/image/pdp.picture/${productPic.id}/drawing_1920`;
+                return;
+            }
+
+            // 2. Model thumbnail fallback (scope='model', linked to all products of model)
+            this.state.productPictureId = null;
+            const modelPic = this.state.allPictures.find(p => p.scope === "model" && inList(p));
+            if (modelPic) {
+                this.state.pictureId  = modelPic.id;
+                this.state.pictureUrl = `/web/image/pdp.picture/${modelPic.id}/image_1920`;
+                this.state.drawingUrl = `/web/image/pdp.picture/${modelPic.id}/drawing_1920`;
             } else {
-                // Fall back to model picture already loaded by fetchModelPicture()
-                this.state.productPictureId = null;
-                const modelPic = this.state.allPictures[0] || null;
-                this.state.pictureId  = modelPic ? modelPic.id : null;
-                this.state.pictureUrl = modelPic
-                    ? `/web/image/pdp.picture/${modelPic.id}/image_1920` : null;
-                this.state.drawingUrl = modelPic
-                    ? `/web/image/pdp.picture/${modelPic.id}/drawing_1920` : null;
+                // This product has no picture at all
+                this.state.pictureId  = null;
+                this.state.pictureUrl = null;
+                this.state.drawingUrl = null;
             }
         } catch (e) {
             this.state.productPictureId = null;
         }
     }
 
-    triggerImageUpload(field) {
-        const input = document.getElementById(`pdp-upload-${field}`);
-        if (input) { input.value = ""; input.click(); }
+    /** Make a picture the active display (called from the picture manager). */
+    setActivePicture(picId) {
+        this.state.pictureId  = picId;
+        this.state.pictureUrl = `/web/image/pdp.picture/${picId}/image_1920`;
+        this.state.drawingUrl = `/web/image/pdp.picture/${picId}/drawing_1920`;
+        const pid = this.state.selectedProductId ? parseInt(this.state.selectedProductId) : null;
+        const pic = this.state.allPictures.find(p => p.id === picId);
+        this.state.productPictureId =
+            (pid && pic?.scope === "product" && pic?.product_ids?.includes(pid)) ? picId : null;
     }
 
-    async onImageFileSelected(ev, field) {
+    /**
+     * @param {string} field  - 'image_1920' or 'drawing_1920'
+     * @param {string} scope  - 'model' | 'product'
+     */
+    triggerImageUpload(field, scope) {
+        const input = document.getElementById(`pdp-upload-${field}-${scope}`);
+        if (input) input.click();
+    }
+
+    async onImageFileSelected(ev, field, scope) {
         const file = ev.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const base64 = e.target.result.split(",")[1];
+        ev.target.value = "";   // reset so the same file can be re-selected later
+        try {
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload  = (e) => resolve(e.target.result.split(",")[1]);
+                reader.onerror = (e) => reject(new Error("FileReader error: " + e.target.error));
+                reader.readAsDataURL(file);
+            });
+
+            const filenameField = field === "image_1920" ? "filename" : "drawing_filename";
             const productId = this.state.selectedProductId;
-            try {
-                if (productId && this.state.productPictureId) {
-                    // Update the existing product-specific picture
+            let newId;
+
+            if (scope === "product") {
+                const pid = parseInt(productId);
+                // Drawing on an existing product picture → add drawing to it
+                if (field === "drawing_1920" && this.state.productPictureId) {
                     await this.orm.write("pdp.picture", [this.state.productPictureId], {
-                        [field]: base64,
-                        [field === "image_1920" ? "filename" : "drawing_filename"]: file.name,
+                        drawing_1920: base64,
+                        drawing_filename: file.name,
                     });
-                } else if (productId) {
-                    // Create a new product-specific picture
-                    const [newId] = await this.orm.create("pdp.picture", [{
-                        model_id:  this.state.selectedModelId,
-                        product_ids: [[4, productId]],
-                        image_1920: base64,
-                        filename:  file.name,
+                    newId = this.state.productPictureId;
+                } else {
+                    [newId] = await this.orm.create("pdp.picture", [{
+                        scope: "product",
+                        product_ids: [[4, pid]],
+                        [field]: base64,
+                        [filenameField]: file.name,
                     }]);
                     this.state.productPictureId = newId;
-                    this.state.pictureId = newId;
-                } else {
-                    // No product selected — fall back to model-level picture
-                    if (this.state.pictureId) {
-                        await this.orm.write("pdp.picture", [this.state.pictureId], {
-                            [field]: base64,
-                            [field === "image_1920" ? "filename" : "drawing_filename"]: file.name,
-                        });
-                    } else {
-                        const [newId] = await this.orm.create("pdp.picture", [{
-                            model_id:  this.state.selectedModelId,
-                            image_1920: base64,
-                            filename:  file.name,
-                        }]);
-                        this.state.pictureId = newId;
-                    }
                 }
-                await this.fetchModelPicture();
-                if (productId) await this.fetchProductPicture(productId);
-            } catch (err) {
-                this.notification.add("Failed to upload image", { type: "danger" });
+            } else {
+                // scope='model' — thumbnail shared across all products of this model
+                const modelProducts = await this.orm.searchRead(
+                    "pdp.product",
+                    [["model_id", "=", this.state.selectedModelId]],
+                    ["id"]
+                );
+                if (!modelProducts.length) {
+                    this.notification.add(
+                        "Add a product to this model before uploading a photo.",
+                        { type: "warning" }
+                    );
+                    return;
+                }
+                const existingModelPic = this.state.allPictures.find(p => p.scope === "model");
+                if (field === "drawing_1920" && existingModelPic) {
+                    await this.orm.write("pdp.picture", [existingModelPic.id], {
+                        drawing_1920: base64,
+                        drawing_filename: file.name,
+                    });
+                    newId = existingModelPic.id;
+                } else {
+                    [newId] = await this.orm.create("pdp.picture", [{
+                        scope: "model",
+                        product_ids: modelProducts.map(p => [4, p.id]),
+                        [field]: base64,
+                        [filenameField]: file.name,
+                    }]);
+                }
             }
-        };
-        reader.readAsDataURL(file);
+
+            this.state.pictureId = newId;
+            if (field === "image_1920") {
+                this.state.pictureUrl = `/web/image/pdp.picture/${newId}/image_1920`;
+            } else {
+                this.state.drawingUrl = `/web/image/pdp.picture/${newId}/drawing_1920`;
+            }
+            await this.fetchModelPicture();
+        } catch (err) {
+            this.notification.add(
+                err?.data?.message || err?.message || "Failed to upload image",
+                { type: "danger" }
+            );
+        }
     }
 
     async deletePictureField(field) {
         if (!this.state.pictureId) return;
-        const productId   = this.state.selectedProductId;
-        const picId       = this.state.pictureId;
-        const isProductPic = !!this.state.productPictureId;
+        const productId = this.state.selectedProductId;
+        const picId     = this.state.pictureId;
+        const pid       = productId ? parseInt(productId) : null;
+        const pic       = this.state.allPictures.find(p => p.id === picId);
+        const isProductPic = !!(pid && pic?.scope === "product" && pic?.product_ids?.includes(pid));
 
-        if (isProductPic && productId) {
-            // Remove the M2M link between picture and product.
-            // The picture record itself stays (other products keep their link).
-            await this.orm.write("pdp.picture", [picId], {
-                product_ids: [[3, productId]],
-            });
-            // Auto-delete the record only if it has no remaining links
-            const remaining = await this.orm.read(
-                "pdp.picture", [picId], ["model_id", "product_ids"]
-            );
-            if (!remaining[0].model_id && !remaining[0].product_ids.length) {
+        if (isProductPic && pid) {
+            // Remove the M2M link for this product; auto-delete if no links remain
+            await this.orm.write("pdp.picture", [picId], { product_ids: [[3, pid]] });
+            const remaining = await this.orm.read("pdp.picture", [picId], ["product_ids"]);
+            if (!remaining[0].product_ids.length) {
                 await this.orm.unlink("pdp.picture", [picId]);
             }
             this.state.productPictureId = null;
@@ -661,13 +720,38 @@ export class PdpWorkspace extends Component {
                 await this.orm.unlink("pdp.picture", [picId]);
             }
         }
+        // Clear display immediately for instant feedback
+        this.state.pictureId = null;
+        this.state.pictureUrl = null;
+        this.state.drawingUrl = null;
         await this.fetchModelPicture();
-        if (productId) await this.fetchProductPicture(productId);
+        if (productId) await this.fetchProductPicture(parseInt(productId));
     }
 
     async deletePictureById(picId) {
-        await this.orm.unlink("pdp.picture", [picId]);
+        const pic = this.state.allPictures.find(p => p.id === picId);
+        const pid = this.state.selectedProductId ? parseInt(this.state.selectedProductId) : null;
+
+        if (pic?.scope === "product" && pid) {
+            // Unlink from this product only; delete the record if no links remain
+            await this.orm.write("pdp.picture", [picId], { product_ids: [[3, pid]] });
+            const remaining = await this.orm.read("pdp.picture", [picId], ["product_ids"]);
+            if (!remaining[0]?.product_ids?.length) {
+                await this.orm.unlink("pdp.picture", [picId]);
+            }
+        } else {
+            await this.orm.unlink("pdp.picture", [picId]);
+        }
+
+        if (this.state.pictureId === picId) {
+            this.state.pictureId = null;
+            this.state.pictureUrl = null;
+            this.state.drawingUrl = null;
+            this.state.productPictureId = null;
+        }
         await this.fetchModelPicture();
+        const productId = this.state.selectedProductId;
+        if (productId) await this.fetchProductPicture(parseInt(productId));
         if (this.state.allPictures.length === 0) this.state.showPictureManager = false;
     }
 

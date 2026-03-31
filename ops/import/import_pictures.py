@@ -5,15 +5,15 @@ Reads manifest.csv produced by ops/export/export_pictures_products.py.
 
 Behaviour per manifest row type
 ---------------------------------
-model          → create/update pdp.picture with model_id=<model>
+model          → create/update pdp.picture with scope='model'
                  and product_ids = all products belonging to that model (M2M)
 
-model_drawing  → add drawing_1920 to the existing pdp.picture for that model
+model_drawing  → add drawing_1920 to the existing scope='model' picture for that model
                  (picture must have been imported first by a 'model' row)
 
-product        → create pdp.picture with product_ids=[<product>]
-                 (product-specific photo from Snapshots; overrides model fallback
-                  when displayed in the workspace)
+product        → create pdp.picture with scope='product', product_ids=[<product>]
+                 (product-specific photo from Snapshots; shown in preference to the
+                  model thumbnail when displayed in the workspace)
 
 Deduplication: by MD5 checksum — if same blob already exists, only update links.
 
@@ -79,7 +79,7 @@ def iter_base64(path, chunk_size):
 def commit(n):
     env.cr.commit()
     env.clear()
-    print(f"  💾 committed {n} records")
+    print(f"  committed {n} records")
 
 
 # ── Pre-load caches ────────────────────────────────────────────────────────
@@ -120,7 +120,7 @@ for entry in rows:
     try:
         b64, chk = iter_base64(full_path, CHUNK_SIZE)
     except (OSError, MemoryError, binascii.Error) as exc:
-        print(f"  ⚠️  {fname}: read error ({exc})")
+        print(f"  {fname}: read error ({exc})")
         errors += 1
         continue
 
@@ -138,22 +138,25 @@ for entry in rows:
                 # Dedup by checksum
                 existing = Picture.search([("checksum", "=", chk)], limit=1)
                 if existing:
-                    # Same blob — ensure links are set
-                    needs = {}
-                    if not existing.model_id:
-                        needs["model_id"] = model.id
                     new_pids = [p for p in product_ids if p not in existing.product_ids.ids]
+                    needs = {}
                     if new_pids:
                         needs["product_ids"] = [(4, pid) for pid in new_pids]
+                    if existing.scope != "model":
+                        needs["scope"] = "model"
                     if needs:
                         existing.write(needs)
                         linked += 1
                     else:
                         skipped += 1
                 else:
-                    pic = Picture.search([("model_id", "=", model.id)], limit=1)
+                    # Find existing model picture by matching product links + scope
+                    pic = Picture.search(
+                        [("scope", "=", "model"), ("product_ids", "in", product_ids)],
+                        limit=1
+                    ) if product_ids else Picture.browse()
                     vals = {
-                        "model_id":    model.id,
+                        "scope":       "model",
                         "filename":    fname,
                         "image":       b64,
                         "checksum":    chk,
@@ -175,7 +178,11 @@ for entry in rows:
                 if not model:
                     skipped += 1
                     continue
-                pic = Picture.search([("model_id", "=", model.id)], limit=1)
+                product_ids = model_to_product_ids.get(model.id, [])
+                pic = Picture.search(
+                    [("scope", "=", "model"), ("product_ids", "in", product_ids)],
+                    limit=1
+                ) if product_ids else Picture.browse()
                 if pic and not pic.drawing_1920:
                     pic.write({"drawing_1920": b64, "drawing_filename": fname})
                     drawing_added += 1
@@ -192,17 +199,23 @@ for entry in rows:
                 # Dedup by checksum
                 existing = Picture.search([("checksum", "=", chk)], limit=1)
                 if existing:
+                    needs = {}
                     if product.id not in existing.product_ids.ids:
-                        existing.write({"product_ids": [(4, product.id)]})
+                        needs["product_ids"] = [(4, product.id)]
+                    if existing.scope != "product":
+                        needs["scope"] = "product"
+                    if needs:
+                        existing.write(needs)
                         linked += 1
                     else:
                         skipped += 1
                 else:
-                    # Check if this product already has a picture
                     pic = Picture.search(
-                        [("product_ids", "in", [product.id])], limit=1
+                        [("scope", "=", "product"), ("product_ids", "in", [product.id])],
+                        limit=1
                     )
                     vals = {
+                        "scope":       "product",
                         "filename":    fname,
                         "image":       b64,
                         "checksum":    chk,
@@ -219,7 +232,7 @@ for entry in rows:
                         created += 1
 
     except Exception as exc:
-        print(f"  ⚠️  {fname}: failed ({exc.__class__.__name__}: {exc})")
+        print(f"  {fname}: failed ({exc.__class__.__name__}: {exc})")
         traceback.print_exc()
         env.clear()
         errors += 1

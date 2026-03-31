@@ -6,13 +6,13 @@ class Picture(models.Model):
     _name = 'pdp.picture'
     _description = 'Picture linked to a PDP model'
     
-    model_id = fields.Many2one(
-        'pdp.product.model',
-        string='Model',
-        ondelete='set null',
-        index=True,
-        required=False,
-        help="Model-level fallback: shown when no product-specific picture exists.",
+    scope = fields.Selection(
+        [('product', 'Product'), ('model', 'Model')],
+        string='Scope',
+        default='product',
+        required=True,
+        help="'Product' = specific to the products in the list. "
+             "'Model' = shared thumbnail shown for all products of the model.",
     )
 
     product_ids = fields.Many2many(
@@ -25,7 +25,7 @@ class Picture(models.Model):
     )
 
     # Actual image payload -> stored in filestore thanks to attachment=True
-    image_1920 = fields.Image(string='Image', max_width=1920, max_height=1920, required=True)
+    image_1920 = fields.Image(string='Image', max_width=1920, max_height=1920, required=False)
     image = fields.Image(related='image_1920', readonly=False, string=False)  # tu continues à utiliser "image"
 
     filename = fields.Char(string='Filename')

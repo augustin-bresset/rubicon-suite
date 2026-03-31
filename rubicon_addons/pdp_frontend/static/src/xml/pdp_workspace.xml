@@ -73,11 +73,13 @@
 
                 <!-- RIGHT: Image / Drawing -->
                 <div class="d-flex flex-column h-100 bg-white" style="flex: 1 1 0; min-width: 150px;">
-                    <!-- Hidden file inputs -->
-                    <input type="file" id="pdp-upload-image_1920" accept="image/*" class="d-none"
-                           t-on-change="ev => this.onImageFileSelected(ev, 'image_1920')"/>
-                    <input type="file" id="pdp-upload-drawing_1920" accept="image/*" class="d-none"
-                           t-on-change="ev => this.onImageFileSelected(ev, 'drawing_1920')"/>
+                    <!-- Hidden file inputs — one per (field, scope) pair -->
+                    <input type="file" id="pdp-upload-image_1920-model"   accept="image/*" class="d-none"
+                           t-on-change="ev => this.onImageFileSelected(ev, 'image_1920', 'model')"/>
+                    <input type="file" id="pdp-upload-image_1920-product" accept="image/*" class="d-none"
+                           t-on-change="ev => this.onImageFileSelected(ev, 'image_1920', 'product')"/>
+                    <input type="file" id="pdp-upload-drawing_1920-model" accept="image/*" class="d-none"
+                           t-on-change="ev => this.onImageFileSelected(ev, 'drawing_1920', 'model')"/>
 
                     <div class="d-flex justify-content-between align-items-center p-1 border-bottom bg-light">
                         <small class="fw-bold text-truncate px-1" t-if="activeProduct"><t t-esc="activeProduct.code"/></small>
@@ -106,9 +108,17 @@
                                     <img t-att-src="state.pictureUrl" class="img-fluid" style="max-height: 100%; object-fit: contain; cursor: zoom-in;" alt="Model" t-on-click="() => this.openFullScreenImage()"/>
                                     <div class="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-2 pb-1">
                                         <button type="button" class="btn btn-sm btn-light border opacity-75"
-                                                t-on-click="() => this.triggerImageUpload('image_1920')">
-                                            <i class="fa fa-refresh me-1"/>Replace
+                                                t-on-click="() => this.triggerImageUpload('image_1920', 'model')"
+                                                title="Add model photo (shared by all products)">
+                                            <i class="fa fa-photo me-1"/>Model
                                         </button>
+                                        <t t-if="state.selectedProductId">
+                                            <button type="button" class="btn btn-sm btn-light border opacity-75"
+                                                    t-on-click="() => this.triggerImageUpload('image_1920', 'product')"
+                                                    title="Add product photo (specific to this product)">
+                                                <i class="fa fa-tag me-1"/>Product
+                                            </button>
+                                        </t>
                                         <button type="button" class="btn btn-sm btn-light border opacity-75 text-danger"
                                                 t-on-click="() => this.deletePictureField('image_1920')">
                                             <i class="fa fa-trash"/>
@@ -120,10 +130,18 @@
                                 <div class="text-muted d-flex flex-column align-items-center gap-2">
                                     <button type="button" class="btn btn-outline-secondary btn-lg rounded-circle"
                                             style="width: 60px; height: 60px;"
-                                            t-on-click="() => this.triggerImageUpload('image_1920')">
+                                            t-on-click="() => this.triggerImageUpload('image_1920', 'model')"
+                                            title="Add model photo (shared by all products)">
                                         <i class="fa fa-plus fa-lg"/>
                                     </button>
                                     <small>Add model photo</small>
+                                    <t t-if="state.selectedProductId">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                t-on-click="() => this.triggerImageUpload('image_1920', 'product')"
+                                                title="Add product photo (specific to this product)">
+                                            <i class="fa fa-tag me-1"/>Add product photo
+                                        </button>
+                                    </t>
                                 </div>
                             </t>
                         </t>
@@ -157,8 +175,9 @@
                                     <img t-att-src="state.drawingUrl" class="img-fluid" style="max-height: 100%; object-fit: contain; cursor: zoom-in;" alt="Drawing" t-on-click="() => this.openFullScreenImage()"/>
                                     <div class="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-2 pb-1">
                                         <button type="button" class="btn btn-sm btn-light border opacity-75"
-                                                t-on-click="() => this.triggerImageUpload('drawing_1920')">
-                                            <i class="fa fa-refresh me-1"/>Replace
+                                                t-on-click="() => this.triggerImageUpload('drawing_1920', 'model')"
+                                                title="Add drawing">
+                                            <i class="fa fa-plus me-1"/>Add
                                         </button>
                                         <button type="button" class="btn btn-sm btn-light border opacity-75 text-danger"
                                                 t-on-click="() => this.deletePictureField('drawing_1920')">
@@ -171,7 +190,7 @@
                                 <div class="text-muted d-flex flex-column align-items-center gap-2" style="margin-top: 120px;">
                                     <button type="button" class="btn btn-outline-secondary btn-lg rounded-circle"
                                             style="width: 60px; height: 60px;"
-                                            t-on-click="() => this.triggerImageUpload('drawing_1920')">
+                                            t-on-click="() => this.triggerImageUpload('drawing_1920', 'model')">
                                         <i class="fa fa-plus fa-lg"/>
                                     </button>
                                     <small>Add drawing</small>
@@ -186,7 +205,7 @@
                     <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
                          style="background: rgba(0,0,0,0.5); z-index: 1050;"
                          t-on-click.self="() => this.state.showPictureManager = false">
-                        <div class="bg-white rounded shadow-lg p-3" style="min-width: 320px; max-width: 480px; width: 90%;">
+                        <div class="pdp-picture-manager bg-white rounded shadow-lg p-3" style="min-width: 320px; max-width: 480px; width: 90%;">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="mb-0 fw-bold">Manage Photos — <t t-esc="activeModel ? activeModel.code : ''"/></h6>
                                 <button type="button" class="btn-close" t-on-click="() => this.state.showPictureManager = false"/>
@@ -197,25 +216,41 @@
                             <t t-else="">
                                 <div class="d-flex flex-column gap-2">
                                     <t t-foreach="state.allPictures" t-as="pic" t-key="pic.id">
-                                        <div class="d-flex align-items-center gap-2 p-2 border rounded">
+                                        <div t-attf-class="pdp-pic-item d-flex align-items-center gap-2 p-2 border rounded {{ pic.id === state.pictureId ? 'border-primary bg-light' : '' }}"
+                                             style="cursor: pointer;"
+                                             t-on-click="() => this.setActivePicture(pic.id)">
                                             <img t-attf-src="/web/image/pdp.picture/{{pic.id}}/image_1920"
                                                  style="width: 48px; height: 48px; object-fit: cover; border-radius: 4px;"/>
-                                            <span class="flex-grow-1 text-truncate small text-muted">
-                                                <t t-esc="pic.filename || ('Photo #' + pic.id)"/>
-                                            </span>
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <div class="text-truncate small text-muted">
+                                                    <t t-esc="pic.filename || ('Photo #' + pic.id)"/>
+                                                </div>
+                                                <span t-attf-class="badge {{ pic.scope === 'model' ? 'text-bg-secondary' : 'text-bg-info' }}" style="font-size: 10px;">
+                                                    <t t-esc="pic.scope === 'model' ? 'Model' : 'Product'"/>
+                                                </span>
+                                            </div>
+                                            <i t-if="pic.id === state.pictureId" class="fa fa-eye text-primary me-1" title="Currently displayed"/>
                                             <button type="button" class="btn btn-sm btn-outline-danger"
-                                                    t-on-click="() => this.deletePictureById(pic.id)">
+                                                    t-on-click.stop="() => this.deletePictureById(pic.id)">
                                                 <i class="fa fa-trash"/>
                                             </button>
                                         </div>
                                     </t>
                                 </div>
                             </t>
-                            <div class="mt-3 d-flex justify-content-end">
-                                <button type="button" class="btn btn-primary btn-sm"
-                                        t-on-click="() => this.triggerImageUpload('image_1920')">
-                                    <i class="fa fa-plus me-1"/>Add photo
+                            <div class="mt-3 d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        t-on-click="() => this.triggerImageUpload('image_1920', 'model')"
+                                        title="Shared by all products of this model">
+                                    <i class="fa fa-photo me-1"/>Model photo
                                 </button>
+                                <t t-if="state.selectedProductId">
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                            t-on-click="() => this.triggerImageUpload('image_1920', 'product')"
+                                            title="Specific to the selected product">
+                                        <i class="fa fa-tag me-1"/>Product photo
+                                    </button>
+                                </t>
                             </div>
                         </div>
                     </div>

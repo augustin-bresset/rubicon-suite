@@ -19,18 +19,19 @@
             parent="menu_pdp_root"
             action="action_pdp_picture"
             sequence="10"/>
+
   <!-- Kanban -->
   <record id="view_pdp_picture_kanban" model="ir.ui.view">
     <field name="name">pdp.picture.kanban</field>
     <field name="model">pdp.picture</field>
     <field name="arch" type="xml">
-      <kanban default_group_by="model_id">
+      <kanban>
         <templates>
           <t t-name="card">
             <div class="o_kanban_record">
               <field name="image" widget="image" class="oe_avatar" width="160" height="160"/>
               <div class="o_kanban_primary_bottom">
-                <strong><field name="model_id"/></strong>
+                <strong><field name="product_ids"/></strong>
               </div>
               <div><field name="filename"/></div>
             </div>
@@ -46,7 +47,7 @@
     <field name="model">pdp.picture</field>
     <field name="arch" type="xml">
       <list string="Pictures">
-        <field name="model_id"/>
+        <field name="product_ids" widget="many2many_tags"/>
         <field name="filename"/>
         <field name="checksum"/>
         <field name="active"/>
@@ -54,20 +55,18 @@
     </field>
   </record>
 
-  <!-- Search (⚠️ version minimale, valide RNG) -->
+  <!-- Search -->
   <record id="view_pdp_picture_search" model="ir.ui.view">
     <field name="name">pdp.picture.search</field>
     <field name="model">pdp.picture</field>
     <field name="arch" type="xml">
       <search>
-        <field name="model_id"/>
+        <field name="product_ids"/>
         <field name="filename"/>
-        <filter name="filter_orphans" string="Orphans" domain="[('model_id','=',False)]"/>
+        <filter name="filter_orphans" string="Orphans" domain="[('product_ids','=',False)]"/>
         <filter name="filter_active" string="Active" domain="[('active','=',True)]"/>
         <filter name="filter_inactive" string="Archived" domain="[('active','=',False)]"/>
-        <!-- group by via filters simples (pas de balise <group> pour éviter l'erreur RNG) -->
         <separator/>
-        <filter name="grp_model" string="Group by Model" context="{'group_by': 'model_id'}"/>
         <filter name="grp_active" string="Group by Active" context="{'group_by': 'active'}"/>
       </search>
     </field>
@@ -81,7 +80,7 @@
       <form string="Picture">
         <sheet>
           <group>
-            <field name="model_id" options="{'no_create': True}"/>
+            <field name="product_ids" widget="many2many_tags" options="{'no_create': True}"/>
             <field name="filename"/>
             <field name="checksum" readonly="1"/>
             <field name="active"/>

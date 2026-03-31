@@ -86,8 +86,14 @@ class ProductModel(models.Model):
     
     def _compute_picture(self):
         Pic = self.env['pdp.picture']
+        Product = self.env['pdp.product']
         for rec in self:
-            rec.picture_id = Pic.search([('model_id', '=', rec.id)], limit=1)
+            products = Product.search([('model_id', '=', rec.id)])
+            pic = Pic.search(
+                [('scope', '=', 'model'), ('product_ids', 'in', products.ids)],
+                limit=1
+            ) if products else Pic.browse()
+            rec.picture_id = pic
 
     # =========================================================================
     # Domain Methods - Reusable by API, Cron, OWL, Reports
