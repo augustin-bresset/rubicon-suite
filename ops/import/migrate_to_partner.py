@@ -216,7 +216,7 @@ for row in rows:
             print(f"  ⚠ Error creating individual {company_name}: {e}")
             skipped += 1
 
-print(f"\n✅ Migration complete!")
+print(f"\n[SUCCESS] Migration complete!")
 print(f"   Companies created:    {created_companies}")
 print(f"   Individuals created:  {created_individuals}")
 print(f"   Skipped:              {skipped}")
@@ -233,4 +233,4 @@ for doc in docs:
         linked += 1
 
 print(f"   Documents re-linked: {linked}/{len(docs)}")
-print(f"\n✅ All done!")
+print(f"\n[SUCCESS] All done!")

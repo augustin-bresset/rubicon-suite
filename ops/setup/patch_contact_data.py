@@ -235,7 +235,7 @@ print(f"\n{'='*70}")
 if DRY_RUN:
     print("⚠  DRY-RUN — no changes made. Pass --apply to execute.")
 else:
-    print("✅ Done!")
+    print("[SUCCESS] Done!")
 print(f"  sis_contact set  : {c_contact}")
 print(f"  sis_fax set      : {c_fax}")
 print(f"  Phone2 added     : {c_phone2}")

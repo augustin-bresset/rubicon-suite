@@ -34,7 +34,7 @@ def main(db, conf):
             ]:
                 import_csv(env, env[model], "pdp_stone")
             cr.commit()
-    print("✅ STONE import done.")
+    print("[SUCCESS] STONE import done.")
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()

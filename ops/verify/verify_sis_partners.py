@@ -106,5 +106,5 @@ for s in samples:
     print(f"   [{s['sis_code']:6}] {s['name'][:35]:35}  {country:22}  pay={pay_term:12}  ship={shipper:12}  [{flags}]")
 
 print(f"\n{'=' * 70}")
-print("✅ Done!")
+print("[SUCCESS] Done!")
 print(f"{'=' * 70}")

@@ -269,7 +269,7 @@ print(f"\n{'='*70}")
 if DRY_RUN:
     print("⚠  DRY-RUN — no changes made. Pass --apply to execute.")
 else:
-    print(f"✅ Done!")
+    print(f"[SUCCESS] Done!")
     print(f"   website fixed  : {fixed_website}")
     print(f"   city fixed     : {fixed_city}")
     print(f"   ship fixed     : {fixed_ship}")

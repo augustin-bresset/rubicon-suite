@@ -201,7 +201,7 @@ for row in rows:
         # (can't reliably re-link without a unique key, skip)
         pass
 
-print(f"\n✅ Patch complete!")
+print(f"\n[SUCCESS] Patch complete!")
 print(f"   Updated   : {updated}")
 print(f"   Skipped   : {skipped}")
 print(f"   Not found : {not_found}")

@@ -148,7 +148,7 @@ for i in range(0, len(to_delete), BATCH):
                 print(f"    ⚠ id={rid}: {e2}")
                 errors += 1
 
-print(f"\n✅ Done!")
+print(f"\n[SUCCESS] Done!")
 print(f"   Deleted : {deleted}")
 print(f"   Errors  : {errors}")
 

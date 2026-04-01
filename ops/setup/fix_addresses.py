@@ -117,7 +117,7 @@ for line in lines:
         except Exception as e:
             print(f"  ⚠ [{code}] Error: {e}"[:100])
 
-print(f"\n✅ Done!")
+print(f"\n[SUCCESS] Done!")
 print(f"   Updated:   {updated}")
 print(f"   Not found: {not_found}")
 

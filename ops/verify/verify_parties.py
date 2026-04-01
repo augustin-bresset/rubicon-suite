@@ -86,5 +86,5 @@ print(f"\n🔧 DATA INTEGRITY")
 print(f"   Companies with code='0': {len(broken)}")
 
 print(f"\n{'=' * 70}")
-print("✅ Verification complete!")
+print("[SUCCESS] Verification complete!")
 print(f"{'=' * 70}")

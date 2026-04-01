@@ -130,7 +130,7 @@ for row in rows:
             print(f"  ⚠ Error updating [{code}] {company}: {e}")
             skipped += 1
 
-print(f"\n✅ Done!")
+print(f"\n[SUCCESS] Done!")
 print(f"   Updated:       {updated}")
 print(f"   Parent links:  {parent_linked}")
 print(f"   Country set:   {country_set}")

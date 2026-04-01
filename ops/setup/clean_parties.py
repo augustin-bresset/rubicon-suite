@@ -139,4 +139,4 @@ for comp in companies:
 print(f"  Set contact on {contact_set}/{len(companies)} companies")
 
 # =========================================================================
-print(f"\n✅ Done! Cleaned {cleaned} individuals, set {contact_set} company contacts")
+print(f"\n[SUCCESS] Done! Cleaned {cleaned} individuals, set {contact_set} company contacts")

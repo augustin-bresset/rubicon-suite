@@ -22,3 +22,8 @@ def safe_bool(val, default=True):
         return bool(val)
     except:
         return default
+    
+def no_all_one_zero_value(val):
+    if val in {"ALL", "all", "0", "1"}:
+        return ''
+    return val

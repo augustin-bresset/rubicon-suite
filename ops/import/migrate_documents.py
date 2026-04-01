@@ -113,4 +113,4 @@ print(f"Total Items scanned matching condition: {len(items)}")
 if items_skipped_no_product:
     print(f"Could not map {len(items_skipped_no_product)} unique designs to PDP products.")
 
-print("\n✅ Migration complete!")
+print("\n[SUCCESS] Migration complete!")

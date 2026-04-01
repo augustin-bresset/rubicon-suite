@@ -315,7 +315,7 @@ def main():
             f.write(c + "\n")
         f.write("\n[DONE]\n")
 
-    print(f"\n✅ Done!")
+    print(f"\n[SUCCESS] Done!")
     print(f"   Companies:     {company_count}")
     print(f"   Individuals:   {individual_count}")
     print(f"   Fixed IDs:     {fixed_id_count}")

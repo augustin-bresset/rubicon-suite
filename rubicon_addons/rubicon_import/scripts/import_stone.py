@@ -33,4 +33,4 @@ for model in MODELS:
     import_csv(env, env[model], "pdp_stone")
 
 env.cr.commit()
-print("✅ STONE import done.")
+print("[SUCCESS] STONE import done.")
