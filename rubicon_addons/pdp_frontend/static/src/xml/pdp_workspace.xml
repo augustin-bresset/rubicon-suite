@@ -931,8 +931,8 @@
                         <button class="btn btn-sm btn-primary border px-3 fw-bold" t-on-click="() => this.saveAll()" t-att-disabled="!state.isDirty">Save</button>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-light border px-3 text-primary" t-on-click="() => this.recalculatePrice()">Recalculate</button>
                         <button class="btn btn-sm btn-light border px-3 text-secondary" t-on-click="() => this.openMarginsModal()" t-att-disabled="!state.selectedMarginId">Margins</button>
+                        <button class="btn btn-sm btn-light border px-3 text-primary" t-on-click="() => this.recalculatePrice()">Refresh</button>
                     </div>
                 </div>
             </div>
