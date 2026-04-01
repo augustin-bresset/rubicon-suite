@@ -48,7 +48,7 @@ class Stone(models.Model):
     
     _sql_constraints = [
         ("stone_code_uniq", "unique(code)", "Stone code must be unique."),
-        ("stone_tuple_uniq", "unique(type_id, shape_id, size_id)", "This stone combination already exists."),
+        ("stone_tuple_uniq", "unique(type_id, shape_id, shade_id, size_id)", "This stone combination already exists."),
         ("cost_currency_chk", "CHECK (cost IS NULL OR currency_id IS NOT NULL)", "Currency required when a cost is set."),
     ]
     
