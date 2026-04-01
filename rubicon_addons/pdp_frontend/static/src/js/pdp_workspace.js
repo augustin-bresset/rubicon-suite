@@ -151,7 +151,7 @@ export class PdpWorkspace extends Component {
                 this.orm.searchRead("pdp.margin", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.labor.type", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.metal", [], ["id", "code", "name"]),
-                this.orm.searchRead("pdp.metal.purity", [], ["id", "code", "percent"]),
+                this.orm.searchRead("pdp.metal.purity", [["percent", ">", 0]], ["id", "code", "percent"], { order: "percent desc" }),
                 this.orm.searchRead("pdp.part", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.addon.type", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.stone.shape", [], ["id", "code", "shape"], { order: "shape ASC" }),
@@ -198,7 +198,6 @@ export class PdpWorkspace extends Component {
             }
 
             if (this.state.margins.length > 0) this.state.selectedMarginId = this.state.margins[0].id;
-            if (this.purities.length > 0) this.state.selectedPurityId = this.purities[0].id;
 
             const usd = this.state.currencies.find(c => c.name === "USD");
             if (usd) {
@@ -528,6 +527,15 @@ export class PdpWorkspace extends Component {
 
     async selectProduct(productId) {
         this.state.selectedProductId = parseInt(productId);
+        // Set default purity from the model metal entry matching this product's metal version
+        const product = this.state.products.find(p => p.id === this.state.selectedProductId);
+        if (product?.metal) {
+            const mw = this.state.metalWeights.find(m => m.metal_version === product.metal);
+            if (mw) {
+                const pid = Array.isArray(mw.purity_id) ? mw.purity_id[0] : mw.purity_id;
+                if (pid) this.state.selectedPurityId = pid;
+            }
+        }
         try {
             // fetchModelPicture must finish first: it populates allPictures,
             // which fetchProductPicture reads to decide what to display.

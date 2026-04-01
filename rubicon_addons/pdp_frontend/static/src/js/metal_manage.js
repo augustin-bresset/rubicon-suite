@@ -36,7 +36,7 @@ export class MetalManage extends Component {
             this.orm.searchRead(
                 "pdp.metal",
                 [],
-                ["id", "code", "name", "cost", "currency_id", "cost_method", "plating", "gold", "reference"],
+                ["id", "code", "name", "cost", "currency_id", "cost_method", "plating", "gold", "default_purity_id"],
                 { order: "code asc" }
             ),
             this.orm.searchRead(
@@ -113,7 +113,7 @@ export class MetalManage extends Component {
             cost_method: "fixed",
             plating: false,
             gold: true,
-            reference: false,
+            default_purity_id: false,
         });
         this.state.isDirty = true;
     }
@@ -236,7 +236,7 @@ export class MetalManage extends Component {
             cost_method: r.cost_method,
             plating: !!r.plating,
             gold: !!r.gold,
-            reference: !!r.reference,
+            default_purity_id: this.m2oId(r.default_purity_id) || false,
         };
     }
 

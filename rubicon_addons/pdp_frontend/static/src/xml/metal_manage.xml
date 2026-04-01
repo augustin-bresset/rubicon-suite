@@ -34,7 +34,7 @@
                         <th style="width: 100px;">Method</th>
                         <th style="width: 60px;" class="text-center">Plating</th>
                         <th style="width: 60px;" class="text-center">Gold</th>
-                        <th style="width: 80px;" class="text-center">Reference</th>
+                        <th style="width: 120px;">Default Purity</th>
                         <th style="width: 40px;"></th>
                     </tr>
                 </thead>
@@ -107,12 +107,19 @@
                                     t-on-change="(e) => this.onMetalFieldChange(row, 'gold', e.target.checked)"
                                 />
                             </td>
-                            <td class="text-center" t-on-click.stop="() => {}">
-                                <input
-                                    type="checkbox"
-                                    t-att-checked="row.reference"
-                                    t-on-change="(e) => this.onMetalFieldChange(row, 'reference', e.target.checked)"
-                                />
+                            <td t-on-click.stop="() => {}">
+                                <select
+                                    class="form-select form-select-sm"
+                                    t-on-change="(e) => this.onMetalFieldChange(row, 'default_purity_id', +e.target.value || false)">
+                                    <option value="">—</option>
+                                    <t t-foreach="state.purities" t-as="pur" t-key="pur.id">
+                                        <option
+                                            t-att-value="pur.id"
+                                            t-att-selected="this.m2oId(row.default_purity_id) === pur.id">
+                                            <t t-esc="pur.code"/>
+                                        </option>
+                                    </t>
+                                </select>
                             </td>
                             <td t-on-click.stop="() => {}">
                                 <button

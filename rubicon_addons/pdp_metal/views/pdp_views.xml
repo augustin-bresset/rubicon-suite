@@ -25,7 +25,7 @@
         <field name="currency_id" />
         <field name="plating"/>
         <field name="gold"/>
-        <field name="reference"/>
+        <field name="default_purity_id"/>
       </list>
     </field>
   </record>

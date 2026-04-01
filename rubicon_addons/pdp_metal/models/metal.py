@@ -34,6 +34,9 @@ class Metal(models.Model):
         string='Market Metal'
     )
     
-    plating      = fields.Boolean(string='Plating')
-    gold         = fields.Boolean(string='Is Gold', default=True)
-    reference    = fields.Boolean(string='Reference (18K gold)', default=False)
+    plating          = fields.Boolean(string='Plating')
+    gold             = fields.Boolean(string='Is Gold', default=True)
+    default_purity_id = fields.Many2one(
+        'pdp.metal.purity',
+        string='Default Purity',
+    )
