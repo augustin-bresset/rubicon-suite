@@ -14,10 +14,10 @@ class StoneWeight(models.Model):
         required=True
     )
 
-    type_id  = fields.Many2one("pdp.stone.type",  string="Stone Type",  required=True, index=True)
-    shape_id = fields.Many2one("pdp.stone.shape", string="Stone Shape", required=True, index=True)
-    shade_id = fields.Many2one("pdp.stone.shade", string="Stone Shade", index=True)
-    size_id  = fields.Many2one("pdp.stone.size",  string="Stone Size",  required=True, index=True)
+    type_id  = fields.Many2one("pdp.stone.type",  string="Stone Type",  required=True, index=True, ondelete="cascade")
+    shape_id = fields.Many2one("pdp.stone.shape", string="Stone Shape", required=True, index=True, ondelete="cascade")
+    shade_id = fields.Many2one("pdp.stone.shade", string="Stone Shade", index=True, ondelete="set null")
+    size_id  = fields.Many2one("pdp.stone.size",  string="Stone Size",  required=True, index=True, ondelete="cascade")
 
 
     _sql_constraints = [
