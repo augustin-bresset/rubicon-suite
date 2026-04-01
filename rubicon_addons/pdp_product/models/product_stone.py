@@ -39,6 +39,17 @@ class ProductStone(models.Model):
         string="Weight of one stone used",   
     )
     
+    line_num = fields.Char(
+        string='Line Number',
+        index=True,
+    )
+
+    setting = fields.Float(
+        string='Setting Cost',
+        digits=(10, 2),
+        default=0.0,
+    )
+
     composition_id = fields.Many2one(
         comodel_name='pdp.product.stone.composition',
         string='Composition',

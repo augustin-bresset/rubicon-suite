@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="pdp_frontend.ToolsCheckData">
+    <div class="o_action pdp-tools-check-data d-flex flex-column h-100 bg-white">
+
+        <!-- Print-only: hide everything except the results table -->
+        <style>
+            @media print {
+                .pdp-check-sidebar, .pdp-check-topbar { display: none !important; }
+                .pdp-check-results { border: none !important; padding: 0 !important; }
+            }
+        </style>
+
+        <!-- ── Topbar ──────────────────────────────────────────────────────── -->
+        <div class="pdp-check-topbar d-flex align-items-center px-3 py-2 border-bottom bg-light">
+            <h5 class="fw-bold mb-0 text-secondary">Check Data</h5>
+        </div>
+
+        <!-- ── Body: sidebar + results ─────────────────────────────────────── -->
+        <div class="d-flex flex-row flex-grow-1 overflow-hidden">
+
+            <!-- Sidebar -->
+            <div class="pdp-check-sidebar d-flex flex-column border-end bg-light"
+                 style="width: 210px; min-width: 210px; padding: 12px 8px;">
+
+                <t t-foreach="[
+                    ['blank_stone_margins', 'Blank Stone Margins'],
+                    ['blank_stone_costs',   'Blank Stone Costs'],
+                    ['blank_stone_weights', 'Blank Stone Weights']
+                ]" t-as="item" t-key="item[0]">
+                    <button t-attf-class="btn btn-sm text-start mb-1 {{ state.activeCheck === item[0] ? 'btn-primary' : 'btn-outline-secondary' }}"
+                            t-on-click="() => this.runCheck(item[0])">
+                        <t t-esc="item[1]"/>
+                    </button>
+                </t>
+
+                <div class="mt-auto pt-3 border-top">
+                    <button class="btn btn-sm btn-outline-dark w-100"
+                            t-att-disabled="!state.activeCheck || state.loading"
+                            t-on-click="() => this.printReport()">
+                        <i class="fa fa-print me-1"/> Print
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results panel -->
+            <div class="pdp-check-results flex-grow-1 overflow-auto p-3">
+
+                <!-- Empty state -->
+                <t t-if="!state.activeCheck">
+                    <div class="text-muted text-center mt-5">
+                        <i class="fa fa-search fa-2x mb-2 d-block"/>
+                        Select a check from the left menu.
+                    </div>
+                </t>
+
+                <!-- Loading -->
+                <t t-elif="state.loading">
+                    <div class="text-center mt-5">
+                        <div class="spinner-border text-primary" role="status"/>
+                        <div class="mt-2 text-muted">Running check…</div>
+                    </div>
+                </t>
+
+                <!-- Results -->
+                <t t-else="">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">
+                            <t t-esc="this.activeLabel"/>
+                            <span class="badge bg-secondary ms-2 fw-normal">
+                                <t t-esc="state.results.length"/> item(s)
+                            </span>
+                        </h6>
+                    </div>
+
+                    <t t-if="state.results.length === 0">
+                        <div class="alert alert-success">
+                            <i class="fa fa-check-circle me-1"/> No issues found.
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div style="overflow-x:auto;">
+                        <table class="table table-sm table-bordered table-hover" style="font-size:12px;">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width:130px;">Stone Code</th>
+                                    <th style="min-width:200px;">Description</th>
+                                    <th>Used in Products</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.results" t-as="row" t-key="row.stone_code">
+                                    <tr>
+                                        <td class="fw-semibold"><t t-esc="row.stone_code"/></td>
+                                        <td class="text-muted"><t t-esc="row.description"/></td>
+                                        <td style="word-break:break-all;"><t t-esc="row.used_in"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        </div>
+                    </t>
+                </t>
+            </div><!-- /results panel -->
+        </div><!-- /body -->
+    </div>
+</t>
+
+</templates>

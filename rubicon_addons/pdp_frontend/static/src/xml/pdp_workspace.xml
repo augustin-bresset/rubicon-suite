@@ -427,26 +427,36 @@
                             <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addStone()">+ Add</button>
                         </div>
                         <div style="overflow-x:auto;">
-                        <table class="table table-sm table-bordered table-hover mb-0" style="font-size: 11px; min-width: 900px;">
+                        <table class="table table-sm table-bordered table-hover mb-0" style="font-size: 11px; min-width: 1100px;">
                             <thead class="bg-light">
                                 <tr>
+                                    <th style="width:70px;">LineNum</th>
                                     <th style="min-width:110px;">Stone</th>
-                                    <th style="min-width:70px;">Type</th>
-                                    <th style="min-width:70px;">Shade</th>
-                                    <th style="min-width:70px;">Shape</th>
-                                    <th style="min-width:60px;">Size</th>
-                                    <th style="width:50px;" class="text-center">Pcs</th>
+                                    <th style="min-width:60px;">Shade</th>
+                                    <th style="min-width:60px;">Shape</th>
+                                    <th style="min-width:55px;">Size</th>
+                                    <th style="width:45px;" class="text-center">Pcs</th>
                                     <th style="width:60px;" class="text-end">Weight</th>
-                                    <th style="min-width:90px;">Rec. Shape</th>
-                                    <th style="min-width:80px;">Rec. Size</th>
-                                    <th style="width:60px;" class="text-end">Rec. Wgt</th>
+                                    <th style="width:65px;" class="text-end">U.Cost</th>
+                                    <th style="width:45px;">Curr</th>
+                                    <th style="width:65px;" class="text-end">Setting</th>
+                                    <th style="min-width:80px;">RecShape</th>
+                                    <th style="min-width:70px;">RecSize</th>
+                                    <th style="width:60px;" class="text-end">RecWgt</th>
                                     <th style="width:24px;"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <t t-foreach="state.stoneRows" t-as="sr" t-key="sr._key">
-                                    <tr t-attf-class="{{ sr._dirty ? 'table-warning' : '' }}">
-                                        <td>
+                                    <tr t-attf-class="{{ sr._dirty ? 'table-warning' : '' }} {{ state.selectedStoneKey === sr._key ? 'table-primary' : '' }}"
+                                        t-on-click="() => this.selectStoneRow(sr._key)" style="cursor:pointer;">
+                                        <td t-on-click.stop="">
+                                            <input type="text" class="form-control form-control-sm p-0 text-center" style="font-size:11px;"
+                                                   t-att-value="sr.line_num"
+                                                   t-on-change="(ev) => this.setStoneField(sr._key, 'line_num', ev.target.value)"
+                                                   placeholder="Num"/>
+                                        </td>
+                                        <td t-on-click.stop="">
                                             <input type="text"
                                                    t-attf-class="form-control form-control-sm p-0 text-center {{ !sr._stoneValid and sr._stoneCode ? 'border-danger' : '' }}"
                                                    style="font-size:11px; min-width:100px;"
@@ -454,60 +464,103 @@
                                                    t-on-blur="(ev) => this.validateStoneCode(sr._key, ev.target.value)"
                                                    placeholder="Code..."/>
                                         </td>
-                                        <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.type_id) ? sr._stoneDetail.type_id[1] : ''"/></td>
                                         <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.shade_id) ? sr._stoneDetail.shade_id[1] : ''"/></td>
                                         <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.shape_id) ? sr._stoneDetail.shape_id[1] : ''"/></td>
                                         <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.size_id) ? sr._stoneDetail.size_id[1] : ''"/></td>
-                                        <td>
+                                        <td t-on-click.stop="">
                                             <input type="number" class="form-control form-control-sm p-0 text-center" style="font-size:11px;"
                                                    t-att-value="sr.pieces"
                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'pieces', ev.target.value)"/>
                                         </td>
-                                        <td>
+                                        <td t-on-click.stop="">
                                             <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
                                                    t-att-value="sr.weight"
                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'weight', ev.target.value)"/>
                                         </td>
-                                        <td>
-                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
-                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_shape_id', ev.target.value)">
-                                                <option value="">None</option>
-                                                <t t-foreach="this.stoneShapes" t-as="sshp" t-key="sshp.id">
-                                                    <option t-att-value="sshp.id"
-                                                            t-att-selected="sshp.id === (Array.isArray(sr.reshaped_shape_id) ? sr.reshaped_shape_id[0] : sr.reshaped_shape_id)">
-                                                        <t t-esc="sshp.code"/>
-                                                    </option>
-                                                </t>
-                                            </select>
+                                        <td class="text-end text-muted small align-middle">
+                                            <t t-esc="sr._stoneDetail ? sr._stoneDetail.cost : ''"/>
                                         </td>
-                                        <td>
-                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
-                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_size_id', ev.target.value)">
-                                                <option value="">None</option>
-                                                <t t-foreach="this.stoneSizes" t-as="ssz" t-key="ssz.id">
-                                                    <option t-att-value="ssz.id"
-                                                            t-att-selected="ssz.id === (Array.isArray(sr.reshaped_size_id) ? sr.reshaped_size_id[0] : sr.reshaped_size_id)">
-                                                        <t t-esc="ssz.name"/>
-                                                    </option>
-                                                </t>
-                                            </select>
+                                        <td class="text-muted small align-middle">
+                                            <t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.currency_id) ? sr._stoneDetail.currency_id[1] : ''"/>
                                         </td>
-                                        <td>
-                                            <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
-                                                   t-att-value="sr.reshaped_weight"
-                                                   t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_weight', ev.target.value)"/>
+                                        <td t-on-click.stop="">
+                                            <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                   t-att-value="sr.setting"
+                                                   t-on-change="(ev) => this.setStoneField(sr._key, 'setting', ev.target.value)"/>
                                         </td>
-                                        <td class="text-center align-middle">
+                                        <td class="text-muted small align-middle">
+                                            <t t-esc="Array.isArray(sr.reshaped_shape_id) ? sr.reshaped_shape_id[1] : ''"/>
+                                        </td>
+                                        <td class="text-muted small align-middle">
+                                            <t t-esc="sr.reshaped_size_id and Array.isArray(sr.reshaped_size_id) ? sr.reshaped_size_id[1] : ''"/>
+                                        </td>
+                                        <td class="text-end text-muted small align-middle">
+                                            <t t-esc="sr.reshaped_weight"/>
+                                        </td>
+                                        <td class="text-center align-middle" t-on-click.stop="">
                                             <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
                                                     t-on-click="() => this.removeStone(sr._key)">✕</button>
                                         </td>
                                     </tr>
                                 </t>
                                 <t t-if="state.stoneRows.length === 0">
-                                    <tr><td colspan="11" class="text-muted text-center p-3">No stones. Click "+ Add" to add a stone.</td></tr>
+                                    <tr><td colspan="14" class="text-muted text-center p-3">No stones. Click "+ Add" to add a stone.</td></tr>
                                 </t>
                             </tbody>
                         </table>
+                        </div>
+
+                        <!-- Detail panel: shown when a row is selected -->
+                        <t t-set="selStone" t-value="state.stoneRows.find(r => r._key === state.selectedStoneKey)"/>
+                        <div t-if="selStone" class="border rounded bg-light p-2 mt-2" style="font-size:11px;">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <!-- Navigation shortcuts to Manage sections -->
+                                <div class="btn-group btn-group-sm me-2">
+                                    <button class="btn btn-outline-secondary py-0 px-2"
+                                            t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Stones</button>
+                                    <button class="btn btn-outline-secondary py-0 px-2"
+                                            t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Cost</button>
+                                    <button class="btn btn-outline-secondary py-0 px-2"
+                                            t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Weights</button>
+                                </div>
+                                <span class="text-muted fw-bold me-1">Recut to:</span>
+                                <!-- Rec Shape -->
+                                <div class="d-flex align-items-center gap-1">
+                                    <label class="text-muted mb-0">Shape</label>
+                                    <select class="form-select form-select-sm p-0" style="font-size:11px; width:100px;"
+                                            t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_shape_id', ev.target.value)">
+                                        <option value="">—</option>
+                                        <t t-foreach="this.stoneShapes" t-as="sshp" t-key="sshp.id">
+                                            <option t-att-value="sshp.id"
+                                                    t-att-selected="sshp.id === (Array.isArray(selStone.reshaped_shape_id) ? selStone.reshaped_shape_id[0] : selStone.reshaped_shape_id)">
+                                                <t t-esc="sshp.code"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <!-- Rec Size -->
+                                <div class="d-flex align-items-center gap-1">
+                                    <label class="text-muted mb-0">Size</label>
+                                    <select class="form-select form-select-sm p-0" style="font-size:11px; width:90px;"
+                                            t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_size_id', ev.target.value)">
+                                        <option value="">—</option>
+                                        <t t-foreach="this.stoneSizes" t-as="ssz" t-key="ssz.id">
+                                            <option t-att-value="ssz.id"
+                                                    t-att-selected="ssz.id === (Array.isArray(selStone.reshaped_size_id) ? selStone.reshaped_size_id[0] : selStone.reshaped_size_id)">
+                                                <t t-esc="ssz.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <!-- Rec Weight -->
+                                <div class="d-flex align-items-center gap-1">
+                                    <label class="text-muted mb-0">Weight</label>
+                                    <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px; width:70px;"
+                                           t-att-value="selStone.reshaped_weight"
+                                           t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_weight', ev.target.value)"
+                                           placeholder="0.0"/>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

@@ -100,6 +100,7 @@ export class PdpWorkspace extends Component {
 
             // Stones tab (editable)
             stoneRows: [],
+            selectedStoneKey: null,
 
             // Labor tab
             laborModelCosts: [],
@@ -485,6 +486,7 @@ export class PdpWorkspace extends Component {
         this.state.stoneOriginal = [];
         this.state.stoneRecut = [];
         this.state.stoneRows = [];
+        this.state.selectedStoneKey = null;
         this.state.laborProductCosts = [];
         this.state.addonCosts = [];
         this.state.parts = [];
@@ -840,13 +842,14 @@ export class PdpWorkspace extends Component {
             if (compId) {
                 const stones = await this.orm.searchRead(
                     "pdp.product.stone", [["composition_id", "=", compId]],
-                    ["id", "stone_id", "pieces", "weight", "reshaped_shape_id", "reshaped_size_id", "reshaped_weight"]
+                    ["id", "line_num", "stone_id", "pieces", "weight", "setting",
+                     "reshaped_shape_id", "reshaped_size_id", "reshaped_weight"]
                 );
-                // Batch-fetch stone details (type/shade/shape/size) in one query
+                // Batch-fetch stone details (type/shade/shape/size/cost/currency) in one query
                 const stoneIds = stones.filter(s => s.stone_id).map(s => Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id);
                 let detailMap = {};
                 if (stoneIds.length) {
-                    const details = await this.orm.read("pdp.stone", stoneIds, ["id", "code", "type_id", "shape_id", "shade_id", "size_id", "weight"]);
+                    const details = await this.orm.read("pdp.stone", stoneIds, ["id", "code", "type_id", "shape_id", "shade_id", "size_id", "weight", "cost", "currency_id"]);
                     detailMap = Object.fromEntries(details.map(d => [d.id, d]));
                 }
                 this.state.stoneRows = stones.map(s => {
@@ -1098,13 +1101,23 @@ export class PdpWorkspace extends Component {
     // ==========================================
 
     addStone() {
+        const key = -Date.now();
         this.state.stoneRows.push({
-            id: null, _key: -Date.now(), _dirty: true,
-            stone_id: false, _stoneCode: '', _stoneValid: false, _stoneDetail: null,
-            pieces: 1, weight: '0',
+            id: null, _key: key, _dirty: true,
+            line_num: '', stone_id: false, _stoneCode: '', _stoneValid: false, _stoneDetail: null,
+            pieces: 1, weight: '0', setting: 0,
             reshaped_shape_id: false, reshaped_size_id: false, reshaped_weight: '',
         });
+        this.state.selectedStoneKey = key;
         this.state.isDirty = true;
+    }
+
+    selectStoneRow(key) {
+        this.state.selectedStoneKey = this.state.selectedStoneKey === key ? null : key;
+    }
+
+    goToManage(actionTag) {
+        this.action.doAction({ type: 'ir.actions.client', tag: actionTag });
     }
 
     removeStone(key) {
@@ -1625,9 +1638,11 @@ export class PdpWorkspace extends Component {
                             continue;
                         }
                         const vals = {
+                            line_num: row.line_num || '',
                             stone_id: this.m2oId(row.stone_id),
                             pieces: row.pieces || 1,
-                            weight: row.weight || '0',
+                            weight: parseFloat(row.weight) || 0,
+                            setting: parseFloat(row.setting) || 0,
                             reshaped_shape_id: this.m2oId(row.reshaped_shape_id) || false,
                             reshaped_size_id: this.m2oId(row.reshaped_size_id) || false,
                             reshaped_weight: row.reshaped_weight || '',

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="pdp_frontend.ToolsReports">
+    <div class="o_action pdp-tools-reports d-flex flex-column h-100 p-3 bg-white">
+
+        <!-- ── Topbar ──────────────────────────────────────────────────────── -->
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <h5 class="fw-bold mb-0 text-secondary">Reports</h5>
+            <button class="btn btn-primary fw-bold px-4"
+                    t-on-click="() => this.makeExcel()"
+                    t-att-disabled="state.loading">
+                <t t-if="state.loading">
+                    <span class="spinner-border spinner-border-sm me-1" role="status"/>
+                    Generating…
+                </t>
+                <t t-else="">
+                    <i class="fa fa-file-excel-o me-1"/> Make Excel Sheet
+                </t>
+            </button>
+        </div>
+
+        <!-- ── 3-column parameter panel ────────────────────────────────────── -->
+        <div class="row g-4">
+
+            <!-- Col 1: Select Report -->
+            <div class="col-3">
+                <div class="card h-100">
+                    <div class="card-header fw-bold small py-2 bg-light">Select Report</div>
+                    <div class="card-body py-3 d-flex flex-column gap-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rep-price-list"
+                                   t-att-checked="state.repPriceList"
+                                   t-on-change="(ev) => { state.repPriceList = ev.target.checked; }"/>
+                            <label class="form-check-label" for="rep-price-list">Price List</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rep-pictures"
+                                   t-att-checked="state.repPictures"
+                                   t-on-change="(ev) => { state.repPictures = ev.target.checked; }"/>
+                            <label class="form-check-label" for="rep-pictures">Pictures</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rep-by-date"
+                                   t-att-checked="state.repByDate"
+                                   t-on-change="(ev) => { state.repByDate = ev.target.checked; }"/>
+                            <label class="form-check-label" for="rep-by-date">Item List by Date</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rep-by-stone"
+                                   t-att-checked="state.repByStone"
+                                   t-on-change="(ev) => { state.repByStone = ev.target.checked; }"/>
+                            <label class="form-check-label" for="rep-by-stone">Item List by Stone</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col 2: Parameters (left) -->
+            <div class="col-5">
+                <div class="card h-100">
+                    <div class="card-header fw-bold small py-2 bg-light">Parameters</div>
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center mb-2">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">Margin</label>
+                            <div class="col-8">
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => { state.marginId = ev.target.value || null; }">
+                                    <option value="">— All —</option>
+                                    <t t-foreach="this.margins" t-as="m" t-key="m.id">
+                                        <option t-att-value="m.id"
+                                                t-att-selected="state.marginId == m.id">
+                                            <t t-esc="m.code"/> — <t t-esc="m.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-2 align-items-center mb-2">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">Purity</label>
+                            <div class="col-8">
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => { state.purityId = ev.target.value || null; }">
+                                    <option value="">— All —</option>
+                                    <t t-foreach="this.purities" t-as="p" t-key="p.id">
+                                        <option t-att-value="p.id"
+                                                t-att-selected="state.purityId == p.id">
+                                            <t t-esc="p.code"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-2 align-items-center mb-2">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">Metal Conv.</label>
+                            <div class="col-8">
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => { state.metalId = ev.target.value || null; }">
+                                    <option value="">— All —</option>
+                                    <t t-foreach="this.metals" t-as="mt" t-key="mt.id">
+                                        <option t-att-value="mt.id"
+                                                t-att-selected="state.metalId == mt.id">
+                                            <t t-esc="mt.code"/> — <t t-esc="mt.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-2 align-items-center mb-2">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">Currency</label>
+                            <div class="col-8">
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => { state.currencyId = ev.target.value || null; }">
+                                    <option value="">— Default —</option>
+                                    <t t-foreach="this.currencies" t-as="c" t-key="c.id">
+                                        <option t-att-value="c.id"
+                                                t-att-selected="state.currencyId == c.id">
+                                            <t t-esc="c.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-2 align-items-center">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">Price List Type</label>
+                            <div class="col-8 d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="plt" id="plt-single"
+                                           value="single"
+                                           t-att-checked="state.priceListType === 'single'"
+                                           t-on-change="() => { state.priceListType = 'single'; }"/>
+                                    <label class="form-check-label" for="plt-single">Single Column</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="plt" id="plt-multi"
+                                           value="multi"
+                                           t-att-checked="state.priceListType === 'multi'"
+                                           t-on-change="() => { state.priceListType = 'multi'; }"/>
+                                    <label class="form-check-label" for="plt-multi">Multi Column</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col 3: Parameters (right) -->
+            <div class="col-4">
+                <div class="card h-100">
+                    <div class="card-header fw-bold small py-2 bg-light">Filters</div>
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center mb-2">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">Orn. Cat.</label>
+                            <div class="col-8">
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => { state.categoryId = ev.target.value || null; }">
+                                    <option value="">— All —</option>
+                                    <t t-foreach="this.categories" t-as="cat" t-key="cat.id">
+                                        <option t-att-value="cat.id"
+                                                t-att-selected="state.categoryId == cat.id">
+                                            <t t-esc="cat.code"/> — <t t-esc="cat.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-2 align-items-center mb-2">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">From</label>
+                            <div class="col-3">
+                                <input type="number" class="form-control form-control-sm text-center"
+                                       t-att-value="state.fromSeq"
+                                       t-on-change="(ev) => { state.fromSeq = parseInt(ev.target.value) || 0; }"/>
+                            </div>
+                            <label class="col-1 col-form-label col-form-label-sm text-center px-0">Till</label>
+                            <div class="col-4">
+                                <input type="number" class="form-control form-control-sm text-center"
+                                       t-att-value="state.tillSeq"
+                                       t-on-change="(ev) => { state.tillSeq = parseInt(ev.target.value) || 100; }"/>
+                            </div>
+                        </div>
+                        <div class="row g-2 align-items-center mb-2">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">Updated</label>
+                            <div class="col-8">
+                                <input type="date" class="form-control form-control-sm"
+                                       t-att-value="state.updatedDate"
+                                       t-on-change="(ev) => { state.updatedDate = ev.target.value; }"/>
+                            </div>
+                        </div>
+                        <div class="row g-2 align-items-center mb-2">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">Appl. From</label>
+                            <div class="col-8">
+                                <input type="date" class="form-control form-control-sm"
+                                       t-att-value="state.applFromDate"
+                                       t-on-change="(ev) => { state.applFromDate = ev.target.value; }"/>
+                            </div>
+                        </div>
+                        <div class="row g-2 align-items-center">
+                            <label class="col-4 col-form-label col-form-label-sm fw-semibold">Items</label>
+                            <div class="col-8 d-flex gap-3 flex-wrap">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="items" id="items-all"
+                                           t-att-checked="state.items === 'all'"
+                                           t-on-change="() => { state.items = 'all'; }"/>
+                                    <label class="form-check-label" for="items-all">All</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="items" id="items-coll"
+                                           t-att-checked="state.items === 'in_collection'"
+                                           t-on-change="() => { state.items = 'in_collection'; }"/>
+                                    <label class="form-check-label" for="items-coll">In Collection</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /row -->
+    </div>
+</t>
+
+</templates>

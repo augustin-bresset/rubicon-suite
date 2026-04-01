@@ -294,6 +294,10 @@ By clicking in `Manage/Ornament Categories` you arrived on the `Ornament Catagor
 This view of the ornament database give the waste of gold associated to each ornaments.
 ![ornamentcategories](./images/pdp_ornementcategories.png)
 
+We have those columns :
+* `CatID` : The unique identifier of the category
+* `CatName` : The name of the category
+* `MetalWast%` : The waste of metal in percentage for this ornament (not sure now)
 
 ### Manage Currencies
 By clicking in `Manage/Currencies` you arrived on the `Currencies` page.
@@ -301,6 +305,12 @@ By clicking in `Manage/Currencies` you arrived on the `Currencies` page.
 This table give the rate change from a currency to Bath.
 
 ![currencies](./images/pdp_currencies.png)
+
+With those columns :
+* `Code` : The code of the country (US, EU, ...)
+* `Country` : The country of the currency 
+* `Currency` : The name of the currency (Euro, US$, ...)
+* `Rate` : The rate change from this currency to Bath
 
 
 ### Tools
