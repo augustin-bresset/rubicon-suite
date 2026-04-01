@@ -23,8 +23,8 @@ class StoneWeight(models.Model):
     _sql_constraints = [
         (
             "stone_weight_uniq",
-            "unique(type_id, shape_id, size_id)",
-            "A weight already exists for this type/shape/size combination."
+            "unique(type_id, shape_id, size_id, shade_id)",
+            "A weight already exists for this type/shape/size/shade combination."
         ),
         (
             "weight_positive",
