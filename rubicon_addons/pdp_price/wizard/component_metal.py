@@ -24,8 +24,14 @@ class PriceMetal(models.TransientModel):
         if not model_metal:
             return self._payload('metal', 0.0, 0.0, currency)
 
-        # Determine effective purity: user-selected overrides stored, otherwise use stored
-        effective_purity = purity if purity and purity.exists() else model_metal.purity_id
+        # Determine effective purity: user-selected overrides stored only if compatible system
+        stored_purity = model_metal.purity_id
+        metal_system = model_metal.metal_id.purity_system
+        if (purity and purity.exists()
+                and (not metal_system or purity.purity_system == metal_system)):
+            effective_purity = purity
+        else:
+            effective_purity = stored_purity
         purity_percent = effective_purity.percent if effective_purity else 75.0  # fallback 18K
 
         rate = 1.0
@@ -67,11 +73,11 @@ class PriceMetal(models.TransientModel):
             fixed_cost_usd = self._convert(model_metal.metal_id.cost or 0.0, model_metal.metal_id.currency_id, usd, date)
             cost_per_gram_usd = fixed_cost_usd / OZ_TO_G
 
-        # Gold weight = total alloy weight × gold fraction (purity)
-        # cost_per_gram_usd is per gram of PURE gold
+        # pure_grams = alloy_weight × purity_fraction
+        # cost_per_gram_usd is per gram of pure metal (gold, silver, bronze…)
         alloy_weight = model_metal.weight or 0.0
-        gold_grams = alloy_weight * (purity_percent / 100.0)
-        usd_cost = cost_per_gram_usd * gold_grams
+        pure_grams = alloy_weight * (purity_percent / 100.0)
+        usd_cost = cost_per_gram_usd * pure_grams
         total_cost = self._convert(usd_cost, usd, currency, date)
         total_margin = (rate - 1.0) * total_cost
 

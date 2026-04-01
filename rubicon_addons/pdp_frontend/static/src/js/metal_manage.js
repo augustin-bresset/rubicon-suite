@@ -36,7 +36,7 @@ export class MetalManage extends Component {
             this.orm.searchRead(
                 "pdp.metal",
                 [],
-                ["id", "code", "name", "cost", "currency_id", "cost_method", "plating", "gold", "default_purity_id"],
+                ["id", "code", "name", "cost", "currency_id", "cost_method", "plating", "gold", "default_purity_id", "purity_system"],
                 { order: "code asc" }
             ),
             this.orm.searchRead(
@@ -48,8 +48,8 @@ export class MetalManage extends Component {
             this.orm.searchRead(
                 "pdp.metal.purity",
                 [],
-                ["id", "code", "percent"],
-                { order: "code asc" }
+                ["id", "code", "percent", "purity_system"],
+                { order: "purity_system asc, percent asc" }
             ),
             this.orm.searchRead(
                 "res.currency",
@@ -114,6 +114,7 @@ export class MetalManage extends Component {
             plating: false,
             gold: true,
             default_purity_id: false,
+            purity_system: 'carat',
         });
         this.state.isDirty = true;
     }
@@ -182,6 +183,7 @@ export class MetalManage extends Component {
             _dirty: true,
             code: "",
             percent: 0,
+            purity_system: 'carat',
         });
         this.state.isDirty = true;
     }
@@ -237,6 +239,7 @@ export class MetalManage extends Component {
             plating: !!r.plating,
             gold: !!r.gold,
             default_purity_id: this.m2oId(r.default_purity_id) || false,
+            purity_system: r.purity_system || false,
         };
     }
 
@@ -254,6 +257,7 @@ export class MetalManage extends Component {
         return {
             code: r.code,
             percent: parseFloat(r.percent) || 0,
+            purity_system: r.purity_system || false,
         };
     }
 

@@ -150,8 +150,8 @@ export class PdpWorkspace extends Component {
                 this.orm.searchRead("pdp.product.model", [], ["id", "code", "drawing", "quotation", "category_id"], { order: "code ASC" }),
                 this.orm.searchRead("pdp.margin", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.labor.type", [], ["id", "code", "name"]),
-                this.orm.searchRead("pdp.metal", [], ["id", "code", "name"]),
-                this.orm.searchRead("pdp.metal.purity", [["percent", ">", 0]], ["id", "code", "percent"], { order: "percent desc" }),
+                this.orm.searchRead("pdp.metal", [], ["id", "code", "name", "purity_system"]),
+                this.orm.searchRead("pdp.metal.purity", [["percent", ">", 0]], ["id", "code", "percent", "purity_system"], { order: "percent desc" }),
                 this.orm.searchRead("pdp.part", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.addon.type", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.stone.shape", [], ["id", "code", "shape"], { order: "shape ASC" }),
@@ -210,10 +210,6 @@ export class PdpWorkspace extends Component {
                 this.state.usRate = this.state.currencies[0].rate || 1.0;
             }
 
-            if (this.state.models.length > 0) {
-                const defaultModel = this.state.models.find(m => m.code.includes("R132")) || this.state.models[0];
-                await this.selectModel(defaultModel.id);
-            }
         } catch (e) {
             console.error("Initial load failed:", e);
         }
@@ -243,6 +239,18 @@ export class PdpWorkspace extends Component {
             const pid = Array.isArray(m.purity_id) ? m.purity_id[0] : m.purity_id;
             return pid === this.state.selectedPurityId;
         });
+    }
+
+    // Returns only purities compatible with the current product's metal purity system
+    get filteredPurities() {
+        const product = this.activeProduct;
+        if (!product?.metal) return this.purities;
+        const mw = this.state.metalWeights.find(m => m.metal_version === product.metal);
+        if (!mw) return this.purities;
+        const metalId = Array.isArray(mw.metal_id) ? mw.metal_id[0] : mw.metal_id;
+        const metal = this.allMetals.find(m => m.id === metalId);
+        if (!metal?.purity_system) return this.purities;
+        return this.purities.filter(p => p.purity_system === metal.purity_system);
     }
 
     get defaultCurrencyId() {
@@ -1835,7 +1843,7 @@ export class PdpWorkspace extends Component {
         if (!this.state.selectedProductId || !this.state.selectedCurrencyId) return;
         try {
             const result = await this.orm.call(
-                "pdp.api.service", "compute_price",
+                "pdp.price.service", "compute_price_by_ids",
                 [this.state.selectedProductId, this.state.selectedMarginId || false, this.state.selectedCurrencyId],
                 { purity_id: this.state.selectedPurityId || false }
             );

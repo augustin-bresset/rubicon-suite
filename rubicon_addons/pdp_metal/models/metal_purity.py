@@ -18,4 +18,8 @@ class MetalPurity(models.Model):
         digits=(4, 1),
         help='e.g. 75.0 for 18K gold',
     )
+    purity_system = fields.Selection(
+        [('carat', 'Carat'), ('millesimal', 'Millièmes')],
+        string='Purity System',
+    )
 

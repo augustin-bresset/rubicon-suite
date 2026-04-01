@@ -101,3 +101,13 @@ class PdpPriceService(models.AbstractModel):
                 'price': currency.round(total_price),
             }
         }
+
+    @api.model
+    def compute_price_by_ids(self, product_id, margin_id, currency_id, purity_id=None):
+        """Entry point for JS/OWL: converts raw IDs to records then delegates."""
+        product = self.env['pdp.product'].browse(int(product_id))
+        if not product.exists():
+            return {'error': 'Product not found'}
+        margin = self.env['pdp.margin'].browse(int(margin_id)) if margin_id else None
+        currency = self.env['res.currency'].browse(int(currency_id))
+        return self.compute_product_price(product, margin, currency, purity_id=purity_id)

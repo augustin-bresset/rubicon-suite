@@ -35,6 +35,7 @@
                         <th style="width: 60px;" class="text-center">Plating</th>
                         <th style="width: 60px;" class="text-center">Gold</th>
                         <th style="width: 120px;">Default Purity</th>
+                        <th style="width: 110px;">Type</th>
                         <th style="width: 40px;"></th>
                     </tr>
                 </thead>
@@ -119,6 +120,15 @@
                                             <t t-esc="pur.code"/>
                                         </option>
                                     </t>
+                                </select>
+                            </td>
+                            <td t-on-click.stop="() => {}">
+                                <select
+                                    class="form-select form-select-sm"
+                                    t-on-change="(e) => this.onMetalFieldChange(row, 'purity_system', e.target.value || false)">
+                                    <option value="">—</option>
+                                    <option value="carat" t-att-selected="row.purity_system === 'carat'">Carat</option>
+                                    <option value="millesimal" t-att-selected="row.purity_system === 'millesimal'">Millièmes</option>
                                 </select>
                             </td>
                             <td t-on-click.stop="() => {}">
@@ -270,8 +280,9 @@
                         <table class="table table-sm table-hover pdp-manage-table">
                             <thead class="table-light sticky-top">
                                 <tr>
-                                    <th style="width: 200px;">Name (e.g. 18K)</th>
-                                    <th style="width: 150px;">Percentage</th>
+                                    <th style="width: 150px;">Name (e.g. 18K)</th>
+                                    <th style="width: 120px;">Percentage</th>
+                                    <th style="width: 110px;">Type</th>
                                     <th style="width: 40px;"></th>
                                 </tr>
                             </thead>
@@ -296,6 +307,15 @@
                                             />
                                         </td>
                                         <td>
+                                            <select
+                                                class="form-select form-select-sm"
+                                                t-on-change="(e) => this.onPurityFieldChange(row, 'purity_system', e.target.value || false)">
+                                                <option value="">—</option>
+                                                <option value="carat" t-att-selected="row.purity_system === 'carat'">Carat</option>
+                                                <option value="millesimal" t-att-selected="row.purity_system === 'millesimal'">Millièmes</option>
+                                            </select>
+                                        </td>
+                                        <td>
                                             <button
                                                 class="btn btn-sm btn-outline-danger"
                                                 t-on-click.stop="() => this.removePurity(row)">
@@ -306,7 +326,7 @@
                                 </t>
                                 <t t-if="state.purities.length === 0">
                                     <tr>
-                                        <td colspan="3" class="text-center text-muted fst-italic py-3">
+                                        <td colspan="4" class="text-center text-muted fst-italic py-3">
                                             No purities defined.
                                         </td>
                                     </tr>

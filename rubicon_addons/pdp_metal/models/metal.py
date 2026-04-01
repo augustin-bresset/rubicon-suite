@@ -40,3 +40,7 @@ class Metal(models.Model):
         'pdp.metal.purity',
         string='Default Purity',
     )
+    purity_system = fields.Selection(
+        [('carat', 'Carat'), ('millesimal', 'Millièmes')],
+        string='Purity System',
+    )

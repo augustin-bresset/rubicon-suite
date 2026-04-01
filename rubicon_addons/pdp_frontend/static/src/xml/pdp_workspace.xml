@@ -300,7 +300,7 @@
                                 <label class="col-4 fw-bold small">Purity</label>
                                 <div class="col-5">
                                     <select class="form-select form-select-sm" t-on-change="(ev) => this.onPurityChange(ev)">
-                                        <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
+                                        <t t-foreach="this.filteredPurities" t-as="pur" t-key="pur.id">
                                             <option t-att-value="pur.id" t-att-selected="pur.id === state.selectedPurityId"><t t-esc="pur.code"/></option>
                                         </t>
                                     </select>
@@ -671,7 +671,7 @@
                                 <small class="fw-bold">Filter Purity:</small>
                                 <select class="form-select form-select-sm" style="width:100px; font-size:11px;" t-on-change="(ev) => this.onPurityChange(ev)">
                                     <option value="">All</option>
-                                    <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
+                                    <t t-foreach="this.filteredPurities" t-as="pur" t-key="pur.id">
                                         <option t-att-value="pur.id" t-att-selected="pur.id === state.selectedPurityId"><t t-esc="pur.code"/></option>
                                     </t>
                                 </select>

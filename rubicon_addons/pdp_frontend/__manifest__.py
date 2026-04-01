@@ -5,7 +5,7 @@
     "summary": "Frontend interface for Product Definition and Pricing",
     "depends": [
         "web",
-        "pdp_api",
+        "pdp_price",
         "pdp_picture",
         "rubicon_uom",
     ],

@@ -101,13 +101,12 @@ nano odoo_conf/odoo_demo.conf
 
 ```bash
 docker compose -f docker-compose.demo.yml up -d
-
 docker compose -f docker-compose.demo.yml exec odoo_demo odoo \
   -d rubicondemo \
-  -i rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom,metal_price \
+  -i rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom \
   --stop-after-init
-
 docker compose -f docker-compose.demo.yml up -d
+
 ```
 
 The demo is now running on `http://YOUR_VPS_IP:8070`.

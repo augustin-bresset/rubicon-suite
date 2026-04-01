@@ -1,9 +1,9 @@
-id,code,name,cost,gold,plating
-metal_B,B,Bronze,7.0,False,False
-metal_L,L,Palladium Gold,3460.0,True,True
-metal_P,P,Pink Gold,3255.0,True,True
-metal_PL,PL,Platinum,2010.0,False,False
-metal_R,R,Yellow+Rhodium,1915.0,False,True
-metal_S,S,Silver,36.0,False,True
-metal_W,W,White Gold,3255.0,True,True
-metal_Y,Y,Yellow Gold,3245.0,True,True
+id,code,name,cost,gold,plating,purity_system
+metal_B,B,Bronze,7.0,False,False,millesimal
+metal_L,L,Palladium Gold,3460.0,True,True,carat
+metal_P,P,Pink Gold,3255.0,True,True,carat
+metal_PL,PL,Platinum,2010.0,False,False,millesimal
+metal_R,R,Yellow+Rhodium,1915.0,False,True,carat
+metal_S,S,Silver,36.0,False,True,millesimal
+metal_W,W,White Gold,3255.0,True,True,carat
+metal_Y,Y,Yellow Gold,3245.0,True,True,carat
