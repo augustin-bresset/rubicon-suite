@@ -149,8 +149,9 @@ if __name__ == '__main__':
             shape_code = strip_code_space(row[1])
             shade_code = no_all_one_zero_value(strip_code_space(row[2]))
             
-
             size = size_field(row[3])
+            if shape_code in {"1", "ALL", "all", "0"}:
+                return
             
             stone_code = create_stone_code(type_code, shade_code, shape_code, size)
             return {
