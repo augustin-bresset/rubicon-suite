@@ -18,8 +18,8 @@ class Stone(models.Model):
     )
 
     type_id  = fields.Many2one("pdp.stone.type",  string="Stone Type",  required=True, index=True)
-    shape_id = fields.Many2one("pdp.stone.shape", string="Stone Shape", index=True)
-    shade_id = fields.Many2one("pdp.stone.shade", string="Stone Shade", index=True)
+    shape_id = fields.Many2one("pdp.stone.shape", string="Stone Shape", required=False, default=None, index=True)
+    shade_id = fields.Many2one("pdp.stone.shade", string="Stone Shade", required=False, default=None, index=True)
     size_id  = fields.Many2one("pdp.stone.size",  string="Stone Size",  required=True, index=True)
     weight_id = fields.Many2one(
         'pdp.stone.weight',
