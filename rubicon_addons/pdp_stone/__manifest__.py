@@ -1,6 +1,6 @@
 {
     'name': 'PDP Stone',
-    'version': '0.01',
+    'version': '1.0',
     'license': 'LGPL-3',
     'category': 'Product',
     'author': 'Rubicon',

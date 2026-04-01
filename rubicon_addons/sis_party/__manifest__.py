@@ -1,6 +1,7 @@
 {
     'name': 'SIS Party',
     'version': '18.0.2.0.0',
+    'license': 'LGPL-3',
     'category': 'Sales',
     'summary': 'SIS Party (Client/Vendor) Management — extends res.partner',
     'depends': ['base', 'pdp_margin'],

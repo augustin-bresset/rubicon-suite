@@ -1,6 +1,7 @@
 {
     'name': 'SIS Frontend',
     'version': '1.1',
+    'license': 'LGPL-3',
     'category': 'Sales',
     'summary': 'Frontend application for Sales Information System (SIS)',
     'description': """
