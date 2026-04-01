@@ -10,7 +10,7 @@ class PdpPriceService(models.AbstractModel):
     _description = 'PDP Price Computation Service'
 
     @api.model
-    def compute_product_price(self, product, margin=None, currency=None, date=None):
+    def compute_product_price(self, product, margin=None, currency=None, date=None, purity_id=None):
         """
         Compute price breakdown for a product.
         
@@ -29,6 +29,7 @@ class PdpPriceService(models.AbstractModel):
         margin = margin or self.env['pdp.margin'].search([], limit=1)
         currency = currency or self.env.company.currency_id
         date = date or fields.Date.context_today(self)
+        purity = self.env['pdp.metal.purity'].browse(purity_id) if purity_id else None
 
         # Price components to compute
         components = [
@@ -52,11 +53,13 @@ class PdpPriceService(models.AbstractModel):
                 continue
 
             try:
+                extra = {'purity': purity} if model_name == 'pdp.price.metal' else {}
                 payload = comp_model.compute(
                     product=product,
                     margin=margin,
                     currency=currency,
                     date=date,
+                    **extra,
                 )
             except Exception as e:
                 import logging

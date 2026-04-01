@@ -15,13 +15,26 @@
 
     <!-- New margin inline form -->
     <t t-if="state.showNewMarginForm">
-      <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom bg-white">
+      <div class="d-flex align-items-center flex-wrap gap-2 px-3 py-2 border-bottom bg-white">
         <input class="form-control form-control-sm" style="width:120px;" placeholder="Code"
                t-att-value="state.newMarginCode"
                t-on-input="(e) => this.state.newMarginCode = e.target.value"/>
         <input class="form-control form-control-sm" style="width:200px;" placeholder="Name"
                t-att-value="state.newMarginName"
                t-on-input="(e) => this.state.newMarginName = e.target.value"/>
+        <span class="text-muted small">Copy from:</span>
+        <select class="form-select form-select-sm" style="width:160px;"
+                t-on-change="(e) => this.state.newMarginCopySourceId = e.target.value ? +e.target.value : null">
+          <option value="">— none —</option>
+          <t t-foreach="state.margins" t-as="m" t-key="m.id">
+            <option t-att-value="m.id"><t t-esc="m.code"/> – <t t-esc="m.name"/></option>
+          </t>
+        </select>
+        <span class="text-muted small">Rate:</span>
+        <input type="number" step="0.01" min="0" class="form-control form-control-sm" style="width:90px;"
+               t-att-value="state.newMarginCopyRate"
+               t-att-disabled="!state.newMarginCopySourceId"
+               t-on-input="(e) => this.state.newMarginCopyRate = e.target.value"/>
         <button class="btn btn-sm btn-primary" t-on-click="() => this.createMargin()">Create</button>
       </div>
     </t>

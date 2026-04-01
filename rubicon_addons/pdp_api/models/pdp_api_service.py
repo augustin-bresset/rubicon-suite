@@ -96,7 +96,7 @@ class PdpApiService(models.AbstractModel):
         }
 
     @api.model
-    def compute_price(self, product_id, margin_id, currency_id, metal_id=None):
+    def compute_price(self, product_id, margin_id, currency_id, metal_id=None, purity_id=None):
         """
         JSON Endpoint to recalculate prices.
         Delegates to pdp.price.service.compute_product_price().
@@ -109,4 +109,4 @@ class PdpApiService(models.AbstractModel):
         currency = self.env['res.currency'].browse(int(currency_id))
 
         PriceService = self.env['pdp.price.service']
-        return PriceService.compute_product_price(product, margin, currency)
+        return PriceService.compute_product_price(product, margin, currency, purity_id=purity_id)

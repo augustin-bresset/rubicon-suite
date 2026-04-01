@@ -50,6 +50,8 @@ export class MarginsManage extends Component {
             showNewMarginForm: false,
             newMarginCode: "",
             newMarginName: "",
+            newMarginCopySourceId: null,
+            newMarginCopyRate: 1.0,
         });
 
         onWillStart(async () => {
@@ -274,11 +276,41 @@ export class MarginsManage extends Component {
         }
         try {
             const [newId] = await this.orm.create("pdp.margin", [{ code: this.state.newMarginCode, name: this.state.newMarginName }]);
+            const srcId = this.state.newMarginCopySourceId;
+            const rate = parseFloat(this.state.newMarginCopyRate) || 1.0;
+            if (srcId) {
+                const [partRates, labors, addons, metals, stonesConditional, stonesNormal] = await Promise.all([
+                    this.orm.searchRead("pdp.margin.part", [["margin_id", "=", srcId]], ["rate"], { limit: 1 }),
+                    this.orm.searchRead("pdp.margin.labor", [["margin_id", "=", srcId]], ["labor_id", "rate"]),
+                    this.orm.searchRead("pdp.margin.addon", [["margin_id", "=", srcId]], ["addon_id", "rate"]),
+                    this.orm.searchRead("pdp.margin.metal", [["margin_id", "=", srcId]], ["metal_purity_id", "rate"]),
+                    this.orm.searchRead("pdp.margin.stone.conditional", [["margin_id", "=", srcId]], ["stone_cat_id", "operator", "comparative_cost", "currency_id", "rate"]),
+                    this.orm.searchRead("pdp.margin.stone", [["margin_id", "=", srcId]], ["stone_type_id", "rate"]),
+                ]);
+                const m2oId = (f) => Array.isArray(f) ? f[0] : f;
+                const creates = [];
+                if (partRates.length) {
+                    creates.push(this.orm.create("pdp.margin.part", [{ margin_id: newId, rate: partRates[0].rate * rate }]));
+                }
+                for (const r of labors)
+                    creates.push(this.orm.create("pdp.margin.labor", [{ margin_id: newId, labor_id: m2oId(r.labor_id), rate: r.rate * rate }]));
+                for (const r of addons)
+                    creates.push(this.orm.create("pdp.margin.addon", [{ margin_id: newId, addon_id: m2oId(r.addon_id), rate: r.rate * rate }]));
+                for (const r of metals)
+                    creates.push(this.orm.create("pdp.margin.metal", [{ margin_id: newId, metal_purity_id: m2oId(r.metal_purity_id), rate: r.rate * rate }]));
+                for (const r of stonesConditional)
+                    creates.push(this.orm.create("pdp.margin.stone.conditional", [{ margin_id: newId, stone_cat_id: m2oId(r.stone_cat_id), operator: r.operator, comparative_cost: r.comparative_cost, currency_id: m2oId(r.currency_id), rate: r.rate * rate }]));
+                for (const r of stonesNormal)
+                    creates.push(this.orm.create("pdp.margin.stone", [{ margin_id: newId, stone_type_id: m2oId(r.stone_type_id), rate: r.rate * rate }]));
+                await Promise.all(creates);
+            }
             const margins = await this.orm.searchRead("pdp.margin", [], ["id", "code", "name"], { order: "code asc" });
             this.state.margins = margins;
             this.state.showNewMarginForm = false;
             this.state.newMarginCode = "";
             this.state.newMarginName = "";
+            this.state.newMarginCopySourceId = null;
+            this.state.newMarginCopyRate = 1.0;
             await this.selectMargin(newId);
         } catch (e) {
             this.notification.add("Error: " + (e.message || e), { type: "danger" });

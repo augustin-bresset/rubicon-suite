@@ -110,13 +110,13 @@
                                         <button type="button" class="btn btn-sm btn-light border opacity-75"
                                                 t-on-click="() => this.triggerImageUpload('image_1920', 'model')"
                                                 title="Add model photo (shared by all products)">
-                                            <i class="fa fa-photo me-1"/>Model
+                                            Model
                                         </button>
                                         <t t-if="state.selectedProductId">
                                             <button type="button" class="btn btn-sm btn-light border opacity-75"
                                                     t-on-click="() => this.triggerImageUpload('image_1920', 'product')"
                                                     title="Add product photo (specific to this product)">
-                                                <i class="fa fa-tag me-1"/>Product
+                                                Product
                                             </button>
                                         </t>
                                         <button type="button" class="btn btn-sm btn-light border opacity-75 text-danger"
@@ -139,7 +139,7 @@
                                         <button type="button" class="btn btn-sm btn-outline-primary"
                                                 t-on-click="() => this.triggerImageUpload('image_1920', 'product')"
                                                 title="Add product photo (specific to this product)">
-                                            <i class="fa fa-tag me-1"/>Add product photo
+                                            Add product photo
                                         </button>
                                     </t>
                                 </div>
@@ -177,7 +177,7 @@
                                         <button type="button" class="btn btn-sm btn-light border opacity-75"
                                                 t-on-click="() => this.triggerImageUpload('drawing_1920', 'model')"
                                                 title="Add drawing">
-                                            <i class="fa fa-plus me-1"/>Add
+                                            Add
                                         </button>
                                         <button type="button" class="btn btn-sm btn-light border opacity-75 text-danger"
                                                 t-on-click="() => this.deletePictureField('drawing_1920')">
@@ -242,13 +242,13 @@
                                 <button type="button" class="btn btn-outline-secondary btn-sm"
                                         t-on-click="() => this.triggerImageUpload('image_1920', 'model')"
                                         title="Shared by all products of this model">
-                                    <i class="fa fa-photo me-1"/>Model photo
+                                    Model photo
                                 </button>
                                 <t t-if="state.selectedProductId">
                                     <button type="button" class="btn btn-primary btn-sm"
                                             t-on-click="() => this.triggerImageUpload('image_1920', 'product')"
                                             title="Specific to the selected product">
-                                        <i class="fa fa-tag me-1"/>Product photo
+                                        Product photo
                                     </button>
                                 </t>
                             </div>
@@ -300,7 +300,6 @@
                                 <label class="col-4 fw-bold small">Purity</label>
                                 <div class="col-5">
                                     <select class="form-select form-select-sm" t-on-change="(ev) => this.onPurityChange(ev)">
-                                        <option value="">All</option>
                                         <t t-foreach="this.purities" t-as="pur" t-key="pur.id">
                                             <option t-att-value="pur.id" t-att-selected="pur.id === state.selectedPurityId"><t t-esc="pur.code"/></option>
                                         </t>
@@ -460,13 +459,48 @@
                                             <input type="text"
                                                    t-attf-class="form-control form-control-sm p-0 text-center {{ !sr._stoneValid and sr._stoneCode ? 'border-danger' : '' }}"
                                                    style="font-size:11px; min-width:100px;"
-                                                   t-att-value="sr._stoneCode"
+                                                   t-att-value="sr._stoneValid and sr._stoneTypeName ? sr._stoneTypeName : sr._stoneCode"
+                                                   t-on-focus="(ev) => { ev.target.value = sr._stoneCode; ev.target.select(); }"
                                                    t-on-blur="(ev) => this.validateStoneCode(sr._key, ev.target.value)"
+                                                   t-att-title="sr._stoneCode"
                                                    placeholder="Code..."/>
                                         </td>
-                                        <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.shade_id) ? sr._stoneDetail.shade_id[1] : ''"/></td>
-                                        <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.shape_id) ? sr._stoneDetail.shape_id[1] : ''"/></td>
-                                        <td class="text-muted small align-middle"><t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.size_id) ? sr._stoneDetail.size_id[1] : ''"/></td>
+                                        <td t-on-click.stop="">
+                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                    t-on-change="(ev) => this.onStoneAttrChange(sr._key, 'shade_id', ev.target.value)">
+                                                <option value="">—</option>
+                                                <t t-foreach="this.stoneShades" t-as="sh" t-key="sh.id">
+                                                    <option t-att-value="sh.id"
+                                                            t-att-selected="sh.id === (sr._stoneDetail and Array.isArray(sr._stoneDetail.shade_id) ? sr._stoneDetail.shade_id[0] : 0)">
+                                                        <t t-esc="sh.shade"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td t-on-click.stop="">
+                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                    t-on-change="(ev) => this.onStoneAttrChange(sr._key, 'shape_id', ev.target.value)">
+                                                <option value="">—</option>
+                                                <t t-foreach="this.stoneShapes" t-as="shp" t-key="shp.id">
+                                                    <option t-att-value="shp.id"
+                                                            t-att-selected="shp.id === (sr._stoneDetail and Array.isArray(sr._stoneDetail.shape_id) ? sr._stoneDetail.shape_id[0] : 0)">
+                                                        <t t-esc="shp.shape"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td t-on-click.stop="">
+                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                    t-on-change="(ev) => this.onStoneAttrChange(sr._key, 'size_id', ev.target.value)">
+                                                <option value="">—</option>
+                                                <t t-foreach="this.stoneSizes" t-as="sz" t-key="sz.id">
+                                                    <option t-att-value="sz.id"
+                                                            t-att-selected="sz.id === (sr._stoneDetail and Array.isArray(sr._stoneDetail.size_id) ? sr._stoneDetail.size_id[0] : 0)">
+                                                        <t t-esc="sz.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
                                         <td t-on-click.stop="">
                                             <input type="number" class="form-control form-control-sm p-0 text-center" style="font-size:11px;"
                                                    t-att-value="sr.pieces"
@@ -488,14 +522,35 @@
                                                    t-att-value="sr.setting"
                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'setting', ev.target.value)"/>
                                         </td>
-                                        <td class="text-muted small align-middle">
-                                            <t t-esc="Array.isArray(sr.reshaped_shape_id) ? sr.reshaped_shape_id[1] : ''"/>
+                                        <td t-on-click.stop="">
+                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_shape_id', ev.target.value)">
+                                                <option value="">—</option>
+                                                <t t-foreach="this.stoneShapes" t-as="sshp" t-key="sshp.id">
+                                                    <option t-att-value="sshp.id"
+                                                            t-att-selected="sshp.id === (Array.isArray(sr.reshaped_shape_id) ? sr.reshaped_shape_id[0] : sr.reshaped_shape_id)">
+                                                        <t t-esc="sshp.shape"/>
+                                                    </option>
+                                                </t>
+                                            </select>
                                         </td>
-                                        <td class="text-muted small align-middle">
-                                            <t t-esc="sr.reshaped_size_id and Array.isArray(sr.reshaped_size_id) ? sr.reshaped_size_id[1] : ''"/>
+                                        <td t-on-click.stop="">
+                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_size_id', ev.target.value)">
+                                                <option value="">—</option>
+                                                <t t-foreach="this.stoneSizes" t-as="ssz" t-key="ssz.id">
+                                                    <option t-att-value="ssz.id"
+                                                            t-att-selected="ssz.id === (Array.isArray(sr.reshaped_size_id) ? sr.reshaped_size_id[0] : sr.reshaped_size_id)">
+                                                        <t t-esc="ssz.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
                                         </td>
-                                        <td class="text-end text-muted small align-middle">
-                                            <t t-esc="sr.reshaped_weight"/>
+                                        <td t-on-click.stop="">
+                                            <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                   t-att-value="sr.reshaped_weight"
+                                                   t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_weight', ev.target.value)"
+                                                   placeholder="0.0"/>
                                         </td>
                                         <td class="text-center align-middle" t-on-click.stop="">
                                             <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
@@ -510,57 +565,44 @@
                         </table>
                         </div>
 
-                        <!-- Detail panel: shown when a row is selected -->
+                        <!-- Detail bar: shown when a row is focused -->
                         <t t-set="selStone" t-value="state.stoneRows.find(r => r._key === state.selectedStoneKey)"/>
-                        <div t-if="selStone" class="border rounded bg-light p-2 mt-2" style="font-size:11px;">
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <!-- Navigation shortcuts to Manage sections -->
-                                <div class="btn-group btn-group-sm me-2">
-                                    <button class="btn btn-outline-secondary py-0 px-2"
-                                            t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Stones</button>
-                                    <button class="btn btn-outline-secondary py-0 px-2"
-                                            t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Cost</button>
-                                    <button class="btn btn-outline-secondary py-0 px-2"
-                                            t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Weights</button>
-                                </div>
-                                <span class="text-muted fw-bold me-1">Recut to:</span>
-                                <!-- Rec Shape -->
-                                <div class="d-flex align-items-center gap-1">
-                                    <label class="text-muted mb-0">Shape</label>
-                                    <select class="form-select form-select-sm p-0" style="font-size:11px; width:100px;"
-                                            t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_shape_id', ev.target.value)">
-                                        <option value="">—</option>
-                                        <t t-foreach="this.stoneShapes" t-as="sshp" t-key="sshp.id">
-                                            <option t-att-value="sshp.id"
-                                                    t-att-selected="sshp.id === (Array.isArray(selStone.reshaped_shape_id) ? selStone.reshaped_shape_id[0] : selStone.reshaped_shape_id)">
-                                                <t t-esc="sshp.code"/>
-                                            </option>
-                                        </t>
-                                    </select>
-                                </div>
-                                <!-- Rec Size -->
-                                <div class="d-flex align-items-center gap-1">
-                                    <label class="text-muted mb-0">Size</label>
-                                    <select class="form-select form-select-sm p-0" style="font-size:11px; width:90px;"
-                                            t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_size_id', ev.target.value)">
-                                        <option value="">—</option>
-                                        <t t-foreach="this.stoneSizes" t-as="ssz" t-key="ssz.id">
-                                            <option t-att-value="ssz.id"
-                                                    t-att-selected="ssz.id === (Array.isArray(selStone.reshaped_size_id) ? selStone.reshaped_size_id[0] : selStone.reshaped_size_id)">
-                                                <t t-esc="ssz.name"/>
-                                            </option>
-                                        </t>
-                                    </select>
-                                </div>
-                                <!-- Rec Weight -->
-                                <div class="d-flex align-items-center gap-1">
-                                    <label class="text-muted mb-0">Weight</label>
-                                    <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px; width:70px;"
-                                           t-att-value="selStone.reshaped_weight"
-                                           t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_weight', ev.target.value)"
-                                           placeholder="0.0"/>
-                                </div>
+                        <div t-if="selStone" class="d-flex align-items-center gap-2 flex-wrap mt-1 px-1 py-1 border-top bg-light" style="font-size:11px;">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary py-0 px-2"
+                                        t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Stones</button>
+                                <button class="btn btn-outline-secondary py-0 px-2"
+                                        t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Cost</button>
+                                <button class="btn btn-outline-secondary py-0 px-2"
+                                        t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Weights</button>
                             </div>
+                            <span class="text-muted fw-bold ms-2">Recut to:</span>
+                            <select class="form-select form-select-sm p-0" style="font-size:11px; width:120px;"
+                                    t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_shape_id', ev.target.value)">
+                                <option value="">Shape —</option>
+                                <t t-foreach="this.stoneShapes" t-as="sshp" t-key="sshp.id">
+                                    <option t-att-value="sshp.id"
+                                            t-att-selected="sshp.id === (Array.isArray(selStone.reshaped_shape_id) ? selStone.reshaped_shape_id[0] : selStone.reshaped_shape_id)">
+                                        <t t-esc="sshp.shape"/>
+                                    </option>
+                                </t>
+                            </select>
+                            <span class="text-muted">Size:</span>
+                            <select class="form-select form-select-sm p-0" style="font-size:11px; width:90px;"
+                                    t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_size_id', ev.target.value)">
+                                <option value="">—</option>
+                                <t t-foreach="this.stoneSizes" t-as="ssz" t-key="ssz.id">
+                                    <option t-att-value="ssz.id"
+                                            t-att-selected="ssz.id === (Array.isArray(selStone.reshaped_size_id) ? selStone.reshaped_size_id[0] : selStone.reshaped_size_id)">
+                                        <t t-esc="ssz.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                            <span class="text-muted">Weight:</span>
+                            <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px; width:70px;"
+                                   t-att-value="selStone.reshaped_weight"
+                                   t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_weight', ev.target.value)"
+                                   placeholder="0.0"/>
                         </div>
                     </div>
 
@@ -931,7 +973,7 @@
                         <button class="btn btn-sm btn-primary border px-3 fw-bold" t-on-click="() => this.saveAll()" t-att-disabled="!state.isDirty">Save</button>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-light border px-3 text-secondary" t-on-click="() => this.openMarginsModal()" t-att-disabled="!state.selectedMarginId">Margins</button>
+                        <button class="btn btn-sm btn-light border px-3 text-secondary" t-on-click="() => this.goToManage('pdp_frontend.margins_manage')">Margins</button>
                         <button class="btn btn-sm btn-light border px-3 text-primary" t-on-click="() => this.recalculatePrice()">Refresh</button>
                     </div>
                 </div>

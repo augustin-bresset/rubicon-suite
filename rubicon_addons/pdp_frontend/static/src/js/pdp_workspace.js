@@ -146,16 +146,17 @@ export class PdpWorkspace extends Component {
 
     async loadInitialData() {
         try {
-            const [models, margins, laborTypes, allMetals, purities, allParts, addonTypes, stoneShapes, stoneSizes, stoneCategories, stoneTypes] = await Promise.all([
+            const [models, margins, laborTypes, allMetals, purities, allParts, addonTypes, stoneShapes, stoneSizes, stoneShades, stoneCategories, stoneTypes] = await Promise.all([
                 this.orm.searchRead("pdp.product.model", [], ["id", "code", "drawing", "quotation", "category_id"], { order: "code ASC" }),
                 this.orm.searchRead("pdp.margin", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.labor.type", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.metal", [], ["id", "code", "name"]),
-                this.orm.searchRead("pdp.metal.purity", [], ["id", "code"]),
+                this.orm.searchRead("pdp.metal.purity", [], ["id", "code", "percent"]),
                 this.orm.searchRead("pdp.part", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.addon.type", [], ["id", "code", "name"]),
-                this.orm.searchRead("pdp.stone.shape", [], ["id", "code"], { order: "code ASC" }),
+                this.orm.searchRead("pdp.stone.shape", [], ["id", "code", "shape"], { order: "shape ASC" }),
                 this.orm.searchRead("pdp.stone.size", [], ["id", "name"], { order: "name ASC" }),
+                this.orm.searchRead("pdp.stone.shade", [], ["id", "code", "shade"], { order: "shade ASC" }),
                 this.orm.searchRead("pdp.stone.category", [], ["id", "code", "name"], { order: "name ASC" }),
                 this.orm.searchRead("pdp.stone.type", [], ["id", "code", "name", "category_id"], { order: "name ASC" }),
             ]);
@@ -169,6 +170,7 @@ export class PdpWorkspace extends Component {
             this.addonTypes = addonTypes;
             this.stoneShapes = stoneShapes;
             this.stoneSizes = stoneSizes;
+            this.stoneShades = stoneShades;
             this.stoneCategories = stoneCategories;
             this.stoneTypes = stoneTypes;
 
@@ -196,6 +198,7 @@ export class PdpWorkspace extends Component {
             }
 
             if (this.state.margins.length > 0) this.state.selectedMarginId = this.state.margins[0].id;
+            if (this.purities.length > 0) this.state.selectedPurityId = this.purities[0].id;
 
             const usd = this.state.currencies.find(c => c.name === "USD");
             if (usd) {
@@ -270,6 +273,12 @@ export class PdpWorkspace extends Component {
         return val;
     }
 
+    _getStoneTypeName(detail) {
+        if (!detail || !detail.type_id) return '';
+        const typeId = Array.isArray(detail.type_id) ? detail.type_id[0] : detail.type_id;
+        return this.stoneTypes.find(t => t.id === typeId)?.name || detail.type_id[1] || '';
+    }
+
     async validateStoneCode(key, code) {
         const row = this.state.stoneRows.find(r => r._key === key);
         if (!row) return;
@@ -285,27 +294,35 @@ export class PdpWorkspace extends Component {
         }
         const found = await this.orm.searchRead(
             "pdp.stone", [["code", "=", trimmed]],
-            ["id", "code", "type_id", "shape_id", "shade_id", "size_id"],
+            ["id", "code", "type_id", "shape_id", "shade_id", "size_id", "cost", "currency_id"],
             { limit: 1 }
         );
         if (found.length) {
-            row.stone_id = [found[0].id, found[0].code];
-            row._stoneCode = found[0].code;
+            const s = found[0];
+            row.stone_id = [s.id, s.code];
+            row._stoneCode = s.code;
             row._stoneValid = true;
-            row._stoneDetail = found[0];
+            row._stoneDetail = s;
+            row._stoneTypeName = this._getStoneTypeName(s);
 
-            // Attempt to auto-fetch the standard stone weight from pdp.stone.weight
+            if (!s.cost) {
+                this.notification.add(
+                    `Pierre "${s.code}" : prix unitaire non renseigné. Le coût ne sera pas calculé.`,
+                    { type: 'warning' }
+                );
+            }
+
+            // Attempt to auto-fetch the standard stone weight
             try {
                 const weights = await this.orm.searchRead(
                     "pdp.stone.weight",
                     [
-                        ["type_id", "=", found[0].type_id ? found[0].type_id[0] : false],
-                        ["shape_id", "=", found[0].shape_id ? found[0].shape_id[0] : false],
-                        ["shade_id", "=", found[0].shade_id ? found[0].shade_id[0] : false],
-                        ["size_id", "=", found[0].size_id ? found[0].size_id[0] : false]
+                        ["type_id",  "=", s.type_id  ? s.type_id[0]  : false],
+                        ["shape_id", "=", s.shape_id ? s.shape_id[0] : false],
+                        ["shade_id", "=", s.shade_id ? s.shade_id[0] : false],
+                        ["size_id",  "=", s.size_id  ? s.size_id[0]  : false],
                     ],
-                    ["weight"],
-                    { limit: 1 }
+                    ["weight"], { limit: 1 }
                 );
                 if (weights.length > 0 && weights[0].weight) {
                     row.weight = weights[0].weight.toString().replace('.', ',');
@@ -319,7 +336,53 @@ export class PdpWorkspace extends Component {
             row._stoneCode = trimmed;
             row._stoneValid = false;
             row._stoneDetail = null;
+            row._stoneTypeName = '';
             this.notification.add(`Pierre "${trimmed}" introuvable.`, { type: 'warning' });
+        }
+        row._dirty = true;
+        this.state.isDirty = true;
+    }
+
+    async onStoneAttrChange(key, field, newId) {
+        const row = this.state.stoneRows.find(r => r._key === key);
+        if (!row || !row._stoneDetail) return;
+        const d = row._stoneDetail;
+        const m2o = (f) => (Array.isArray(f) ? f[0] : f) || false;
+        const typeId  = m2o(d.type_id);
+        const shadeId = field === 'shade_id' ? (parseInt(newId) || false) : m2o(d.shade_id);
+        const shapeId = field === 'shape_id' ? (parseInt(newId) || false) : m2o(d.shape_id);
+        const sizeId  = field === 'size_id'  ? (parseInt(newId) || false) : m2o(d.size_id);
+
+        const domain = [
+            ['type_id',  '=', typeId],
+            ['shade_id', '=', shadeId || false],
+            ['shape_id', '=', shapeId || false],
+            ['size_id',  '=', sizeId  || false],
+        ];
+        try {
+            const found = await this.orm.searchRead(
+                "pdp.stone", domain,
+                ["id", "code", "type_id", "shape_id", "shade_id", "size_id", "cost", "currency_id"],
+                { limit: 1 }
+            );
+            if (found.length) {
+                const s = found[0];
+                row.stone_id = [s.id, s.code];
+                row._stoneCode = s.code;
+                row._stoneValid = true;
+                row._stoneDetail = s;
+                row._stoneTypeName = this._getStoneTypeName(s);
+                if (!s.cost) {
+                    this.notification.add(
+                        `Pierre "${s.code}" : prix unitaire non renseigné. Le coût ne sera pas calculé.`,
+                        { type: 'warning' }
+                    );
+                }
+            } else {
+                this.notification.add(`Aucune pierre trouvée pour cette combinaison.`, { type: 'warning' });
+            }
+        } catch (e) {
+            this.notification.add(`Erreur lors de la recherche de pierre.`, { type: 'danger' });
         }
         row._dirty = true;
         this.state.isDirty = true;
@@ -420,8 +483,9 @@ export class PdpWorkspace extends Component {
         }
     }
 
-    onPurityChange(ev) {
+    async onPurityChange(ev) {
         this.state.selectedPurityId = parseInt(ev.target.value) || null;
+        await this.recalculatePrice();
     }
 
     // ==========================================
@@ -850,6 +914,7 @@ export class PdpWorkspace extends Component {
                 let detailMap = {};
                 if (stoneIds.length) {
                     const details = await this.orm.read("pdp.stone", stoneIds, ["id", "code", "type_id", "shape_id", "shade_id", "size_id", "weight", "cost", "currency_id"]);
+                    // note: cost/currency_id already included above
                     detailMap = Object.fromEntries(details.map(d => [d.id, d]));
                 }
                 this.state.stoneRows = stones.map(s => {
@@ -860,6 +925,7 @@ export class PdpWorkspace extends Component {
                         _stoneCode: detail ? detail.code : (Array.isArray(s.stone_id) ? s.stone_id[1] : ''),
                         _stoneValid: !!sid,
                         _stoneDetail: detail,
+                        _stoneTypeName: detail ? this._getStoneTypeName(detail) : '',
                     };
                 });
                 this.state.stoneOriginal = stones.map(s => {
@@ -1104,7 +1170,7 @@ export class PdpWorkspace extends Component {
         const key = -Date.now();
         this.state.stoneRows.push({
             id: null, _key: key, _dirty: true,
-            line_num: '', stone_id: false, _stoneCode: '', _stoneValid: false, _stoneDetail: null,
+            line_num: '', stone_id: false, _stoneCode: '', _stoneValid: false, _stoneDetail: null, _stoneTypeName: '',
             pieces: 1, weight: '0', setting: 0,
             reshaped_shape_id: false, reshaped_size_id: false, reshaped_weight: '',
         });
@@ -1762,7 +1828,8 @@ export class PdpWorkspace extends Component {
         try {
             const result = await this.orm.call(
                 "pdp.api.service", "compute_price",
-                [this.state.selectedProductId, this.state.selectedMarginId || false, this.state.selectedCurrencyId]
+                [this.state.selectedProductId, this.state.selectedMarginId || false, this.state.selectedCurrencyId],
+                { purity_id: this.state.selectedPurityId || false }
             );
             if (result && !result.error) {
                 this.state.priceLines = result.lines || [];
