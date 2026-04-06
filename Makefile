@@ -49,7 +49,8 @@ TEST_TAGS        ?= pdp_frontend
         raw_to_data_all import_all import_csv import_pictures import-pictures \
         export-pictures audit_counts create_diagram \
         stone-data stone-install stone-import stone-all backup backup-help \
-        cleanup-none-all migrate-picture-scope \
+        cleanup-none-all migrate-picture-scope cleanup-orphan-pictures \
+        verify-picture-chain \
         test-db-init test-tours test-tours-fresh
 
 
@@ -230,6 +231,12 @@ cleanup-none-all: backup
 
 migrate-picture-scope:
 	$(ODOO_SHELL) < ops/cleanup/migrate_picture_scope.py
+
+cleanup-orphan-pictures:
+	$(ODOO_SHELL) < ops/cleanup/cleanup_orphan_pictures.py
+
+verify-picture-chain:
+	$(ODOO_SHELL) < ops/verify/verify_picture_chain.py
 
 backup-help:
 	@cat meta/doc/backup.md

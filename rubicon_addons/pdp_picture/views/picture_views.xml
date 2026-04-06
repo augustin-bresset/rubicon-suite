@@ -31,7 +31,9 @@
             <div class="o_kanban_record">
               <field name="image" widget="image" class="oe_avatar" width="160" height="160"/>
               <div class="o_kanban_primary_bottom">
-                <strong><field name="product_ids"/></strong>
+                <strong><field name="scope"/></strong>
+                <span> — </span>
+                <field name="product_ids"/>
               </div>
               <div><field name="filename"/></div>
             </div>
@@ -47,8 +49,11 @@
     <field name="model">pdp.picture</field>
     <field name="arch" type="xml">
       <list string="Pictures">
+        <field name="scope"/>
         <field name="product_ids" widget="many2many_tags"/>
         <field name="filename"/>
+        <field name="drawing_filename"/>
+        <field name="source_date"/>
         <field name="checksum"/>
         <field name="active"/>
       </list>
@@ -63,10 +68,14 @@
       <search>
         <field name="product_ids"/>
         <field name="filename"/>
+        <filter name="filter_model_scope" string="Model scope" domain="[('scope','=','model')]"/>
+        <filter name="filter_product_scope" string="Product scope" domain="[('scope','=','product')]"/>
+        <filter name="filter_has_drawing" string="Has Drawing" domain="[('drawing_filename','!=',False)]"/>
         <filter name="filter_orphans" string="Orphans" domain="[('product_ids','=',False)]"/>
         <filter name="filter_active" string="Active" domain="[('active','=',True)]"/>
         <filter name="filter_inactive" string="Archived" domain="[('active','=',False)]"/>
         <separator/>
+        <filter name="grp_scope" string="Group by Scope" context="{'group_by': 'scope'}"/>
         <filter name="grp_active" string="Group by Active" context="{'group_by': 'active'}"/>
       </search>
     </field>
@@ -80,13 +89,23 @@
       <form string="Picture">
         <sheet>
           <group>
-            <field name="product_ids" widget="many2many_tags" options="{'no_create': True}"/>
-            <field name="filename"/>
-            <field name="checksum" readonly="1"/>
-            <field name="active"/>
+            <group string="Classification">
+              <field name="scope" readonly="1"/>
+              <field name="product_ids" widget="many2many_tags" options="{'no_create': True}"/>
+              <field name="active"/>
+            </group>
+            <group string="Traceability">
+              <field name="filename"/>
+              <field name="drawing_filename" readonly="1"/>
+              <field name="source_date" readonly="1"/>
+              <field name="checksum" readonly="1"/>
+            </group>
           </group>
-          <group>
-            <field name="image" widget="image" class="oe_avatar"/>
+          <group string="Photo">
+            <field name="image" widget="image" class="oe_avatar" nolabel="1"/>
+          </group>
+          <group string="Technical Drawing">
+            <field name="drawing" widget="image" class="oe_avatar" nolabel="1"/>
           </group>
         </sheet>
       </form>

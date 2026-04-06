@@ -15,13 +15,13 @@ It contains a toolbar at the top with those options :
 * Tools
 * Help
 
-Just below you can display a view on a `Model` by selecting it and specify the `Design`.
+Just below you can display a view on a `Model` by selecting it and specify the `Design` that correspond to a specific `Product`.
 It gives on a table the design that exist on this model.
-On the right of this view there is a picture (if it exist) and the drawing of the `Model` selected.
+On the right of this view there is a picture (if it exist) and the drawing of the `Product` selected.
 
-In the low parts of the window, multiple table give information about the specs of the selected design, its price for exemple.
+In the low parts of the window, multiple table give information about the specs of the selected design : `Costing Summary`, `Weight Summary`, `Stones`, `Metals`, `Labor etc.`, `Matching`.
 
-Finally you have at the top, a manager toolbar allow the creation and deletion of `Design` and a button `Margins`.
+Finally you have at the bottom, a manager toolbar allow the creation and deletion of `Design` and a button `Margins`.
 
 ### Model Image
 
@@ -123,11 +123,7 @@ Some fields deserves a few explanations:
 * `RecShape` : The shape in which the stone will be reshaped (if needed)
 * `RecSize`, `RecWgt` : The recutting size and weight. This is with those fields than the recutting cost is compute.
 
-And when focused on a specific line, under the table we have from left to right :
-* Three buttons : `Stones`, `Cost`, `Weights`
-* Recut to: Shape [drop-down menu of shapes]
-* Size: [input field]
-* Weight: [input field] 
+
 
 If there is a reshaping, PDP will compute the cost of it. (We see later how)
 

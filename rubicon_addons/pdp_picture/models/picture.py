@@ -39,6 +39,13 @@ class Picture(models.Model):
 
     active = fields.Boolean(default=True)
 
+    # Traceability to original Pictures database
+    source_date = fields.Datetime(
+        string='Source Date',
+        readonly=True,
+        help="LastUpdated value from the original Pictures SQL Server database.",
+    )
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:

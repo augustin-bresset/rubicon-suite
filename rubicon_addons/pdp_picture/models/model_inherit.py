@@ -13,7 +13,7 @@ class ProductModel(models.Model):
         Product = self.env['pdp.product']
         for rec in self:
             products = Product.search([('model_id', '=', rec.id)])
-            pic = Pic.search([('product_ids', 'in', products.ids)], limit=1) if products else Pic.browse()
+            pic = Pic.search([('scope', '=', 'model'), ('product_ids', 'in', products.ids)], limit=1) if products else Pic.browse()
             if pic:
                 rec.picture_image = pic.image_1920
                 rec.drawing_image = pic.drawing_1920

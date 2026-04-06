@@ -1,6 +1,6 @@
 {
     "name": "PDP Picture",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "summary": "Store large model pictures via filestore and show them on PDP models/products",
     "license": "LGPL-3",
     "category": "Product",
