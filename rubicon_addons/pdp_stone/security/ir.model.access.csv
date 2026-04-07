@@ -6,3 +6,4 @@ pdp_stone.access_pdp_stone_size,access_pdp_stone_size,pdp_stone.model_pdp_stone_
 pdp_stone.access_pdp_stone_shade,access_pdp_stone_shade,pdp_stone.model_pdp_stone_shade,base.group_user,1,1,1,1
 pdp_stone.access_pdp_stone_weight,access_pdp_stone_weight,pdp_stone.model_pdp_stone_weight,base.group_user,1,1,1,1
 pdp_stone.access_pdp_stone,access_pdp_stone,pdp_stone.model_pdp_stone,base.group_user,1,1,1,1
+pdp_stone.access_pdp_stone_setting_type,access_pdp_stone_setting_type,pdp_stone.model_pdp_stone_setting_type,base.group_user,1,1,1,1

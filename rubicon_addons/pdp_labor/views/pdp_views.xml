@@ -68,5 +68,23 @@
     </field>
   </record>
 
+  <!-- Stone Setting Types -->
+  <record id="action_pdp_stone_setting_type" model="ir.actions.act_window">
+    <field name="name">Setting Types</field>
+    <field name="res_model">pdp.stone.setting.type</field>
+    <field name="view_mode">list</field>
+  </record>
+
+  <record id="view_pdp_stone_setting_type_list" model="ir.ui.view">
+    <field name="name">pdp.stone.setting.type.list</field>
+    <field name="model">pdp.stone.setting.type</field>
+    <field name="arch" type="xml">
+      <list string="Setting Types" editable="bottom">
+        <field name="name"/>
+        <field name="cost"/>
+      </list>
+    </field>
+  </record>
+
 
 </odoo>

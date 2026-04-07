@@ -47,7 +47,7 @@ class TestPriceLabor(TransactionCase):
         cls.wizard = cls.PriceLabor.create({})
 
     # ---------------- helpers ----------------
-    def _create_labor_type(self, code='SET', name='Stone Setting'):
+    def _create_labor_type(self, code='CAS', name='Casting'):
         LaborType = self.env['pdp.labor.type']
         return LaborType.create({'code': code, 'name': name})
 
@@ -92,7 +92,7 @@ class TestPriceLabor(TransactionCase):
     def test_00_no_costs_any_type_returns_zero(self):
         """If there are labor types but no costs at all, totals must be zero."""
         # Create two types, but no costs
-        self._create_labor_type(code='SET', name='Setting')
+        self._create_labor_type(code='CAS', name='Casting')
         self._create_labor_type(code='POL', name='Polishing')
 
         payload = self.wizard.compute(
@@ -105,7 +105,7 @@ class TestPriceLabor(TransactionCase):
 
     def test_01_model_cost_used_when_product_cost_missing(self):
         """Model-level cost is used when no product-level cost exists."""
-        t = self._create_labor_type(code='SET')
+        t = self._create_labor_type(code='CAS')
         self._create_model_cost(t, 12.0, self.cur)
         # No product cost created
 
@@ -119,7 +119,7 @@ class TestPriceLabor(TransactionCase):
 
     def test_02_model_cost_used_when_product_cost_is_zero(self):
         """Model-level cost is used when product-level cost is present but equals zero."""
-        t = self._create_labor_type(code='SET')
+        t = self._create_labor_type(code='CAS')
         self._create_model_cost(t, 10.0, self.cur)
         self._create_product_cost(t, 0.0, self.cur)  # explicitly zero
 
@@ -131,12 +131,8 @@ class TestPriceLabor(TransactionCase):
         self.assertEqual(payload['price'], 10.0)
 
     def test_03_product_cost_overrides_model_cost(self):
-        """
-        Product-level cost must override model-level cost when > 0.
-        This will FAIL with the current implementation because 'cost' is not
-        assigned when cost_product != 0.0 (UnboundLocalError).
-        """
-        t = self._create_labor_type(code='SET')
+        """Product-level cost must override model-level cost when > 0."""
+        t = self._create_labor_type(code='CAS')
         self._create_model_cost(t, 10.0, self.cur)
         self._create_product_cost(t, 40.0, self.cur)  # override
 
@@ -155,7 +151,7 @@ class TestPriceLabor(TransactionCase):
           t2 cost=20 with rate=1.50  -> margin +10.0
           total cost=30, margin=11, price=41
         """
-        t1 = self._create_labor_type(code='SET')
+        t1 = self._create_labor_type(code='CAS')
         t2 = self._create_labor_type(code='POL')
 
         self._create_model_cost(t1, 10.0, self.cur)
@@ -174,7 +170,7 @@ class TestPriceLabor(TransactionCase):
 
     def test_05_currency_conversion_is_used(self):
         """_convert should be called for each cost line when currencies differ."""
-        t = self._create_labor_type(code='SET')
+        t = self._create_labor_type(code='CAS')
         other_cur = self.env['res.currency'].create({'name': 'ZZZ', 'symbol': 'Z', 'rounding': 0.01})
 
         # Put the cost in ZZZ and mock conversion to return 25.0
@@ -190,3 +186,85 @@ class TestPriceLabor(TransactionCase):
         self.assertEqual(payload['margin'], 0.0)
         self.assertEqual(payload['price'], 25.0)
         self.assertTrue(mock_conv.called)
+
+    # ---------------- stone setting tests ----------------
+
+    def _setup_stone_composition(self, stone_setting_costs):
+        """
+        Create a stone composition with one stone line per entry in stone_setting_costs.
+        Each entry is (setting_cost, pieces).
+        Ensures the SET labor type exists (required by component_labor.py).
+        Returns the composition linked to self.product.
+        """
+        # Ensure SET labor type exists (price engine looks it up by code)
+        if not self.env['pdp.labor.type'].search([('code', '=', 'SET')], limit=1):
+            self.env['pdp.labor.type'].create({'code': 'SET', 'name': 'Setting'})
+
+        # Minimal stone dependencies
+        category = self.env['pdp.stone.category'].create({'code': 'TST', 'name': 'Test Cat'})
+        stone_type = self.env['pdp.stone.type'].create({'code': 'TST', 'name': 'Test Type', 'category_id': category.id})
+        stone_size = self.env['pdp.stone.size'].create({'name': '1.0'})
+        stone = self.env['pdp.stone'].create({
+            'code': 'TST-RD-1.0',
+            'type_id': stone_type.id,
+            'size_id': stone_size.id,
+        })
+        comp = self.env['pdp.product.stone.composition'].create({'code': 'COMP-TEST'})
+        self.product.write({'stone_composition_id': comp.id})
+        for setting_cost, pieces in stone_setting_costs:
+            self.env['pdp.product.stone'].create({
+                'composition_id': comp.id,
+                'stone_id': stone.id,
+                'pieces': pieces,
+                'setting': setting_cost,
+            })
+        return comp
+
+    def test_06_setting_cost_from_stone_lines(self):
+        """Setting cost is summed from stone lines: sum(setting × pieces)."""
+        # 2 lines: 10.0 × 3 pieces + 20.0 × 1 piece = 50.0
+        self._setup_stone_composition([(10.0, 3), (20.0, 1)])
+
+        payload = self.wizard.compute(
+            product=self.product, margin=None, currency=self.cur, date=fields.Date.today()
+        )
+        self.assertEqual(payload['type'], 'labor')
+        self.assertEqual(payload['cost'], 50.0)
+        self.assertEqual(payload['margin'], 0.0)
+        self.assertEqual(payload['price'], 50.0)
+
+    def test_07_set_margin_applied_to_setting_cost(self):
+        """SET margin rate is applied to the setting cost."""
+        self._setup_stone_composition([(100.0, 2)])  # cost = 200.0
+        set_type = self.env['pdp.labor.type'].search([('code', '=', 'SET')], limit=1)
+        self._create_margin_labor_rate(self.margin, set_type, rate_factor=1.25)
+
+        payload = self.wizard.compute(
+            product=self.product, margin=self.margin, currency=self.cur, date=fields.Date.today()
+        )
+        self.assertEqual(payload['cost'], 200.0)
+        self.assertAlmostEqual(payload['margin'], 50.0, places=6)   # (1.25 - 1) × 200
+        self.assertAlmostEqual(payload['price'], 250.0, places=6)
+
+    def test_08_stone_lines_with_zero_setting_ignored(self):
+        """Stone lines with setting=0 contribute nothing to the labor cost."""
+        self._setup_stone_composition([(0.0, 5), (0.0, 3)])
+
+        payload = self.wizard.compute(
+            product=self.product, margin=None, currency=self.cur, date=fields.Date.today()
+        )
+        self.assertEqual(payload['cost'], 0.0)
+        self.assertEqual(payload['margin'], 0.0)
+
+    def test_09_setting_and_model_labor_combined(self):
+        """Setting cost (from stone lines) and regular labor cost (from model) are additive."""
+        self._setup_stone_composition([(30.0, 2)])   # setting = 60.0
+        t = self._create_labor_type(code='POL', name='Polishing')
+        self._create_model_cost(t, 40.0, self.cur)
+
+        payload = self.wizard.compute(
+            product=self.product, margin=None, currency=self.cur, date=fields.Date.today()
+        )
+        self.assertEqual(payload['cost'], 100.0)   # 60 + 40
+        self.assertEqual(payload['margin'], 0.0)
+        self.assertEqual(payload['price'], 100.0)

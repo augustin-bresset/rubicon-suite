@@ -67,4 +67,11 @@
             action="action_pdp_addon_cost"
             sequence="1"/>
 
+  <!-- Stone Setting Types -->
+  <menuitem id="menu_pdp_stone_setting_type"
+            name="Setting Types"
+            parent="menu_pdp_root"
+            action="pdp_labor.action_pdp_stone_setting_type"
+            sequence="10"/>
+
 </odoo>

@@ -16,6 +16,7 @@
         'data/pdp.stone.shade.csv',
         'data/pdp.stone.weight.csv',
         'data/pdp.stone.csv',
+        'data/pdp.stone.setting.type.csv',
         # Views
         'views/pdp_views.xml',
         'views/pdp_menus.xml',

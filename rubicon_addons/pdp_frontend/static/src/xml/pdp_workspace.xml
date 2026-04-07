@@ -438,7 +438,7 @@
                                     <th style="width:60px;" class="text-end">Weight</th>
                                     <th style="width:65px;" class="text-end">U.Cost</th>
                                     <th style="width:45px;">Curr</th>
-                                    <th style="width:65px;" class="text-end">Setting</th>
+                                    <th style="min-width:100px;">Setting</th>
                                     <th style="min-width:80px;">RecShape</th>
                                     <th style="min-width:70px;">RecSize</th>
                                     <th style="width:60px;" class="text-end">RecWgt</th>
@@ -518,9 +518,16 @@
                                             <t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.currency_id) ? sr._stoneDetail.currency_id[1] : ''"/>
                                         </td>
                                         <td t-on-click.stop="">
-                                            <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
-                                                   t-att-value="sr.setting"
-                                                   t-on-change="(ev) => this.setStoneField(sr._key, 'setting', ev.target.value)"/>
+                                            <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'setting_type_id', ev.target.value)">
+                                                <option value="">—</option>
+                                                <t t-foreach="this.settingTypes" t-as="sett" t-key="sett.id">
+                                                    <option t-att-value="sett.id"
+                                                            t-att-selected="sett.id === (Array.isArray(sr.setting_type_id) ? sr.setting_type_id[0] : sr.setting_type_id)">
+                                                        <t t-esc="sett.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
                                         </td>
                                         <td t-on-click.stop="">
                                             <select class="form-select form-select-sm p-0" style="font-size:11px;"

@@ -39,6 +39,7 @@ export class PdpWorkspace extends Component {
         this.stoneSizes = [];
         this.stoneCategories = [];
         this.stoneTypes = [];
+        this.settingTypes = [];
 
         this.state = useState({
             // Collections
@@ -146,7 +147,7 @@ export class PdpWorkspace extends Component {
 
     async loadInitialData() {
         try {
-            const [models, margins, laborTypes, allMetals, purities, allParts, addonTypes, stoneShapes, stoneSizes, stoneShades, stoneCategories, stoneTypes] = await Promise.all([
+            const [models, margins, laborTypes, allMetals, purities, allParts, addonTypes, stoneShapes, stoneSizes, stoneShades, stoneCategories, stoneTypes, settingTypes] = await Promise.all([
                 this.orm.searchRead("pdp.product.model", [], ["id", "code", "drawing", "quotation", "category_id"], { order: "code ASC" }),
                 this.orm.searchRead("pdp.margin", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.labor.type", [], ["id", "code", "name"]),
@@ -159,6 +160,7 @@ export class PdpWorkspace extends Component {
                 this.orm.searchRead("pdp.stone.shade", [], ["id", "code", "shade"], { order: "shade ASC" }),
                 this.orm.searchRead("pdp.stone.category", [], ["id", "code", "name"], { order: "name ASC" }),
                 this.orm.searchRead("pdp.stone.type", [], ["id", "code", "name", "category_id"], { order: "name ASC" }),
+                this.orm.searchRead("pdp.stone.setting.type", [], ["id", "name", "cost"], { order: "cost ASC" }),
             ]);
 
             this.state.models = models;
@@ -173,6 +175,7 @@ export class PdpWorkspace extends Component {
             this.stoneShades = stoneShades;
             this.stoneCategories = stoneCategories;
             this.stoneTypes = stoneTypes;
+            this.settingTypes = settingTypes;
 
             const currSettings = await this.orm.searchRead(
                 "pdp.currency.setting", [["active", "=", true]],
@@ -922,7 +925,7 @@ export class PdpWorkspace extends Component {
             if (compId) {
                 const stones = await this.orm.searchRead(
                     "pdp.product.stone", [["composition_id", "=", compId]],
-                    ["id", "line_num", "stone_id", "pieces", "weight", "setting",
+                    ["id", "line_num", "stone_id", "pieces", "weight", "setting", "setting_type_id",
                      "reshaped_shape_id", "reshaped_size_id", "reshaped_weight"]
                 );
                 // Batch-fetch stone details (type/shade/shape/size/cost/currency) in one query
@@ -1187,7 +1190,7 @@ export class PdpWorkspace extends Component {
         this.state.stoneRows.push({
             id: null, _key: key, _dirty: true,
             line_num: '', stone_id: false, _stoneCode: '', _stoneValid: false, _stoneDetail: null, _stoneTypeName: '',
-            pieces: 1, weight: '0', setting: 0,
+            pieces: 1, weight: '0', setting: 0, setting_type_id: false,
             reshaped_shape_id: false, reshaped_size_id: false, reshaped_weight: '',
         });
         this.state.selectedStoneKey = key;
@@ -1217,6 +1220,12 @@ export class PdpWorkspace extends Component {
         if (field === 'pieces') row[field] = parseInt(value) || 0;
         else if (field === 'stone_id' || field === 'reshaped_shape_id' || field === 'reshaped_size_id')
             row[field] = parseInt(value) || false;
+        else if (field === 'setting_type_id') {
+            const typeId = parseInt(value) || false;
+            row.setting_type_id = typeId;
+            const stype = typeId ? this.settingTypes.find(t => t.id === typeId) : null;
+            row.setting = stype ? stype.cost : 0;
+        }
         else row[field] = value;
         row._dirty = true;
         this.state.isDirty = true;
@@ -1725,6 +1734,7 @@ export class PdpWorkspace extends Component {
                             pieces: row.pieces || 1,
                             weight: parseFloat(row.weight) || 0,
                             setting: parseFloat(row.setting) || 0,
+                            setting_type_id: this.m2oId(row.setting_type_id) || false,
                             reshaped_shape_id: this.m2oId(row.reshaped_shape_id) || false,
                             reshaped_size_id: this.m2oId(row.reshaped_size_id) || false,
                             reshaped_weight: row.reshaped_weight || '',

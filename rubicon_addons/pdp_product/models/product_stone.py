@@ -50,12 +50,23 @@ class ProductStone(models.Model):
         default=0.0,
     )
 
+    setting_type_id = fields.Many2one(
+        comodel_name='pdp.stone.setting.type',
+        string='Setting Type',
+        ondelete='set null',
+    )
+
     composition_id = fields.Many2one(
         comodel_name='pdp.product.stone.composition',
         string='Composition',
         required=True,
         ondelete='cascade'
     )
+
+    @api.onchange('setting_type_id')
+    def _onchange_setting_type(self):
+        if self.setting_type_id:
+            self.setting = self.setting_type_id.cost
 
     @api.depends('stone_id', 'stone_id.weight')
     def _compute_weight(self):
