@@ -8,6 +8,7 @@
         # Data
         'data/pdp.labor.type.csv',
         'data/pdp.addon.type.csv',
+        'data/pdp_labor_settings.xml',
         # Views
         'views/pdp_views.xml',
         'views/pdp_menus.xml',

@@ -4,7 +4,7 @@
         <div class="o_action_manager pdp-workspace h-100 w-100 d-flex flex-column" style="font-size: 13px; background: #f0f0f0;">
 
             <!-- ===== TOP BAR ===== -->
-            <div class="bg-white border-bottom p-2 d-flex align-items-center gap-3 shadow-sm">
+            <div class="bg-white border-bottom p-2 d-flex align-items-center gap-3 shadow-sm" style="position: relative; z-index: 1030;">
                 <div class="fw-bold fs-5 text-primary">PDP</div>
                 <div class="d-flex align-items-center gap-2">
                     <label class="fw-bold mb-0">Model</label>
@@ -15,8 +15,26 @@
                             </option>
                         </t>
                     </select>
-                    <input type="text" class="form-control form-control-sm" placeholder="Filter..." style="width: 120px;" t-on-input="(ev) => this.onSearchInput(ev)" t-on-keydown="(ev) => this.onSearchKeydown(ev)"/>
-                    <span class="text-muted ms-2 px-2 py-1 bg-light border rounded small"><t t-esc="state.products.length"/> products</span>
+                    <button class="btn btn-sm btn-outline-secondary" t-on-click="() => this.openModelList()">List</button>
+                    <div class="position-relative">
+                        <input type="text" class="form-control form-control-sm" placeholder="Filter products..." style="width: 150px;"
+                               t-att-value="state.productSearch"
+                               t-on-input="(ev) => this.onProductSearchInput(ev)"
+                               t-on-keydown="(ev) => this.onProductSearchKeydown(ev)"/>
+                        <t t-if="state.productSearchResults.length > 0">
+                            <div class="position-absolute bg-white border rounded shadow-sm" style="top: 100%; left: 0; z-index: 1000; min-width: 220px; max-height: 260px; overflow-y: auto;">
+                                <t t-foreach="state.productSearchResults" t-as="pr" t-key="pr.id">
+                                    <div class="px-2 py-1 border-bottom" style="cursor: pointer; font-size: 12px;"
+                                         t-on-mousedown="() => this.selectProductFromSearch(pr)">
+                                        <t t-esc="pr.code"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                    <span class="text-muted ms-1 px-2 py-1 bg-light border rounded small">
+                        <t t-esc="filteredProducts.length"/>/<t t-esc="state.products.length"/>
+                    </span>
                 </div>
                 <div class="ms-auto d-flex align-items-center gap-2">
                     <t t-if="state.isDirty">
@@ -44,10 +62,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <t t-if="state.products.length === 0">
+                            <t t-if="filteredProducts.length === 0">
                                 <tr><td colspan="5" class="text-center text-muted p-3">No products.</td></tr>
                             </t>
-                            <t t-foreach="state.products" t-as="product" t-key="product.id">
+                            <t t-foreach="filteredProducts" t-as="product" t-key="product.id">
                                 <tr style="cursor: pointer;"
                                     t-attf-class="{{ state.selectedProductId === product.id ? 'table-primary fw-bold' : '' }}"
                                     t-on-click="() => this.selectProduct(product.id)">
@@ -200,6 +218,42 @@
                     </div>
                 </div>
 
+                <!-- Model List Modal -->
+                <t t-if="state.showModelList">
+                    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                         style="background: rgba(0,0,0,0.5); z-index: 1050;"
+                         t-on-click.self="() => this.closeModelList()">
+                        <div class="bg-white rounded shadow-lg" style="min-width: 420px; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
+                            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                                <span class="fw-bold">Models</span>
+                                <button type="button" class="btn-close" t-on-click="() => this.closeModelList()"/>
+                            </div>
+                            <div class="overflow-auto flex-grow-1">
+                                <table class="table table-sm table-bordered table-hover mb-0" style="font-size: 12px;">
+                                    <thead class="bg-light sticky-top">
+                                        <tr>
+                                            <th>Model</th>
+                                            <th>Drawing#</th>
+                                            <th>Quotation#</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.models" t-as="m" t-key="m.id">
+                                            <tr style="cursor: pointer;"
+                                                t-attf-class="{{ m.id === state.selectedModelId ? 'table-primary fw-bold' : '' }}"
+                                                t-on-click="() => this.selectModelFromList(m.id)">
+                                                <td><t t-esc="m.code"/></td>
+                                                <td class="text-muted"><t t-esc="m.drawing || ''"/></td>
+                                                <td class="text-muted"><t t-esc="m.quotation || ''"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+
                 <!-- Picture Manager Modal -->
                 <t t-if="state.showPictureManager">
                     <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
@@ -279,7 +333,7 @@
                 <div class="tab-content flex-grow-1 p-2 overflow-auto" style="font-size: 12px;">
 
                     <div t-if="!state.selectedProductId" class="text-center text-muted p-4">
-                        <i class="fa fa-hand-pointer-o fa-2x mb-2 d-block"></i>Select a product to view details.
+                        Select a product to view details.
                     </div>
 
                     <!-- ===== COSTING SUMMARY ===== -->
@@ -582,6 +636,8 @@
                                         t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Cost</button>
                                 <button class="btn btn-outline-secondary py-0 px-2"
                                         t-on-click="() => this.goToManage('pdp_frontend.stone_manage')">Weights</button>
+                                <button class="btn btn-outline-secondary py-0 px-2"
+                                        t-on-click="() => this.action.doAction('pdp_labor.action_pdp_stone_setting_type')">Settings</button>
                             </div>
                             <span class="text-muted fw-bold ms-2">Recut to:</span>
                             <select class="form-select form-select-sm p-0" style="font-size:11px; width:120px;"
@@ -705,7 +761,7 @@
                                                     <t t-foreach="this.allParts" t-as="opt" t-key="opt.id">
                                                         <option t-att-value="opt.id"
                                                                 t-att-selected="opt.id === (Array.isArray(p.part_id) ? p.part_id[0] : p.part_id)">
-                                                            <t t-esc="opt.code"/>
+                                                            <t t-esc="opt.name"/>
                                                         </option>
                                                     </t>
                                                 </select>
@@ -752,7 +808,7 @@
                                                     <t t-foreach="this.laborTypes" t-as="ltype" t-key="ltype.id">
                                                         <option t-att-value="ltype.id"
                                                                 t-att-selected="ltype.id === (Array.isArray(l.labor_id) ? l.labor_id[0] : l.labor_id)">
-                                                            <t t-esc="ltype.code"/>
+                                                            <t t-esc="ltype.name"/>
                                                         </option>
                                                     </t>
                                                 </select>
@@ -812,7 +868,7 @@
                                                     <t t-foreach="this.allParts" t-as="opt" t-key="opt.id">
                                                         <option t-att-value="opt.id"
                                                                 t-att-selected="opt.id === (Array.isArray(p.part_id) ? p.part_id[0] : p.part_id)">
-                                                            <t t-esc="opt.code"/>
+                                                            <t t-esc="opt.name"/>
                                                         </option>
                                                     </t>
                                                 </select>
@@ -854,7 +910,7 @@
                                                     <t t-foreach="this.laborTypes" t-as="ltype" t-key="ltype.id">
                                                         <option t-att-value="ltype.id"
                                                                 t-att-selected="ltype.id === (Array.isArray(l.labor_id) ? l.labor_id[0] : l.labor_id)">
-                                                            <t t-esc="ltype.code"/>
+                                                            <t t-esc="ltype.name"/>
                                                         </option>
                                                     </t>
                                                 </select>
@@ -908,7 +964,7 @@
                                                     <t t-foreach="this.addonTypes" t-as="at" t-key="at.id">
                                                         <option t-att-value="at.id"
                                                                 t-att-selected="at.id === (Array.isArray(a.addon_id) ? a.addon_id[0] : a.addon_id)">
-                                                            <t t-esc="at.code"/>
+                                                            <t t-esc="at.name"/>
                                                         </option>
                                                     </t>
                                                 </select>

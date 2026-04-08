@@ -15,9 +15,9 @@ It contains a toolbar at the top with those options :
 * Tools
 * Help
 
-Just below you can display a view on a `Model` by selecting it and specify the `Design` that correspond to a specific `Product`.
-It gives on a table the design that exist on this model.
-On the right of this view there is a picture (if it exist) and the drawing of the `Product` selected.
+Just below you can display a view on a `Model` by selecting it, it will gives on a table all the design(products) that exist on this model. Next to it you can search a `Design` that correspond to a specific `Product`. It meens that you can search for product by their code. 
+
+On the right of this view there is a double window : a picture (if it exist) and an other menue called drawing.
 
 In the low parts of the window, multiple table give information about the specs of the selected design : `Costing Summary`, `Weight Summary`, `Stones`, `Metals`, `Labor etc.`, `Matching`.
 
@@ -33,6 +33,9 @@ By default you have an **image** of the model on the upper right, or by clicking
 
 By clicking on `Drawing` on the upper right window, when it has been referenced, you can get its identification code.
 ![drawingref](./images/pdp_model_drawing.png)
+
+You have here the `Drawing#` and the `Quotation#` of the design. 
+
 
 ### Model List
 By clicking on `List` next to `Model XXXX`, you will list all the existing models.

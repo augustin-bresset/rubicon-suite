@@ -40,6 +40,8 @@ export class PdpWorkspace extends Component {
         this.stoneCategories = [];
         this.stoneTypes = [];
         this.settingTypes = [];
+        this._defaultLaborCurrencyId = false;
+        this._searchTimeout = null;
 
         this.state = useState({
             // Collections
@@ -67,7 +69,10 @@ export class PdpWorkspace extends Component {
             newMarginCopySourceId: null,
 
             // Topbar
-            modelSearch: "",
+            showModelList: false,
+            productSearch: "",
+            productSearchResults: [],
+            productFilter: "",
 
             // Selections
             selectedModelId: null,
@@ -200,6 +205,15 @@ export class PdpWorkspace extends Component {
                 );
             }
 
+            // Load default labor currency from settings (singleton created at install)
+            const laborSettings = await this.orm.searchRead(
+                'pdp.labor.settings', [], ['default_labor_currency_id'], { limit: 1 }
+            );
+            if (laborSettings.length && laborSettings[0].default_labor_currency_id) {
+                const cur = laborSettings[0].default_labor_currency_id;
+                this._defaultLaborCurrencyId = Array.isArray(cur) ? cur[0] : cur;
+            }
+
             if (this.state.margins.length > 0) this.state.selectedMarginId = this.state.margins[0].id;
 
             const usd = this.state.currencies.find(c => c.name === "USD");
@@ -223,9 +237,13 @@ export class PdpWorkspace extends Component {
     // ==========================================
 
     get filteredModels() {
-        if (!this.state.modelSearch) return this.state.models;
-        const q = this.state.modelSearch.toLowerCase();
-        return this.state.models.filter(m => m.code.toLowerCase().includes(q));
+        return this.state.models;
+    }
+
+    get filteredProducts() {
+        if (!this.state.productFilter) return this.state.products;
+        const q = this.state.productFilter.toLowerCase();
+        return this.state.products.filter(p => p.code.toLowerCase().includes(q));
     }
 
     get activeModel() {
@@ -258,6 +276,10 @@ export class PdpWorkspace extends Component {
 
     get defaultCurrencyId() {
         return this.state.selectedCurrencyId || (this.state.currencies.length > 0 ? this.state.currencies[0].id : false);
+    }
+
+    get defaultLaborCurrencyId() {
+        return this._defaultLaborCurrencyId || this.defaultCurrencyId;
     }
 
     onUomChange(categoryCode, uomId) {
@@ -418,21 +440,49 @@ export class PdpWorkspace extends Component {
     // Event Handlers
     // ==========================================
 
-    onSearchInput(ev) {
-        this.state.modelSearch = ev.target.value;
-        const matches = this.filteredModels;
-        if (matches.length === 1 && matches[0].id !== this.state.selectedModelId) {
-            this.selectModel(matches[0].id);
+    onProductSearchInput(ev) {
+        const q = ev.target.value;
+        this.state.productSearch = q;
+        if (!q) {
+            this.state.productSearchResults = [];
+            this.state.productFilter = '';
+            return;
+        }
+        const ql = q.toLowerCase();
+        this.state.productSearchResults = this.state.products.filter(
+            p => p.code.toLowerCase().includes(ql)
+        );
+    }
+
+    onProductSearchKeydown(ev) {
+        if (ev.key === 'Enter') {
+            this.state.productFilter = this.state.productSearch;
+            this.state.productSearchResults = [];
+        } else if (ev.key === 'Escape') {
+            this.state.productSearch = '';
+            this.state.productFilter = '';
+            this.state.productSearchResults = [];
         }
     }
 
-    onSearchKeydown(ev) {
-        if (ev.key === "Enter") {
-            const matches = this.filteredModels;
-            if (matches.length >= 1) {
-                this.selectModel(matches[0].id);
-            }
-        }
+    selectProductFromSearch(product) {
+        this.state.productSearch = product.code;
+        this.state.productFilter = product.code;
+        this.state.productSearchResults = [];
+        this.selectProduct(product.id);
+    }
+
+    openModelList() {
+        this.state.showModelList = true;
+    }
+
+    closeModelList() {
+        this.state.showModelList = false;
+    }
+
+    selectModelFromList(modelId) {
+        this.state.showModelList = false;
+        this.selectModel(modelId);
     }
 
     async onModelSelectChange(ev) {
@@ -504,6 +554,9 @@ export class PdpWorkspace extends Component {
 
     async selectModel(modelId) {
         this.state.selectedModelId = parseInt(modelId);
+        this.state.productSearch = '';
+        this.state.productSearchResults = [];
+        this.state.productFilter = '';
         this._resetDeletedLists();
         this.state.isDirty = false;
         try {
@@ -1059,7 +1112,7 @@ export class PdpWorkspace extends Component {
             id: null, _key: -Date.now(), _dirty: true,
             labor_id: this.laborTypes.length > 0 ? [this.laborTypes[0].id, this.laborTypes[0].code] : false,
             metal: 'W', cost: 0,
-            currency_id: this.defaultCurrencyId ? [this.defaultCurrencyId, ''] : false,
+            currency_id: this.defaultLaborCurrencyId ? [this.defaultLaborCurrencyId, ''] : false,
         });
         this.state.isDirty = true;
     }
@@ -1092,7 +1145,7 @@ export class PdpWorkspace extends Component {
             id: null, _key: -Date.now(), _dirty: true,
             labor_id: this.laborTypes.length > 0 ? [this.laborTypes[0].id, this.laborTypes[0].code] : false,
             cost: 0,
-            currency_id: this.defaultCurrencyId ? [this.defaultCurrencyId, ''] : false,
+            currency_id: this.defaultLaborCurrencyId ? [this.defaultLaborCurrencyId, ''] : false,
         });
         this.state.isDirty = true;
     }
@@ -1125,7 +1178,7 @@ export class PdpWorkspace extends Component {
             id: null, _key: -Date.now(), _dirty: true,
             addon_id: this.addonTypes.length > 0 ? [this.addonTypes[0].id, this.addonTypes[0].code] : false,
             cost: 0,
-            currency_id: this.defaultCurrencyId ? [this.defaultCurrencyId, ''] : false,
+            currency_id: this.defaultLaborCurrencyId ? [this.defaultLaborCurrencyId, ''] : false,
         });
         this.state.isDirty = true;
     }

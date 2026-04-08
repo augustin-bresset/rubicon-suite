@@ -1,0 +1,5 @@
+<odoo noupdate="1">
+    <record id="pdp_labor_settings_default" model="pdp.labor.settings">
+        <field name="default_labor_currency_id" ref="base.THB"/>
+    </record>
+</odoo>
