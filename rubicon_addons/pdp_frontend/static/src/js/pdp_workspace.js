@@ -123,6 +123,7 @@ export class PdpWorkspace extends Component {
             // Metals tab extras
             whereUsedModels: [],
             selectedPurityId: null,
+            selectedConvMetal: null,
 
             // New product modal
             showNewModal: false,
@@ -157,7 +158,7 @@ export class PdpWorkspace extends Component {
                 this.orm.searchRead("pdp.product.model", [], ["id", "code", "drawing", "quotation", "category_id"], { order: "code ASC" }),
                 this.orm.searchRead("pdp.margin", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.labor.type", [], ["id", "code", "name"]),
-                this.orm.searchRead("pdp.metal", [], ["id", "code", "name", "purity_system"]),
+                this.orm.searchRead("pdp.metal", [], ["id", "code", "name", "purity_system", "is_reference"]),
                 this.orm.searchRead("pdp.metal.purity", [["percent", ">", 0]], ["id", "code", "percent", "purity_system"], { order: "percent desc" }),
                 this.orm.searchRead("pdp.part", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.addon.type", [], ["id", "code", "name"]),
@@ -272,8 +273,12 @@ export class PdpWorkspace extends Component {
         });
     }
 
-    // Returns only purities compatible with the current product's metal purity system
+    // Returns only purities compatible with the conv metal override (if set) or the current product's metal
     get filteredPurities() {
+        if (this.state.selectedConvMetal) {
+            const convMetal = this.allMetals.find(m => m.code === this.state.selectedConvMetal);
+            if (convMetal?.purity_system) return this.purities.filter(p => p.purity_system === convMetal.purity_system);
+        }
         const product = this.activeProduct;
         if (!product?.metal) return this.purities;
         const mw = this.state.metalWeights.find(m => m.metal_version === product.metal);
@@ -282,6 +287,10 @@ export class PdpWorkspace extends Component {
         const metal = this.allMetals.find(m => m.id === metalId);
         if (!metal?.purity_system) return this.purities;
         return this.purities.filter(p => p.purity_system === metal.purity_system);
+    }
+
+    get nonRefMetals() {
+        return this.allMetals.filter(m => !m.is_reference);
     }
 
     get defaultCurrencyId() {
@@ -562,6 +571,13 @@ export class PdpWorkspace extends Component {
 
     async onPurityChange(ev) {
         this.state.selectedPurityId = parseInt(ev.target.value) || null;
+        await this.recalculatePrice();
+    }
+
+    async onConvMetalChange(ev) {
+        this.state.selectedConvMetal = ev.target.value || null;
+        // Reset purity when switching conv metal so it doesn't carry over an incompatible value
+        this.state.selectedPurityId = null;
         await this.recalculatePrice();
     }
 
@@ -2039,7 +2055,7 @@ export class PdpWorkspace extends Component {
             const result = await this.orm.call(
                 "pdp.price.service", "compute_price_by_ids",
                 [this.state.selectedProductId, this.state.selectedMarginId || false, this.state.selectedCurrencyId],
-                { purity_id: this.state.selectedPurityId || false }
+                { purity_id: this.state.selectedPurityId || false, conv_metal_code: this.state.selectedConvMetal || false }
             );
             console.log("[price] result=", result);
             if (result && !result.error) {

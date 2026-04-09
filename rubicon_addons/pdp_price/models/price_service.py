@@ -10,7 +10,7 @@ class PdpPriceService(models.AbstractModel):
     _description = 'PDP Price Computation Service'
 
     @api.model
-    def compute_product_price(self, product, margin=None, currency=None, date=None, purity_id=None):
+    def compute_product_price(self, product, margin=None, currency=None, date=None, purity_id=None, conv_metal_code=None):
         """
         Compute price breakdown for a product.
         
@@ -55,6 +55,8 @@ class PdpPriceService(models.AbstractModel):
 
             try:
                 extra = {'purity': purity} if model_name in ('pdp.price.metal', 'pdp.price.conv') else {}
+                if model_name == 'pdp.price.conv' and conv_metal_code:
+                    extra['conv_metal_code'] = conv_metal_code
                 payload = comp_model.compute(
                     product=product,
                     margin=margin,
@@ -104,11 +106,11 @@ class PdpPriceService(models.AbstractModel):
         }
 
     @api.model
-    def compute_price_by_ids(self, product_id, margin_id, currency_id, purity_id=None):
+    def compute_price_by_ids(self, product_id, margin_id, currency_id, purity_id=None, conv_metal_code=None):
         """Entry point for JS/OWL: converts raw IDs to records then delegates."""
         product = self.env['pdp.product'].browse(int(product_id))
         if not product.exists():
             return {'error': 'Product not found'}
         margin = self.env['pdp.margin'].browse(int(margin_id)) if margin_id else None
         currency = self.env['res.currency'].browse(int(currency_id))
-        return self.compute_product_price(product, margin, currency, purity_id=purity_id)
+        return self.compute_product_price(product, margin, currency, purity_id=purity_id, conv_metal_code=conv_metal_code)

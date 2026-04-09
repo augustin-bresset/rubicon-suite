@@ -10,12 +10,13 @@ class PriceConv(models.TransientModel):
     _inherit = 'pdp.price.component'
 
     @api.model
-    def compute(self, *, product, margin, currency, date, purity=None):
+    def compute(self, *, product, margin, currency, date, purity=None, conv_metal_code=None):
         """
         Metal Conv: cost of casting the product in the actual metal,
         derived from the reference (WG18K) weight and the density/price ratio.
 
         When product.metal == reference metal code → returns 0 (no conversion needed).
+        conv_metal_code: optional override for the target metal (default: product.metal).
         """
         if not product.model_id:
             return self._payload('conv', 0.0, 0.0, currency)
@@ -30,13 +31,16 @@ class PriceConv(models.TransientModel):
         if not ref_metal or not ref_metal.density:
             return self._payload('conv', 0.0, 0.0, currency)
 
-        # --- If the product uses the reference metal itself → no conversion ---
-        if product.metal == ref_metal.code:
+        # --- Determine target metal: override or product.metal ---
+        target_metal_code = conv_metal_code or product.metal
+
+        # --- If target is the reference metal itself → no conversion ---
+        if target_metal_code == ref_metal.code:
             return self._payload('conv', 0.0, 0.0, currency)
 
-        # --- Actual metal: look up pdp.metal by code matching product.metal ---
+        # --- Actual metal: look up pdp.metal by code ---
         actual_metal = self.env['pdp.metal'].with_context(clean_ctx).search(
-            [('code', '=', product.metal)], limit=1
+            [('code', '=', target_metal_code)], limit=1
         )
         if not actual_metal or not actual_metal.density:
             return self._payload('conv', 0.0, 0.0, currency)
@@ -61,7 +65,7 @@ class PriceConv(models.TransientModel):
         # --- Effective purity for actual metal ---
         actual_model_metal = ModelMetal.search([
             ('model_id', '=', product.model_id.id),
-            ('metal_version', '=', product.metal),
+            ('metal_version', '=', target_metal_code),
         ], limit=1)
         stored_purity = (actual_model_metal.purity_id if actual_model_metal
                          else actual_metal.default_purity_id)

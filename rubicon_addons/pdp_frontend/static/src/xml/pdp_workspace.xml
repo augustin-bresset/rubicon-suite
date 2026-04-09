@@ -380,7 +380,18 @@
                                     </select>
                                 </div>
                             </div>
-<div class="row mb-1 align-items-center">
+                            <div class="row mb-1 align-items-center">
+                                <label class="col-4 fw-bold small">Conv Metal</label>
+                                <div class="col-8">
+                                    <select class="form-select form-select-sm" t-on-change="(ev) => this.onConvMetalChange(ev)">
+                                        <option value="">-- Product --</option>
+                                        <t t-foreach="this.nonRefMetals" t-as="cm" t-key="cm.id">
+                                            <option t-att-value="cm.code" t-att-selected="cm.code === state.selectedConvMetal"><t t-esc="cm.code"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-1 align-items-center">
                                 <label class="col-4 fw-bold small">Currency</label>
                                 <div class="col-5">
                                     <select class="form-select form-select-sm" t-on-change="(ev) => this.onCurrencyChange(ev)">
