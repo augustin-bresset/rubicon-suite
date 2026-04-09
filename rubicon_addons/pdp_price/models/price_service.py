@@ -34,7 +34,8 @@ class PdpPriceService(models.AbstractModel):
         # Price components to compute
         components = [
             ('pdp.price.stone', 'stone', 'Stones'),
-            ('pdp.price.metal', 'metal', 'Metals'),
+            ('pdp.price.metal', 'metal', 'Metal'),
+            ('pdp.price.conv',  'conv',  'Metal Conv'),
             ('pdp.price.labor', 'labor', 'Labor'),
             ('pdp.price.addon', 'addon', 'Addons'),
             ('pdp.price.part', 'part', 'Parts'),
@@ -53,7 +54,7 @@ class PdpPriceService(models.AbstractModel):
                 continue
 
             try:
-                extra = {'purity': purity} if model_name == 'pdp.price.metal' else {}
+                extra = {'purity': purity} if model_name in ('pdp.price.metal', 'pdp.price.conv') else {}
                 payload = comp_model.compute(
                     product=product,
                     margin=margin,

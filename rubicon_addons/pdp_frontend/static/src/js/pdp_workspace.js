@@ -672,7 +672,11 @@ export class PdpWorkspace extends Component {
         }
     }
 
-    // ==========================================
+    openCurrencyRates() {
+        this.action.doAction('pdp_frontend.action_pdp_currency_setting');
+    }
+
+// ==========================================
     // Data Fetching
     // ==========================================
 
@@ -1017,28 +1021,134 @@ export class PdpWorkspace extends Component {
                         _stoneTypeName: detail ? this._getStoneTypeName(detail) : '',
                     };
                 });
-                this.state.stoneOriginal = stones.map(s => {
+                // Helper: resolve display names from preloaded lookup arrays
+                const _typeName  = (d) => {
+                    const id = d?.type_id  ? (Array.isArray(d.type_id)  ? d.type_id[0]  : d.type_id)  : null;
+                    return id ? (this.stoneTypes.find(t => t.id === id)?.name  || '') : '';
+                };
+                const _shadeName = (d) => {
+                    const id = d?.shade_id ? (Array.isArray(d.shade_id) ? d.shade_id[0] : d.shade_id) : null;
+                    return id ? (this.stoneShades.find(s => s.id === id)?.shade || '') : '';
+                };
+                const _shapeName = (shapeField) => {
+                    const id = shapeField ? (Array.isArray(shapeField) ? shapeField[0] : shapeField) : null;
+                    return id ? (this.stoneShapes.find(s => s.id === id)?.shape || '') : '';
+                };
+
+                // Aggregate: group by (type, shade, shape), sum pieces + weight
+                const _aggregate = (rows) => {
+                    const map = new Map();
+                    for (const { key, type, shade, shape, pieces, weight } of rows) {
+                        if (!map.has(key)) map.set(key, { type, shade, shape, pieces: 0, weight: 0 });
+                        const g = map.get(key);
+                        g.pieces += pieces;
+                        g.weight += weight;
+                    }
+                    return Array.from(map.values());
+                };
+
+                this.state.stoneOriginal = _aggregate(stones.map(s => {
                     const sid = Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id;
                     const d = sid ? (detailMap[sid] || null) : null;
+                    const typeId  = d?.type_id  ? (Array.isArray(d.type_id)  ? d.type_id[0]  : d.type_id)  : 0;
+                    const shadeId = d?.shade_id ? (Array.isArray(d.shade_id) ? d.shade_id[0] : d.shade_id) : 0;
+                    const shapeId = d?.shape_id ? (Array.isArray(d.shape_id) ? d.shape_id[0] : d.shape_id) : 0;
+                    const pcs = s.pieces || 0;
+                    const unitWeight = s.weight || d?.weight || 0;
                     return {
-                        type:   d?.type_id  ? d.type_id[1]  : '',
-                        shade:  d?.shade_id ? d.shade_id[1] : '',
-                        shape:  d?.shape_id ? d.shape_id[1] : '',
-                        pieces: s.pieces,
-                        weight: s.weight || d?.weight || 0,
+                        key:    `${typeId}_${shadeId}_${shapeId}`,
+                        type:   _typeName(d),
+                        shade:  _shadeName(d),
+                        shape:  _shapeName(d?.shape_id),
+                        pieces: pcs,
+                        weight: unitWeight * pcs,
                     };
-                });
-                this.state.stoneRecut = stones.map(s => {
+                }));
+
+                // Lookup reshaped stone weights from catalog (reshaped_weight is always 0 in DB).
+                // Keys: `${typeId}_${shadeId}_${shapeId}_${sizeId}` → weight per stone.
+                // We index both by reshaped shape and by original shape (fallback).
+                const reshapedWeightMap = new Map();
+                const reshapeSizeIds = [...new Set(
+                    stones
+                        .map(s => s.reshaped_size_id)
+                        .filter(id => id)
+                        .map(id => Array.isArray(id) ? id[0] : id)
+                )];
+                if (reshapeSizeIds.length) {
+                    // Also find slash-variant sizes: if reshaped size name = "3.8",
+                    // look for catalog sizes named "3.8/..." (e.g. "3.8/4.0").
+                    // slashToOriginal maps slash_size_id → original reshaped_size_id
+                    const slashToOriginal = new Map();
+                    for (const origSzId of reshapeSizeIds) {
+                        const origName = this.stoneSizes.find(s => s.id === origSzId)?.name;
+                        if (!origName) continue;
+                        const prefix = origName + '/';
+                        for (const sz of this.stoneSizes) {
+                            if (sz.name.startsWith(prefix)) {
+                                slashToOriginal.set(sz.id, origSzId);
+                            }
+                        }
+                    }
+
+                    const allSizeIds = [...new Set([...reshapeSizeIds, ...slashToOriginal.keys()])];
+                    const reshapedStones = await this.orm.searchRead(
+                        "pdp.stone",
+                        [["size_id", "in", allSizeIds]],
+                        ["id", "type_id", "shade_id", "shape_id", "size_id", "weight"]
+                    );
+                    for (const rs of reshapedStones) {
+                        const tId  = rs.type_id  ? (Array.isArray(rs.type_id)  ? rs.type_id[0]  : rs.type_id)  : 0;
+                        const shId = rs.shade_id ? (Array.isArray(rs.shade_id) ? rs.shade_id[0] : rs.shade_id) : 0;
+                        const spId = rs.shape_id ? (Array.isArray(rs.shape_id) ? rs.shape_id[0] : rs.shape_id) : 0;
+                        const rawSzId = rs.size_id ? (Array.isArray(rs.size_id) ? rs.size_id[0] : rs.size_id) : 0;
+                        // For slash-variant sizes, key by the original size id so lookups match
+                        const szId = slashToOriginal.get(rawSzId) ?? rawSzId;
+                        reshapedWeightMap.set(`${tId}_${shId}_${spId}_${szId}`, rs.weight || 0);
+                    }
+                }
+
+                this.state.stoneRecut = _aggregate(stones.map(s => {
                     const sid = Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id;
                     const d = sid ? (detailMap[sid] || null) : null;
+                    const typeId      = d?.type_id  ? (Array.isArray(d.type_id)  ? d.type_id[0]  : d.type_id)  : 0;
+                    const shadeId     = d?.shade_id ? (Array.isArray(d.shade_id) ? d.shade_id[0] : d.shade_id) : 0;
+                    const origShapeId = d?.shape_id ? (Array.isArray(d.shape_id) ? d.shape_id[0] : d.shape_id) : 0;
+                    const reshapeShapeRaw = s.reshaped_shape_id;
+                    const reshapeShapeId  = reshapeShapeRaw
+                        ? (Array.isArray(reshapeShapeRaw) ? reshapeShapeRaw[0] : reshapeShapeRaw)
+                        : origShapeId;
+                    const sizeRaw  = s.reshaped_size_id;
+                    const sizeId   = sizeRaw ? (Array.isArray(sizeRaw) ? sizeRaw[0] : sizeRaw) : 0;
+                    const pcs = s.pieces || 0;
+
+                    let unitWeight;
+                    const reshapedWeightVal = parseFloat(s.reshaped_weight) || 0;
+                    if (reshapedWeightVal > 0) {
+                        // Explicit new weight stored on the line — highest priority
+                        unitWeight = reshapedWeightVal;
+                    } else if (sizeId) {
+                        // 1. Exact match: reshaped shape + reshaped size
+                        const keyExact = `${typeId}_${shadeId}_${reshapeShapeId}_${sizeId}`;
+                        // 2. Fallback: original shape + reshaped size (when catalog has no bufftop/cabochon entry)
+                        const keyFallback = `${typeId}_${shadeId}_${origShapeId}_${sizeId}`;
+                        unitWeight = reshapedWeightMap.get(keyExact)
+                            ?? reshapedWeightMap.get(keyFallback)
+                            ?? (s.weight || d?.weight || 0);
+                    } else {
+                        unitWeight = s.weight || d?.weight || 0;
+                    }
+
                     return {
-                        type:   d?.type_id  ? d.type_id[1]  : '',
-                        shade:  d?.shade_id ? d.shade_id[1] : '',
-                        shape:  s.reshaped_shape_id ? s.reshaped_shape_id[1] : (d?.shape_id ? d.shape_id[1] : ''),
-                        pieces: s.pieces,
-                        weight: s.reshaped_weight || s.weight || d?.weight || 0,
+                        // Group by ORIGINAL type+shade+shape (same groups as stoneOriginal)
+                        key:    `${typeId}_${shadeId}_${origShapeId}`,
+                        type:   _typeName(d),
+                        shade:  _shadeName(d),
+                        shape:  _shapeName(d?.shape_id),
+                        pieces: pcs,
+                        weight: unitWeight * pcs,
                     };
-                });
+                }));
             } else {
                 this.state.stoneRows = [];
                 this.state.stoneOriginal = [];

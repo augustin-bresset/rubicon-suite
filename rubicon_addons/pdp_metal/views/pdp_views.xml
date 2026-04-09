@@ -23,6 +23,8 @@
         <field name="name"/>
         <field name="cost"/>
         <field name="currency_id" />
+        <field name="density"/>
+        <field name="is_reference"/>
         <field name="plating"/>
         <field name="gold"/>
         <field name="default_purity_id"/>

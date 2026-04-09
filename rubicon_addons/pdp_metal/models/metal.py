@@ -36,6 +36,16 @@ class Metal(models.Model):
     
     plating          = fields.Boolean(string='Plating')
     gold             = fields.Boolean(string='Is Gold', default=True)
+    is_reference     = fields.Boolean(
+        string='Reference Metal',
+        default=False,
+        help='Mark as the reference metal for Metal Conv computation (should be White Gold 18K).',
+    )
+    density          = fields.Float(
+        string='Density (g/cm³)',
+        digits=(16, 4),
+        help='Alloy density at typical purity (e.g. WG18K ≈ 15.5, Silver 925 ≈ 10.3).',
+    )
     default_purity_id = fields.Many2one(
         'pdp.metal.purity',
         string='Default Purity',

@@ -380,7 +380,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="row mb-1 align-items-center">
+<div class="row mb-1 align-items-center">
                                 <label class="col-4 fw-bold small">Currency</label>
                                 <div class="col-5">
                                     <select class="form-select form-select-sm" t-on-change="(ev) => this.onCurrencyChange(ev)">
@@ -393,6 +393,9 @@
                             <div class="row mb-1 align-items-center">
                                 <label class="col-4 fw-bold small">Rate</label>
                                 <div class="col-5"><input type="text" class="form-control form-control-sm bg-light" t-att-value="state.usRate" readonly="1"/></div>
+                                <div class="col-3">
+                                    <button class="btn btn-sm btn-outline-secondary py-0 px-2 w-100" style="font-size:11px;" t-on-click="() => this.openCurrencyRates()">Rates</button>
+                                </div>
                             </div>
                         </div>
                         <div class="col-8 ps-3">
