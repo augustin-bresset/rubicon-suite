@@ -70,6 +70,7 @@ export class PdpWorkspace extends Component {
 
             // Topbar
             showModelList: false,
+            modelListFilter: { code: '', drawing: '', quotation: '' },
             productSearch: "",
             productSearchResults: [],
             productFilter: "",
@@ -238,6 +239,15 @@ export class PdpWorkspace extends Component {
 
     get filteredModels() {
         return this.state.models;
+    }
+
+    get filteredModelList() {
+        const { code, drawing, quotation } = this.state.modelListFilter;
+        return this.state.models.filter(m =>
+            (!code      || (m.code      || '').toLowerCase().includes(code.toLowerCase())) &&
+            (!drawing   || (m.drawing   || '').toLowerCase().includes(drawing.toLowerCase())) &&
+            (!quotation || (m.quotation || '').toLowerCase().includes(quotation.toLowerCase()))
+        );
     }
 
     get filteredProducts() {
@@ -473,7 +483,14 @@ export class PdpWorkspace extends Component {
     }
 
     openModelList() {
+        this.state.modelListFilter = { code: '', drawing: '', quotation: '' };
         this.state.showModelList = true;
+    }
+
+    onModelListKeydown(field, ev) {
+        if (ev.key === 'Enter') {
+            this.state.modelListFilter[field] = ev.target.value;
+        }
     }
 
     closeModelList() {
