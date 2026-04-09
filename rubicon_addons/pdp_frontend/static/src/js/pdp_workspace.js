@@ -1903,13 +1903,18 @@ export class PdpWorkspace extends Component {
     // ==========================================
 
     async recalculatePrice() {
-        if (!this.state.selectedProductId || !this.state.selectedCurrencyId) return;
+        console.log("[price] recalculatePrice called. productId=", this.state.selectedProductId, "currencyId=", this.state.selectedCurrencyId, "marginId=", this.state.selectedMarginId);
+        if (!this.state.selectedProductId || !this.state.selectedCurrencyId) {
+            console.warn("[price] early return: productId=", this.state.selectedProductId, "currencyId=", this.state.selectedCurrencyId);
+            return;
+        }
         try {
             const result = await this.orm.call(
                 "pdp.price.service", "compute_price_by_ids",
                 [this.state.selectedProductId, this.state.selectedMarginId || false, this.state.selectedCurrencyId],
                 { purity_id: this.state.selectedPurityId || false }
             );
+            console.log("[price] result=", result);
             if (result && !result.error) {
                 this.state.priceLines = result.lines || [];
                 this.state.priceTotals = result.totals || { cost: 0, margin: 0, price: 0 };

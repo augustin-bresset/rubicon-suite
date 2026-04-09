@@ -47,6 +47,7 @@ This view contains a table with those columns :
 * Drawing#
 * Quotation# 
 
+And before the first line you have for each field a search bar.
 
 ### New Button
 By clicking on `New` on the menue at the bottom of the page, you open `Make New Product` view.
