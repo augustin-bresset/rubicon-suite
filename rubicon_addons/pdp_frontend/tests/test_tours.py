@@ -43,9 +43,10 @@ class TestPdpTours(HttpCase):
 
         # Currency setting so stone/metal cost dropdowns are populated
         usd = env.ref("base.USD")
-        env["pdp.currency.setting"].create(
-            {"currency_id": usd.id, "rate": 1.0, "sequence": 1}
-        )
+        if not env["pdp.currency.setting"].search([("currency_id", "=", usd.id)], limit=1):
+            env["pdp.currency.setting"].create(
+                {"currency_id": usd.id, "rate": 1.0, "sequence": 1}
+            )
 
         # ── Picture tours (Tours 9 & 10) — separate model/product with 2 photos ─
         # Using a dedicated model so Tours 8 (upload from scratch) still sees an

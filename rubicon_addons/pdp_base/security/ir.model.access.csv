@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pdp_base.access_pdp_config_read,access_pdp_config_read,pdp_base.model_pdp_config,base.group_user,1,0,0,0
+pdp_base.access_pdp_config_admin,access_pdp_config_admin,pdp_base.model_pdp_config,base.group_system,1,1,1,1

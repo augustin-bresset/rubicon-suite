@@ -827,11 +827,14 @@
                         <div class="col-6">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="fw-bold small">Labor (Model Level)</span>
-                                <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addLaborModel()">+ Add</button>
+                                <span class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-secondary" style="font-size:10px;" t-esc="this._defaultLaborCurrencyName"/>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addLaborModel()">+ Add</button>
+                                </span>
                             </div>
                             <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
                                 <thead class="bg-light">
-                                    <tr><th>Type</th><th style="width:35px;">Metal</th><th class="text-end" style="width:60px;">Cost</th><th style="width:55px;">Curr.</th><th style="width:24px;"></th></tr>
+                                    <tr><th>Type</th><th style="width:35px;">Metal</th><th class="text-end" style="width:60px;">Cost</th><th style="width:24px;"></th></tr>
                                 </thead>
                                 <tbody>
                                     <t t-foreach="state.laborModelCosts" t-as="l" t-key="l._key">
@@ -857,18 +860,6 @@
                                                        t-att-value="l.cost"
                                                        t-on-change="(ev) => this.setLaborModelField(l._key, 'cost', ev.target.value)"/>
                                             </td>
-                                            <td>
-                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
-                                                        t-on-change="(ev) => this.setLaborModelField(l._key, 'currency_id', ev.target.value)">
-                                                    <option value="">--</option>
-                                                    <t t-foreach="state.currencies" t-as="curr" t-key="curr.id">
-                                                        <option t-att-value="curr.id"
-                                                                t-att-selected="curr.id === (Array.isArray(l.currency_id) ? l.currency_id[0] : l.currency_id)">
-                                                            <t t-esc="curr.name"/>
-                                                        </option>
-                                                    </t>
-                                                </select>
-                                            </td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
                                                         t-on-click="() => this.removeLaborModel(l._key)">✕</button>
@@ -876,7 +867,7 @@
                                         </tr>
                                     </t>
                                     <t t-if="state.laborModelCosts.length === 0">
-                                        <tr><td colspan="5" class="text-muted text-center">None</td></tr>
+                                        <tr><td colspan="4" class="text-muted text-center">None</td></tr>
                                     </t>
                                 </tbody>
                             </table>
@@ -929,11 +920,14 @@
                         <div class="col-6 mt-2">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="fw-bold small">Labor (Product Level)</span>
-                                <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addLaborProduct()">+ Add</button>
+                                <span class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-secondary" style="font-size:10px;" t-esc="this._defaultLaborCurrencyName"/>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addLaborProduct()">+ Add</button>
+                                </span>
                             </div>
                             <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
                                 <thead class="bg-light">
-                                    <tr><th>Type</th><th class="text-end" style="width:60px;">Cost</th><th style="width:55px;">Curr.</th><th style="width:24px;"></th></tr>
+                                    <tr><th>Type</th><th class="text-end" style="width:60px;">Cost</th><th style="width:24px;"></th></tr>
                                 </thead>
                                 <tbody>
                                     <t t-foreach="state.laborProductCosts" t-as="l" t-key="l._key">
@@ -954,18 +948,6 @@
                                                        t-att-value="l.cost"
                                                        t-on-change="(ev) => this.setLaborProductField(l._key, 'cost', ev.target.value)"/>
                                             </td>
-                                            <td>
-                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
-                                                        t-on-change="(ev) => this.setLaborProductField(l._key, 'currency_id', ev.target.value)">
-                                                    <option value="">--</option>
-                                                    <t t-foreach="state.currencies" t-as="curr" t-key="curr.id">
-                                                        <option t-att-value="curr.id"
-                                                                t-att-selected="curr.id === (Array.isArray(l.currency_id) ? l.currency_id[0] : l.currency_id)">
-                                                            <t t-esc="curr.name"/>
-                                                        </option>
-                                                    </t>
-                                                </select>
-                                            </td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
                                                         t-on-click="() => this.removeLaborProduct(l._key)">✕</button>
@@ -973,7 +955,7 @@
                                         </tr>
                                     </t>
                                     <t t-if="state.laborProductCosts.length === 0">
-                                        <tr><td colspan="4" class="text-muted text-center">None</td></tr>
+                                        <tr><td colspan="3" class="text-muted text-center">None</td></tr>
                                     </t>
                                 </tbody>
                             </table>
@@ -983,11 +965,14 @@
                         <div class="col-6 mt-2">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="fw-bold small">Misc.</span>
-                                <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addAddonCost()">+ Add</button>
+                                <span class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-secondary" style="font-size:10px;" t-esc="this._defaultLaborCurrencyName"/>
+                                    <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addAddonCost()">+ Add</button>
+                                </span>
                             </div>
                             <table class="table table-sm table-bordered mb-0" style="font-size: 11px;">
                                 <thead class="bg-light">
-                                    <tr><th>Type</th><th class="text-end" style="width:60px;">Cost</th><th style="width:55px;">Curr.</th><th style="width:24px;"></th></tr>
+                                    <tr><th>Type</th><th class="text-end" style="width:60px;">Cost</th><th style="width:24px;"></th></tr>
                                 </thead>
                                 <tbody>
                                     <t t-foreach="state.addonCosts" t-as="a" t-key="a._key">
@@ -1008,18 +993,6 @@
                                                        t-att-value="a.cost"
                                                        t-on-change="(ev) => this.setAddonCostField(a._key, 'cost', ev.target.value)"/>
                                             </td>
-                                            <td>
-                                                <select class="form-select form-select-sm p-0" style="font-size:11px;"
-                                                        t-on-change="(ev) => this.setAddonCostField(a._key, 'currency_id', ev.target.value)">
-                                                    <option value="">--</option>
-                                                    <t t-foreach="state.currencies" t-as="curr" t-key="curr.id">
-                                                        <option t-att-value="curr.id"
-                                                                t-att-selected="curr.id === (Array.isArray(a.currency_id) ? a.currency_id[0] : a.currency_id)">
-                                                            <t t-esc="curr.name"/>
-                                                        </option>
-                                                    </t>
-                                                </select>
-                                            </td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px; line-height:1.2;"
                                                         t-on-click="() => this.removeAddonCost(a._key)">✕</button>
@@ -1027,7 +1000,7 @@
                                         </tr>
                                     </t>
                                     <t t-if="state.addonCosts.length === 0">
-                                        <tr><td colspan="4" class="text-muted text-center">None</td></tr>
+                                        <tr><td colspan="3" class="text-muted text-center">None</td></tr>
                                     </t>
                                 </tbody>
                             </table>

@@ -68,27 +68,6 @@
     </field>
   </record>
 
-  <!-- Labor Settings -->
-  <record id="action_pdp_labor_settings" model="ir.actions.act_window">
-    <field name="name">Labor Settings</field>
-    <field name="res_model">pdp.labor.settings</field>
-    <field name="view_mode">list,form</field>
-  </record>
-
-  <record id="view_pdp_labor_settings_form" model="ir.ui.view">
-    <field name="name">pdp.labor.settings.form</field>
-    <field name="model">pdp.labor.settings</field>
-    <field name="arch" type="xml">
-      <form string="Labor Settings">
-        <sheet>
-          <group>
-            <field name="default_labor_currency_id"/>
-          </group>
-        </sheet>
-      </form>
-    </field>
-  </record>
-
   <!-- Stone Setting Types -->
   <record id="action_pdp_stone_setting_type" model="ir.actions.act_window">
     <field name="name">Setting Types</field>

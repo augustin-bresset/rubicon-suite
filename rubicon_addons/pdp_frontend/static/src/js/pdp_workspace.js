@@ -41,6 +41,7 @@ export class PdpWorkspace extends Component {
         this.stoneTypes = [];
         this.settingTypes = [];
         this._defaultLaborCurrencyId = false;
+        this._defaultLaborCurrencyName = '';
         this._searchTimeout = null;
 
         this.state = useState({
@@ -207,13 +208,14 @@ export class PdpWorkspace extends Component {
                 );
             }
 
-            // Load default labor currency from settings (singleton created at install)
-            const laborSettings = await this.orm.searchRead(
-                'pdp.labor.settings', [], ['default_labor_currency_id'], { limit: 1 }
+            // Load default labor currency from pdp.config (pdp_base)
+            const pdpConfigs = await this.orm.searchRead(
+                'pdp.config', [], ['labor_currency_id'], { limit: 1 }
             );
-            if (laborSettings.length && laborSettings[0].default_labor_currency_id) {
-                const cur = laborSettings[0].default_labor_currency_id;
+            if (pdpConfigs.length && pdpConfigs[0].labor_currency_id) {
+                const cur = pdpConfigs[0].labor_currency_id;
                 this._defaultLaborCurrencyId = Array.isArray(cur) ? cur[0] : cur;
+                this._defaultLaborCurrencyName = Array.isArray(cur) ? cur[1] : String(cur);
             }
 
             if (this.state.margins.length > 0) this.state.selectedMarginId = this.state.margins[0].id;

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <record id="pdp_config_default" model="pdp.config">
+        <field name="name">PDP Configuration</field>
+        <field name="labor_currency_id" ref="base.THB"/>
+    </record>
+</odoo>

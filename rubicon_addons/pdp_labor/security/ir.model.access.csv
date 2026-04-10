@@ -4,6 +4,3 @@ pdp_labor.access_pdp_labor_cost_model,access_pdp_labor_cost_model,pdp_labor.mode
 pdp_labor.access_pdp_labor_cost_product,access_pdp_labor_cost_product,pdp_labor.model_pdp_labor_cost_product,base.group_user,1,1,1,1
 pdp_labor.access_pdp_addon_type,access_pdp_addon_type,pdp_labor.model_pdp_addon_type,base.group_user,1,1,1,1
 pdp_labor.access_pdp_addon_cost,access_pdp_addon_cost,pdp_labor.model_pdp_addon_cost,base.group_user,1,1,1,1
-pdp_labor.access_pdp_labor_settings_read,access_pdp_labor_settings_read,pdp_labor.model_pdp_labor_settings,base.group_user,1,0,0,0
-pdp_labor.access_pdp_labor_settings_admin,access_pdp_labor_settings_admin,pdp_labor.model_pdp_labor_settings,base.group_system,1,1,1,1
-

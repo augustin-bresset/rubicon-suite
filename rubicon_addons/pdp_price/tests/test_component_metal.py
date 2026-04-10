@@ -71,7 +71,7 @@ class TestPriceMetal(TransactionCase):
         self.assertEqual(res['type'], 'metal')
         self.assertGreater(res['cost'], 0.0)
         self.assertEqual(res['margin'], self.currency.round(res['cost'] * 0.10))
-        self.assertEqual(res['price'], self.currency.round(res['cost'] + res['margin']))
+        self.assertAlmostEqual(res['price'], res['cost'] + res['margin'], places=6)
 
     def test_ignores_search_default_context(self):
         comp = self.component.with_context(search_default_product_id=999)

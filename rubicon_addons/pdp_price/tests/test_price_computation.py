@@ -65,10 +65,10 @@ class TestPriceComputationMock(TransactionCase):
     def _create_mock_stone(self, code, cost=0.0):
         """Helper to create a complete mock stone with all required relations."""
         stype = self.env['pdp.stone.type'].create({'name': f'Type_{code}', 'code': f'T{code}'})
-        sshape = self.env['pdp.stone.shape'].create({'name': f'Shape_{code}', 'code': f'S{code}'})
-        sshade = self.env['pdp.stone.shade'].create({'name': f'Shade_{code}', 'code': f'H{code}'})
-        ssize = self.env['pdp.stone.size'].create({'name': f'Size_{code}', 'code': f'Z{code}'})
-        
+        sshape = self.env['pdp.stone.shape'].create({'shape': f'Shape_{code}', 'code': f'S{code}'})
+        sshade = self.env['pdp.stone.shade'].create({'shade': f'Shade_{code}', 'code': f'H{code}'})
+        ssize = self.env['pdp.stone.size'].create({'name': f'Size_{code}'})
+
         return self.env['pdp.stone'].create({
             'code': code,
             'type_id': stype.id,
@@ -76,23 +76,22 @@ class TestPriceComputationMock(TransactionCase):
             'shade_id': sshade.id,
             'size_id': ssize.id,
             'cost': cost,
-            'currency_id': self.usd.id if cost else False
+            'currency_id': self.usd.id
         })
-    
+
     def _create_mock_product_with_stone(self, stone, pieces=1):
         """Helper to create a mock product with a stone composition."""
-        Composition = self.env['pdp.stone.composition']
+        Composition = self.env['pdp.product.stone.composition']
         ProductStone = self.env['pdp.product.stone']
-        
-        comp = Composition.create({'name': f'Comp_{stone.code}'})
+
+        comp = Composition.create({'code': f'COMP_{stone.code}'})
         ProductStone.create({
             'composition_id': comp.id,
             'stone_id': stone.id,
             'pieces': pieces
         })
-        
+
         return self.env['pdp.product'].create({
-            'name': f'Product with {stone.code}',
             'code': f'PROD_{stone.code}',
             'stone_composition_id': comp.id
         })
@@ -168,7 +167,6 @@ class TestPriceComputationMock(TransactionCase):
         Expected: No crash, totals = 0
         """
         mock_product = self.env['pdp.product'].create({
-            'name': 'Empty Product',
             'code': 'EMPTY_001'
         })
         

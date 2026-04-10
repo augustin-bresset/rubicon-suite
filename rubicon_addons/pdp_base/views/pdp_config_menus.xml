@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <menuitem id="menu_pdp_base_root"
+            name="PDP Config"
+            sequence="99"
+            groups="base.group_system"/>
+
+  <menuitem id="menu_pdp_base_settings"
+            name="PDP Settings"
+            parent="menu_pdp_base_root"
+            action="pdp_base.action_pdp_config"
+            groups="base.group_system"
+            sequence="1"/>
+
+</odoo>

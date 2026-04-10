@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <record id="action_pdp_config" model="ir.actions.act_window">
+    <field name="name">PDP Settings</field>
+    <field name="res_model">pdp.config</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="view_pdp_config_form" model="ir.ui.view">
+    <field name="name">pdp.config.form</field>
+    <field name="model">pdp.config</field>
+    <field name="arch" type="xml">
+      <form string="PDP Settings">
+        <sheet>
+          <group string="Labor / Misc">
+            <field name="labor_currency_id"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_pdp_config_list" model="ir.ui.view">
+    <field name="name">pdp.config.list</field>
+    <field name="model">pdp.config</field>
+    <field name="arch" type="xml">
+      <list string="PDP Settings">
+        <field name="name"/>
+        <field name="labor_currency_id"/>
+      </list>
+    </field>
+  </record>
+
+</odoo>

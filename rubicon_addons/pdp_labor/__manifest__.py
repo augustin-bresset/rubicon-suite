@@ -2,13 +2,12 @@
     'name': 'PDP Labor',
     'version': '1.0',
     'license': 'LGPL-3',
-    'depends': ['rubicon_env', 'pdp_product'],
+    'depends': ['rubicon_env', 'pdp_product', 'pdp_base'],
     'data': [
         './security/ir.model.access.csv',
         # Data
         'data/pdp.labor.type.csv',
         'data/pdp.addon.type.csv',
-        'data/pdp_labor_settings.xml',
         # Views
         'views/pdp_views.xml',
         'views/pdp_menus.xml',
