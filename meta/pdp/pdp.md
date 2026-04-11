@@ -100,6 +100,15 @@ Then you got the details of the pricing in tree columns :
 * `Margin` the margin for Rubicon 
 * `Price` the sum of the two precedents, what the client needs to pay
 
+And with those lines :
+* `Metal` 
+* `Stone`
+* `Setting`
+* `Recutting`
+* `Labor`
+* `Misc`
+* `Parts`
+* `Net` : the sum of all the previous lines
 
 #### Weight Summary
 By clicking on `Weight Summary` you got tables on the details of the weigths

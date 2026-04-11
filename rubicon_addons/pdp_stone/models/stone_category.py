@@ -9,6 +9,17 @@ class StoneCategory(models.Model):
     name = fields.Char(string="Name", required=True)
     active = fields.Boolean(default=True)
 
+    recutting_cost = fields.Monetary(
+        string='Recutting Cost /ct',
+        currency_field='recutting_currency_id',
+        default=0.0,
+        help='Recutting cost per carat for stones of this category.',
+    )
+    recutting_currency_id = fields.Many2one(
+        'res.currency',
+        string='Recutting Currency',
+    )
+
     type_ids = fields.One2many(
         comodel_name="pdp.stone.type",
         inverse_name="category_id",

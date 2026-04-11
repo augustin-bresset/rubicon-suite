@@ -420,7 +420,7 @@
                                 <tbody>
                                     <t t-foreach="state.priceLines" t-as="line" t-key="line_index">
                                         <tr>
-                                            <td class="text-start bg-light fw-bold text-capitalize"><t t-esc="line.type"/></td>
+                                            <td class="text-start bg-light fw-bold"><t t-esc="line.label"/></td>
                                             <td><t t-esc="(line.cost || 0).toFixed(2)"/></td>
                                             <td><t t-esc="(line.margin || 0).toFixed(2)"/></td>
                                             <td><t t-esc="(line.price || 0).toFixed(2)"/></td>

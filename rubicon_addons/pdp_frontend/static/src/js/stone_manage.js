@@ -21,6 +21,7 @@ export class StoneManage extends Component {
         this._deletedSizeIds = [];
         this._deletedStoneIds = [];
         this._deletedWeightIds = [];
+        this._deletedSettingTypeIds = [];
 
         this.state = useState({
             activeTab: "cats_types",
@@ -52,6 +53,9 @@ export class StoneManage extends Component {
             weightFilterShapeId: "",
             weightFilterShadeId: "",
             weights: [],
+
+            // Tab 5: Setting Types
+            settingTypes: [],
 
             isDirty: false,
         });
@@ -119,11 +123,11 @@ export class StoneManage extends Component {
     // ── Load All ───────────────────────────────────────────────────
 
     async _loadAll() {
-        const [cats, types, shapes, shades, sizes, currencies] = await Promise.all([
+        const [cats, types, shapes, shades, sizes, currencies, settingTypes] = await Promise.all([
             this.orm.searchRead(
                 "pdp.stone.category",
                 [],
-                ["id", "code", "name"],
+                ["id", "code", "name", "recutting_cost", "recutting_currency_id"],
                 { order: "code asc" }
             ),
             this.orm.searchRead(
@@ -156,6 +160,12 @@ export class StoneManage extends Component {
                 ["id", "name", "symbol"],
                 { order: "name asc" }
             ),
+            this.orm.searchRead(
+                "pdp.stone.setting.type",
+                [],
+                ["id", "name", "cost", "currency_id"],
+                { order: "name asc" }
+            ),
         ]);
 
         this.stoneCategories = cats.map(c => ({ ...c }));
@@ -170,6 +180,7 @@ export class StoneManage extends Component {
         this.state.shapes = shapes.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.shades = shades.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.sizes = sizes.map(r => ({ ...r, _key: r.id, _dirty: false }));
+        this.state.settingTypes = settingTypes.map(r => ({ ...r, _key: r.id, _dirty: false }));
     }
 
     // ── Tab switch ─────────────────────────────────────────────────
@@ -245,6 +256,8 @@ export class StoneManage extends Component {
             _dirty: true,
             code: "",
             name: "",
+            recutting_cost: 0,
+            recutting_currency_id: false,
         });
         this.state.isDirty = true;
     }
@@ -495,10 +508,70 @@ export class StoneManage extends Component {
         this.state.isDirty = true;
     }
 
+    // ── Tab 5: Setting Type methods ────────────────────────────────
+
+    get dirtySettingTypesCount() {
+        return this.state.settingTypes.filter(r => r._dirty).length + this._deletedSettingTypeIds.length;
+    }
+
+    addSettingType() {
+        const thb = this.currencies.find(c => c.name === 'THB');
+        this.state.settingTypes.push({
+            id: null,
+            _key: -Date.now(),
+            _dirty: true,
+            name: "",
+            cost: 0,
+            currency_id: thb ? [thb.id, thb.name] : false,
+        });
+        this.state.isDirty = true;
+    }
+
+    removeSettingType(row) {
+        if (row.id) this._deletedSettingTypeIds.push(row.id);
+        const idx = this.state.settingTypes.indexOf(row);
+        if (idx !== -1) this.state.settingTypes.splice(idx, 1);
+        this.state.isDirty = true;
+    }
+
+    onSettingTypeFieldChange(row, field, value) {
+        row[field] = value;
+        row._dirty = true;
+        this.state.isDirty = true;
+    }
+
+    async saveSettingTypes() {
+        const err = this._validateDirtyRows(this.state.settingTypes, [
+            { key: "name", label: "Name" },
+        ]);
+        if (err) { this.notification.add(err, { type: "warning" }); return; }
+        try {
+            await this._saveSection(
+                "pdp.stone.setting.type",
+                this.state.settingTypes,
+                this._deletedSettingTypeIds,
+                r => ({
+                    name: r.name,
+                    cost: parseFloat(r.cost) || 0,
+                    currency_id: this.m2oId(r.currency_id) || false,
+                })
+            );
+            this.state.isDirty = this._anyDirty();
+            this.notification.add("Setting types saved.", { type: "success" });
+        } catch (e) {
+            this.notification.add("Error: " + (e.message || String(e)), { type: "danger" });
+        }
+    }
+
     // ── Value extractors ───────────────────────────────────────────
 
     _catVals(r) {
-        return { code: r.code, name: r.name };
+        return {
+            code: r.code,
+            name: r.name,
+            recutting_cost: parseFloat(r.recutting_cost) || 0,
+            recutting_currency_id: this.m2oId(r.recutting_currency_id) || false,
+        };
     }
 
     _typeVals(r) {
@@ -745,13 +818,15 @@ export class StoneManage extends Component {
             this.state.sizes.some(r => r._dirty) ||
             this.state.stones.some(r => r._dirty) ||
             this.state.weights.some(r => r._dirty) ||
+            this.state.settingTypes.some(r => r._dirty) ||
             this._deletedCatIds.length > 0 ||
             this._deletedTypeIds.length > 0 ||
             this._deletedShapeIds.length > 0 ||
             this._deletedShadeIds.length > 0 ||
             this._deletedSizeIds.length > 0 ||
             this._deletedStoneIds.length > 0 ||
-            this._deletedWeightIds.length > 0
+            this._deletedWeightIds.length > 0 ||
+            this._deletedSettingTypeIds.length > 0
         );
     }
 

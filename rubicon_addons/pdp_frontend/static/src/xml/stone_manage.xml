@@ -42,6 +42,14 @@
                         Unit Weights
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="#"
+                        class="nav-link py-1 px-2"
+                        t-att-class="state.activeTab === 'setting_types' ? 'active' : ''"
+                        t-on-click.prevent="() => this.setTab('setting_types')">
+                        Setting Types
+                    </a>
+                </li>
             </ul>
 
             <t t-if="state.isDirty">
@@ -77,8 +85,10 @@
                             <table class="table table-sm table-hover table-bordered pdp-manage-table mb-0">
                                 <thead class="table-light sticky-top">
                                     <tr>
-                                        <th style="width: 120px;">Code</th>
+                                        <th style="width: 100px;">Code</th>
                                         <th>Name</th>
+                                        <th style="width: 110px;">Recutting /ct</th>
+                                        <th style="width: 100px;">Currency</th>
                                         <th style="width: 40px;"></th>
                                     </tr>
                                 </thead>
@@ -109,6 +119,29 @@
                                                 />
                                             </td>
                                             <td t-on-click.stop="() => {}">
+                                                <input
+                                                    type="number"
+                                                    class="form-control form-control-sm text-end"
+                                                    step="0.01"
+                                                    t-att-value="row.recutting_cost || 0"
+                                                    t-on-input="(e) => this.onCatFieldChange(row, 'recutting_cost', e.target.value)"
+                                                />
+                                            </td>
+                                            <td t-on-click.stop="() => {}">
+                                                <select
+                                                    class="form-select form-select-sm"
+                                                    t-on-change="(e) => this.onCatFieldChange(row, 'recutting_currency_id', e.target.value ? parseInt(e.target.value) : false)">
+                                                    <option value="">—</option>
+                                                    <t t-foreach="currencies" t-as="cur" t-key="cur.id">
+                                                        <option
+                                                            t-att-value="cur.id"
+                                                            t-att-selected="cur.id === (Array.isArray(row.recutting_currency_id) ? row.recutting_currency_id[0] : row.recutting_currency_id)">
+                                                            <t t-esc="cur.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </td>
+                                            <td t-on-click.stop="() => {}">
                                                 <button
                                                     class="btn btn-sm btn-outline-danger"
                                                     t-on-click.stop="() => this.removeCategory(row)">
@@ -119,7 +152,7 @@
                                     </t>
                                     <t t-if="state.categories.length === 0">
                                         <tr>
-                                            <td colspan="3" class="text-center text-muted fst-italic py-3">
+                                            <td colspan="5" class="text-center text-muted fst-italic py-3">
                                                 No categories. Click Add Category.
                                             </td>
                                         </tr>
@@ -786,6 +819,67 @@
                         </table>
                     </div>
 
+                </div>
+            </t>
+
+            <!-- ==================== TAB 5: Setting Types ==================== -->
+            <t t-if="state.activeTab === 'setting_types'">
+                <div class="d-flex flex-column h-100" style="overflow: hidden;">
+                    <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom bg-light">
+                        <span class="fw-bold">Setting Types</span>
+                        <button class="btn btn-sm btn-outline-primary ms-auto" t-on-click="() => this.addSettingType()">+ Add</button>
+                        <button class="btn btn-sm btn-success" t-on-click="() => this.saveSettingTypes()">Save</button>
+                    </div>
+                    <div style="flex: 1 1 0; overflow-y: auto;">
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="min-width:200px;">Name</th>
+                                    <th style="width:100px;">Currency</th>
+                                    <th style="width:120px;">Cost</th>
+                                    <th style="width:40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.settingTypes" t-as="st" t-key="st._key">
+                                    <tr t-attf-class="{{ st._dirty ? 'table-warning' : '' }}">
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm"
+                                                t-att-value="st.name"
+                                                t-on-input="(e) => this.onSettingTypeFieldChange(st, 'name', e.target.value)"/>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm"
+                                                    t-on-change="(e) => this.onSettingTypeFieldChange(st, 'currency_id', parseInt(e.target.value) || false)">
+                                                <t t-foreach="this.currencies" t-as="cur" t-key="cur.id">
+                                                    <option t-att-value="cur.id"
+                                                            t-att-selected="cur.id === (Array.isArray(st.currency_id) ? st.currency_id[0] : st.currency_id)">
+                                                        <t t-esc="cur.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" class="form-control form-control-sm"
+                                                t-att-value="st.cost"
+                                                t-on-input="(e) => this.onSettingTypeFieldChange(st, 'cost', e.target.value)"/>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                t-on-click.stop="() => this.removeSettingType(st)">✕</button>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-if="state.settingTypes.length === 0">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted fst-italic py-3">
+                                            No setting types defined. Click "+ Add" to create one.
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </t>
 

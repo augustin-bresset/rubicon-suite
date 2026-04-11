@@ -18,6 +18,17 @@ root_folder = os.path.join(os.path.dirname(__file__), '../../..')
 # Folders
 tmp_folder = os.path.join(root_folder, 'data', 'tmp')
 
+
+def _load_setting_type_names():
+    """Load StoneSettings.csv and StoneSettingCost.csv into a dict: id_str → name."""
+    settings_file = os.path.join(backup_folder, 'StoneSettings.csv')
+    mapping = {}
+    with open(settings_file, newline='', encoding='utf-8') as f:
+        for row in csv.reader(f):
+            if len(row) >= 2 and row[1].strip() not in ('', 'All', 'None'):
+                mapping[row[0].strip()] = row[1].strip()
+    return mapping
+
 def two_lines_manager(csv_name):
     """Manage files with one row on two lines."""
     dest_name = os.path.join(tmp_folder, csv_name)
@@ -245,6 +256,7 @@ if __name__ == '__main__':
     # Product Stone
     if everything or "stone" in sys.argv:
         # B ,014B ,AQ+BT+R.MO+CHA,AQ   ,20,OVCAB,10X8,ML   ,1,.0000,.00,,US,,,,TRCAB,7X7/,1.4000,A1
+        _setting_names = _load_setting_type_names()
 
         model_name = "pdp.product.stone"
         csv_name = "ModelStone.csv"
@@ -262,7 +274,8 @@ if __name__ == '__main__':
             "id", "composition_id", "stone_id", "stone_type", "stone_shade",
             "stone_shape", "stone_size", "pieces", "weight",
             "cost", "currency_id",
-            "reshaped_shape_id", "reshaped_size_id", "reshaped_weight" 
+            "reshaped_shape_id", "reshaped_size_id", "reshaped_weight",
+            "setting_type_id", "line_num",
         ]
         
         def case_management(row):
@@ -360,6 +373,13 @@ if __name__ == '__main__':
              
             
             
+            # Setting type: col4 is the numeric setting ID → resolve to name
+            setting_id_raw = strip_code_space(row[4]) if len(row) > 4 else ''
+            setting_type_ext_id = _setting_names.get(setting_id_raw, '') if setting_id_raw else ''
+
+            # Line number: col20
+            line_num = strip_code_space(row[20]) if len(row) > 20 else ''
+
             return {
                 "id": func_index(f"{product_composition_code}_{stone_code}", model_name),
                 "composition_id"  : product_composition_code,
@@ -369,12 +389,14 @@ if __name__ == '__main__':
                 "stone_shade"       : stone_shade_code,
                 "stone_shape"       : stone_shape_code,
                 "stone_size"        : stone_size,
-                "weight"            : safe_float(row[9]), 
+                "weight"            : safe_float(row[9]),
                 "cost"              : safe_float(row[10]),
                 "currency_id"       : mapping_currency(row[12]),
                 "reshaped_shape_id"    : reshaped_stone_shape_code,
                 "reshaped_size_id"     : reshaped_stone_size,
-                "reshaped_weight"   : safe_float(row[19])
+                "reshaped_weight"   : safe_float(row[19]),
+                "setting_type_id"   : setting_type_ext_id,
+                "line_num"          : line_num,
                 }
             
         two_lines_manager(csv_name)
