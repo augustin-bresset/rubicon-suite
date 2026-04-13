@@ -262,20 +262,20 @@ if __name__ == '__main__':
         csv_name = "ModelStone.csv"
         actual_fields = [
             #0
-            "cat_id", "orn_id", "stones", "stone_type", "stone_setting_code", 
-            #5 
+            "cat_id", "orn_id", "stones", "stone_type", "stone_setting_code",
+            #5
             "shape_code", "size", "shade_code", "pieces", "weight",
             #10
             "stone_unit_cost", "stone_cost", "stonecost_currency", "setting_unit_cost", "setting_cost", "setting_cost_currency",
             #16
-            "shape_code_2", "size_2", "shade_2", "weight_2", "line_num" 
+            "shape_code_2", "size_2", "reshaped_weight", "line_num"
         ]
         fieldnames = [
             "id", "composition_id", "stone_id", "stone_type", "stone_shade",
             "stone_shape", "stone_size", "pieces", "weight",
             "cost", "currency_id",
-            "reshaped_shape_id", "reshaped_size_id", "reshaped_weight",
-            "setting_type_id", "line_num",
+            "reshaped_shape_id", "reshaped_size_id",
+            "reshaped_weight", "setting_type_id", "line_num",
         ]
         
         def case_management(row):
@@ -377,14 +377,15 @@ if __name__ == '__main__':
             setting_id_raw = strip_code_space(row[4]) if len(row) > 4 else ''
             setting_type_ext_id = _setting_names.get(setting_id_raw, '') if setting_id_raw else ''
 
-            # Line number: col20
-            line_num = strip_code_space(row[20]) if len(row) > 20 else ''
+            # Recutting weight: col18; line number: col19
+            reshaped_weight = safe_float(row[18]) if len(row) > 18 else 0.0
+            line_num = strip_code_space(row[19]) if len(row) > 19 else ''
 
             return {
                 "id": func_index(f"{product_composition_code}_{stone_code}", model_name),
-                "composition_id"  : product_composition_code,
+                "composition_id"    : product_composition_code,
                 "pieces"            : safe_int(row[8]),
-                "stone_id"             : stone_code,
+                "stone_id"          : stone_code,
                 "stone_type"        : stone_type_code,
                 "stone_shade"       : stone_shade_code,
                 "stone_shape"       : stone_shape_code,
@@ -392,9 +393,9 @@ if __name__ == '__main__':
                 "weight"            : safe_float(row[9]),
                 "cost"              : safe_float(row[10]),
                 "currency_id"       : mapping_currency(row[12]),
-                "reshaped_shape_id"    : reshaped_stone_shape_code,
-                "reshaped_size_id"     : reshaped_stone_size,
-                "reshaped_weight"   : safe_float(row[19]),
+                "reshaped_shape_id" : reshaped_stone_shape_code,
+                "reshaped_size_id"  : reshaped_stone_size,
+                "reshaped_weight"        : reshaped_weight,
                 "setting_type_id"   : setting_type_ext_id,
                 "line_num"          : line_num,
                 }

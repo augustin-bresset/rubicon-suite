@@ -642,8 +642,9 @@
                                             </select>
                                         </td>
                                         <td t-on-click.stop="">
-                                            <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
-                                                   t-att-value="sr.reshaped_weight"
+                                            <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
+                                                   step="0.0001"
+                                                   t-att-value="sr.reshaped_weight || 0"
                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'reshaped_weight', ev.target.value)"
                                                    placeholder="0.0"/>
                                         </td>
@@ -695,9 +696,10 @@
                                     </option>
                                 </t>
                             </select>
-                            <span class="text-muted">Weight:</span>
-                            <input type="text" class="form-control form-control-sm p-0 text-end" style="font-size:11px; width:70px;"
-                                   t-att-value="selStone.reshaped_weight"
+                            <span class="text-muted">Rec.Wgt:</span>
+                            <input type="number" class="form-control form-control-sm p-0 text-end" style="font-size:11px; width:70px;"
+                                   step="0.0001"
+                                   t-att-value="selStone.reshaped_weight || 0"
                                    t-on-change="(ev) => this.setStoneField(selStone._key, 'reshaped_weight', ev.target.value)"
                                    placeholder="0.0"/>
                         </div>

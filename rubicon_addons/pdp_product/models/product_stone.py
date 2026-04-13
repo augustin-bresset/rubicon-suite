@@ -35,10 +35,12 @@ class ProductStone(models.Model):
         string='Size of Stone Code Reshaped for product',
     )
     
-    reshaped_weight = fields.Char(
-        string="Weight of one stone used",   
+    reshaped_weight = fields.Float(
+        string='Reshaped Weight /ct',
+        digits=(10, 4),
+        default=0.0,
     )
-    
+
     line_num = fields.Char(
         string='Line Number',
         index=True,

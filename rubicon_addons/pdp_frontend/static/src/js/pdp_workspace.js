@@ -1017,7 +1017,7 @@ export class PdpWorkspace extends Component {
             if (compId) {
                 const stones = await this.orm.searchRead(
                     "pdp.product.stone", [["composition_id", "=", compId]],
-                    ["id", "line_num", "stone_id", "pieces", "weight", "setting", "setting_type_id",
+                    ["id", "line_num", "stone_id", "pieces", "weight", "reshaped_weight", "setting", "setting_type_id",
                      "reshaped_shape_id", "reshaped_size_id", "reshaped_weight"]
                 );
                 // Batch-fetch stone details (type/shade/shape/size/cost/currency) in one query
@@ -1388,7 +1388,7 @@ export class PdpWorkspace extends Component {
         this.state.stoneRows.push({
             id: null, _key: key, _dirty: true,
             line_num: '', stone_id: false, _stoneCode: '', _stoneValid: false, _stoneDetail: null, _stoneTypeName: '',
-            pieces: 1, weight: '0', setting: 0, setting_type_id: false,
+            pieces: 1, weight: '0', reshaped_weight: 0, setting: 0, setting_type_id: false,
             reshaped_shape_id: false, reshaped_size_id: false, reshaped_weight: '',
         });
         this.state.selectedStoneKey = key;
@@ -1540,7 +1540,7 @@ export class PdpWorkspace extends Component {
 
         const stones = await this.orm.searchRead(
             "pdp.product.stone", [["composition_id", "=", compId]],
-            ["stone_id", "pieces", "weight", "reshaped_shape_id", "reshaped_size_id", "reshaped_weight"]
+            ["stone_id", "pieces", "weight", "reshaped_weight", "reshaped_shape_id", "reshaped_size_id", "reshaped_weight"]
         );
         if (!stones.length) return;
 
@@ -1551,6 +1551,7 @@ export class PdpWorkspace extends Component {
                 stone_id: s.stone_id ? s.stone_id[0] : false,
                 pieces: s.pieces || 0,
                 weight: s.weight || 0,
+                reshaped_weight: s.reshaped_weight || 0,
                 reshaped_shape_id: s.reshaped_shape_id ? s.reshaped_shape_id[0] : false,
                 reshaped_size_id: s.reshaped_size_id ? s.reshaped_size_id[0] : false,
                 reshaped_weight: s.reshaped_weight || 0,
@@ -1931,6 +1932,7 @@ export class PdpWorkspace extends Component {
                             stone_id: this.m2oId(row.stone_id),
                             pieces: row.pieces || 1,
                             weight: parseFloat(row.weight) || 0,
+                            reshaped_weight: parseFloat(row.reshaped_weight) || 0,
                             setting: parseFloat(row.setting) || 0,
                             setting_type_id: this.m2oId(row.setting_type_id) || false,
                             reshaped_shape_id: this.m2oId(row.reshaped_shape_id) || false,

@@ -64,6 +64,27 @@
             <t t-if="state.activeTab === 'cats_types'">
                 <div class="d-flex flex-column h-100" style="overflow: hidden;">
 
+                    <!-- Recutting global config -->
+                    <div class="d-flex align-items-center gap-3 px-3 py-2 bg-white border-bottom">
+                        <span class="fw-semibold">Recutting Cost /ct</span>
+                        <input type="number" class="form-control form-control-sm text-end" step="0.01" style="width:110px;"
+                               t-att-value="state.recutting.cost || 0"
+                               t-on-input="(e) => this.onRecuttigFieldChange('cost', e.target.value)"/>
+                        <select class="form-select form-select-sm" style="width:100px;"
+                                t-on-change="(e) => this.onRecuttigFieldChange('currency_id', e.target.value ? parseInt(e.target.value) : false)">
+                            <option value="">—</option>
+                            <t t-foreach="currencies" t-as="cur" t-key="cur.id">
+                                <option t-att-value="cur.id"
+                                        t-att-selected="cur.id === (Array.isArray(state.recutting.currency_id) ? state.recutting.currency_id[0] : state.recutting.currency_id)">
+                                    <t t-esc="cur.name"/>
+                                </option>
+                            </t>
+                        </select>
+                        <button class="btn btn-primary btn-sm"
+                                t-att-disabled="!state.recutting._dirty"
+                                t-on-click="() => this.saveRecutting()">Save</button>
+                    </div>
+
                     <!-- Categories panel (top half) -->
                     <div class="d-flex flex-column border-bottom" style="flex: 0 0 45%; min-height: 0; overflow: hidden;">
                         <div class="d-flex align-items-center gap-2 px-3 py-2 bg-light border-bottom">
@@ -85,10 +106,8 @@
                             <table class="table table-sm table-hover table-bordered pdp-manage-table mb-0">
                                 <thead class="table-light sticky-top">
                                     <tr>
-                                        <th style="width: 100px;">Code</th>
+                                        <th style="width: 120px;">Code</th>
                                         <th>Name</th>
-                                        <th style="width: 110px;">Recutting /ct</th>
-                                        <th style="width: 100px;">Currency</th>
                                         <th style="width: 40px;"></th>
                                     </tr>
                                 </thead>
@@ -119,29 +138,6 @@
                                                 />
                                             </td>
                                             <td t-on-click.stop="() => {}">
-                                                <input
-                                                    type="number"
-                                                    class="form-control form-control-sm text-end"
-                                                    step="0.01"
-                                                    t-att-value="row.recutting_cost || 0"
-                                                    t-on-input="(e) => this.onCatFieldChange(row, 'recutting_cost', e.target.value)"
-                                                />
-                                            </td>
-                                            <td t-on-click.stop="() => {}">
-                                                <select
-                                                    class="form-select form-select-sm"
-                                                    t-on-change="(e) => this.onCatFieldChange(row, 'recutting_currency_id', e.target.value ? parseInt(e.target.value) : false)">
-                                                    <option value="">—</option>
-                                                    <t t-foreach="currencies" t-as="cur" t-key="cur.id">
-                                                        <option
-                                                            t-att-value="cur.id"
-                                                            t-att-selected="cur.id === (Array.isArray(row.recutting_currency_id) ? row.recutting_currency_id[0] : row.recutting_currency_id)">
-                                                            <t t-esc="cur.name"/>
-                                                        </option>
-                                                    </t>
-                                                </select>
-                                            </td>
-                                            <td t-on-click.stop="() => {}">
                                                 <button
                                                     class="btn btn-sm btn-outline-danger"
                                                     t-on-click.stop="() => this.removeCategory(row)">
@@ -152,7 +148,7 @@
                                     </t>
                                     <t t-if="state.categories.length === 0">
                                         <tr>
-                                            <td colspan="5" class="text-center text-muted fst-italic py-3">
+                                            <td colspan="3" class="text-center text-muted fst-italic py-3">
                                                 No categories. Click Add Category.
                                             </td>
                                         </tr>

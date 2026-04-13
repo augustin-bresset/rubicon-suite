@@ -6,3 +6,4 @@ from .stone_size import StoneSize
 from .stone_weight import StoneWeight
 from .stone import Stone
 from .stone_setting_type import StoneSettingType
+from .stone_recutting_config import StoneRecuttigConfig

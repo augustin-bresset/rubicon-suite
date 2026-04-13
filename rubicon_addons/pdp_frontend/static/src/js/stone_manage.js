@@ -26,6 +26,9 @@ export class StoneManage extends Component {
         this.state = useState({
             activeTab: "cats_types",
 
+            // Recutting global config
+            recutting: { id: null, cost: 50, currency_id: false, _dirty: false },
+
             // Tab 1: Categories & Types
             categories: [],
             selectedCatKey: null,
@@ -123,11 +126,11 @@ export class StoneManage extends Component {
     // ── Load All ───────────────────────────────────────────────────
 
     async _loadAll() {
-        const [cats, types, shapes, shades, sizes, currencies, settingTypes] = await Promise.all([
+        const [cats, types, shapes, shades, sizes, currencies, settingTypes, recutConfigs] = await Promise.all([
             this.orm.searchRead(
                 "pdp.stone.category",
                 [],
-                ["id", "code", "name", "recutting_cost", "recutting_currency_id"],
+                ["id", "code", "name"],
                 { order: "code asc" }
             ),
             this.orm.searchRead(
@@ -166,6 +169,12 @@ export class StoneManage extends Component {
                 ["id", "name", "cost", "currency_id"],
                 { order: "name asc" }
             ),
+            this.orm.searchRead(
+                "pdp.stone.recutting.config",
+                [],
+                ["id", "cost", "currency_id"],
+                {}
+            ),
         ]);
 
         this.stoneCategories = cats.map(c => ({ ...c }));
@@ -174,6 +183,14 @@ export class StoneManage extends Component {
         this.state.stoneShapes = shapes.map(s => ({ ...s }));
         this.state.stoneShades = shades.map(s => ({ ...s }));
         this.state.stoneSizes = sizes.map(s => ({ ...s }));
+
+        const rc = recutConfigs[0];
+        if (rc) {
+            this.state.recutting = { ...rc, _dirty: false };
+        } else {
+            const thb = currencies.find(c => c.name === 'THB');
+            this.state.recutting = { id: null, cost: 50, currency_id: thb ? [thb.id, thb.name] : false, _dirty: false };
+        }
 
         this.state.categories = cats.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.types = types.map(r => ({ ...r, _key: r.id, _dirty: false }));
@@ -565,13 +582,35 @@ export class StoneManage extends Component {
 
     // ── Value extractors ───────────────────────────────────────────
 
-    _catVals(r) {
-        return {
-            code: r.code,
-            name: r.name,
-            recutting_cost: parseFloat(r.recutting_cost) || 0,
-            recutting_currency_id: this.m2oId(r.recutting_currency_id) || false,
+    onRecuttigFieldChange(field, value) {
+        this.state.recutting[field] = value;
+        this.state.recutting._dirty = true;
+        this.state.isDirty = true;
+    }
+
+    async saveRecutting() {
+        const rc = this.state.recutting;
+        const vals = {
+            cost: parseFloat(rc.cost) || 0,
+            currency_id: this.m2oId(rc.currency_id) || false,
         };
+        try {
+            if (rc.id) {
+                await this.orm.write("pdp.stone.recutting.config", [rc.id], vals);
+            } else {
+                const [newId] = await this.orm.create("pdp.stone.recutting.config", [vals]);
+                this.state.recutting.id = newId;
+            }
+            this.state.recutting._dirty = false;
+            this.state.isDirty = this._anyDirty();
+            this.notification.add("Recutting config saved.", { type: "success" });
+        } catch (e) {
+            this.notification.add("Error: " + (e.message || String(e)), { type: "danger" });
+        }
+    }
+
+    _catVals(r) {
+        return { code: r.code, name: r.name };
     }
 
     _typeVals(r) {
@@ -811,6 +850,7 @@ export class StoneManage extends Component {
 
     _anyDirty() {
         return (
+            this.state.recutting._dirty ||
             this.state.categories.some(r => r._dirty) ||
             this.state.types.some(r => r._dirty) ||
             this.state.shapes.some(r => r._dirty) ||
