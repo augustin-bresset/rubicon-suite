@@ -38,6 +38,9 @@ export class StoneManage extends Component {
             shapes: [],
             shades: [],
             sizes: [],
+            shapeFilter: '',
+            shadeFilter: '',
+            sizeFilter: '',
 
             // Reactive lookup lists (re-render filter selects after save)
             stoneTypes: [],
@@ -80,6 +83,28 @@ export class StoneManage extends Component {
 
     get selectedCategory() {
         return this.state.categories.find(c => c._key === this.state.selectedCatKey) || null;
+    }
+
+    get filteredShapes() {
+        const q = this.state.shapeFilter.toLowerCase();
+        if (!q) return this.state.shapes;
+        return this.state.shapes.filter(r =>
+            (r.code || '').toLowerCase().includes(q) || (r.shape || '').toLowerCase().includes(q)
+        );
+    }
+
+    get filteredShades() {
+        const q = this.state.shadeFilter.toLowerCase();
+        if (!q) return this.state.shades;
+        return this.state.shades.filter(r =>
+            (r.code || '').toLowerCase().includes(q) || (r.shade || '').toLowerCase().includes(q)
+        );
+    }
+
+    get filteredSizes() {
+        const q = this.state.sizeFilter.toLowerCase();
+        if (!q) return this.state.sizes;
+        return this.state.sizes.filter(r => (r.name || '').toLowerCase().includes(q));
     }
 
     get filteredTypes() {

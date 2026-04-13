@@ -11,14 +11,16 @@ class MarginMetal(models.Model):
         string="Margin Code",
         comodel_name="pdp.margin",
         required=True,
-        index=True
+        index=True,
+        ondelete="cascade"
         )
     
     metal_purity_id = fields.Many2one(
         string="Metal Purity",
         comodel_name="pdp.metal.purity",
         required=True,
-        index=True
+        index=True,
+        ondelete="cascade"
         )
     
     rate = fields.Float(

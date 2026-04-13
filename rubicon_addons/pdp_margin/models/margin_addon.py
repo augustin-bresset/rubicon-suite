@@ -18,7 +18,8 @@ class MarginAddon(models.Model):
         string="Margin Code",
         comodel_name="pdp.margin",
         required=True,
-        index=True
+        index=True,
+        ondelete="cascade"
         )
 
     rate = fields.Float(

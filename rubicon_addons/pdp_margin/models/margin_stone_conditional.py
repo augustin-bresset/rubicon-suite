@@ -10,6 +10,7 @@ class MarginStoneConditional(models.Model):
         comodel_name="pdp.margin",
         required=True,
         index=True,
+        ondelete="cascade",
     )
     
     stone_cat_id = fields.Many2one(

@@ -11,6 +11,7 @@ class MarginStone(models.Model):
         comodel_name="pdp.margin",
         required=True,
         index=True,
+        ondelete="cascade",
     )
     
     stone_type_id = fields.Many2one(
