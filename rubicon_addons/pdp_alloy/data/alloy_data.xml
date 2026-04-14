@@ -1,0 +1,184 @@
+<odoo>
+  <data noupdate="1">
+
+    <!-- ── Yellow Gold 18k (750) ──────────────────────────────── -->
+    <record id="alloy_yg18k" model="pdp.alloy">
+      <field name="code">YG18K</field>
+      <field name="name">Yellow Gold 18k</field>
+      <field name="purity">750</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+    </record>
+    <record id="comp_yg18k_au" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_yg18k"/>
+      <field name="metal_id" ref="raw_metal_au"/>
+      <field name="ratio">0.7500</field>
+    </record>
+    <record id="comp_yg18k_ag" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_yg18k"/>
+      <field name="metal_id" ref="raw_metal_ag"/>
+      <field name="ratio">0.1250</field>
+    </record>
+    <record id="comp_yg18k_cu" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_yg18k"/>
+      <field name="metal_id" ref="raw_metal_cu"/>
+      <field name="ratio">0.1250</field>
+    </record>
+
+    <!-- ── White Gold 18k (750) ───────────────────────────────── -->
+    <record id="alloy_wg18k" model="pdp.alloy">
+      <field name="code">WG18K</field>
+      <field name="name">White Gold 18k</field>
+      <field name="purity">750</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+    </record>
+    <record id="comp_wg18k_au" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_wg18k"/>
+      <field name="metal_id" ref="raw_metal_au"/>
+      <field name="ratio">0.7500</field>
+    </record>
+    <record id="comp_wg18k_pd" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_wg18k"/>
+      <field name="metal_id" ref="raw_metal_pd"/>
+      <field name="ratio">0.1000</field>
+    </record>
+    <record id="comp_wg18k_ag" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_wg18k"/>
+      <field name="metal_id" ref="raw_metal_ag"/>
+      <field name="ratio">0.1000</field>
+    </record>
+    <record id="comp_wg18k_cu" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_wg18k"/>
+      <field name="metal_id" ref="raw_metal_cu"/>
+      <field name="ratio">0.0500</field>
+    </record>
+
+    <!-- ── Rose Gold 18k (750) ────────────────────────────────── -->
+    <record id="alloy_rg18k" model="pdp.alloy">
+      <field name="code">RG18K</field>
+      <field name="name">Rose Gold 18k</field>
+      <field name="purity">750</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+    </record>
+    <record id="comp_rg18k_au" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_rg18k"/>
+      <field name="metal_id" ref="raw_metal_au"/>
+      <field name="ratio">0.7500</field>
+    </record>
+    <record id="comp_rg18k_cu" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_rg18k"/>
+      <field name="metal_id" ref="raw_metal_cu"/>
+      <field name="ratio">0.2250</field>
+    </record>
+    <record id="comp_rg18k_ag" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_rg18k"/>
+      <field name="metal_id" ref="raw_metal_ag"/>
+      <field name="ratio">0.0250</field>
+    </record>
+
+    <!-- ── Yellow Gold 14k (585) ──────────────────────────────── -->
+    <record id="alloy_yg14k" model="pdp.alloy">
+      <field name="code">YG14K</field>
+      <field name="name">Yellow Gold 14k</field>
+      <field name="purity">585</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+    </record>
+    <record id="comp_yg14k_au" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_yg14k"/>
+      <field name="metal_id" ref="raw_metal_au"/>
+      <field name="ratio">0.5850</field>
+    </record>
+    <record id="comp_yg14k_ag" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_yg14k"/>
+      <field name="metal_id" ref="raw_metal_ag"/>
+      <field name="ratio">0.2000</field>
+    </record>
+    <record id="comp_yg14k_cu" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_yg14k"/>
+      <field name="metal_id" ref="raw_metal_cu"/>
+      <field name="ratio">0.2150</field>
+    </record>
+
+    <!-- ── White Gold 14k (585) ───────────────────────────────── -->
+    <record id="alloy_wg14k" model="pdp.alloy">
+      <field name="code">WG14K</field>
+      <field name="name">White Gold 14k</field>
+      <field name="purity">585</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+    </record>
+    <record id="comp_wg14k_au" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_wg14k"/>
+      <field name="metal_id" ref="raw_metal_au"/>
+      <field name="ratio">0.5850</field>
+    </record>
+    <record id="comp_wg14k_pd" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_wg14k"/>
+      <field name="metal_id" ref="raw_metal_pd"/>
+      <field name="ratio">0.2000</field>
+    </record>
+    <record id="comp_wg14k_ag" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_wg14k"/>
+      <field name="metal_id" ref="raw_metal_ag"/>
+      <field name="ratio">0.1000</field>
+    </record>
+    <record id="comp_wg14k_cu" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_wg14k"/>
+      <field name="metal_id" ref="raw_metal_cu"/>
+      <field name="ratio">0.1150</field>
+    </record>
+
+    <!-- ── Silver 925 ─────────────────────────────────────────── -->
+    <record id="alloy_ag925" model="pdp.alloy">
+      <field name="code">AG925</field>
+      <field name="name">Silver 925</field>
+      <field name="purity">925</field>
+      <field name="main_metal_id" ref="raw_metal_ag"/>
+    </record>
+    <record id="comp_ag925_ag" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_ag925"/>
+      <field name="metal_id" ref="raw_metal_ag"/>
+      <field name="ratio">0.9250</field>
+    </record>
+    <record id="comp_ag925_cu" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_ag925"/>
+      <field name="metal_id" ref="raw_metal_cu"/>
+      <field name="ratio">0.0750</field>
+    </record>
+
+    <!-- ── Silver 950 ─────────────────────────────────────────── -->
+    <record id="alloy_ag950" model="pdp.alloy">
+      <field name="code">AG950</field>
+      <field name="name">Silver 950</field>
+      <field name="purity">950</field>
+      <field name="main_metal_id" ref="raw_metal_ag"/>
+    </record>
+    <record id="comp_ag950_ag" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_ag950"/>
+      <field name="metal_id" ref="raw_metal_ag"/>
+      <field name="ratio">0.9500</field>
+    </record>
+    <record id="comp_ag950_cu" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_ag950"/>
+      <field name="metal_id" ref="raw_metal_cu"/>
+      <field name="ratio">0.0500</field>
+    </record>
+
+    <!-- ── Platinum 950 ───────────────────────────────────────── -->
+    <record id="alloy_pt950" model="pdp.alloy">
+      <field name="code">PT950</field>
+      <field name="name">Platinum 950</field>
+      <field name="purity">950</field>
+      <field name="main_metal_id" ref="raw_metal_pt"/>
+    </record>
+    <record id="comp_pt950_pt" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_pt950"/>
+      <field name="metal_id" ref="raw_metal_pt"/>
+      <field name="ratio">0.9500</field>
+    </record>
+    <record id="comp_pt950_pd" model="pdp.alloy.component">
+      <field name="alloy_id" ref="alloy_pt950"/>
+      <field name="metal_id" ref="raw_metal_pd"/>
+      <field name="ratio">0.0500</field>
+    </record>
+
+  </data>
+</odoo>

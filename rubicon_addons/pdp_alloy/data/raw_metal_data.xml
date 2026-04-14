@@ -1,0 +1,71 @@
+<odoo>
+  <data noupdate="1">
+
+    <!-- Precious metals -->
+    <record id="raw_metal_au" model="pdp.raw.metal">
+      <field name="code">AU</field>
+      <field name="name">Gold</field>
+      <field name="density">19.3200</field>
+      <field name="price">0.0</field>
+      <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="raw_metal_ag" model="pdp.raw.metal">
+      <field name="code">AG</field>
+      <field name="name">Silver</field>
+      <field name="density">10.4900</field>
+      <field name="price">0.0</field>
+      <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="raw_metal_pt" model="pdp.raw.metal">
+      <field name="code">PT</field>
+      <field name="name">Platinum</field>
+      <field name="density">21.4500</field>
+      <field name="price">0.0</field>
+      <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="raw_metal_pd" model="pdp.raw.metal">
+      <field name="code">PD</field>
+      <field name="name">Palladium</field>
+      <field name="density">12.0200</field>
+      <field name="price">0.0</field>
+      <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="raw_metal_rh" model="pdp.raw.metal">
+      <field name="code">RH</field>
+      <field name="name">Rhodium</field>
+      <field name="density">12.4100</field>
+      <field name="price">0.0</field>
+      <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <!-- Base metals -->
+    <record id="raw_metal_cu" model="pdp.raw.metal">
+      <field name="code">CU</field>
+      <field name="name">Copper</field>
+      <field name="density">8.9600</field>
+      <field name="price">0.0</field>
+      <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="raw_metal_zn" model="pdp.raw.metal">
+      <field name="code">ZN</field>
+      <field name="name">Zinc</field>
+      <field name="density">7.1300</field>
+      <field name="price">0.0</field>
+      <field name="currency_id" ref="base.USD"/>
+    </record>
+
+    <record id="raw_metal_ni" model="pdp.raw.metal">
+      <field name="code">NI</field>
+      <field name="name">Nickel</field>
+      <field name="density">8.9080</field>
+      <field name="price">0.0</field>
+      <field name="currency_id" ref="base.USD"/>
+    </record>
+
+  </data>
+</odoo>
