@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pdp_alloy.access_pdp_raw_metal,access_pdp_raw_metal,pdp_alloy.model_pdp_raw_metal,base.group_user,1,1,1,1
+pdp_alloy.access_pdp_alloy,access_pdp_alloy,pdp_alloy.model_pdp_alloy,base.group_user,1,1,1,1
+pdp_alloy.access_pdp_alloy_component,access_pdp_alloy_component,pdp_alloy.model_pdp_alloy_component,base.group_user,1,1,1,1
