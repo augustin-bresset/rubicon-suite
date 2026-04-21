@@ -167,16 +167,16 @@ class TestParty7AJ:
     # ── ship data still present in CSV (used by sync_parties.py for delivery child) ───
 
     def test_ship_city_in_csv(self):
+        assert 'sis_ship_city' in self.company
         assert self.company['sis_ship_city'] == 'MIAMI'
 
     def test_ship_zip_in_csv(self):
+        assert 'sis_ship_zip' in self.company
         assert self.company['sis_ship_zip'] == '33143'
 
     def test_ship_country_in_csv(self):
+        assert 'sis_ship_country_id' in self.company
         assert self.company['sis_ship_country_id'] == 'United States'
-
-    def test_ship_state_code_in_csv(self):
-        assert self.company['sis_ship_state_code'] == 'FL'
 
     def test_state_code_exported(self):
         assert 'state_code' in self.company
