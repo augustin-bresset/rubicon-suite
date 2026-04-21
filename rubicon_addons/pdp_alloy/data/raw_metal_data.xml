@@ -1,7 +1,6 @@
 <odoo>
   <data noupdate="1">
 
-    <!-- Precious metals -->
     <record id="raw_metal_au" model="pdp.raw.metal">
       <field name="code">AU</field>
       <field name="name">Gold</field>
@@ -42,7 +41,6 @@
       <field name="currency_id" ref="base.USD"/>
     </record>
 
-    <!-- Base metals -->
     <record id="raw_metal_cu" model="pdp.raw.metal">
       <field name="code">CU</field>
       <field name="name">Copper</field>

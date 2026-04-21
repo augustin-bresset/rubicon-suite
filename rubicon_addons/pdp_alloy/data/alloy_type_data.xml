@@ -1,0 +1,61 @@
+<odoo>
+  <data noupdate="1">
+
+    <record id="alloy_type_B" model="pdp.alloy.type">
+      <field name="code">B</field>
+      <field name="name">Bronze</field>
+      <field name="main_metal_id" ref="raw_metal_cu"/>
+      <field name="purity_system">millesimal</field>
+    </record>
+
+    <record id="alloy_type_L" model="pdp.alloy.type">
+      <field name="code">L</field>
+      <field name="name">Palladium Gold</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="alloy_type_P" model="pdp.alloy.type">
+      <field name="code">P</field>
+      <field name="name">Pink Gold</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="alloy_type_PL" model="pdp.alloy.type">
+      <field name="code">PL</field>
+      <field name="name">Platinum</field>
+      <field name="main_metal_id" ref="raw_metal_pt"/>
+      <field name="purity_system">millesimal</field>
+    </record>
+
+    <record id="alloy_type_R" model="pdp.alloy.type">
+      <field name="code">R</field>
+      <field name="name">Yellow+Rhodium</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="alloy_type_S" model="pdp.alloy.type">
+      <field name="code">S</field>
+      <field name="name">Silver</field>
+      <field name="main_metal_id" ref="raw_metal_ag"/>
+      <field name="purity_system">millesimal</field>
+    </record>
+
+    <record id="alloy_type_W" model="pdp.alloy.type">
+      <field name="code">W</field>
+      <field name="name">White Gold</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="alloy_type_Y" model="pdp.alloy.type">
+      <field name="code">Y</field>
+      <field name="name">Yellow Gold</field>
+      <field name="main_metal_id" ref="raw_metal_au"/>
+      <field name="purity_system">carat</field>
+    </record>
+
+  </data>
+</odoo>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-<t t-name="pdp_alloy.alloy_manage">
+<t t-name="pdp_frontend.alloy_manage">
   <div class="o_action d-flex flex-column h-100">
 
     <!-- Header bar -->
@@ -16,18 +16,21 @@
               t-att-class="state.activeTab === 'raw_metals' ? 'fw-bold border-bottom border-primary' : ''"
               t-on-click="() => this.setTab('raw_metals')">Raw Metals</button>
       <button class="btn btn-link px-3 py-2 text-decoration-none"
+              t-att-class="state.activeTab === 'types_purities' ? 'fw-bold border-bottom border-primary' : ''"
+              t-on-click="() => this.setTab('types_purities')">Types &amp; Purities</button>
+      <button class="btn btn-link px-3 py-2 text-decoration-none"
               t-att-class="state.activeTab === 'alloys' ? 'fw-bold border-bottom border-primary' : ''"
               t-on-click="() => this.setTab('alloys')">Alloys</button>
     </div>
 
-    <!-- Tab: Raw Metals -->
+    <!-- ── Tab: Raw Metals ─────────────────────────────────────── -->
     <div t-if="state.activeTab === 'raw_metals'" class="flex-grow-1 overflow-auto p-3">
       <table class="table table-sm table-bordered align-middle">
         <thead class="table-light">
           <tr>
             <th>Code</th>
             <th>Name</th>
-            <th style="width:110px">Density (g/cm³)</th>
+            <th style="width:120px">Density (g/cm³)</th>
             <th style="width:110px">Price /g</th>
             <th style="width:130px">Currency</th>
             <th style="width:40px"></th>
@@ -36,26 +39,16 @@
         <tbody>
           <t t-foreach="state.metals" t-as="row" t-key="row._key">
             <tr t-att-class="row._dirty ? 'table-warning' : ''">
-              <td>
-                <input class="form-control form-control-sm"
-                       t-att-value="row.code"
-                       t-on-change="(ev) => this.onMetalFieldChange(row, 'code', ev)"/>
-              </td>
-              <td>
-                <input class="form-control form-control-sm"
-                       t-att-value="row.name"
-                       t-on-change="(ev) => this.onMetalFieldChange(row, 'name', ev)"/>
-              </td>
-              <td>
-                <input class="form-control form-control-sm text-end" type="number" step="0.0001"
-                       t-att-value="row.density"
-                       t-on-change="(ev) => this.onMetalFieldChange(row, 'density', ev)"/>
-              </td>
-              <td>
-                <input class="form-control form-control-sm text-end" type="number" step="0.01"
-                       t-att-value="row.price"
-                       t-on-change="(ev) => this.onMetalFieldChange(row, 'price', ev)"/>
-              </td>
+              <td><input class="form-control form-control-sm" t-att-value="row.code"
+                         t-on-change="(ev) => this.onMetalFieldChange(row, 'code', ev)"/></td>
+              <td><input class="form-control form-control-sm" t-att-value="row.name"
+                         t-on-change="(ev) => this.onMetalFieldChange(row, 'name', ev)"/></td>
+              <td><input class="form-control form-control-sm text-end" type="number" step="0.0001"
+                         t-att-value="row.density"
+                         t-on-change="(ev) => this.onMetalFieldChange(row, 'density', ev)"/></td>
+              <td><input class="form-control form-control-sm text-end" type="number" step="0.01"
+                         t-att-value="row.price"
+                         t-on-change="(ev) => this.onMetalFieldChange(row, 'price', ev)"/></td>
               <td>
                 <select class="form-select form-select-sm"
                         t-on-change="(ev) => this.onMetalFieldChange(row, 'currency_id', ev)">
@@ -69,7 +62,8 @@
                 </select>
               </td>
               <td class="text-center">
-                <button class="btn btn-sm btn-link text-danger p-0" t-on-click="() => this.removeMetal(row)">✕</button>
+                <button class="btn btn-sm btn-link text-danger p-0"
+                        t-on-click="() => this.removeMetal(row)">✕</button>
               </td>
             </tr>
           </t>
@@ -81,53 +75,32 @@
       <button class="btn btn-sm btn-outline-secondary" t-on-click="addMetal">+ Add Metal</button>
     </div>
 
-    <!-- Tab: Alloys -->
-    <div t-if="state.activeTab === 'alloys'" class="flex-grow-1 overflow-auto d-flex flex-column">
+    <!-- ── Tab: Types and Purities ────────────────────────────── -->
+    <div t-if="state.activeTab === 'types_purities'" class="flex-grow-1 overflow-auto p-3 d-flex gap-4">
 
-      <!-- Alloys table (top half) -->
-      <div class="p-3" style="flex: 0 0 auto;">
+      <!-- Types -->
+      <div style="flex: 1 1 400px;">
+        <h6 class="mb-2">Alloy Types</h6>
         <table class="table table-sm table-bordered align-middle">
           <thead class="table-light">
             <tr>
-              <th style="width:30px"></th>
-              <th>Code</th>
+              <th style="width:55px">Code</th>
               <th>Name</th>
-              <th style="width:100px">Purity</th>
-              <th>Main Metal</th>
-              <th style="width:90px">Total Ratio</th>
+              <th style="width:110px">Main Metal</th>
+              <th style="width:115px">System</th>
               <th style="width:40px"></th>
             </tr>
           </thead>
           <tbody>
-            <t t-foreach="state.alloys" t-as="row" t-key="row._key">
-              <tr t-att-class="(row._dirty ? 'table-warning' : '') + (state.selectedAlloyKey === row._key ? ' table-primary' : '')"
-                  style="cursor:pointer"
-                  t-on-click="() => this.selectAlloy(row)">
-                <td class="text-center">
-                  <span t-if="state.selectedAlloyKey === row._key">▶</span>
-                </td>
-                <td>
-                  <input class="form-control form-control-sm"
-                         t-att-value="row.code"
-                         t-on-click.stop=""
-                         t-on-change="(ev) => this.onAlloyFieldChange(row, 'code', ev)"/>
-                </td>
-                <td>
-                  <input class="form-control form-control-sm"
-                         t-att-value="row.name"
-                         t-on-click.stop=""
-                         t-on-change="(ev) => this.onAlloyFieldChange(row, 'name', ev)"/>
-                </td>
-                <td>
-                  <input class="form-control form-control-sm"
-                         t-att-value="row.purity"
-                         t-on-click.stop=""
-                         t-on-change="(ev) => this.onAlloyFieldChange(row, 'purity', ev)"/>
-                </td>
+            <t t-foreach="state.types" t-as="row" t-key="row._key">
+              <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                <td><input class="form-control form-control-sm" t-att-value="row.code"
+                           t-on-change="(ev) => this.onTypeFieldChange(row, 'code', ev)"/></td>
+                <td><input class="form-control form-control-sm" t-att-value="row.name"
+                           t-on-change="(ev) => this.onTypeFieldChange(row, 'name', ev)"/></td>
                 <td>
                   <select class="form-select form-select-sm"
-                          t-on-click.stop=""
-                          t-on-change="(ev) => this.onAlloyFieldChange(row, 'main_metal_id', ev)">
+                          t-on-change="(ev) => this.onTypeFieldChange(row, 'main_metal_id', ev)">
                     <option value="">—</option>
                     <t t-foreach="state.metals" t-as="m" t-key="m._key">
                       <option t-att-value="m.id || ''"
@@ -137,7 +110,164 @@
                     </t>
                   </select>
                 </td>
-                <td class="text-end">
+                <td>
+                  <select class="form-select form-select-sm"
+                          t-on-change="(ev) => this.onTypeFieldChange(row, 'purity_system', ev)">
+                    <option value="">—</option>
+                    <option value="carat"
+                            t-att-selected="row.purity_system === 'carat'">Carat</option>
+                    <option value="millesimal"
+                            t-att-selected="row.purity_system === 'millesimal'">Millesimal</option>
+                  </select>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-link text-danger p-0"
+                          t-on-click="() => this.removeType(row)">✕</button>
+                </td>
+              </tr>
+            </t>
+            <tr t-if="state.types.length === 0">
+              <td colspan="5" class="text-center text-muted fst-italic">No types.</td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="btn btn-sm btn-outline-secondary" t-on-click="addType">+ Add Type</button>
+      </div>
+
+      <!-- Purities -->
+      <div style="flex: 0 0 340px;">
+        <h6 class="mb-2">Purities</h6>
+        <table class="table table-sm table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width:70px">Code</th>
+              <th style="width:100px">Percent (%)</th>
+              <th>System</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <t t-foreach="state.purities" t-as="row" t-key="row._key">
+              <tr t-att-class="row._dirty ? 'table-warning' : ''">
+                <td><input class="form-control form-control-sm" t-att-value="row.code"
+                           t-on-change="(ev) => this.onPurityFieldChange(row, 'code', ev)"/></td>
+                <td><input class="form-control form-control-sm text-end" type="number" step="0.01"
+                           t-att-value="row.percent"
+                           t-on-change="(ev) => this.onPurityFieldChange(row, 'percent', ev)"/></td>
+                <td>
+                  <select class="form-select form-select-sm"
+                          t-on-change="(ev) => this.onPurityFieldChange(row, 'purity_system', ev)">
+                    <option value="carat"
+                            t-att-selected="row.purity_system === 'carat'">Carat</option>
+                    <option value="millesimal"
+                            t-att-selected="row.purity_system === 'millesimal'">Millesimal</option>
+                  </select>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-link text-danger p-0"
+                          t-on-click="() => this.removePurity(row)">✕</button>
+                </td>
+              </tr>
+            </t>
+            <tr t-if="state.purities.length === 0">
+              <td colspan="4" class="text-center text-muted fst-italic">No purities.</td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="btn btn-sm btn-outline-secondary" t-on-click="addPurity">+ Add Purity</button>
+      </div>
+
+    </div>
+
+    <!-- ── Tab: Alloys ─────────────────────────────────────────── -->
+    <div t-if="state.activeTab === 'alloys'" class="flex-grow-1 overflow-auto d-flex flex-column">
+
+      <!-- Reference alloy bar -->
+      <div class="d-flex align-items-center px-3 py-2 border-bottom bg-light gap-2">
+        <span class="text-muted small">Reference alloy:</span>
+        <select class="form-select form-select-sm" style="width:220px"
+                t-on-change="onConfigChange">
+          <option value="">— not set —</option>
+          <t t-foreach="state.alloys" t-as="a" t-key="a._key">
+            <option t-att-value="a.id || ''"
+                    t-att-selected="a.id === (Array.isArray(state.config.reference_alloy_id) ? state.config.reference_alloy_id[0] : state.config.reference_alloy_id)">
+              <t t-esc="a.name || a.code"/>
+            </option>
+          </t>
+        </select>
+        <span t-if="state.config.reference_alloy_id" class="text-muted small">
+          — weights are converted assuming equal volume
+        </span>
+      </div>
+
+      <!-- Alloys table -->
+      <div class="p-3" style="flex: 0 0 auto;">
+        <table class="table table-sm table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width:30px"></th>
+              <th style="width:90px">Code</th>
+              <th style="width:200px">Name</th>
+              <th style="width:160px">Type</th>
+              <th style="width:130px">Purity</th>
+              <th style="width:90px">Variant</th>
+              <th style="width:100px">Density</th>
+              <th style="width:90px">Total Ratio</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <t t-foreach="state.alloys" t-as="row" t-key="row._key">
+              <tr style="cursor:pointer"
+                  t-att-class="(row._dirty ? 'table-warning ' : '') + (state.selectedAlloyKey === row._key ? 'table-primary' : '')"
+                  t-on-click="() => this.selectAlloy(row)">
+                <td class="text-center">
+                  <span t-if="state.selectedAlloyKey === row._key">▶</span>
+                </td>
+                <td class="text-muted fst-italic small px-2">
+                  <t t-esc="row.code || '—'"/>
+                </td>
+                <td class="px-2">
+                  <t t-esc="row.name || '—'"/>
+                </td>
+                <td>
+                  <select class="form-select form-select-sm"
+                          t-on-click.stop=""
+                          t-on-change="(ev) => this.onAlloyFieldChange(row, 'type_id', ev)">
+                    <option value="">—</option>
+                    <t t-foreach="state.types" t-as="t" t-key="t._key">
+                      <option t-att-value="t.id || ''"
+                              t-att-selected="t.id === (Array.isArray(row.type_id) ? row.type_id[0] : row.type_id)">
+                        <t t-esc="t.code"/> — <t t-esc="t.name"/>
+                      </option>
+                    </t>
+                  </select>
+                </td>
+                <td>
+                  <select class="form-select form-select-sm"
+                          t-on-click.stop=""
+                          t-on-change="(ev) => this.onAlloyFieldChange(row, 'purity_id', ev)">
+                    <option value="">—</option>
+                    <t t-foreach="filteredPuritiesForAlloy(row)" t-as="p" t-key="p._key">
+                      <option t-att-value="p.id || ''"
+                              t-att-selected="p.id === (Array.isArray(row.purity_id) ? row.purity_id[0] : row.purity_id)">
+                        <t t-esc="p.code"/> (<t t-esc="p.percent"/>%)
+                      </option>
+                    </t>
+                  </select>
+                </td>
+                <td>
+                  <input class="form-control form-control-sm" style="width:80px"
+                         t-att-value="row.variant || ''"
+                         placeholder="—"
+                         t-on-click.stop=""
+                         t-on-change="(ev) => this.onAlloyFieldChange(row, 'variant', ev)"/>
+                </td>
+                <td class="text-end px-2 text-muted small">
+                  <t t-if="row.density" t-esc="row.density.toFixed(4)"/>
+                  <t t-else="">—</t>
+                </td>
+                <td class="text-end px-2">
                   <t t-esc="(row.total_ratio || 0).toFixed(4)"/>
                 </td>
                 <td class="text-center">
@@ -154,20 +284,34 @@
         <button class="btn btn-sm btn-outline-secondary" t-on-click="addAlloy">+ Add Alloy</button>
       </div>
 
-      <!-- Composition panel (bottom half, shown when an alloy is selected) -->
+      <!-- Composition panel -->
       <div t-if="state.selectedAlloyKey" class="border-top p-3 flex-grow-1 overflow-auto">
-        <div class="d-flex align-items-center mb-2 gap-2">
+
+        <!-- Composition header with ratio indicator -->
+        <div class="d-flex align-items-center mb-2 gap-3">
           <strong>Composition —</strong>
           <span t-esc="selectedAlloy ? selectedAlloy.name : ''"/>
-          <span class="text-muted ms-2">
-            Total: <t t-esc="state.components.reduce((s, c) => s + (c.ratio || 0), 0).toFixed(4)"/>
+          <t t-set="total" t-value="componentTotal"/>
+          <span t-if="total > 1.0 + 0.00001"
+                class="badge bg-danger">
+            Total: <t t-esc="total.toFixed(4)"/> — exceeds 1.0
           </span>
+          <span t-elif="total > 0 and total &lt; 1.0 - 0.00001"
+                class="badge bg-warning text-dark">
+            Total: <t t-esc="total.toFixed(4)"/> — incomplete
+          </span>
+          <span t-elif="total > 0"
+                class="badge bg-success">
+            Total: <t t-esc="total.toFixed(4)"/>
+          </span>
+          <span t-else="" class="text-muted small">No components yet.</span>
         </div>
-        <table class="table table-sm table-bordered align-middle">
+
+        <table class="table table-sm table-bordered align-middle" style="max-width:500px">
           <thead class="table-light">
             <tr>
               <th>Metal</th>
-              <th style="width:120px">Ratio (0–1)</th>
+              <th style="width:130px">Ratio (0–1)</th>
               <th style="width:40px"></th>
             </tr>
           </thead>
@@ -199,7 +343,7 @@
               </tr>
             </t>
             <tr t-if="state.components.length === 0">
-              <td colspan="3" class="text-center text-muted fst-italic">No components. Add one below.</td>
+              <td colspan="3" class="text-center text-muted fst-italic">No components.</td>
             </tr>
           </tbody>
         </table>
@@ -208,6 +352,7 @@
       <div t-else="" class="p-3 text-muted fst-italic">
         Select an alloy to view its composition.
       </div>
+
     </div>
 
   </div>

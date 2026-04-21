@@ -27,7 +27,7 @@
 
   <record id="action_pdp_metal_manage" model="ir.actions.client">
     <field name="name">Metals</field>
-    <field name="tag">pdp_frontend.metal_manage</field>
+    <field name="tag">pdp_frontend.alloy_manage</field>
   </record>
   <menuitem id="menu_pdp_manage_metals"
             name="Metals"

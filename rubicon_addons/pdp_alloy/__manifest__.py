@@ -3,11 +3,13 @@
     'version': '1.0',
     'summary': 'Raw metals and alloy composition management',
     'category': 'PDP',
-    'depends': ['web'],
+    'depends': ['rubicon_env'],
     'data': [
         'security/ir.model.access.csv',
         'views/alloy_menu.xml',
         'data/raw_metal_data.xml',
+        'data/alloy_type_data.xml',
+        'data/alloy_purity_data.xml',
         'data/alloy_data.xml',
     ],
     'assets': {

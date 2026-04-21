@@ -127,7 +127,7 @@
                           <t t-foreach="this.laborTypes" t-as="ltype" t-key="ltype.id">
                             <option t-att-value="ltype.id"
                                     t-att-selected="this.m2oId(row.labor_id) === ltype.id">
-                              <t t-esc="ltype.code"/>
+                              <t t-esc="ltype.name"/>
                             </option>
                           </t>
                         </select>
@@ -173,7 +173,7 @@
                           <t t-foreach="this.addonTypes" t-as="at" t-key="at.id">
                             <option t-att-value="at.id"
                                     t-att-selected="this.m2oId(row.addon_id) === at.id">
-                              <t t-esc="at.code"/>
+                              <t t-esc="at.name"/>
                             </option>
                           </t>
                         </select>

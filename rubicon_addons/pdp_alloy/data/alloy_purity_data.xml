@@ -1,0 +1,65 @@
+<odoo>
+  <data noupdate="1">
+
+    <record id="purity_9K" model="pdp.alloy.purity">
+      <field name="code">9K</field>
+      <field name="percent">40.0</field>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="purity_10K" model="pdp.alloy.purity">
+      <field name="code">10K</field>
+      <field name="percent">42.0</field>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="purity_14K" model="pdp.alloy.purity">
+      <field name="code">14K</field>
+      <field name="percent">61.0</field>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="purity_18K" model="pdp.alloy.purity">
+      <field name="code">18K</field>
+      <field name="percent">75.0</field>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="purity_22K" model="pdp.alloy.purity">
+      <field name="code">22K</field>
+      <field name="percent">91.7</field>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="purity_24K" model="pdp.alloy.purity">
+      <field name="code">24K</field>
+      <field name="percent">100.0</field>
+      <field name="purity_system">carat</field>
+    </record>
+
+    <record id="purity_925" model="pdp.alloy.purity">
+      <field name="code">925</field>
+      <field name="percent">92.5</field>
+      <field name="purity_system">millesimal</field>
+    </record>
+
+    <record id="purity_950" model="pdp.alloy.purity">
+      <field name="code">950</field>
+      <field name="percent">95.0</field>
+      <field name="purity_system">millesimal</field>
+    </record>
+
+    <record id="purity_955" model="pdp.alloy.purity">
+      <field name="code">955</field>
+      <field name="percent">95.5</field>
+      <field name="purity_system">millesimal</field>
+    </record>
+
+    <record id="purity_B" model="pdp.alloy.purity">
+      <field name="code">B</field>
+      <field name="percent">100.0</field>
+      <field name="purity_system">millesimal</field>
+    </record>
+
+  </data>
+</odoo>

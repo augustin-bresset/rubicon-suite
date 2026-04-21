@@ -1,7 +1,7 @@
 <odoo>
   <record id="action_pdp_alloy_manage" model="ir.actions.client">
     <field name="name">Alloys</field>
-    <field name="tag">pdp_alloy.alloy_manage</field>
+    <field name="tag">pdp_frontend.alloy_manage</field>
   </record>
 
   <menuitem id="menu_pdp_alloy_root"

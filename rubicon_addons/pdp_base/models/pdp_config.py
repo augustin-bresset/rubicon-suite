@@ -13,6 +13,13 @@ class PdpConfig(models.Model):
         required=True,
         help='Currency applied by default to all labor and misc costs entered in the workspace.',
     )
+    reference_alloy_id = fields.Many2one(
+        'pdp.alloy',
+        string='Reference Alloy',
+        help='Alloy used as reference for weight conversions across the suite '
+             '(e.g. White Gold 18k). When switching alloy on a product, weights '
+             'are recalculated to preserve the same volume.',
+    )
 
     @api.model
     def get_singleton(self):

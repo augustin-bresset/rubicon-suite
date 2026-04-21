@@ -7,21 +7,43 @@ class Alloy(models.Model):
     _rec_name = 'name'
     _order = 'code'
 
-    code = fields.Char(string='Code', required=True)
-    name = fields.Char(string='Name', required=True)
-    purity = fields.Char(
-        string='Purity',
-        help='Purity of the main metal, e.g. 18k, 925, 750.',
+    type_id = fields.Many2one(
+        'pdp.alloy.type',
+        string='Type',
+        help='e.g. Yellow Gold, White Gold, Silver …',
     )
-    main_metal_id = fields.Many2one(
-        'pdp.raw.metal',
-        string='Main Metal',
-        help='The primary metal in this alloy.',
+    purity_id = fields.Many2one(
+        'pdp.alloy.purity',
+        string='Purity',
+    )
+    variant = fields.Char(
+        string='Variant',
+        default='',
+        help='Optional suffix for alloys sharing the same type and purity (e.g. HARD, SOFT, V2).',
+    )
+    code = fields.Char(
+        string='Code',
+        compute='_compute_code',
+        store=True,
+        readonly=True,
+    )
+    name = fields.Char(
+        string='Name',
+        compute='_compute_name',
+        store=True,
+        readonly=True,
     )
     component_ids = fields.One2many(
         'pdp.alloy.component',
         'alloy_id',
         string='Composition',
+    )
+    density = fields.Float(
+        string='Density (g/cm³)',
+        compute='_compute_density',
+        store=True,
+        digits=(10, 4),
+        help='Weighted average density computed from the composition ratios.',
     )
     total_ratio = fields.Float(
         string='Total Ratio',
@@ -30,13 +52,51 @@ class Alloy(models.Model):
         store=False,
     )
 
+    @api.depends('type_id', 'purity_id', 'variant')
+    def _compute_code(self):
+        for alloy in self:
+            base = (alloy.type_id.code or '') + (alloy.purity_id.code or '')
+            alloy.code = (base + '-' + alloy.variant) if alloy.variant else base
+
+    @api.depends('type_id', 'purity_id')
+    def _compute_name(self):
+        for alloy in self:
+            parts = []
+            if alloy.type_id:
+                parts.append(alloy.type_id.name)
+            if alloy.purity_id:
+                parts.append(alloy.purity_id.code)
+            alloy.name = ' '.join(parts) if parts else (alloy.code or '')
+
+    @api.depends('component_ids.ratio', 'component_ids.metal_id', 'component_ids.metal_id.density')
+    def _compute_density(self):
+        for alloy in self:
+            alloy.density = sum(
+                c.ratio * (c.metal_id.density or 0.0)
+                for c in alloy.component_ids
+            )
+
     @api.depends('component_ids.ratio')
     def _compute_total_ratio(self):
         for alloy in self:
             alloy.total_ratio = sum(alloy.component_ids.mapped('ratio'))
 
+    def convert_weight(self, weight, to_alloy):
+        """Return the weight of the same volume cast in `to_alloy`.
+
+        Formula: w_new = w_ref × (density_new / density_ref)
+
+        Returns False if self has no density (composition incomplete).
+        """
+        self.ensure_one()
+        if not self.density:
+            return False
+        if not to_alloy.density:
+            return False
+        return weight * to_alloy.density / self.density
+
     _sql_constraints = [
-        ('code_uniq', 'UNIQUE(code)', 'Alloy code must be unique.'),
+        ('type_purity_variant_uniq', 'UNIQUE(type_id, purity_id, variant)', 'This type + purity + variant combination already exists.'),
     ]
 
 
