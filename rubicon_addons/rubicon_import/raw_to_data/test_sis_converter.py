@@ -175,6 +175,14 @@ class TestParty7AJ:
         assert 'sis_ship_country_id' in self.company
         assert self.company['sis_ship_country_id'] == 'United States'
 
+    def test_state_code_exported(self):
+        assert 'state_code' in self.company
+        assert self.company['state_code'] == 'FL'
+
+    def test_ship_state_code_exported(self):
+        assert 'sis_ship_state_code' in self.company
+        assert self.company['sis_ship_state_code'] == 'FL'
+
     # ── removed / forbidden fields ────────────────────────
 
     def test_no_contact_type_field(self):

@@ -406,16 +406,17 @@ def make_row_to_party(lookups):
         # Ship address: find second country occurrence after the company block.
         # The country NAME is the anchor (city, state, zip, cc follow at +1..+4).
         # fedex_acc is the second-to-last field; stamp is always row[-1].
-        ship_city = ship_zip = ship_cc = ''
+        ship_city = ship_zip = ship_cc = ship_state = ''
         if cc_col is not None:
             search_from = (contact_name_col if contact_name_col is not None else cc_col + 14) + 3
             for i in range(search_from, min(len(row), 70)):
                 if row[i].strip().upper() in country_names:
                     scc = i + 4
                     if scc < len(row) and row[scc].strip() in country_codes:
-                        ship_city = _get(row, scc - 3)
-                        ship_zip  = _get(row, scc - 1)
-                        ship_cc   = _get(row, scc)
+                        ship_city  = _get(row, scc - 3)
+                        ship_state = _get(row, scc - 2).strip()
+                        ship_zip   = _get(row, scc - 1)
+                        ship_cc    = _get(row, scc)
                         break
         fedex_acc = s(row[-2]) if len(row) >= 2 else ''
 
@@ -430,6 +431,7 @@ def make_row_to_party(lookups):
             'street': _get(row, 5),
             'street2': _get(row, 4),
             'city': city,
+            'state_code': _get(row, cc_col - 2).strip() if cc_col is not None else '',
             'zip': zip_code,
             'country_id': _SIS_TO_ODOO_COUNTRY.get(country_cc, '') if country_cc else '',
             'phone': clean_phone(_get(row, phone_col)),
@@ -445,6 +447,7 @@ def make_row_to_party(lookups):
             'sis_ship_method_id': lookups['shipper'].get(ship_method, ''),
             'sis_ship_fedex_acc': fedex_acc,
             'sis_ship_city': ship_city,
+            'sis_ship_state_code': ship_state,
             'sis_ship_zip': ship_zip,
             'sis_ship_country_id': _SIS_TO_ODOO_COUNTRY.get(ship_cc, '') if ship_cc else '',
             'sis_ship_stamp': s(row[-1]) if row else '',
@@ -661,11 +664,12 @@ if __name__ == '__main__':
         csv_name='CustomersJoined.csv',
         fieldnames=['id', 'sis_code', 'name', 'active', 'customer_rank', 'supplier_rank',
                     'is_company', 'street', 'street2',
-                    'city', 'zip', 'country_id',
+                    'city', 'state_code', 'zip', 'country_id',
                     'phone', 'mobile', 'email', 'website', 'notes',
                     'sis_is_customer', 'sis_is_vendor', 'sis_contact',
                     'margin_id', 'sis_pay_term_id', 'sis_ship_method_id',
-                    'sis_ship_fedex_acc', 'sis_ship_city', 'sis_ship_zip',
+                    'sis_ship_fedex_acc',
+                    'sis_ship_city', 'sis_ship_state_code', 'sis_ship_zip',
                     'sis_ship_country_id', 'sis_ship_stamp'],
         row_to_dict=make_row_to_party(lookups),
         dest_folder=sis_party_data,
