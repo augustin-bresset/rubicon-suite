@@ -132,8 +132,9 @@ class TestParty7AJ:
     def test_notes_contain_mobile(self):
         assert 'mobile 089-0440321' in self.company['notes']
 
-    def test_sis_contact_name(self):
-        assert 'sis_contact' in self.company
+    # ── contact name still in CSV (used by sync_parties.py for contact child) ──────
+
+    def test_contact_name_in_csv(self):
         assert self.company['sis_contact'] == 'Mr. Jose V. ROSAS'
 
     # ── defaults ──────────────────────────────────────────
@@ -163,17 +164,19 @@ class TestParty7AJ:
         assert 'sis_ship_stamp' in self.company
         assert self.company['sis_ship_stamp'] == '750 + 2'
 
-    def test_ship_city(self):
-        assert 'sis_ship_city' in self.company
+    # ── ship data still present in CSV (used by sync_parties.py for delivery child) ───
+
+    def test_ship_city_in_csv(self):
         assert self.company['sis_ship_city'] == 'MIAMI'
 
-    def test_ship_zip(self):
-        assert 'sis_ship_zip' in self.company
+    def test_ship_zip_in_csv(self):
         assert self.company['sis_ship_zip'] == '33143'
 
-    def test_ship_country_odoo_name(self):
-        assert 'sis_ship_country_id' in self.company
+    def test_ship_country_in_csv(self):
         assert self.company['sis_ship_country_id'] == 'United States'
+
+    def test_ship_state_code_in_csv(self):
+        assert self.company['sis_ship_state_code'] == 'FL'
 
     def test_state_code_exported(self):
         assert 'state_code' in self.company
