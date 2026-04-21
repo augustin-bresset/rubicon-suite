@@ -37,64 +37,27 @@ def create(model, vals):
 def write(model, ids, vals):
     return models.execute_kw(DB, uid, PASS, model, 'write', [ids, vals])
 
-# --- Country mapping: SIS code → res.country ID ---
+# --- Country lookup: Odoo name → res.country ID ---
 print("Loading res.country mapping...")
-countries = search_read('res.country', [], ['id', 'code', 'name'])
-country_by_code = {}
-for c in countries:
-    country_by_code[c['code'].upper()] = c['id']
+countries = search_read('res.country', [], ['id', 'name'])
+country_by_name = {c['name'].upper(): c['id'] for c in countries}
 print(f"  {len(countries)} countries available")
 
-# SIS custom codes → ISO codes
-SIS_TO_ISO = {
-    'AE': 'AE', 'AR': 'AR', 'AU': 'AU', 'BE': 'BE',
-    'BT': 'BL',  # St. Barthelemy
-    'BZ': 'BR',  # Brazil
-    'CA': 'CA',
-    'CB': 'CO',  # Colombia
-    'CH': 'CL',  # Chile (SIS used CH for Chile, not Switzerland)
-    'CN': 'CN', 'CO': 'CR',  # Costa Rica
-    'EG': 'EG',
-    'EN': 'GB',  # UK
-    'FR': 'FR',
-    'GM': 'DE',  # Germany
-    'GR': 'GR',
-    'HD': 'HN',  # Honduras
-    'HK': 'HK',
-    'HO': 'NL',  # Holland → Netherlands
-    'IN': 'ID',  # Indonesia
-    'IS': 'IL',  # Israel
-    'IT': 'IT', 'JP': 'JP', 'KR': 'KR',
-    'ME': 'MX',  # Mexico
-    'ML': 'MY',  # Malaysia
-    'NC': 'NC', 'NL': 'NL', 'NZ': 'NZ', 'RU': 'RU',
-    'SA': 'ZA',  # South Africa
-    'SG': 'SG',
-    'SP': 'ES',  # Spain
-    'SU': 'SA',  # Saudi Arabia
-    'SW': 'CH',  # Switzerland
-    'TA': 'TZ',  # Tanzania
-    'TH': 'TH',
-    'TU': 'TR',  # Turkey
-    'TW': 'TW',
-    'UK': 'UA',  # Ukraine
-    'US': 'US', 'VE': 'VE',
-}
-
-def resolve_country(sis_xmlid):
-    """Resolve sis_country_XX → res.country ID."""
-    if not sis_xmlid or not sis_xmlid.startswith('sis_country_'):
+def resolve_country(name):
+    """Resolve Odoo res.country name → ID (case-insensitive)."""
+    if not name:
         return None
-    sis_code = sis_xmlid.replace('sis_country_', '').upper()
-    iso_code = SIS_TO_ISO.get(sis_code, sis_code)
-    return country_by_code.get(iso_code)
+    return country_by_name.get(name.strip().upper())
 
-# --- Load pay terms and shippers for reference ---
+# --- Load pay terms, shippers and margins for reference ---
 pay_terms = search_read('sis.pay.term', [], ['id', 'name'])
 pay_term_by_name = {p['name']: p['id'] for p in pay_terms}
 
 shippers = search_read('sis.shipper', [], ['id', 'name'])
 shipper_by_name = {s['name']: s['id'] for s in shippers}
+
+margins = search_read('pdp.margin', [], ['id', 'code'])
+margin_by_code = {m['code']: m['id'] for m in margins}
 
 EMAIL_RE = re.compile(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}')
 PHONE_RE = re.compile(r'^[\+\d][\d\s\-\(\)\.]{6,}$')
@@ -110,20 +73,22 @@ print(f"  {len(rows)} rows")
 
 # --- Process ---
 created_companies = 0
-created_individuals = 0
 skipped = 0
 sis_code_to_partner_id = {}  # SIS code → new partner ID
 last_company_partner_id = None
 last_company_sis_code = None
 
 for row in rows:
-    code = row.get('code', '').strip()
-    company_name = row.get('company', '').strip()
-    contact_type = row.get('contact_type', '').strip()
-    country_ref = row.get('country_id/id', '').strip()
+    # New CSV field names (as of raw_to_data_sis.py refactor)
+    code         = row.get('sis_code', '').strip()
+    company_name = row.get('name', '').strip()
+    is_company   = row.get('is_company', '').strip() == 'True'
 
-    if contact_type == 'company':
-        # Build company partner vals
+    if not company_name:
+        skipped += 1
+        continue
+
+    if is_company:
         vals = {
             'name': company_name,
             'company_type': 'company',
@@ -132,59 +97,78 @@ for row in rows:
         }
 
         # Address
-        addr = row.get('address', '').strip()
-        if addr and addr not in ('1', '0', 'NA'):
-            vals['street'] = addr
+        street = row.get('street', '').strip()
+        if street:
+            vals['street'] = street
+        street2 = row.get('street2', '').strip()
+        if street2 and street2 not in ('1', '0', 'NA'):
+            vals['street2'] = street2
         city = row.get('city', '').strip()
         if city:
             vals['city'] = city
-        state = row.get('state', '').strip()
-        if state:
-            vals['state_id'] = False  # We won't try to resolve state
         zip_val = row.get('zip', '').strip()
         if zip_val:
             vals['zip'] = zip_val
 
-        # Country
-        country_id = resolve_country(country_ref)
+        # Country: CSV now holds the Odoo res.country name (e.g. "United States")
+        country_id = resolve_country(row.get('country_id', ''))
         if country_id:
             vals['country_id'] = country_id
 
         # Communication
         phone = row.get('phone', '').strip()
-        if phone and PHONE_RE.match(phone):
+        if phone:
             vals['phone'] = phone
-        fax = row.get('fax', '').strip()
-        # No fax field in res.partner, skip
+        mobile = row.get('mobile', '').strip()
+        if mobile:
+            vals['mobile'] = mobile
         email = row.get('email', '').strip()
         if email and EMAIL_RE.search(email):
             vals['email'] = email
-        homepage = row.get('homepage', '').strip()
-        if homepage:
-            vals['website'] = homepage
+        website = row.get('website', '').strip()
+        if website:
+            vals['website'] = website
 
         # Notes
         notes = row.get('notes', '').strip()
         if notes:
             vals['comment'] = notes
 
-        # SIS specifics
-        group = row.get('group_code', '').strip()
-        if group:
-            vals['sis_group'] = group
-        account = row.get('account', '').strip()
-        if account:
-            vals['sis_account'] = account
+        # SIS identity
+        sis_contact = row.get('sis_contact', '').strip()
+        if sis_contact:
+            vals['sis_contact'] = sis_contact
+        vals['sis_is_customer'] = row.get('sis_is_customer', '').strip() == 'True'
+        vals['sis_is_vendor']   = row.get('sis_is_vendor', '').strip() == 'True'
 
-        pay_term = row.get('pay_term_id', '').strip()
+        # Margin: CSV holds pdp.margin code (_rec_name='code'), e.g. "WHO"
+        margin_code = row.get('margin_id', '').strip()
+        if margin_code and margin_code in margin_by_code:
+            vals['margin_id'] = margin_by_code[margin_code]
+
+        pay_term = row.get('sis_pay_term_id', '').strip()
         if pay_term and pay_term in pay_term_by_name:
             vals['sis_pay_term_id'] = pay_term_by_name[pay_term]
 
-        ship_method = row.get('ship_method_id', '').strip()
+        ship_method = row.get('sis_ship_method_id', '').strip()
         if ship_method and ship_method in shipper_by_name:
             vals['sis_ship_method_id'] = shipper_by_name[ship_method]
 
-        stamp = row.get('ship_stamp', '').strip()
+        # Shipment details
+        fedex_acc = row.get('sis_ship_fedex_acc', '').strip()
+        if fedex_acc:
+            vals['sis_ship_fedex_acc'] = fedex_acc
+        ship_city = row.get('sis_ship_city', '').strip()
+        if ship_city:
+            vals['sis_ship_city'] = ship_city
+        ship_zip = row.get('sis_ship_zip', '').strip()
+        if ship_zip:
+            vals['sis_ship_zip'] = ship_zip
+        ship_country_id = resolve_country(row.get('sis_ship_country_id', ''))
+        if ship_country_id:
+            vals['sis_ship_country_id'] = ship_country_id
+
+        stamp = row.get('sis_ship_stamp', '').strip()
         if stamp:
             vals['sis_ship_stamp'] = stamp
 
@@ -195,31 +179,12 @@ for row in rows:
             last_company_sis_code = code
             created_companies += 1
         except Exception as e:
-            print(f"  ⚠ Error creating company [{code}] {company_name}: {e}")
-            skipped += 1
-
-    elif contact_type == 'individual':
-        # Individual: just name, linked to parent
-        vals = {
-            'name': company_name,  # 'company' field in CSV = person name
-            'company_type': 'person',
-            'is_company': False,
-        }
-
-        if last_company_partner_id:
-            vals['parent_id'] = last_company_partner_id
-
-        try:
-            partner_id = create('res.partner', vals)
-            created_individuals += 1
-        except Exception as e:
-            print(f"  ⚠ Error creating individual {company_name}: {e}")
+            print(f"  Error creating company [{code}] {company_name}: {e}")
             skipped += 1
 
 print(f"\n[SUCCESS] Migration complete!")
-print(f"   Companies created:    {created_companies}")
-print(f"   Individuals created:  {created_individuals}")
-print(f"   Skipped:              {skipped}")
+print(f"   Companies created: {created_companies}")
+print(f"   Skipped:           {skipped}")
 
 # --- Re-link documents ---
 print(f"\n=== Re-linking sis.document.party_id ===")

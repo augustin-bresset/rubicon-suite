@@ -10,6 +10,7 @@ Usage: python3 -m rubicon_import.raw_to_data.raw_to_data_sis
 import os
 import sys
 import csv
+import re
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 
@@ -59,22 +60,12 @@ def safe_date(val):
 
 
 def clean_phone(val):
-    """Keep only digits and leading +, separated by space if multiple numbers."""
+    """Keep digits, spaces, + and - (readable format); strip null bytes and leading/trailing space."""
     v = s(val)
     if not v:
         return ''
-    # Allowed chars: digits, +, space, comma (for split)
-    # But user wants cleaning. Let's keep it simple:
-    # 1. Split by comma or slash if present
-    import re
-    parts = re.split(r'[,/]', v)
-    cleaned_parts = []
-    for p in parts:
-        # Keep digits and +
-        clean = re.sub(r'[^0-9+]', '', p)
-        if clean:
-            cleaned_parts.append(clean)
-    return ', '.join(cleaned_parts)
+    v = re.sub(r'[^\d +\-()]', '', v)
+    return v.strip()
 
 def clean_country(val):
     """Normalize country names."""
@@ -90,6 +81,53 @@ def clean_country(val):
         # Add more as discovered
     }
     return mapping.get(v, v)
+
+# Maps SIS country codes (Countries.csv col 0) → Odoo res.country names
+_SIS_TO_ODOO_COUNTRY = {
+    'AE': 'United Arab Emirates',
+    'AR': 'Argentina',
+    'AU': 'Australia',
+    'BE': 'Belgium',
+    'BT': 'Saint Barthélemy',
+    'BZ': 'Brazil',
+    'CA': 'Canada',
+    'CB': 'Colombia',
+    'CH': 'Chile',
+    'CN': 'China',
+    'CO': 'Costa Rica',
+    'EG': 'Egypt',
+    'EN': 'United Kingdom',
+    'FR': 'France',
+    'GM': 'Germany',
+    'GR': 'Greece',
+    'HD': 'Honduras',
+    'HK': 'Hong Kong',
+    'HO': 'Netherlands',
+    'IN': 'Indonesia',
+    'IS': 'Israel',
+    'IT': 'Italy',
+    'JP': 'Japan',
+    'KR': 'South Korea',
+    'ME': 'Mexico',
+    'ML': 'Malaysia',
+    'NC': 'New Caledonia',
+    'NL': 'Netherlands',
+    'NZ': 'New Zealand',
+    'RU': 'Russia',
+    'SA': 'South Africa',
+    'SG': 'Singapore',
+    'SP': 'Spain',
+    'SU': 'Saudi Arabia',
+    'SW': 'Switzerland',
+    'TA': 'Tanzania, United Republic of',
+    'TH': 'Thailand',
+    'TU': 'Turkey',
+    'TW': 'Taiwan',
+    'UK': 'Ukraine',
+    'US': 'United States',
+    'VE': 'Venezuela',
+}
+
 
 # ═══════════════════════════════════════════════════════
 # Build lookup maps from raw CSVs (code/id → name)
@@ -216,61 +254,202 @@ def make_row_to_trade_fair(lookups):
             'id': f'sis_tradefair_{fid}',
             'name': name,
             'city': city,
-            'country_id': lookups['country'].get(country_code, ''),
+            'country_id': _SIS_TO_ODOO_COUNTRY.get(country_code, ''),
             'date_start': date_start,
             'date_end': date_end,
         }
     return row_to_trade_fair
 
 
+_RECORD_RE = re.compile(r'^(\d+),')
+
+_DIAMOND_BOILERPLATE = (
+    'The seller hereby guarantees that these diamonds are "conflict-free" and confirms\n'
+    'its adherence to compliance with the SoW guidelines of the WDC "\n'
+    '- "The diamonds here invoiced are exclusively of natural origin and untreated, on the\n'
+    'basis of personal knowledge and / or written guarantees provided by the supplier of\n'
+    'these diamonds"'
+)
+
+
+def preprocess_customers(src_path, dst_path):
+    """
+    Join multi-line BCP Customers.csv records into single lines.
+
+    The MSSQL BCP export embeds literal newlines in text fields without quoting,
+    so csv.reader splits each physical line as a separate row. Each logical record
+    starts with a monotonically-increasing integer ID. We detect record boundaries
+    by that ID and join the physical lines, then strip the diamond boilerplate that
+    appears verbatim in every notes field.
+    """
+    with open(src_path, encoding='utf-8') as f:
+        raw = f.readlines()
+
+    records = []
+    cur = []
+    last_id = -1
+    for line in raw:
+        m = _RECORD_RE.match(line)
+        if m:
+            pid = int(m.group(1))
+            if pid > last_id:
+                if cur:
+                    records.append(''.join(cur))
+                cur = [line]
+                last_id = pid
+                continue
+        cur.append(line)
+    if cur:
+        records.append(''.join(cur))
+
+    with open(dst_path, 'w', encoding='utf-8', newline='') as f:
+        for rec in records:
+            cleaned = rec.replace(_DIAMOND_BOILERPLATE, '')
+            cleaned = cleaned.replace('\x00', '')
+            cleaned = cleaned.replace('\n', ' ').replace('\r', '').strip()
+            f.write(cleaned + '\n')
+
+    print(f"[INFO] preprocess_customers: {len(records)} records → {dst_path}")
+    return dst_path
+
+
 def make_row_to_party(lookups):
+    # Build country_name → code lookup for anchor detection
+    country_name_to_code = {}
+    with open(os.path.join(backup_sis, 'Countries.csv'), encoding='utf-8') as f:
+        for row in csv.reader(f):
+            if len(row) >= 2:
+                country_name_to_code[row[1].strip().upper()] = row[0].strip()
+    country_names = set(country_name_to_code.keys())
+    country_codes = set(lookups['country'].keys())
+
+    def _find_cc_col(tokens):
+        """
+        Locate the country_code column using the full country_name as an anchor.
+        country_code is always 4 columns after the country_name (city, state, zip, cc).
+        Falls back to a direct scan from col 10 for records with missing/null country_name.
+        """
+        for i, t in enumerate(tokens):
+            if t.strip().upper() in country_names:
+                cc = i + 4
+                if cc < len(tokens) and tokens[cc].strip() in country_codes:
+                    return cc
+        for i in range(10, min(len(tokens), 35)):
+            if tokens[i].strip() in country_codes:
+                return i
+        return None
+
+    def _get(tokens, col, default=''):
+        if col is None or col < 0 or col >= len(tokens):
+            return default
+        return s(tokens[col])
+
     def row_to_party(row):
-        if len(row) < 14:
+        if len(row) < 4:
             return None
         pid = s(row[0])
         code = s(row[1])
         company = s(row[2])
         if not pid or not company:
             return None
+        try:
+            int(pid)
+        except ValueError:
+            return None  # skip garbage rows from bad joins
 
-        country_code = s(row[13]) if len(row) > 13 else ''
-        pay_term = s(row[21]) if len(row) > 21 else ''
-        ship_method = s(row[22]) if len(row) > 22 else ''
+        is_company = bool(code and code != '0')
+        cc_col = _find_cc_col(row)
 
-        # Schema mappings:
-        # row[24]: Inactive (bit) -> 1=Inactive, 0=Active
-        # row[27]: Customer (bit) -> 1=Customer
-        # row[28]: Vendor (bit) -> 1=Vendor
+        if cc_col is not None:
+            city        = _get(row, cc_col - 3)
+            zip_code    = _get(row, cc_col - 1)
+            country_cc  = _get(row, cc_col)
+            phone_col        = cc_col + 1
+            fax_col          = cc_col + 3
+            email_col        = cc_col + 4
+            notes1_col       = cc_col + 5
+            group_col        = cc_col + 7
+            pay_term_col     = cc_col + 8
+            ship_method_col  = cc_col + 9
+            notes2_col       = cc_col + 12
+            inactive_col     = cc_col + 13
+            contact_name_col = cc_col + 14
+            customer_col     = cc_col + 16
+            vendor_col       = cc_col + 17
+        else:
+            city = zip_code = country_cc = ''
+            phone_col = fax_col = email_col = notes1_col = None
+            group_col = pay_term_col = ship_method_col = None
+            notes2_col = inactive_col = contact_name_col = None
+            customer_col = vendor_col = None
 
-        inactive_bit = s(row[24]) == '1' if len(row) > 24 else False
-        customer_bit = s(row[27]) == '1' if len(row) > 27 else False
-        vendor_bit = s(row[28]) == '1' if len(row) > 28 else False
-        
-        is_active = not inactive_bit
+        pay_term    = _get(row, pay_term_col)
+        ship_method = _get(row, ship_method_col)
 
-        return {
+        notes1 = _get(row, notes1_col).strip()
+        notes2 = _get(row, notes2_col).strip()
+        notes = ' | '.join(filter(None, [notes1, notes2]))
+
+        inactive_bit = _get(row, inactive_col) == '1'
+        customer_bit = _get(row, customer_col) == '1'
+        vendor_bit   = _get(row, vendor_col)   == '1'
+
+        contact_name = _get(row, contact_name_col).strip() if contact_name_col else ''
+
+        # Email: strip "mailto:" prefix if present
+        email_raw = _get(row, email_col)
+        email = re.sub(r'^mailto:', '', email_raw, flags=re.IGNORECASE).strip()
+
+        # Margin: stored as pdp.margin code (_rec_name='code'), e.g. "WHO" = Wholesale
+        margin_code = _get(row, group_col).strip() if group_col else ''
+
+        # Ship address: find second country occurrence after the company block.
+        # The country NAME is the anchor (city, state, zip, cc follow at +1..+4).
+        # fedex_acc is the second-to-last field; stamp is always row[-1].
+        ship_city = ship_zip = ship_cc = ''
+        if cc_col is not None:
+            search_from = (contact_name_col if contact_name_col is not None else cc_col + 14) + 3
+            for i in range(search_from, min(len(row), 70)):
+                if row[i].strip().upper() in country_names:
+                    scc = i + 4
+                    if scc < len(row) and row[scc].strip() in country_codes:
+                        ship_city = _get(row, scc - 3)
+                        ship_zip  = _get(row, scc - 1)
+                        ship_cc   = _get(row, scc)
+                        break
+        fedex_acc = s(row[-2]) if len(row) >= 2 else ''
+
+        yield {
             'id': f'sis_party_{pid}',
-            'code': code,
-            'company': company,
-            'active': is_active,
+            'sis_code': code,
+            'name': company,
+            'active': not inactive_bit,
             'customer_rank': 1 if customer_bit else 0,
             'supplier_rank': 1 if vendor_bit else 0,
-            'contact_type': 'company' if code and code != '0' else 'individual',
-            'is_company': True if code and code != '0' else False,
-            'address': s(row[4]) if len(row) > 4 else '',
-            'city': s(row[7]) if len(row) > 7 else '',
-            'zip': s(row[8]) if len(row) > 8 else '',
-            'country_id': lookups['country'].get(clean_country(s(row[13])), ''),
-            'phone': clean_phone(row[14]) if len(row) > 14 else '',
-            'homepage': s(row[15]) if len(row) > 15 else '',
-            'fax': s(row[16]) if len(row) > 16 else '',
-            'email': s(row[17]) if len(row) > 17 else '',
-            'notes': s(row[18]) if len(row) > 18 else '',
-            'group_code': s(row[20]) if len(row) > 20 else '',
-            'pay_term_id': lookups['payterm'].get(pay_term, ''),
-            'ship_method_id': lookups['shipper'].get(ship_method, ''),
-            'ship_stamp': s(row[25]) if len(row) > 25 else '',
+            'is_company': is_company,
+            'street': _get(row, 5),
+            'street2': _get(row, 4),
+            'city': city,
+            'zip': zip_code,
+            'country_id': _SIS_TO_ODOO_COUNTRY.get(country_cc, '') if country_cc else '',
+            'phone': clean_phone(_get(row, phone_col)),
+            'mobile': clean_phone(_get(row, cc_col + 2)) if cc_col is not None else '',
+            'email': email,
+            'website': '',
+            'notes': notes,
+            'sis_is_customer': customer_bit,
+            'sis_is_vendor': vendor_bit,
+            'sis_contact': contact_name,
+            'margin_id': margin_code,
+            'sis_pay_term_id': lookups['payterm'].get(pay_term, ''),
+            'sis_ship_method_id': lookups['shipper'].get(ship_method, ''),
+            'sis_ship_fedex_acc': fedex_acc,
+            'sis_ship_city': ship_city,
+            'sis_ship_zip': ship_zip,
+            'sis_ship_country_id': _SIS_TO_ODOO_COUNTRY.get(ship_cc, '') if ship_cc else '',
+            'sis_ship_stamp': s(row[-1]) if row else '',
         }
+
     return row_to_party
 
 
@@ -472,12 +651,22 @@ if __name__ == '__main__':
         src_folder=backup_sis,
     )
 
+    customers_joined = os.path.join(backup_sis, 'CustomersJoined.csv')
+    preprocess_customers(
+        src_path=os.path.join(backup_sis, 'Customers.csv'),
+        dst_path=customers_joined,
+    )
     raw_to_data(
         model_name='sis.party',
-        csv_name='Customers.csv',
-        fieldnames=['id', 'code', 'company', 'active', 'customer_rank', 'supplier_rank', 'contact_type', 'is_company',
-                    'address', 'city', 'zip', 'country_id', 'phone', 'homepage', 'fax', 'email', 'notes',
-                    'group_code', 'pay_term_id', 'ship_method_id', 'ship_stamp'],
+        csv_name='CustomersJoined.csv',
+        fieldnames=['id', 'sis_code', 'name', 'active', 'customer_rank', 'supplier_rank',
+                    'is_company', 'street', 'street2',
+                    'city', 'zip', 'country_id',
+                    'phone', 'mobile', 'email', 'website', 'notes',
+                    'sis_is_customer', 'sis_is_vendor', 'sis_contact',
+                    'margin_id', 'sis_pay_term_id', 'sis_ship_method_id',
+                    'sis_ship_fedex_acc', 'sis_ship_city', 'sis_ship_zip',
+                    'sis_ship_country_id', 'sis_ship_stamp'],
         row_to_dict=make_row_to_party(lookups),
         dest_folder=sis_party_data,
         src_folder=backup_sis,
