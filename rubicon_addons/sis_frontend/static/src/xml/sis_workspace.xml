@@ -110,7 +110,7 @@
                                 <div class="row g-2">
                                     <div class="col-12">
                                         <label class="form-label mb-1 small">Contact</label>
-                                        <input type="text" class="o_input"
+                                        <input type="text" class="o_input form-control form-control-sm"
                                                t-att-value="state.contactPartner.name || ''"
                                                t-on-input="ev => this.setContactField('name', ev.target.value)"
                                                placeholder="Contact name"/>
