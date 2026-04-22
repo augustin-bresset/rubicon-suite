@@ -322,6 +322,10 @@
                                 <div class="mb-2">
                                     <label class="form-label mb-1 small">Address</label>
                                     <input type="text" class="o_input form-control form-control-sm"
+                                           t-att-value="state.deliveryPartner.name || ''"
+                                           t-on-input="ev => this.setDeliveryField('name', ev.target.value)"
+                                           placeholder="Addressee / Care of"/>
+                                    <input type="text" class="o_input form-control form-control-sm mt-1"
                                            t-att-value="state.deliveryPartner.street || ''"
                                            t-on-input="ev => this.setDeliveryField('street', ev.target.value)"
                                            placeholder="Street"/>

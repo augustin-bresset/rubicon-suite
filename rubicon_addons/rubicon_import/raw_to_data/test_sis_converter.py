@@ -166,15 +166,19 @@ class TestParty7AJ:
 
     # ── ship data still present in CSV (used by sync_parties.py for delivery child) ───
 
-    def test_ship_street_in_csv(self):
-        assert 'sis_ship_street' in self.company
-        # Must include both the street and suite number
-        assert '7905' in self.company['sis_ship_street']
-        assert 'Suite 601' in self.company['sis_ship_street']
+    def test_ship_name_is_care_of(self):
+        # delivery.name = addressee / care-of (first address line)
+        assert 'sis_ship_name' in self.company
+        assert self.company['sis_ship_name'] == 'KLEX CORPORATION'
 
-    def test_ship_street2_in_csv(self):
+    def test_ship_street_is_main_street(self):
+        assert 'sis_ship_street' in self.company
+        assert '7905' in self.company['sis_ship_street']
+
+    def test_ship_street2_is_complement(self):
+        # street2 = suite / complement, not the care-of name
         assert 'sis_ship_street2' in self.company
-        assert self.company['sis_ship_street2'] == 'KLEX CORPORATION'
+        assert self.company['sis_ship_street2'] == 'Suite 601'
 
     def test_ship_city_in_csv(self):
         assert 'sis_ship_city' in self.company

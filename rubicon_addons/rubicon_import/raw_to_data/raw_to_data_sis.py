@@ -438,10 +438,12 @@ def make_row_to_party(lookups):
                 v for v in ship_addr_slots
                 if v and v.upper() != city_norm and v.strip() != zip_norm
             ]
-            ship_street2 = ship_addr_lines[0] if ship_addr_lines else ''
-            ship_street  = ' '.join(ship_addr_lines[1:]) if len(ship_addr_lines) > 1 else ''
+            # Odoo delivery address: name=addressee, street=main, street2=complement
+            ship_name    = ship_addr_lines[0] if len(ship_addr_lines) > 0 else ''
+            ship_street  = ship_addr_lines[1] if len(ship_addr_lines) > 1 else ''
+            ship_street2 = ship_addr_lines[2] if len(ship_addr_lines) > 2 else ''
         else:
-            ship_street = ship_street2 = ''
+            ship_name = ship_street = ship_street2 = ''
 
         # Bank info: scc+1..scc+7 when scc+1 is non-empty (skip parties with no bank)
         bank_name = bank_address = bank_acc_name = bank_acc_no = ''
@@ -478,6 +480,7 @@ def make_row_to_party(lookups):
             'sis_pay_term_id': lookups['payterm'].get(pay_term, ''),
             'sis_ship_method_id': lookups['shipper'].get(ship_method, ''),
             'sis_ship_fedex_acc': fedex_acc,
+            'sis_ship_name': ship_name,
             'sis_ship_street': ship_street,
             'sis_ship_street2': ship_street2,
             'sis_ship_city': ship_city,
@@ -707,7 +710,7 @@ if __name__ == '__main__':
                     'sis_is_customer', 'sis_is_vendor', 'sis_contact',
                     'margin_id', 'sis_pay_term_id', 'sis_ship_method_id',
                     'sis_ship_fedex_acc',
-                    'sis_ship_street', 'sis_ship_street2',
+                    'sis_ship_name', 'sis_ship_street', 'sis_ship_street2',
                     'sis_ship_city', 'sis_ship_state_code', 'sis_ship_zip',
                     'sis_ship_country_id', 'sis_ship_stamp',
                     'bank_name', 'bank_address', 'bank_acc_name', 'bank_acc_no'],

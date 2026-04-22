@@ -366,7 +366,7 @@ export class SisWorkspace extends Component {
         const deliveryVals = {
             type: "delivery",
             parent_id: savedPartyId,
-            name: this.state.party.name || "",
+            name: dp.name || this.state.party.name || "",
             street: dp.street || "",
             street2: dp.street2 || "",
             city: dp.city || "",
