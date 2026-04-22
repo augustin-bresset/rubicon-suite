@@ -57,12 +57,49 @@ margin_by_code = {m['code']: m['id'] for m in margins}
 def resolve_country(name):
     return country_by_name.get((name or '').strip().upper())
 
+print("Loading res.country.state...")
+states = sr('res.country.state', [], ['id', 'code', 'country_id'])
+state_by_country_code = {
+    (s['country_id'][0], s['code'].upper()): s['id']
+    for s in states
+}
+print(f"  {len(states)} states loaded")
+
+def resolve_state(state_code, country_odoo_id):
+    if not state_code or not country_odoo_id:
+        return None
+    return state_by_country_code.get((country_odoo_id, state_code.strip().upper()))
+
 # ── Existing SIS partners indexed by sis_code ─────────────────────────────
 print("Loading existing SIS partners...")
 partners = sr('res.partner', [('sis_code', '!=', False), ('is_company', '=', True)],
               ['id', 'sis_code'])
 partner_by_code = {p['sis_code']: p['id'] for p in partners}
 print(f"  {len(partner_by_code)} company partners found")
+
+print("Loading existing child partners (delivery + contact)...")
+children = sr('res.partner',
+              [('type', 'in', ['delivery', 'contact']),
+               ('parent_id', 'in', list(partner_by_code.values()))],
+              ['id', 'type', 'parent_id'])
+
+delivery_by_parent = {}
+contact_by_parent  = {}
+contact_dups_to_delete = []
+for c in children:
+    pid = c['parent_id'][0]
+    if c['type'] == 'delivery':
+        delivery_by_parent[pid] = c['id']
+    elif c['type'] == 'contact':
+        if pid in contact_by_parent:
+            contact_dups_to_delete.append(c['id'])
+        else:
+            contact_by_parent[pid] = c['id']
+
+if contact_dups_to_delete and not DRY_RUN:
+    models.execute_kw(DB, uid, PASS, 'res.partner', 'unlink', [contact_dups_to_delete])
+    print(f"  Removed {len(contact_dups_to_delete)} duplicate contact children")
+print(f"  {len(delivery_by_parent)} delivery, {len(contact_by_parent)} contacts found")
 
 # ── Read CSV ──────────────────────────────────────────────────────────────
 print(f"Reading {CSV_PATH}...")
@@ -89,6 +126,7 @@ for row in rows:
         not_found += 1
         continue
 
+    company_name = row.get('name', '').strip()
     vals = {}
 
     # ── Address ───────────────────────────────────────────────────────────
@@ -100,6 +138,12 @@ for row in rows:
     cid = resolve_country(row.get('country_id', ''))
     if cid:
         vals['country_id'] = cid
+
+    state_code = row.get('state_code', '').strip()
+    cid_for_state = vals.get('country_id') or resolve_country(row.get('country_id', ''))
+    sid = resolve_state(state_code, cid_for_state)
+    if sid:
+        vals['state_id'] = sid
 
     # ── Contact ───────────────────────────────────────────────────────────
     phone = row.get('phone', '').strip()
@@ -119,9 +163,6 @@ for row in rows:
         vals['comment'] = notes
 
     # ── SIS fields ────────────────────────────────────────────────────────
-    sis_contact = row.get('sis_contact', '').strip()
-    if sis_contact:
-        vals['sis_contact'] = sis_contact
     vals['sis_is_customer'] = row.get('sis_is_customer', '').strip() == 'True'
     vals['sis_is_vendor']   = row.get('sis_is_vendor', '').strip() == 'True'
 
@@ -141,15 +182,6 @@ for row in rows:
     fedex = row.get('sis_ship_fedex_acc', '').strip()
     if fedex:
         vals['sis_ship_fedex_acc'] = fedex
-    ship_city = row.get('sis_ship_city', '').strip()
-    if ship_city:
-        vals['sis_ship_city'] = ship_city
-    ship_zip = row.get('sis_ship_zip', '').strip()
-    if ship_zip:
-        vals['sis_ship_zip'] = ship_zip
-    ship_cid = resolve_country(row.get('sis_ship_country_id', ''))
-    if ship_cid:
-        vals['sis_ship_country_id'] = ship_cid
     stamp = row.get('sis_ship_stamp', '').strip()
     if stamp:
         vals['sis_ship_stamp'] = stamp
@@ -162,10 +194,61 @@ for row in rows:
         do_write('res.partner', [partner_id], vals)
         updated += 1
         if DRY_RUN and updated <= 3:
-            print(f"  [DRY] [{code}] would write: { {k: v for k, v in vals.items() if k in ('city','zip','country_id','phone')} }")
+            print(f"  [DRY] [{code}] would write: { {k: v for k, v in vals.items() if k in ('city','zip','country_id','phone','state_id')} }")
     except Exception as e:
         print(f"  Error [{code}]: {e}")
         skipped += 1
+        continue
+
+    # ── Delivery child (type='delivery') ─────────────────────────────────────
+    ship_country_id = resolve_country(row.get('sis_ship_country_id', ''))
+    ship_state_id   = resolve_state(row.get('sis_ship_state_code', ''), ship_country_id)
+    ship_city = row.get('sis_ship_city', '').strip()
+    ship_zip  = row.get('sis_ship_zip', '').strip()
+
+    if ship_city or ship_country_id:
+        delivery_vals = {
+            'type': 'delivery',
+            'parent_id': partner_id,
+            'name': company_name,
+        }
+        if ship_city:
+            delivery_vals['city'] = ship_city
+        if ship_zip:
+            delivery_vals['zip'] = ship_zip
+        if ship_country_id:
+            delivery_vals['country_id'] = ship_country_id
+        if ship_state_id:
+            delivery_vals['state_id'] = ship_state_id
+
+        existing_delivery = delivery_by_parent.get(partner_id)
+        if existing_delivery:
+            do_write('res.partner', [existing_delivery], delivery_vals)
+        else:
+            if DRY_RUN:
+                print(f"  [DRY] [{code}] would create delivery child: {delivery_vals.get('city')}, {delivery_vals.get('zip')}")
+            else:
+                new_id = models.execute_kw(DB, uid, PASS, 'res.partner', 'create', [delivery_vals])
+                delivery_by_parent[partner_id] = new_id
+
+    # ── Contact child (type='contact') ────────────────────────────────────────
+    contact_name = row.get('sis_contact', '').strip()
+    if contact_name:
+        contact_vals = {
+            'type': 'contact',
+            'parent_id': partner_id,
+            'name': contact_name,
+            'is_company': False,
+        }
+        existing_contact = contact_by_parent.get(partner_id)
+        if existing_contact:
+            do_write('res.partner', [existing_contact], contact_vals)
+        else:
+            if DRY_RUN:
+                print(f"  [DRY] [{code}] would create contact child: {contact_name}")
+            else:
+                new_id = models.execute_kw(DB, uid, PASS, 'res.partner', 'create', [contact_vals])
+                contact_by_parent[partner_id] = new_id
 
 print(f"\n{'[DRY RUN] ' if DRY_RUN else ''}Done!")
 print(f"  Updated   : {updated}")
