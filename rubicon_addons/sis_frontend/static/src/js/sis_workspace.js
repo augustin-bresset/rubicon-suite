@@ -39,6 +39,8 @@ export class SisWorkspace extends Component {
             partyDirty: false,
             partyBanks: [],
             partyPhones: [],
+            deliveryPartner: { id: null, name: "", street: "", street2: "", city: "", state_id: false, zip: "", country_id: false },
+            contactPartner:  { id: null, name: "" },
 
             // ── Documents ──────────────────────────────────────
             documents: [],
@@ -159,11 +161,10 @@ export class SisWorkspace extends Component {
             "title", "street", "city", "state_id", "zip", "country_id",
             "phone", "email", "website", "comment",
             "margin_id", "sis_pay_term_id",
-            "sis_contact",
             // New fields:
             "sis_is_customer", "sis_is_vendor",
             "sis_account", "sis_vendor_account", "sis_vendor_pay_term_id",
-            "sis_ship_address", "sis_ship_country_id", "sis_ship_method_id", "sis_ship_fedex_acc", "sis_ship_stamp",
+            "sis_ship_method_id", "sis_ship_fedex_acc", "sis_ship_stamp",
             "bank_ids", "sis_phone_ids", "sis_code"
         ]);
         this.state.party = records[0] ? { ...records[0] } : null;
@@ -186,6 +187,28 @@ export class SisWorkspace extends Component {
             this.state.partyPhones = [];
         }
 
+        // Load delivery address child (standard Odoo type='delivery')
+        const deliveryList = await this.orm.searchRead("res.partner",
+            [["parent_id", "=", partyId], ["type", "=", "delivery"]],
+            ["id", "name", "street", "street2", "city", "state_id", "zip", "country_id"],
+            { limit: 1 }
+        );
+        this.state.deliveryPartner = deliveryList.length
+            ? { ...deliveryList[0] }
+            : { id: null, name: "", street: "", street2: "", city: "",
+                state_id: false, zip: "", country_id: false };
+
+        // Load contact child (standard Odoo type='contact')
+        const contactList = await this.orm.searchRead("res.partner",
+            [["parent_id", "=", partyId], ["type", "=", "contact"],
+             ["is_company", "=", false]],
+            ["id", "name"],
+            { limit: 1 }
+        );
+        this.state.contactPartner = contactList.length
+            ? { ...contactList[0] }
+            : { id: null, name: "" };
+
         const idx = this.state.parties.findIndex((p) => p.id === partyId);
         if (idx >= 0) this.state.partyIndex = idx;
     }
@@ -201,6 +224,16 @@ export class SisWorkspace extends Component {
 
     setPartyField(field, value) {
         this.state.party[field] = value;
+        this.state.partyDirty = true;
+    }
+
+    setDeliveryField(field, value) {
+        this.state.deliveryPartner[field] = value;
+        this.state.partyDirty = true;
+    }
+
+    setContactField(field, value) {
+        this.state.contactPartner[field] = value;
         this.state.partyDirty = true;
     }
 
@@ -238,16 +271,20 @@ export class SisWorkspace extends Component {
             id: null, name: "", is_company: true, active: true,
             title: "", street: "", city: "", state_id: false, zip: "", country_id: false,
             phone: "", email: "", website: "", comment: "",
-            sis_contact: "",
             margin_id: false, sis_pay_term_id: false,
-sis_is_customer: true,
+            sis_is_customer: true,
             sis_is_vendor: false,
             sis_account: "", sis_vendor_account: "", sis_vendor_pay_term_id: false,
-            sis_ship_address: "", sis_ship_country_id: false, sis_ship_method_id: false, sis_ship_fedex_acc: "", sis_ship_stamp: "",
+            sis_ship_method_id: false, sis_ship_fedex_acc: "", sis_ship_stamp: "",
             bank_ids: [],
             sis_phone_ids: [],
             sis_code: ""
         };
+        this.state.deliveryPartner = {
+            id: null, name: "", street: "", street2: "",
+            city: "", state_id: false, zip: "", country_id: false
+        };
+        this.state.contactPartner = { id: null, name: "" };
         this.state.partyBanks = [];
         this.state.partyPhones = [];
         this.state.partyDirty = true;
@@ -257,6 +294,7 @@ sis_is_customer: true,
     async saveParty() {
         if (!this.state.party) return;
         const p = this.state.party;
+        const isNew = !p.id;
         const vals = {
             name: p.name,
             sis_code: p.sis_code || "",
@@ -272,7 +310,6 @@ sis_is_customer: true,
             email: p.email || "",
             website: p.website || "",
             comment: p.comment || "",
-            sis_contact: p.sis_contact || "",
             margin_id: this._m2oId(p.margin_id),
             sis_pay_term_id: this._m2oId(p.sis_pay_term_id),
             sis_is_customer: p.sis_is_customer || false,
@@ -280,8 +317,6 @@ sis_is_customer: true,
             sis_account: p.sis_account || "",
             sis_vendor_account: p.sis_vendor_account || "",
             sis_vendor_pay_term_id: this._m2oId(p.sis_vendor_pay_term_id),
-            sis_ship_address: p.sis_ship_address || "",
-            sis_ship_country_id: this._m2oId(p.sis_ship_country_id),
             sis_ship_method_id: this._m2oId(p.sis_ship_method_id),
             sis_ship_fedex_acc: p.sis_ship_fedex_acc || "",
             sis_ship_stamp: p.sis_ship_stamp || "",
@@ -298,17 +333,53 @@ sis_is_customer: true,
 
         if (p.id) {
             await this.orm.write("res.partner", [p.id], vals);
-            this.state.partyDirty = false;
-            this.notification.add("Party saved.", { type: "success" });
-            await this._reloadParties();
-            await this._loadParty(p.id);
         } else {
             const newId = (await this.orm.create("res.partner", [vals]))[0];
-            this.state.partyDirty = false;
-            this.notification.add("Party created.", { type: "success" });
-            await this._reloadParties();
-            await this._loadParty(newId);
+            this.state.party.id = newId;
         }
+
+        // Save delivery child
+        const dp = this.state.deliveryPartner;
+        const savedPartyId = this.state.party.id;
+        const deliveryVals = {
+            type: "delivery",
+            parent_id: savedPartyId,
+            name: this.state.party.name || "",
+            street: dp.street || "",
+            street2: dp.street2 || "",
+            city: dp.city || "",
+            zip: dp.zip || "",
+            state_id: this._m2oId(dp.state_id) || false,
+            country_id: this._m2oId(dp.country_id) || false,
+        };
+        if (dp.id) {
+            await this.orm.write("res.partner", [dp.id], deliveryVals);
+        } else if (dp.city || dp.country_id) {
+            const [newId] = await this.orm.create("res.partner", [deliveryVals]);
+            this.state.deliveryPartner.id = newId;
+        }
+
+        // Save contact child
+        const cp = this.state.contactPartner;
+        if (cp.name) {
+            const contactVals = {
+                type: "contact",
+                parent_id: savedPartyId,
+                name: cp.name,
+                is_company: false,
+            };
+            if (cp.id) {
+                await this.orm.write("res.partner", [cp.id], contactVals);
+            } else {
+                const [newId] = await this.orm.create("res.partner", [contactVals]);
+                this.state.contactPartner.id = newId;
+            }
+        }
+
+        this.state.partyDirty = false;
+        this.notification.add(isNew ? "Party created." : "Party saved.", { type: "success" });
+        await this._reloadParties();
+        await this._loadParty(savedPartyId);
     }
 
     // DOCUMENTS
