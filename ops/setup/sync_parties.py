@@ -101,6 +101,13 @@ if contact_dups_to_delete and not DRY_RUN:
     print(f"  Removed {len(contact_dups_to_delete)} duplicate contact children")
 print(f"  {len(delivery_by_parent)} delivery, {len(contact_by_parent)} contacts found")
 
+print("Loading existing bank accounts...")
+banks = sr('res.partner.bank',
+           [('partner_id', 'in', list(partner_by_code.values()))],
+           ['id', 'partner_id'])
+bank_by_partner = {b['partner_id'][0]: b['id'] for b in banks}
+print(f"  {len(bank_by_partner)} bank accounts found")
+
 # ── Read CSV ──────────────────────────────────────────────────────────────
 print(f"Reading {CSV_PATH}...")
 rows = []
@@ -249,6 +256,25 @@ for row in rows:
             else:
                 new_id = models.execute_kw(DB, uid, PASS, 'res.partner', 'create', [contact_vals])
                 contact_by_parent[partner_id] = new_id
+
+    # ── Bank account (res.partner.bank) ───────────────────────────────────────
+    bank_acc_no = row.get('bank_acc_no', '').strip()
+    bank_name   = row.get('bank_name', '').strip()
+    if bank_acc_no or bank_name:
+        bank_vals = {
+            'partner_id':     partner_id,
+            'acc_number':     bank_acc_no or '—',
+            'acc_holder_name': row.get('bank_acc_name', '').strip(),
+            'sis_bank_name':  bank_name,
+            'sis_bank_address': row.get('bank_address', '').strip(),
+        }
+        existing_bank = bank_by_partner.get(partner_id)
+        if existing_bank:
+            do_write('res.partner.bank', [existing_bank], bank_vals)
+        else:
+            if not DRY_RUN:
+                new_id = models.execute_kw(DB, uid, PASS, 'res.partner.bank', 'create', [bank_vals])
+                bank_by_partner[partner_id] = new_id
 
 print(f"\n{'[DRY RUN] ' if DRY_RUN else ''}Done!")
 print(f"  Updated   : {updated}")

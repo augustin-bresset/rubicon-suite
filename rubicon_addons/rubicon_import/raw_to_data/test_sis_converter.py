@@ -186,6 +186,24 @@ class TestParty7AJ:
         assert 'sis_ship_state_code' in self.company
         assert self.company['sis_ship_state_code'] == 'FL'
 
+    # ── bank info (ref: main_with_example.md § Bank Info) ────────────────────
+
+    def test_bank_name(self):
+        assert 'bank_name' in self.company
+        assert self.company['bank_name'] == 'NEUFLIZE OBC Enterprises'
+
+    def test_bank_acc_no(self):
+        assert 'bank_acc_no' in self.company
+        assert 'FR35 1497' in self.company['bank_acc_no']
+
+    def test_bank_acc_name(self):
+        assert 'bank_acc_name' in self.company
+        assert 'BIC' in self.company['bank_acc_name']
+
+    def test_bank_address_non_empty(self):
+        assert 'bank_address' in self.company
+        assert 'Hoche' in self.company['bank_address']
+
     # ── removed / forbidden fields ────────────────────────
 
     def test_no_contact_type_field(self):

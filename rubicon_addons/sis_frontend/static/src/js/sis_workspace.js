@@ -179,7 +179,7 @@ export class SisWorkspace extends Component {
         // Fetch Bank details if any
         if (this.state.party && this.state.party.bank_ids && this.state.party.bank_ids.length > 0) {
             this.state.partyBanks = await this.orm.read("res.partner.bank", this.state.party.bank_ids, [
-                "bank_id", "acc_holder_name", "acc_number"
+                "bank_id", "acc_holder_name", "acc_number", "sis_bank_name", "sis_bank_address"
             ]);
         } else {
             this.state.partyBanks = [];

@@ -407,18 +407,29 @@ def make_row_to_party(lookups):
         # The country NAME is the anchor (city, state, zip, cc follow at +1..+4).
         # fedex_acc is the second-to-last field; stamp is always row[-1].
         ship_city = ship_zip = ship_cc = ship_state = ''
+        _scc = None
         if cc_col is not None:
             search_from = (contact_name_col if contact_name_col is not None else cc_col + 14) + 3
             for i in range(search_from, min(len(row), 70)):
                 if row[i].strip().upper() in country_names:
                     scc = i + 4
                     if scc < len(row) and row[scc].strip() in country_codes:
+                        _scc = scc
                         ship_city  = _get(row, scc - 3)
                         ship_state = _get(row, scc - 2).strip()
                         ship_zip   = _get(row, scc - 1)
                         ship_cc    = _get(row, scc)
                         break
         fedex_acc = s(row[-2]) if len(row) >= 2 else ''
+
+        # Bank info: scc+1..scc+7 when scc+1 is non-empty (skip parties with no bank)
+        bank_name = bank_address = bank_acc_name = bank_acc_no = ''
+        if _scc is not None and _get(row, _scc + 1):
+            bank_name = _get(row, _scc + 1)
+            addr_parts = [_get(row, _scc + j) for j in range(2, 6)]
+            bank_address = '\n'.join(p.strip() for p in addr_parts if p.strip())
+            bank_acc_name = _get(row, _scc + 6)
+            bank_acc_no = _get(row, _scc + 7)
 
         yield {
             'id': f'sis_party_{pid}',
@@ -451,6 +462,10 @@ def make_row_to_party(lookups):
             'sis_ship_zip': ship_zip,
             'sis_ship_country_id': _SIS_TO_ODOO_COUNTRY.get(ship_cc, '') if ship_cc else '',
             'sis_ship_stamp': s(row[-1]) if row else '',
+            'bank_name': bank_name,
+            'bank_address': bank_address,
+            'bank_acc_name': bank_acc_name,
+            'bank_acc_no': bank_acc_no,
         }
 
     return row_to_party
@@ -670,7 +685,8 @@ if __name__ == '__main__':
                     'margin_id', 'sis_pay_term_id', 'sis_ship_method_id',
                     'sis_ship_fedex_acc',
                     'sis_ship_city', 'sis_ship_state_code', 'sis_ship_zip',
-                    'sis_ship_country_id', 'sis_ship_stamp'],
+                    'sis_ship_country_id', 'sis_ship_stamp',
+                    'bank_name', 'bank_address', 'bank_acc_name', 'bank_acc_no'],
         row_to_dict=make_row_to_party(lookups),
         dest_folder=sis_party_data,
         src_folder=backup_sis,

@@ -399,29 +399,41 @@
                     <!-- ─── BANK INFO ─── -->
                     <t t-elif="state.partyTab === 'bank'">
                         <div style="max-width:800px;">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Bank Name</th>
-                                            <th>Account Holder Name</th>
-                                            <th>Account Number</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <t t-foreach="state.partyBanks" t-as="b" t-key="b.id || b.bank_id">
-                                            <tr>
-                                                <td><t t-esc="b.bank_id ? b.bank_id[1] : ''"/></td>
-                                                <td><t t-esc="b.acc_holder_name"/></td>
-                                                <td><t t-esc="b.acc_number"/></td>
-                                            </tr>
-                                        </t>
-                                        <t t-if="!state.partyBanks.length">
-                                            <tr><td colspan="3" class="text-center text-muted py-3">No bank records. Please define them via the standard Odoo Contact view.</td></tr>
-                                        </t>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <t t-if="!state.partyBanks.length">
+                                <p class="text-muted small py-3">No bank records.</p>
+                            </t>
+                            <t t-foreach="state.partyBanks" t-as="b" t-key="b.id">
+                                <div class="card mb-3">
+                                    <div class="card-body p-3">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="form-label mb-1 small fw-semibold">Bank Name</label>
+                                                <div class="form-control-plaintext ps-2 small">
+                                                    <t t-esc="b.sis_bank_name || (b.bank_id ? b.bank_id[1] : '') || '—'"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label mb-1 small fw-semibold">Bank Address</label>
+                                                <div class="form-control-plaintext ps-2 small" style="white-space:pre-line">
+                                                    <t t-esc="b.sis_bank_address || ''"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label mb-1 small fw-semibold">Acc. Name</label>
+                                                <div class="form-control-plaintext ps-2 small">
+                                                    <t t-esc="b.acc_holder_name || '—'"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label mb-1 small fw-semibold">Acc. No.</label>
+                                                <div class="form-control-plaintext ps-2 small">
+                                                    <t t-esc="b.acc_number || '—'"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
                         </div>
                     </t>
 
