@@ -338,6 +338,19 @@
                                            t-on-input="ev => this.setDeliveryField('zip', ev.target.value)"
                                            placeholder="Zip"/>
                                 </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1 small">State</label>
+                                    <select class="o_input form-select form-select-sm"
+                                            t-on-change="ev => this.setDeliveryField('state_id', parseInt(ev.target.value) || false)">
+                                        <option value="">—</option>
+                                        <t t-foreach="this.deliveryStates" t-as="s" t-key="s.id">
+                                            <option t-att-value="s.id"
+                                                    t-att-selected="s.id === this._m2oId(state.deliveryPartner.state_id)">
+                                                <t t-esc="s.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
                                 <div>
                                     <label class="form-label mb-1 small">Country</label>
                                     <!-- Country M2O -->

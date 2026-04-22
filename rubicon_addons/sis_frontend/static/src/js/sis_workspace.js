@@ -155,6 +155,12 @@ export class SisWorkspace extends Component {
         return this.allStates.filter(s => s.country_id[0] === cId);
     }
 
+    get deliveryStates() {
+        const cId = this.state.deliveryPartner && this._m2oId(this.state.deliveryPartner.country_id);
+        if (!cId) return this.allStates;
+        return this.allStates.filter(s => s.country_id[0] === cId);
+    }
+
     async _loadParty(partyId) {
         const records = await this.orm.read("res.partner", [partyId], [
             "id", "name", "category_id", "active",
