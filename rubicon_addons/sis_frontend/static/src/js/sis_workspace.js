@@ -233,6 +233,12 @@ export class SisWorkspace extends Component {
         this.state.partyDirty = true;
     }
 
+    // Odoo Html fields return markup — extract plain text for simple textareas.
+    stripHtml(html) {
+        if (!html) return '';
+        return new DOMParser().parseFromString(html, 'text/html').body.textContent.trim();
+    }
+
     setDeliveryField(field, value) {
         this.state.deliveryPartner[field] = value;
         this.state.partyDirty = true;

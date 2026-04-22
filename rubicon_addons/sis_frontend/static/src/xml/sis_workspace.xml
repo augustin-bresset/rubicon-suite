@@ -220,7 +220,7 @@
                             <div class="col-12">
                                 <label class="form-label mb-1 small">Notes</label>
                                 <textarea class="form-control form-control-sm" rows="4"
-                                          t-att-value="state.party.comment || ''"
+                                          t-att-value="this.stripHtml(state.party.comment)"
                                           t-on-input="ev => this.setPartyField('comment', ev.target.value)"></textarea>
                             </div>
 
