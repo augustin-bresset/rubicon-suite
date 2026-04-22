@@ -110,9 +110,10 @@
                                 <div class="row g-2">
                                     <div class="col-12">
                                         <label class="form-label mb-1 small">Contact</label>
-                                        <input class="form-control form-control-sm"
-                                               t-att-value="state.party.sis_contact || ''"
-                                               t-on-input="ev => this.setPartyField('sis_contact', ev.target.value)"/>
+                                        <input type="text" class="o_input"
+                                               t-att-value="state.contactPartner.name || ''"
+                                               t-on-input="ev => this.setContactField('name', ev.target.value)"
+                                               placeholder="Contact name"/>
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label mb-1 small">Address</label>
@@ -313,20 +314,39 @@
                     <t t-elif="state.partyTab === 'shipment'">
                         <div class="row g-4" style="max-width:900px;">
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="form-label mb-1 small">Address</label>
-                                    <textarea class="form-control form-control-sm" rows="3"
-                                              t-att-value="state.party.sis_ship_address || ''"
-                                              t-on-input="ev => this.setPartyField('sis_ship_address', ev.target.value)"></textarea>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1 small">Street</label>
+                                    <!-- Street -->
+                                    <input type="text" class="o_input form-control form-control-sm"
+                                           t-att-value="state.deliveryPartner.street || ''"
+                                           t-on-input="ev => this.setDeliveryField('street', ev.target.value)"
+                                           placeholder="Street"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1 small">City</label>
+                                    <!-- City -->
+                                    <input type="text" class="o_input form-control form-control-sm"
+                                           t-att-value="state.deliveryPartner.city || ''"
+                                           t-on-input="ev => this.setDeliveryField('city', ev.target.value)"
+                                           placeholder="City"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1 small">Zip</label>
+                                    <!-- Zip -->
+                                    <input type="text" class="o_input form-control form-control-sm"
+                                           t-att-value="state.deliveryPartner.zip || ''"
+                                           t-on-input="ev => this.setDeliveryField('zip', ev.target.value)"
+                                           placeholder="Zip"/>
                                 </div>
                                 <div>
                                     <label class="form-label mb-1 small">Country</label>
-                                    <select class="form-select form-select-sm"
-                                            t-on-change="ev => this.setPartyField('sis_ship_country_id', +ev.target.value || false)">
+                                    <!-- Country M2O -->
+                                    <select class="o_input form-select form-select-sm"
+                                            t-on-change="ev => this.setDeliveryField('country_id', parseInt(ev.target.value) || false)">
                                         <option value="">—</option>
                                         <t t-foreach="this.sisCountries" t-as="c" t-key="c.id">
                                             <option t-att-value="c.id"
-                                                    t-att-selected="this._m2oId(state.party.sis_ship_country_id) === c.id">
+                                                    t-att-selected="c.id === this._m2oId(state.deliveryPartner.country_id)">
                                                 <t t-esc="c.name"/>
                                             </option>
                                         </t>
