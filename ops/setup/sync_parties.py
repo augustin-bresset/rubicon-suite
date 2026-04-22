@@ -210,15 +210,21 @@ for row in rows:
     # ── Delivery child (type='delivery') ─────────────────────────────────────
     ship_country_id = resolve_country(row.get('sis_ship_country_id', ''))
     ship_state_id   = resolve_state(row.get('sis_ship_state_code', ''), ship_country_id)
-    ship_city = row.get('sis_ship_city', '').strip()
-    ship_zip  = row.get('sis_ship_zip', '').strip()
+    ship_street  = row.get('sis_ship_street', '').strip()
+    ship_street2 = row.get('sis_ship_street2', '').strip()
+    ship_city    = row.get('sis_ship_city', '').strip()
+    ship_zip     = row.get('sis_ship_zip', '').strip()
 
-    if ship_city or ship_country_id:
+    if ship_city or ship_country_id or ship_street:
         delivery_vals = {
             'type': 'delivery',
             'parent_id': partner_id,
             'name': company_name,
         }
+        if ship_street:
+            delivery_vals['street'] = ship_street
+        if ship_street2:
+            delivery_vals['street2'] = ship_street2
         if ship_city:
             delivery_vals['city'] = ship_city
         if ship_zip:

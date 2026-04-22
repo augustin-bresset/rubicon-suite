@@ -459,7 +459,9 @@ In our case we have :
 * `Total C.I.F PARIS US$` : 195.00
 * `Less Deposit` : 0.00
 * `Total` : 195.00
+
 And on the right :
+
 * `Qty` : 1
 * `Amount` : 195.00
 * `Less Cost` : 118.03

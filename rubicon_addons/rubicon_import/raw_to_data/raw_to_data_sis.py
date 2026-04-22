@@ -422,6 +422,10 @@ def make_row_to_party(lookups):
                         break
         fedex_acc = s(row[-2]) if len(row) >= 2 else ''
 
+        # Ship address lines: always at cc_col+18 (care-of) and cc_col+19 (street)
+        ship_street2 = _get(row, cc_col + 18).strip() if cc_col is not None else ''
+        ship_street  = _get(row, cc_col + 19).strip() if cc_col is not None else ''
+
         # Bank info: scc+1..scc+7 when scc+1 is non-empty (skip parties with no bank)
         bank_name = bank_address = bank_acc_name = bank_acc_no = ''
         if _scc is not None and _get(row, _scc + 1):
@@ -457,6 +461,8 @@ def make_row_to_party(lookups):
             'sis_pay_term_id': lookups['payterm'].get(pay_term, ''),
             'sis_ship_method_id': lookups['shipper'].get(ship_method, ''),
             'sis_ship_fedex_acc': fedex_acc,
+            'sis_ship_street': ship_street,
+            'sis_ship_street2': ship_street2,
             'sis_ship_city': ship_city,
             'sis_ship_state_code': ship_state,
             'sis_ship_zip': ship_zip,
@@ -684,6 +690,7 @@ if __name__ == '__main__':
                     'sis_is_customer', 'sis_is_vendor', 'sis_contact',
                     'margin_id', 'sis_pay_term_id', 'sis_ship_method_id',
                     'sis_ship_fedex_acc',
+                    'sis_ship_street', 'sis_ship_street2',
                     'sis_ship_city', 'sis_ship_state_code', 'sis_ship_zip',
                     'sis_ship_country_id', 'sis_ship_stamp',
                     'bank_name', 'bank_address', 'bank_acc_name', 'bank_acc_no'],
