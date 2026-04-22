@@ -422,9 +422,26 @@ def make_row_to_party(lookups):
                         break
         fedex_acc = s(row[-2]) if len(row) >= 2 else ''
 
-        # Ship address lines: always at cc_col+18 (care-of) and cc_col+19 (street)
-        ship_street2 = _get(row, cc_col + 18).strip() if cc_col is not None else ''
-        ship_street  = _get(row, cc_col + 19).strip() if cc_col is not None else ''
+        # Ship address lines: slots cc_col+18..21, minus city/zip text that spills in.
+        # e.g. A&J  → ['KLEX CORPORATION', '7905 S.W. 86 Street', '', 'Suite 601']
+        #      EMASUR → ["L'ACHEMINEUR...", 'ZI LES...', 'AULNAY SOUS BOIS', '93605']
+        # We strip out the structured city/zip values so only real address lines remain.
+        if cc_col is not None:
+            city_norm = ship_city.strip().upper()
+            zip_norm  = ship_zip.strip()
+            ship_addr_slots = [
+                _get(row, cc_col + 18 + i).strip()
+                for i in range(4)
+                if cc_col + 18 + i < len(row)
+            ]
+            ship_addr_lines = [
+                v for v in ship_addr_slots
+                if v and v.upper() != city_norm and v.strip() != zip_norm
+            ]
+            ship_street2 = ship_addr_lines[0] if ship_addr_lines else ''
+            ship_street  = ' '.join(ship_addr_lines[1:]) if len(ship_addr_lines) > 1 else ''
+        else:
+            ship_street = ship_street2 = ''
 
         # Bank info: scc+1..scc+7 when scc+1 is non-empty (skip parties with no bank)
         bank_name = bank_address = bank_acc_name = bank_acc_no = ''

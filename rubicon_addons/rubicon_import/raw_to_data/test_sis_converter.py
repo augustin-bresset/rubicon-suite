@@ -168,7 +168,9 @@ class TestParty7AJ:
 
     def test_ship_street_in_csv(self):
         assert 'sis_ship_street' in self.company
+        # Must include both the street and suite number
         assert '7905' in self.company['sis_ship_street']
+        assert 'Suite 601' in self.company['sis_ship_street']
 
     def test_ship_street2_in_csv(self):
         assert 'sis_ship_street2' in self.company
