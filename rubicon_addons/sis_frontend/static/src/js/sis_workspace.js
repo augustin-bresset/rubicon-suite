@@ -165,7 +165,7 @@ export class SisWorkspace extends Component {
     async _loadParty(partyId) {
         const records = await this.orm.read("res.partner", [partyId], [
             "id", "name", "category_id", "active",
-            "title", "street", "city", "state_id", "zip", "country_id",
+            "title", "street", "street2", "city", "state_id", "zip", "country_id",
             "phone", "email", "website", "comment",
             "margin_id", "sis_pay_term_id",
             // New fields:
