@@ -43,7 +43,8 @@
                             <input class="form-control form-control-sm" style="width:120px;"
                                    placeholder="Search…"
                                    t-att-value="state.partySearch"
-                                   t-on-input="ev => this.state.partySearch = ev.target.value"/>
+                                   t-on-input="ev => this.state.partySearch = ev.target.value"
+                                   t-on-keydown="ev => ev.key === 'Enter' &amp;&amp; this.filteredParties.length &amp;&amp; this._loadParty(this.filteredParties[0].id)"/>
                             <select class="form-select form-select-sm" style="width:200px;"
                                     t-on-change="(ev) => this.onSelectParty(ev)">
                                 <t t-foreach="filteredParties" t-as="p" t-key="p.id">
