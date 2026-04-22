@@ -398,42 +398,36 @@
 
                     <!-- ─── BANK INFO ─── -->
                     <t t-elif="state.partyTab === 'bank'">
-                        <div style="max-width:800px;">
-                            <t t-if="!state.partyBanks.length">
-                                <p class="text-muted small py-3">No bank records.</p>
-                            </t>
-                            <t t-foreach="state.partyBanks" t-as="b" t-key="b.id">
-                                <div class="card mb-3">
-                                    <div class="card-body p-3">
-                                        <div class="row g-2">
-                                            <div class="col-6">
-                                                <label class="form-label mb-1 small fw-semibold">Bank Name</label>
-                                                <div class="form-control-plaintext ps-2 small">
-                                                    <t t-esc="b.sis_bank_name || (b.bank_id ? b.bank_id[1] : '') || '—'"/>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <label class="form-label mb-1 small fw-semibold">Bank Address</label>
-                                                <div class="form-control-plaintext ps-2 small" style="white-space:pre-line">
-                                                    <t t-esc="b.sis_bank_address || ''"/>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <label class="form-label mb-1 small fw-semibold">Acc. Name</label>
-                                                <div class="form-control-plaintext ps-2 small">
-                                                    <t t-esc="b.acc_holder_name || '—'"/>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <label class="form-label mb-1 small fw-semibold">Acc. No.</label>
-                                                <div class="form-control-plaintext ps-2 small">
-                                                    <t t-esc="b.acc_number || '—'"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </t>
+                        <div style="max-width:560px;" class="pt-2">
+                            <div class="mb-3">
+                                <label class="form-label mb-1 small">Bank Name</label>
+                                <input type="text" class="o_input form-control form-control-sm"
+                                       t-att-value="state.partyBank.sis_bank_name || ''"
+                                       t-on-input="ev => this.setBankField('sis_bank_name', ev.target.value)"
+                                       placeholder="Bank name"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label mb-1 small">Address</label>
+                                <textarea class="form-control form-control-sm" rows="3"
+                                          style="white-space:pre-line"
+                                          t-att-value="state.partyBank.sis_bank_address || ''"
+                                          t-on-input="ev => this.setBankField('sis_bank_address', ev.target.value)"
+                                          placeholder="Bank address"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label mb-1 small">Acc. Name</label>
+                                <input type="text" class="o_input form-control form-control-sm"
+                                       t-att-value="state.partyBank.acc_holder_name || ''"
+                                       t-on-input="ev => this.setBankField('acc_holder_name', ev.target.value)"
+                                       placeholder="Account holder / BIC"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label mb-1 small">Acc. No.</label>
+                                <input type="text" class="o_input form-control form-control-sm"
+                                       t-att-value="state.partyBank.acc_number || ''"
+                                       t-on-input="ev => this.setBankField('acc_number', ev.target.value)"
+                                       placeholder="IBAN / account number"/>
+                            </div>
                         </div>
                     </t>
 

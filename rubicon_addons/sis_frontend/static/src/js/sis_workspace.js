@@ -38,6 +38,7 @@ export class SisWorkspace extends Component {
             party: null,
             partyDirty: false,
             partyBanks: [],
+            partyBank: { id: null, sis_bank_name: "", sis_bank_address: "", acc_holder_name: "", acc_number: "" },
             partyPhones: [],
             deliveryPartner: { id: null, name: "", street: "", street2: "", city: "", state_id: false, zip: "", country_id: false },
             contactPartner:  { id: null, name: "" },
@@ -177,12 +178,15 @@ export class SisWorkspace extends Component {
         this.state.partyDirty = false;
 
         // Fetch Bank details if any
+        const _emptyBank = { id: null, sis_bank_name: "", sis_bank_address: "", acc_holder_name: "", acc_number: "" };
         if (this.state.party && this.state.party.bank_ids && this.state.party.bank_ids.length > 0) {
             this.state.partyBanks = await this.orm.read("res.partner.bank", this.state.party.bank_ids, [
                 "bank_id", "acc_holder_name", "acc_number", "sis_bank_name", "sis_bank_address"
             ]);
+            this.state.partyBank = { ..._emptyBank, ...this.state.partyBanks[0] };
         } else {
             this.state.partyBanks = [];
+            this.state.partyBank = { ..._emptyBank };
         }
 
         if (this.state.party && this.state.party.sis_phone_ids && this.state.party.sis_phone_ids.length > 0) {
@@ -249,6 +253,11 @@ export class SisWorkspace extends Component {
         this.state.partyDirty = true;
     }
 
+    setBankField(field, value) {
+        this.state.partyBank[field] = value;
+        this.state.partyDirty = true;
+    }
+
     addPartyPhone() {
         this.state.partyPhones.push({ id: "new_" + Date.now(), name: "", phone: "" });
         this.state.partyDirty = true;
@@ -298,6 +307,7 @@ export class SisWorkspace extends Component {
         };
         this.state.contactPartner = { id: null, name: "" };
         this.state.partyBanks = [];
+        this.state.partyBank = { id: null, sis_bank_name: "", sis_bank_address: "", acc_holder_name: "", acc_number: "" };
         this.state.partyPhones = [];
         this.state.partyDirty = true;
         this.state.partyTab = "general";
@@ -385,6 +395,24 @@ export class SisWorkspace extends Component {
             } else {
                 const [newId] = await this.orm.create("res.partner", [contactVals]);
                 this.state.contactPartner.id = newId;
+            }
+        }
+
+        // Save bank account
+        const bk = this.state.partyBank;
+        if (bk.sis_bank_name || bk.acc_number) {
+            const bankVals = {
+                partner_id:       savedPartyId,
+                acc_number:       bk.acc_number || "—",
+                acc_holder_name:  bk.acc_holder_name || "",
+                sis_bank_name:    bk.sis_bank_name || "",
+                sis_bank_address: bk.sis_bank_address || "",
+            };
+            if (bk.id) {
+                await this.orm.write("res.partner.bank", [bk.id], bankVals);
+            } else {
+                const [newId] = await this.orm.create("res.partner.bank", [bankVals]);
+                this.state.partyBank.id = newId;
             }
         }
 
