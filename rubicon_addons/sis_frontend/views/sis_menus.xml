@@ -74,7 +74,23 @@
     <menuitem id="menu_sis_tools_product_browser" name="Product Browser" parent="menu_sis_tools" action="action_sis_tools_product_browser" sequence="20"/>
 
     <!-- ========================================== -->
-    <!-- 4. Odoo Manager (Technical Features only) -->
+    <!-- 4. Settings Menu (admin only) -->
+    <!-- ========================================== -->
+    <menuitem id="menu_sis_settings"
+              name="Settings"
+              parent="menu_sis_root"
+              sequence="40"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_sis_settings_doc_remarks"
+              name="Document Remarks"
+              parent="menu_sis_settings"
+              action="sis_document.action_sis_doc_type_remarks"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <!-- ========================================== -->
+    <!-- 5. Odoo Manager (Technical Features only) -->
     <!-- ========================================== -->
     <menuitem id="menu_sis_odoo_manager"
               name="Odoo Manager"
