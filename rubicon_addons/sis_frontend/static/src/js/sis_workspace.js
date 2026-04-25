@@ -480,11 +480,17 @@ export class SisWorkspace extends Component {
         const doc = docRecords[0];
         this.state.doc = doc ? { ...doc } : null;
 
-        // Resolve M2O fields from legacy char fields when M2O is unset (imported data)
+        // Resolve M2O fields from legacy data when M2O is unset (imported documents)
         if (this.state.doc) {
-            if (!this.state.doc.party_id && this.state.doc.party_code) {
-                const found = this.sisPartners.find(p => p.sis_code === this.state.doc.party_code);
-                if (found) this.state.doc.party_id = [found.id, found.name];
+            if (!this.state.doc.party_id && this.state.doc.name) {
+                // party_code stores a legacy numeric ID, not the sis_code.
+                // Extract the customer code from the document name (SO-EMA-25001 → "EMA").
+                const parts = this.state.doc.name.split('-');
+                const codeFromName = parts.length >= 2 ? parts[1] : null;
+                if (codeFromName) {
+                    const found = this.sisPartners.find(p => p.sis_code === codeFromName);
+                    if (found) this.state.doc.party_id = [found.id, found.name];
+                }
             }
             if (!this.state.doc.margin_id && this.state.doc.margin_name) {
                 const found = this.margins.find(m => m.name === this.state.doc.margin_name);
