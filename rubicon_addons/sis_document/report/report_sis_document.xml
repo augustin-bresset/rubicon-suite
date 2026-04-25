@@ -435,10 +435,11 @@
         </t>
 
         <!-- ═══ REMARK ═══ -->
-        <t t-if="doc.doc_type_id.footer_note">
+        <t t-set="_doc_type" t-value="doc.doc_type_id or doc.env['sis.doc.type'].sudo().search([('code', '=', doc.doc_type_code)], limit=1)"/>
+        <t t-if="_doc_type.footer_note">
             <div class="sis-remark">
                 <div class="sis-remark-title">Remark</div>
-                <div style="white-space: pre-wrap;" t-field="doc.doc_type_id.footer_note"/>
+                <div style="white-space: pre-wrap;"><t t-out="_doc_type.footer_note"/></div>
             </div>
         </t>
 
