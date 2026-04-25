@@ -451,7 +451,7 @@ export class SisWorkspace extends Component {
         const [docRecords, items] = await Promise.all([
             this.orm.read("sis.document", [docId], [
                 "id", "name", "doc_type_code", "legacy_id", "closed", "canceled",
-                "margin_id", "date_created", "date_due", "currency_id",
+                "margin_id", "margin_name", "date_created", "date_due", "currency_id",
                 "party_id", "party_code", "ship_method_id", "pay_term_id",
                 "stamp", "notes", "footnotes",
                 "customer_po", "rcv_mode_id", "trade_fair_id", "employee",
@@ -479,6 +479,19 @@ export class SisWorkspace extends Component {
 
         const doc = docRecords[0];
         this.state.doc = doc ? { ...doc } : null;
+
+        // Resolve M2O fields from legacy char fields when M2O is unset (imported data)
+        if (this.state.doc) {
+            if (!this.state.doc.party_id && this.state.doc.party_code) {
+                const found = this.sisPartners.find(p => p.sis_code === this.state.doc.party_code);
+                if (found) this.state.doc.party_id = [found.id, found.name];
+            }
+            if (!this.state.doc.margin_id && this.state.doc.margin_name) {
+                const found = this.margins.find(m => m.name === this.state.doc.margin_name);
+                if (found) this.state.doc.margin_id = [found.id, found.name];
+            }
+        }
+
         this.state.items = items;
         this.state.docDirty = false;
         this.state.docTab = "general";
