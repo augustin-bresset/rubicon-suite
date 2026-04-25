@@ -8,6 +8,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/sis.doc.type.csv',
+        'data/doc_type_remarks.xml',
         'data/sis.doc.in.mode.csv',
         # sis.document and sis.document.item are business data — loaded via import_sis_odoo.py
         'report/report_action.xml',
