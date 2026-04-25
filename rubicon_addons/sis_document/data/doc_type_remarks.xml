@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sis_doctype_SO" model="sis.doc.type">
+        <field name="footer_note">1. The diamonds herein invoiced have been purchased from legitimate sources not involved in funding conflict and in compliance with United Nation Resolutions and corresponding national laws. The seller hereby guarantees that these diamonds are conflict free and confirms adherence to the WDC SoW guidelines.
+
+2. We certify that the non-industrial diamonds in our invoices were not mined, extracted, produced, or manufactured wholly or in part in Russian federal, notwithstanding any prior-stage processing in a third country.</field>
+    </record>
+
+    <record id="sis_doctype_SI" model="sis.doc.type">
+        <field name="footer_note">1. The diamonds herein invoiced have been purchased from legitimate sources not involved in funding conflict and in compliance with United Nation Resolutions and corresponding national laws. The seller hereby guarantees that these diamonds are conflict free and confirms adherence to the WDC SoW guidelines.
+
+2. We certify that the non-industrial diamonds in our invoices were not mined, extracted, produced, or manufactured wholly or in part in Russian federal, notwithstanding any prior-stage processing in a third country.</field>
+    </record>
+</odoo>

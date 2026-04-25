@@ -12,3 +12,4 @@ class SisDocType(models.Model):
         ('S', 'Sales'),
         ('W', 'Workshop/Production'),
     ], string='Category')
+    footer_note = fields.Text(string='Footer Note')

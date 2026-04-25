@@ -435,26 +435,12 @@
         </t>
 
         <!-- ═══ REMARK ═══ -->
-        <t t-set="rubicon" t-value="doc.env['res.partner'].sudo().search([('sis_code', '=', 'RUB')], limit=1)"/>
-        <div class="sis-remark">
-            <div class="sis-remark-title">Remark</div>
-            <t t-if="rubicon and rubicon.sis_ship_stamp">
-                <div style="white-space: pre-wrap;" t-field="rubicon.sis_ship_stamp"/>
-            </t>
-            <t t-else="">
-                <p><b>1.</b> The diamonds herein invoiced have been purchased from legitimate
-                sources not involved in
-                funding conflict and in compliance with United Nation Resolutions and
-                corresponding national laws.
-                The seller hereby guarantees that these diamonds are conflict free and
-                confirms adherence to the
-                WDC SoW guidelines.</p>
-                <p><b>2.</b> We certify that the non-industrial diamonds in our invoices were not
-                mined, extracted, produced,
-                or manufactured wholly or in part in Russian federal, notwithstanding
-                any prior-stage processing in a third country.</p>
-            </t>
-        </div>
+        <t t-if="doc.doc_type_id.footer_note">
+            <div class="sis-remark">
+                <div class="sis-remark-title">Remark</div>
+                <div style="white-space: pre-wrap;" t-field="doc.doc_type_id.footer_note"/>
+            </div>
+        </t>
 
         <!-- ═══ NOTES (if any) ═══ -->
         <t t-if="doc.notes">
