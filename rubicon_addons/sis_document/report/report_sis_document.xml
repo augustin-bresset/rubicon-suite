@@ -401,18 +401,8 @@
         </table>
 
         <!-- ═══ ORNAMENT QUANTITIES ═══ -->
-        <t t-set="desc_counts" t-value="{}"/>
-        <t t-foreach="doc.item_ids" t-as="item">
-            <t t-set="desc_key" t-value="item.description or 'Other'"/>
-            <t t-if="desc_key in desc_counts">
-                <t t-set="_dummy" t-value="desc_counts.update({desc_key: desc_counts[desc_key] + int(item.qty)})"/>
-            </t>
-            <t t-else="">
-                <t t-set="_dummy" t-value="desc_counts.update({desc_key: int(item.qty)})"/>
-            </t>
-        </t>
-
-        <t t-if="desc_counts">
+        <t t-set="ornament_counts" t-value="doc.get_ornament_quantities()"/>
+        <t t-if="ornament_counts">
             <table class="sis-ornament-table">
                 <thead>
                     <tr>
@@ -420,15 +410,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="desc_counts" t-as="desc">
+                    <t t-foreach="ornament_counts" t-as="cat_name">
                         <tr>
-                            <td><span t-esc="desc"/></td>
-                            <td><span t-esc="desc_counts[desc]"/> pcs</td>
+                            <td><span t-esc="cat_name"/></td>
+                            <td><span t-esc="ornament_counts[cat_name]"/> pcs</td>
                         </tr>
                     </t>
                     <tr style="font-weight:bold; border-top:1px solid #000;">
                         <td>Total</td>
-                        <td><span t-esc="sum(desc_counts.values())"/></td>
+                        <td><span t-esc="sum(ornament_counts.values())"/></td>
                     </tr>
                 </tbody>
             </table>
