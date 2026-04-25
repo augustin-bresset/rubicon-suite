@@ -14,6 +14,7 @@
         'report/report_action.xml',
         'report/report_sis_document.xml',
         'views/document_views.xml',
+        'views/doc_type_views.xml',
         'views/menus.xml',
     ],
     'assets': {
