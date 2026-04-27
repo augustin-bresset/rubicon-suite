@@ -522,8 +522,11 @@ def make_row_to_document(lookups):
             if len(row) >= 2:
                 doc_type_lookup[s(row[0])] = s(row[1])
 
+    def _col(row, i, default=''):
+        return s(row[i]) if len(row) > i else default
+
     def row_to_document(row):
-        if len(row) < 30:
+        if len(row) < 4:
             return None
         doc_type = s(row[0])
         legacy_id = safe_int(row[1])
@@ -535,13 +538,11 @@ def make_row_to_document(lookups):
             return None
 
         xml_id = f'sis_doc_{doc_type}_{legacy_id}'
-        party_raw = s(row[6])
-        # col 9 = ship_method legacy ID, col 10 = pay_term legacy ID
-        # col 29 = closed bit, col 30 = canceled bit
-        ship_raw = s(row[9])
-        pay_raw = s(row[10])
-        closed = s(row[29]) in ('1', 'True') if len(row) > 29 else False
-        canceled = s(row[30]) in ('1', 'True') if len(row) > 30 else False
+        party_raw = _col(row, 6)
+        ship_raw  = _col(row, 9)
+        pay_raw   = _col(row, 10)
+        closed   = _col(row, 29) in ('1', 'True')
+        canceled = _col(row, 30) in ('1', 'True')
 
         return {
             'id': xml_id,
@@ -549,26 +550,26 @@ def make_row_to_document(lookups):
             'doc_type_code': doc_type,
             'doc_type_id': doc_type_lookup.get(doc_type, ''),
             'legacy_id': legacy_id,
-            'date_created': safe_date(row[4]),
-            'date_due': safe_date(row[5]),
+            'date_created': safe_date(_col(row, 4)),
+            'date_due': safe_date(_col(row, 5)),
             'party_id': lookups['party'].get(party_raw, ''),
             'party_code': party_raw,
-            'stamp': s(row[7]),
-            'customer_po': s(row[8]),
+            'stamp': _col(row, 7),
+            'customer_po': _col(row, 8),
             'ship_method_id': lookups['shipper'].get(ship_raw, ''),
             'pay_term_id': lookups['payterm'].get(pay_raw, ''),
             'closed': closed,
             'canceled': canceled,
-            'employee': s(row[11]),
-            'notes': s(row[12]),
-            'currency': s(row[19]),
-            'total_qty': safe_int(safe_float(row[15])),
-            'total_cost': safe_float(row[16]),
-            'total_profit': safe_float(row[17]),
-            'total_fob': safe_float(row[20]),
-            'freight_insurance': safe_float(row[21]),
-            'total_cif': safe_float(row[26]) if len(row) > 26 else 0.0,
-            'footnotes': s(row[28]) if len(row) > 28 else '',
+            'employee': _col(row, 11),
+            'notes': _col(row, 12),
+            'currency': _col(row, 19),
+            'total_qty': safe_int(safe_float(_col(row, 15))),
+            'total_cost': safe_float(_col(row, 16)),
+            'total_profit': safe_float(_col(row, 17)),
+            'total_fob': safe_float(_col(row, 20)),
+            'freight_insurance': safe_float(_col(row, 21)),
+            'total_cif': safe_float(_col(row, 26)),
+            'footnotes': _col(row, 28),
         }
     return row_to_document
 

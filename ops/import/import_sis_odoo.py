@@ -13,8 +13,8 @@ env.cr.commit()
 print("=== Document Items done ===")
 
 # Verification counts
-for model_name in ['sis.region', 'sis.country', 'sis.pay.term', 'sis.shipper',
-                    'sis.trade.fair', 'sis.party', 'sis.doc.type', 'sis.doc.in.mode',
+for model_name in ['sis.pay.term', 'sis.shipper', 'sis.trade.fair',
+                    'sis.doc.type', 'sis.doc.in.mode',
                     'sis.document', 'sis.document.item']:
     count = env[model_name].search_count([])
     print(f"  {model_name}: {count} records")
