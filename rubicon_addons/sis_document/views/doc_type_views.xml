@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sis_doc_type_remarks_list" model="ir.ui.view">
+        <field name="name">sis.doc.type.remarks.list</field>
+        <field name="model">sis.doc.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" string="Document Remarks">
+                <field name="name" readonly="1"/>
+                <field name="code" readonly="1"/>
+                <field name="footer_note"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sis_doc_type_remarks" model="ir.actions.act_window">
+        <field name="name">Document Remarks</field>
+        <field name="res_model">sis.doc.type</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_sis_doc_type_remarks_list"/>
+    </record>
+</odoo>

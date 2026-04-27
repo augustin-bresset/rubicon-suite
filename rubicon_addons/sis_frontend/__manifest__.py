@@ -12,6 +12,7 @@
     'depends': ['base', 'web', 'sis_party', 'sis_document'],
     'data': [
         'views/sis_menus.xml',
+        'views/sis_settings_views.xml',
     ],
     'assets': {
         'web.assets_backend': [

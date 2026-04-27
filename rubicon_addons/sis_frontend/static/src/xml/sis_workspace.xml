@@ -43,7 +43,8 @@
                             <input class="form-control form-control-sm" style="width:120px;"
                                    placeholder="Search…"
                                    t-att-value="state.partySearch"
-                                   t-on-input="ev => this.state.partySearch = ev.target.value"/>
+                                   t-on-input="ev => this.state.partySearch = ev.target.value"
+                                   t-on-keydown="ev => ev.key === 'Enter' &amp;&amp; this.filteredParties.length &amp;&amp; this._loadParty(this.filteredParties[0].id)"/>
                             <select class="form-select form-select-sm" style="width:200px;"
                                     t-on-change="(ev) => this.onSelectParty(ev)">
                                 <t t-foreach="filteredParties" t-as="p" t-key="p.id">
@@ -110,15 +111,21 @@
                                 <div class="row g-2">
                                     <div class="col-12">
                                         <label class="form-label mb-1 small">Contact</label>
-                                        <input class="form-control form-control-sm"
-                                               t-att-value="state.party.sis_contact || ''"
-                                               t-on-input="ev => this.setPartyField('sis_contact', ev.target.value)"/>
+                                        <input type="text" class="o_input form-control form-control-sm"
+                                               t-att-value="state.contactPartner.name || ''"
+                                               t-on-input="ev => this.setContactField('name', ev.target.value)"
+                                               placeholder="Contact name"/>
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label mb-1 small">Address</label>
                                         <input class="form-control form-control-sm"
                                                t-att-value="state.party.street || ''"
-                                               t-on-input="ev => this.setPartyField('street', ev.target.value)"/>
+                                               t-on-input="ev => this.setPartyField('street', ev.target.value)"
+                                               placeholder="Street"/>
+                                        <input class="form-control form-control-sm mt-1"
+                                               t-att-value="state.party.street2 || ''"
+                                               t-on-input="ev => this.setPartyField('street2', ev.target.value)"
+                                               placeholder="Address complement"/>
                                     </div>
                                     <div class="col-5">
                                         <label class="form-label mb-1 small">City</label>
@@ -219,7 +226,7 @@
                             <div class="col-12">
                                 <label class="form-label mb-1 small">Notes</label>
                                 <textarea class="form-control form-control-sm" rows="4"
-                                          t-att-value="state.party.comment || ''"
+                                          t-att-value="this.stripHtml(state.party.comment)"
                                           t-on-input="ev => this.setPartyField('comment', ev.target.value)"></textarea>
                             </div>
 
@@ -313,20 +320,59 @@
                     <t t-elif="state.partyTab === 'shipment'">
                         <div class="row g-4" style="max-width:900px;">
                             <div class="col-6">
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label class="form-label mb-1 small">Address</label>
-                                    <textarea class="form-control form-control-sm" rows="3"
-                                              t-att-value="state.party.sis_ship_address || ''"
-                                              t-on-input="ev => this.setPartyField('sis_ship_address', ev.target.value)"></textarea>
+                                    <input type="text" class="o_input form-control form-control-sm"
+                                           t-att-value="state.deliveryPartner.name || ''"
+                                           t-on-input="ev => this.setDeliveryField('name', ev.target.value)"
+                                           placeholder="Addressee / Care of"/>
+                                    <input type="text" class="o_input form-control form-control-sm mt-1"
+                                           t-att-value="state.deliveryPartner.street || ''"
+                                           t-on-input="ev => this.setDeliveryField('street', ev.target.value)"
+                                           placeholder="Street"/>
+                                    <input type="text" class="o_input form-control form-control-sm mt-1"
+                                           t-att-value="state.deliveryPartner.street2 || ''"
+                                           t-on-input="ev => this.setDeliveryField('street2', ev.target.value)"
+                                           placeholder="Address complement"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1 small">City</label>
+                                    <!-- City -->
+                                    <input type="text" class="o_input form-control form-control-sm"
+                                           t-att-value="state.deliveryPartner.city || ''"
+                                           t-on-input="ev => this.setDeliveryField('city', ev.target.value)"
+                                           placeholder="City"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1 small">Zip</label>
+                                    <!-- Zip -->
+                                    <input type="text" class="o_input form-control form-control-sm"
+                                           t-att-value="state.deliveryPartner.zip || ''"
+                                           t-on-input="ev => this.setDeliveryField('zip', ev.target.value)"
+                                           placeholder="Zip"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1 small">State</label>
+                                    <select class="o_input form-select form-select-sm"
+                                            t-on-change="ev => this.setDeliveryField('state_id', parseInt(ev.target.value) || false)">
+                                        <option value="">—</option>
+                                        <t t-foreach="this.deliveryStates" t-as="s" t-key="s.id">
+                                            <option t-att-value="s.id"
+                                                    t-att-selected="s.id === this._m2oId(state.deliveryPartner.state_id)">
+                                                <t t-esc="s.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="form-label mb-1 small">Country</label>
-                                    <select class="form-select form-select-sm"
-                                            t-on-change="ev => this.setPartyField('sis_ship_country_id', +ev.target.value || false)">
+                                    <!-- Country M2O -->
+                                    <select class="o_input form-select form-select-sm"
+                                            t-on-change="ev => this.setDeliveryField('country_id', parseInt(ev.target.value) || false)">
                                         <option value="">—</option>
                                         <t t-foreach="this.sisCountries" t-as="c" t-key="c.id">
                                             <option t-att-value="c.id"
-                                                    t-att-selected="this._m2oId(state.party.sis_ship_country_id) === c.id">
+                                                    t-att-selected="c.id === this._m2oId(state.deliveryPartner.country_id)">
                                                 <t t-esc="c.name"/>
                                             </option>
                                         </t>
@@ -365,29 +411,35 @@
 
                     <!-- ─── BANK INFO ─── -->
                     <t t-elif="state.partyTab === 'bank'">
-                        <div style="max-width:800px;">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Bank Name</th>
-                                            <th>Account Holder Name</th>
-                                            <th>Account Number</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <t t-foreach="state.partyBanks" t-as="b" t-key="b.id || b.bank_id">
-                                            <tr>
-                                                <td><t t-esc="b.bank_id ? b.bank_id[1] : ''"/></td>
-                                                <td><t t-esc="b.acc_holder_name"/></td>
-                                                <td><t t-esc="b.acc_number"/></td>
-                                            </tr>
-                                        </t>
-                                        <t t-if="!state.partyBanks.length">
-                                            <tr><td colspan="3" class="text-center text-muted py-3">No bank records. Please define them via the standard Odoo Contact view.</td></tr>
-                                        </t>
-                                    </tbody>
-                                </table>
+                        <div style="max-width:560px;" class="pt-2">
+                            <div class="mb-3">
+                                <label class="form-label mb-1 small">Bank Name</label>
+                                <input type="text" class="o_input form-control form-control-sm"
+                                       t-att-value="state.partyBank.sis_bank_name || ''"
+                                       t-on-input="ev => this.setBankField('sis_bank_name', ev.target.value)"
+                                       placeholder="Bank name"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label mb-1 small">Address</label>
+                                <textarea class="form-control form-control-sm" rows="3"
+                                          style="white-space:pre-line"
+                                          t-att-value="state.partyBank.sis_bank_address || ''"
+                                          t-on-input="ev => this.setBankField('sis_bank_address', ev.target.value)"
+                                          placeholder="Bank address"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label mb-1 small">Acc. Name</label>
+                                <input type="text" class="o_input form-control form-control-sm"
+                                       t-att-value="state.partyBank.acc_holder_name || ''"
+                                       t-on-input="ev => this.setBankField('acc_holder_name', ev.target.value)"
+                                       placeholder="Account holder / BIC"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label mb-1 small">Acc. No.</label>
+                                <input type="text" class="o_input form-control form-control-sm"
+                                       t-att-value="state.partyBank.acc_number || ''"
+                                       t-on-input="ev => this.setBankField('acc_number', ev.target.value)"
+                                       placeholder="IBAN / account number"/>
                             </div>
                         </div>
                     </t>
@@ -762,7 +814,7 @@
                                                 <td class="text-end"><t t-esc="this.fmt(item.cost)"/></td>
                                                 <td class="text-end"><t t-esc="this.fmt(item.amount)"/></td>
                                                 <td class="text-end"><t t-esc="this.fmt(item.profit)"/></td>
-                                                <td class="text-end"><t t-esc="this.fmt(item.profit_pct)"/></td>
+                                                <td class="text-end"><t t-esc="this.fmt(item.profit_pct * 100)"/></td>
                                             </tr>
                                         </t>
                                         <t t-if="!filteredItems.length">
@@ -961,7 +1013,7 @@
                                     Profit <span class="fw-semibold"><t t-esc="this.fmt(state.doc ? state.doc.total_profit : 0)"/></span>
                                 </div>
                                 <div class="col-6 text-end">
-                                    % <t t-esc="this.fmt(state.doc ? state.doc.profit_pct : 0)"/>
+                                    % <t t-esc="this.fmt(state.doc ? state.doc.profit_pct * 100 : 0)"/>
                                 </div>
                             </div>
                         </div>
