@@ -1,7 +1,11 @@
 """
 Standalone tests for the SIS party/document converter (raw_to_data_sis.py).
 
-Reference record: A&J INTERNATIONAL (party ID=7) from meta/sis/main_with_example.md
+Reference records from meta/sis/main_with_example.md:
+  - Party: A&J INTERNATIONAL (ID=7)
+  - Document: SO-EMA-25001 (legacy_id=13159)
+  - Item: P720-RHO+LAM+GT+PT/P on SO-EMA-25001
+
 Run: python -m pytest rubicon_addons/rubicon_import/raw_to_data/test_sis_converter.py -v
 """
 import os
@@ -11,11 +15,11 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 
 from rubicon_import.raw_to_data.raw_to_data_sis import (
-    build_lookups, make_row_to_party, s, clean_phone,
+    build_lookups, make_row_to_party, make_row_to_document, make_row_to_doc_item,
+    s, clean_phone,
 )
 
 _BACKUP = os.path.join(os.path.dirname(__file__), '../../../data/backup_sis')
-
 
 def _party_row(pid: str):
     path = os.path.join(_BACKUP, 'CustomersJoined.csv')
@@ -24,6 +28,25 @@ def _party_row(pid: str):
             if row and s(row[0]) == pid:
                 return row
     return None
+
+
+def _doc_row(doc_name: str):
+    path = os.path.join(_BACKUP, 'SalesDocs.csv')
+    with open(path, encoding='utf-8') as f:
+        for row in csv.reader(f):
+            if len(row) > 3 and s(row[3]) == doc_name:
+                return row
+    return None
+
+
+def _item_rows(doc_type: str, legacy_id: int):
+    path = os.path.join(_BACKUP, 'SalesDocItems.csv')
+    rows = []
+    with open(path, encoding='utf-8') as f:
+        for row in csv.reader(f):
+            if len(row) > 4 and s(row[0]) == doc_type and s(row[1]) == str(legacy_id):
+                rows.append(row)
+    return rows
 
 
 # ─── clean_phone ──────────────────────────────────────────
@@ -240,3 +263,185 @@ class TestParty7AJ:
 
     def test_no_old_ship_stamp_field(self):
         assert 'ship_stamp' not in self.company
+
+
+# ─── SO-EMA-25001 (document) ──────────────────────────────
+# Reference from meta/sis/main_with_example.md § Required Field + General
+
+class TestDocumentSOEMA25001:
+    """
+    Reference: SO-EMA-25001, legacy_id=13159.
+    Covers all documented fields from main_with_example.md.
+    footnotes not tested (documented as excluded).
+    """
+
+    def setup_method(self):
+        lookups = build_lookups()
+        converter = make_row_to_document(lookups)
+        row = _doc_row('SO-EMA-25001')
+        assert row is not None, "SO-EMA-25001 not found in SalesDocs.csv"
+        self.doc = converter(row)
+        assert self.doc is not None, "Converter returned None for SO-EMA-25001"
+
+    # ── identity ──────────────────────────────────────────
+
+    def test_xml_id(self):
+        assert self.doc['id'] == 'sis_doc_SO_13159'
+
+    def test_name(self):
+        assert self.doc['name'] == 'SO-EMA-25001'
+
+    def test_doc_type_code(self):
+        assert self.doc['doc_type_code'] == 'SO'
+
+    def test_legacy_id(self):
+        assert self.doc['legacy_id'] == 13159
+
+    # ── header fields ─────────────────────────────────────
+
+    def test_date_created(self):
+        assert self.doc['date_created'] == '2025-01-06'
+
+    def test_date_due(self):
+        assert self.doc['date_due'] == '2025-01-31'
+
+    def test_closed_is_true(self):
+        assert self.doc['closed'] is True
+
+    def test_canceled_is_false(self):
+        assert self.doc['canceled'] is False
+
+    # ── general tab fields ────────────────────────────────
+
+    def test_party_id_resolves_to_emasur(self):
+        assert self.doc['party_id'] == 'EMASUR'
+
+    def test_stamp(self):
+        assert self.doc['stamp'] == 'EMA+IL'
+
+    def test_customer_po(self):
+        assert self.doc['customer_po'] == '#8001'
+
+    def test_ship_method_resolves_to_courier(self):
+        assert self.doc['ship_method_id'] == 'Courier'
+
+    def test_pay_term_resolves_to_tt(self):
+        assert self.doc['pay_term_id'] == 'T/T'
+
+    def test_employee(self):
+        assert self.doc['employee'] == 'ORM'
+
+    def test_notes(self):
+        assert self.doc['notes'] == 'Gold : 2645$'
+
+    # ── financials ────────────────────────────────────────
+
+    def test_currency(self):
+        assert self.doc['currency'] == 'US'
+
+    def test_total_qty(self):
+        assert self.doc['total_qty'] == 1
+
+    def test_total_fob(self):
+        assert self.doc['total_fob'] == 195.0
+
+    def test_freight_insurance(self):
+        assert self.doc['freight_insurance'] == 0.0
+
+    def test_total_cif(self):
+        assert self.doc['total_cif'] == 195.0
+
+    def test_total_cost(self):
+        assert self.doc['total_cost'] == 118.03
+
+    def test_total_profit(self):
+        assert self.doc['total_profit'] == 76.97
+
+    # ── forbidden fields ──────────────────────────────────
+
+    def test_no_margin_name_field(self):
+        assert 'margin_name' not in self.doc
+
+
+# ─── P720-RHO+LAM+GT+PT/P on SO-EMA-25001 (item) ─────────
+# Reference from meta/sis/main_with_example.md § Items/*
+
+class TestItemP720OnSOEMA25001:
+    """
+    Reference: single item P720-RHO+LAM+GT+PT/P on SO-EMA-25001.
+    Covers General, Instructions, Sizes, Weights and Profit sub-tabs.
+    """
+
+    def setup_method(self):
+        converter = make_row_to_doc_item()
+        item_rows = _item_rows('SO', 13159)
+        assert item_rows, "No items found for SO/13159 in SalesDocItems.csv"
+        items = [r for r in item_rows if s(r[4]) == 'P720-RHO+LAM+GT+PT/P']
+        assert items, "P720-RHO+LAM+GT+PT/P not found among SO-EMA-25001 items"
+        self.item = converter(items[0])
+        assert self.item is not None
+
+    # ── General ───────────────────────────────────────────
+
+    def test_design(self):
+        assert self.item['design'] == 'P720-RHO+LAM+GT+PT/P'
+
+    def test_purity(self):
+        assert self.item['purity'].strip() == '18K'
+
+    def test_qty(self):
+        assert self.item['qty'] == 1.0
+
+    def test_unit_price(self):
+        assert self.item['unit_price'] == 195.0
+
+    def test_amount(self):
+        assert self.item['amount'] == 195.0
+
+    def test_description(self):
+        assert '12 MM' in self.item['description']
+        assert 'LTSA' in self.item['description']
+
+    # ── Instructions ──────────────────────────────────────
+
+    def test_item_group(self):
+        assert '#8001' in self.item['item_group']
+        assert 'ADC' in self.item['item_group']
+
+    def test_special_instruction(self):
+        assert '12 MM' in self.item['special_instruction']
+        assert 'LTSA' in self.item['special_instruction']
+
+    # ── Sizes ─────────────────────────────────────────────
+
+    def test_size_remarks_empty(self):
+        assert self.item['size_remarks'] == ''
+
+    # ── Weights ───────────────────────────────────────────
+
+    def test_diamond_weight_zero(self):
+        assert self.item['diamond_weight'] == 0.0
+
+    def test_stone_weight_zero(self):
+        assert self.item['stone_weight'] == 0.0
+
+    def test_diverse_weight_zero(self):
+        assert self.item['diverse_weight'] == 0.0
+
+    def test_metal_weight(self):
+        assert self.item['metal_weight'] == 1.1
+
+    # ── Profit ────────────────────────────────────────────
+
+    def test_unit_cost(self):
+        assert self.item['unit_cost'] == 118.03
+
+    def test_cost(self):
+        assert self.item['cost'] == 118.03
+
+    def test_profit(self):
+        assert self.item['profit'] == 76.97
+
+    def test_profit_pct_cost_based(self):
+        # 76.97 / 118.03 = 65.21% (cost-based, not revenue-based)
+        assert abs(self.item['profit_pct'] - 0.6521) < 0.001

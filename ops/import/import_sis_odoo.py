@@ -1,14 +1,21 @@
 from odoo.addons.rubicon_import.import_scripts.generic import import_csv
 
-# Import documents (15,969 records)
+# Full reload: wipe existing data to avoid duplicates on re-run
+print("Clearing existing document items and documents...")
+env['sis.document.item'].search([]).unlink()
+env['sis.document'].search([]).unlink()
+env.cr.commit()
+print("  => Tables cleared.")
+
+# Import documents
 print("Starting documents import...")
-import_csv(env, env['sis.document'], 'sis_document')
+import_csv(env, env['sis.document'], 'sis_document', register_xml_id=True)
 env.cr.commit()
 print("=== Documents done ===")
 
-# Import document items (210,474 records)
+# Import document items
 print("Starting items import...")
-import_csv(env, env['sis.document.item'], 'sis_document')
+import_csv(env, env['sis.document.item'], 'sis_document', register_xml_id=True)
 env.cr.commit()
 print("=== Document Items done ===")
 

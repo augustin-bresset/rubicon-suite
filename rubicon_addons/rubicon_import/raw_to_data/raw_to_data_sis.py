@@ -605,40 +605,41 @@ def make_row_to_doc_item():
 
         counter[0] += 1
 
+        def _i(i, default=''):
+            return s(row[i]) if len(row) > i else default
+
         d = {
             'id': f'sis_item_{counter[0]}',
             'document_id': doc_name,
             'design': design,
-            'ref_document': s(row[5]),
-            'description': s(row[6]),
-            'model_code': s(row[7]),
-            'product_code': s(row[8]),
-            'color_code': s(row[9]),
-            'metal_code': s(row[10]),
-            'purity': s(row[11]),
-            'size_remarks': s(row[12]),
-            'qty': safe_float(row[13]),
-            'qty_shipped': safe_float(row[14]),
-            'qty_balance': safe_float(row[15]),
-            'unit_price': safe_float(row[16]),
-            'amount': safe_float(row[17]),
-            'special_instruction': s(row[18]) if len(row) > 18 else '',
-            'item_group': s(row[19]) if len(row) > 19 else '',
-            'unit_cost': safe_float(row[22]) if len(row) > 22 else 0.0,
-            'cost': safe_float(row[23]) if len(row) > 23 else 0.0,
-            'profit': safe_float(row[24]) if len(row) > 24 else 0.0,
-            'diamond_weight': safe_float(row[25]) if len(row) > 25 else 0.0,
-            'stone_weight': safe_float(row[26]) if len(row) > 26 else 0.0,
-            'diverse_weight': safe_float(row[27]) if len(row) > 27 else 0.0,
-            'metal_weight': safe_float(row[28]) if len(row) > 28 else 0.0,
-            'currency': s(row[32]) if len(row) > 32 else 'US',
-            'sequence': safe_int(row[34]) if len(row) > 34 else 0,
+            'ref_document': _i(5),
+            'description': _i(12),
+            'model_code': _i(7),
+            'product_code': _i(8),
+            'color_code': _i(9),
+            'metal_code': _i(10),
+            'purity': _i(11),
+            'size_remarks': _i(6),
+            'qty': safe_float(_i(13)),
+            'qty_shipped': safe_float(_i(14)),
+            'qty_balance': safe_float(_i(15)),
+            'unit_price': safe_float(_i(16)),
+            'amount': safe_float(_i(17)),
+            'special_instruction': _i(18),
+            'item_group': _i(33),
+            'unit_cost': safe_float(_i(22)),
+            'cost': safe_float(_i(23)),
+            'profit': safe_float(_i(24)),
+            'diamond_weight': safe_float(_i(25)),
+            'stone_weight': safe_float(_i(26)),
+            'diverse_weight': safe_float(_i(27)),
+            'metal_weight': safe_float(_i(28)),
+            'currency': _i(32) or 'US',
+            'sequence': safe_int(_i(34)),
         }
 
-        if d['amount'] and d['amount'] != 0:
-            d['profit_pct'] = round(d['profit'] / d['amount'], 4)
-        else:
-            d['profit_pct'] = 0.0
+        cost = d['cost']
+        d['profit_pct'] = round(d['profit'] / cost, 4) if cost else 0.0
 
         return d
 
