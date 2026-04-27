@@ -1,0 +1,33 @@
+id,name,cost,currency_id
+setting_type_2,Setting 10,10.00,THB
+setting_type_3,Setting 12,12.00,THB
+setting_type_4,Setting 15,15.00,THB
+setting_type_5,Presetting,8.00,THB
+setting_type_6,Setting 80,80.00,THB
+setting_type_7,Stringing,5.00,THB
+setting_type_8,Setting 130,130.00,THB
+setting_type_9,Setting 30,30.00,THB
+setting_type_10,Setting 100,100.00,THB
+setting_type_11,Setting 20,20.00,THB
+setting_type_12,Setting 50,50.00,THB
+setting_type_13,Setting 300,300.00,THB
+setting_type_14,Setting 200,200.00,THB
+setting_type_15,Setting 150,150.00,THB
+setting_type_16,Setting 180,180.00,THB
+setting_type_17,Setting 250,250.00,THB
+setting_type_18,Setting 320,320.00,THB
+setting_type_19,Setting 60,60.00,THB
+setting_type_20,Setting 70,70.00,THB
+setting_type_21,Setting 500,500.00,THB
+setting_type_22,Setting 25,25.00,THB
+setting_type_23,Setting 14,14.00,THB
+setting_type_24,Beads 3,3.00,THB
+setting_type_25,Setting 40,40.00,THB
+setting_type_26,Setting beads .01,0.01,THB
+setting_type_27,Cutting 1000,1000.00,THB
+setting_type_28,Cutting 500,500.00,THB
+setting_type_29,Setting 800,800.00,THB
+setting_type_30,Setting 120,120.00,THB
+setting_type_31,Setting 8,8.00,THB
+setting_type_32,MICRO 18,18.00,THB
+setting_type_33,Setting 450,450.00,THB

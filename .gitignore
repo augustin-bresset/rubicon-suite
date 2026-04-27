@@ -85,6 +85,7 @@ meta/backups/
 !rubicon_addons/pdp_stone/data/pdp.stone.size.csv
 !rubicon_addons/pdp_stone/data/pdp.stone.type.csv
 !rubicon_addons/pdp_stone/data/pdp.stone.weight.csv
+!rubicon_addons/pdp_stone/data/pdp.stone.setting.type.csv
 # sis_document
 !rubicon_addons/sis_document/data/sis.doc.type.csv
 !rubicon_addons/sis_document/data/sis.doc.in.mode.csv
