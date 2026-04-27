@@ -814,7 +814,7 @@
                                                 <td class="text-end"><t t-esc="this.fmt(item.cost)"/></td>
                                                 <td class="text-end"><t t-esc="this.fmt(item.amount)"/></td>
                                                 <td class="text-end"><t t-esc="this.fmt(item.profit)"/></td>
-                                                <td class="text-end"><t t-esc="this.fmt(item.profit_pct)"/></td>
+                                                <td class="text-end"><t t-esc="this.fmt(item.profit_pct * 100)"/></td>
                                             </tr>
                                         </t>
                                         <t t-if="!filteredItems.length">
@@ -1013,7 +1013,7 @@
                                     Profit <span class="fw-semibold"><t t-esc="this.fmt(state.doc ? state.doc.total_profit : 0)"/></span>
                                 </div>
                                 <div class="col-6 text-end">
-                                    % <t t-esc="this.fmt(state.doc ? state.doc.profit_pct : 0)"/>
+                                    % <t t-esc="this.fmt(state.doc ? state.doc.profit_pct * 100 : 0)"/>
                                 </div>
                             </div>
                         </div>
