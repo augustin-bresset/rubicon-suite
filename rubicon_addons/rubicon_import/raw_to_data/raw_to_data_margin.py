@@ -23,61 +23,26 @@ if __name__ == '__main__':
         print(f"Begin generation for {sys.argv[1:]}")
     
     
-    # Margin 
+    # Margin
     if everything or "code" in sys.argv:
 
         model_name="pdp.margin"
         csv_name="Margins.csv"
 
         fieldnames=[
-            "id", "code", "name"
-            ]    
-        
-        def row_to_dict(row):     
-            code = strip_code_space(row[0])       
+            "id", "code", "name", "labor_metal_rate", "labor_stone_rate"
+        ]
+
+        def row_to_dict(row):
+            code = strip_code_space(row[0])
             return {
                 "id": func_index(code, model_name),
-                "code": code, 
-                "name": row[1]
-            }        
-            
-        raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
+                "code": code,
+                "name": row[1],
+                "labor_metal_rate": safe_float(row[5]),
+                "labor_stone_rate": safe_float(row[7]),
+            }
 
-    
-    # Margin Labor
-    if everything or "labor" in sys.argv:
-
-        model_name="pdp.margin.labor"
-        csv_name="Margins.csv"
-
-        fieldnames=[
-            "id", "margin_id", "labor_id", "rate"
-        ]    
-        
-        labor_type_csv = "LaborTypes.csv"
-        labor_types = []
-        file_name = os.path.join(backup_folder, labor_type_csv)
-        with open(file_name, newline='', encoding='utf-8') as src_file:
-            reader = csv.reader(src_file)
-            for row in reader:
-                if row[0] == "LAB":
-                    row[0] = "ASS"
-                labor_types.append(row[0])
-        
-        def row_to_dict(row):
-            margin_code = strip_code_space(row[0])
-            
-            out =  {
-                "id": func_index(margin_code, model_name),
-                "margin_id": margin_code, 
-                "labor_id": '',
-                "rate": safe_float(row[7])
-            }        
-            
-            for labor_type in labor_types:
-                out['labor_id'] = labor_type
-                out['id'] = func_index(f"{margin_code}_{labor_type}", model_name)
-                yield out
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
     
     
@@ -131,22 +96,33 @@ if __name__ == '__main__':
     if everything or "stone" in sys.argv:
         model_name="pdp.margin.stone"
         csv_name="StoneMargins.csv"
-        actual_field=[
-            "margin_code", "prod_cat_id(toDEL)", "stone_type", "stone_shape", "stone_size", "stone_shade", "rate"
-        ]
         fieldnames=[
-            "id", "margin_id", "stone_type_id", "stone_size_id", "stone_shade_id", "rate"
+            "id", "margin_id", "stone_type_id", "stone_shape_id",
+            "stone_size_id", "stone_shade_id", "rate"
         ]
-        
+
         def row_to_dict(row):
             margin_code = strip_code_space(row[0])
             stone_type_code = strip_code_space(row[2])
+            # col[3] = stone_shape: "1" or "All" means wildcard (no filter)
+            shape_raw = strip_code_space(row[3]) if len(row) > 3 else ''
+            shape_code = '' if shape_raw in ('', '1', 'All', 'ALL') else shape_raw
+            # col[4] = stone_size: "All" means wildcard
+            size_raw = strip_code_space(row[4]) if len(row) > 4 else ''
+            size_code = '' if size_raw in ('', 'All', 'ALL') else size_raw
+            # col[5] = stone_shade: "1" means wildcard
+            shade_raw = strip_code_space(row[5]) if len(row) > 5 else ''
+            shade_code = '' if shade_raw in ('', '1', 'All', 'ALL') else shade_raw
             return {
-                "id": func_index(f"{margin_code}_{stone_type_code}", model_name),
-                "margin_id": margin_code, 
-                "stone_type_id": stone_type_code, 
-                "rate": float(row[6])
-            }              
+                "id": func_index(f"{margin_code}_{stone_type_code}_{shape_code}_{size_code}_{shade_code}", model_name),
+                "margin_id": margin_code,
+                "stone_type_id": stone_type_code,
+                "stone_shape_id": shape_code,
+                "stone_size_id": size_code,
+                "stone_shade_id": shade_code,
+                "rate": float(row[6]),
+            }
+
         raw_to_data(model_name, csv_name, fieldnames, row_to_dict, dest_folder='pdp_margin', index_auto=True)
 
 

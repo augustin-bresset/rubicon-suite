@@ -85,6 +85,13 @@ meta/backups/
 !rubicon_addons/pdp_stone/data/pdp.stone.size.csv
 !rubicon_addons/pdp_stone/data/pdp.stone.type.csv
 !rubicon_addons/pdp_stone/data/pdp.stone.weight.csv
+# pdp_margin
+!rubicon_addons/pdp_margin/data/pdp.margin.csv
+!rubicon_addons/pdp_margin/data/pdp.margin.part.csv
+!rubicon_addons/pdp_margin/data/pdp.margin.metal.csv
+!rubicon_addons/pdp_margin/data/pdp.margin.stone.csv
+!rubicon_addons/pdp_margin/data/pdp.margin.addon.csv
+!rubicon_addons/pdp_margin/data/pdp.margin.stone.conditional.csv
 # sis_document
 !rubicon_addons/sis_document/data/sis.doc.type.csv
 !rubicon_addons/sis_document/data/sis.doc.in.mode.csv
