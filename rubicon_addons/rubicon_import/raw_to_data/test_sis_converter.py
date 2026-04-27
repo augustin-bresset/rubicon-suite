@@ -331,6 +331,9 @@ class TestDocumentSOEMA25001:
     def test_employee(self):
         assert self.doc['employee'] == 'ORM'
 
+    def test_rcv_mode_resolves_to_email(self):
+        assert self.doc['rcv_mode_id'] == 'Email'
+
     def test_notes(self):
         assert self.doc['notes'] == 'Gold : 2645$'
 

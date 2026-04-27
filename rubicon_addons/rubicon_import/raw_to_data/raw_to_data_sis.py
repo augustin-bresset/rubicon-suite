@@ -166,6 +166,13 @@ def build_lookups():
             if len(row) >= 2:
                 lookups['shipper'][s(row[0])] = s(row[1])
 
+    # DocInMode: id → name
+    lookups['rcv_mode'] = {}
+    with open(os.path.join(backup_sis, 'DocInMode.csv'), encoding='utf-8') as f:
+        for row in csv.reader(f):
+            if len(row) >= 2:
+                lookups['rcv_mode'][s(row[0])] = s(row[1]).strip()
+
     # Party: id → company name
     lookups['party'] = {}
     with open(os.path.join(backup_sis, 'Customers.csv'), encoding='utf-8') as f:
@@ -539,8 +546,9 @@ def make_row_to_document(lookups):
 
         xml_id = f'sis_doc_{doc_type}_{legacy_id}'
         party_raw = _col(row, 6)
-        ship_raw  = _col(row, 9)
-        pay_raw   = _col(row, 10)
+        ship_raw    = _col(row, 9)
+        pay_raw     = _col(row, 10)
+        rcv_raw     = _col(row, 13)
         closed   = _col(row, 29) in ('1', 'True')
         canceled = _col(row, 30) in ('1', 'True')
 
@@ -558,6 +566,7 @@ def make_row_to_document(lookups):
             'customer_po': _col(row, 8),
             'ship_method_id': lookups['shipper'].get(ship_raw, ''),
             'pay_term_id': lookups['payterm'].get(pay_raw, ''),
+            'rcv_mode_id': lookups['rcv_mode'].get(rcv_raw, ''),
             'closed': closed,
             'canceled': canceled,
             'employee': _col(row, 11),
@@ -752,7 +761,7 @@ if __name__ == '__main__':
         fieldnames=['id', 'name', 'doc_type_code', 'doc_type_id', 'legacy_id',
                     'date_created', 'date_due', 'party_id', 'party_code',
                     'stamp', 'customer_po', 'ship_method_id', 'pay_term_id',
-                    'closed', 'canceled', 'employee', 'notes',
+                    'rcv_mode_id', 'closed', 'canceled', 'employee', 'notes',
                     'currency', 'total_qty', 'total_cost', 'total_profit',
                     'total_fob', 'freight_insurance',
                     'total_cif', 'footnotes'],
