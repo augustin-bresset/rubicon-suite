@@ -8,14 +8,16 @@ env.cr.commit()
 print("  => Tables cleared.")
 
 # Import documents
+# module='rubicon_import' keeps external IDs out of sis_document's scope,
+# so Odoo won't delete them when upgrading sis_document.
 print("Starting documents import...")
-import_csv(env, env['sis.document'], 'sis_document', register_xml_id=True)
+import_csv(env, env['sis.document'], 'sis_document', register_xml_id=True, xml_id_module='rubicon_import')
 env.cr.commit()
 print("=== Documents done ===")
 
 # Import document items
 print("Starting items import...")
-import_csv(env, env['sis.document.item'], 'sis_document', register_xml_id=True)
+import_csv(env, env['sis.document.item'], 'sis_document', register_xml_id=True, xml_id_module='rubicon_import')
 env.cr.commit()
 print("=== Document Items done ===")
 

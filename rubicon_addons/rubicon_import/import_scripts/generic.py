@@ -50,14 +50,15 @@ def fields_type_to_func(env, field, value):
 
 
 def import_csv(
-    env, 
-    model, 
+    env,
+    model,
     module='pdp_product',
-    verbose=True, 
+    verbose=True,
     batch_size=1000,
-    register_xml_id=False, 
+    register_xml_id=False,
+    xml_id_module=None,  # module used for ir.model.data; defaults to `module`
     fields_maj=None,
-    csv_path=None # Useful for testing
+    csv_path=None,
     ):
     """
     Import CSV into a model with optional deferred write phase for specific fields.
@@ -86,6 +87,8 @@ def import_csv(
 
     start = time.time()
     logs = {"created": 0, "updated": 0, "skipped": 0, "total": 0}
+
+    xid_module = xml_id_module or module  # module scope for ir.model.data records
 
     ref_cache = {}
     new_records = []
@@ -133,7 +136,7 @@ def import_csv(
                 continue
             ref = ref_cache.get(xml_id)
             if ref is None:
-                ref = env.ref(f"{module}.{xml_id}", raise_if_not_found=False)
+                ref = env.ref(f"{xid_module}.{xml_id}", raise_if_not_found=False)
                 ref_cache[xml_id] = ref
 
             if ref: 
@@ -153,7 +156,7 @@ def import_csv(
                     for rec, (xid, deferred) in zip(created, new_xml_ids):
                         if register_xml_id:
                             env['ir.model.data'].create({
-                                'module': module,
+                                'module': xid_module,
                                 'name': xid,
                                 'model': model._name,
                                 'res_id': rec.id,
@@ -170,7 +173,7 @@ def import_csv(
         for rec, (xid, deferred) in zip(created, new_xml_ids):
             if register_xml_id:
                 env['ir.model.data'].create({
-                    'module': module,
+                    'module': xid_module,
                     'name': xid,
                     'model': model._name,
                     'res_id': rec.id,
