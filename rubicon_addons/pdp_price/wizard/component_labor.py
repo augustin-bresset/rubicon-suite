@@ -1,5 +1,8 @@
 from odoo import models, api
 
+_STONE_LABOR_CODES = frozenset({'REC', 'SET'})
+
+
 class PriceLabor(models.TransientModel):
     _name = 'pdp.price.labor'
     _description = 'Labor Price Component'
@@ -7,7 +10,9 @@ class PriceLabor(models.TransientModel):
 
     @api.model
     def compute(self, *, product, margin, currency, date):
-        setting_pl, labor_pl = self.compute_split(product=product, margin=margin, currency=currency, date=date)
+        setting_pl, labor_pl = self.compute_split(
+            product=product, margin=margin, currency=currency, date=date
+        )
         combined_cost = setting_pl['cost'] + labor_pl['cost']
         combined_margin = setting_pl['margin'] + labor_pl['margin']
         return self._payload('labor', combined_cost, combined_margin, currency)
@@ -35,15 +40,16 @@ class PriceLabor(models.TransientModel):
         all_labor_ids = set(model_cost_by_labor) | set(product_cost_by_labor)
         has_setting = bool(set_type and product.stone_composition_id)
 
-        # --- Pre-fetch margin rates (include SET even if not in cost tables) ---
+        # --- Build margin rate lookup from the two fields on pdp.margin ---
         margin_rate_by_labor = {}
         if margin and (all_labor_ids or has_setting):
-            margin_labor_ids = all_labor_ids | ({set_type.id} if set_type else set())
-            mlines = self.env['pdp.margin.labor'].with_context(clean_ctx).search([
-                ('margin_id', '=', margin.id),
-                ('labor_id', 'in', list(margin_labor_ids)),
-            ])
-            margin_rate_by_labor = {r.labor_id.id: (r.rate or 1.0) for r in mlines}
+            metal_rate = margin.labor_metal_rate or 1.0
+            stone_rate = margin.labor_stone_rate or 1.0
+            all_needed_ids = all_labor_ids | ({set_type.id} if set_type else set())
+            for lt in self.env['pdp.labor.type'].browse(list(all_needed_ids)):
+                margin_rate_by_labor[lt.id] = (
+                    stone_rate if lt.code in _STONE_LABOR_CODES else metal_rate
+                )
 
         # --- Setting cost: sum from stone lines ---
         setting_cost = setting_margin = 0.0

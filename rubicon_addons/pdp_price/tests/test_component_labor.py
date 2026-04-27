@@ -77,17 +77,6 @@ class TestPriceLabor(TransactionCase):
             'currency_id': (currency or self.cur).id,
         })
 
-    def _create_margin_labor_rate(self, margin, labor_type, rate_factor):
-        """
-        Create pdp.margin.labor entry with multiplicative 'rate' (e.g. 1.25 = +25%).
-        """
-        ML = self.env['pdp.margin.labor']
-        return ML.create({
-            'margin_id': margin.id,
-            'labor_id': labor_type.id,
-            'rate': rate_factor,
-        })
-
     # ---------------- tests ----------------
     def test_00_no_costs_any_type_returns_zero(self):
         """If there are labor types but no costs at all, totals must be zero."""
@@ -143,30 +132,35 @@ class TestPriceLabor(TransactionCase):
         self.assertEqual(payload['margin'], 0.0)
         self.assertEqual(payload['price'], 40.0)
 
-    def test_04_margin_applied_per_type_multiplicative(self):
-        """
-        Margin is (rate - 1) * cost for each labor type.
-        Example:
-          t1 cost=10 with rate=1.10  -> margin +1.0
-          t2 cost=20 with rate=1.50  -> margin +10.0
-          total cost=30, margin=11, price=41
-        """
+    def test_04_metal_labor_uses_labor_metal_rate(self):
+        """CAS and POL both use margin.labor_metal_rate."""
         t1 = self._create_labor_type(code='CAS')
         t2 = self._create_labor_type(code='POL')
-
         self._create_model_cost(t1, 10.0, self.cur)
         self._create_model_cost(t2, 20.0, self.cur)
-
-        self._create_margin_labor_rate(self.margin, t1, rate_factor=1.10)
-        self._create_margin_labor_rate(self.margin, t2, rate_factor=1.50)
+        self.margin.write({'labor_metal_rate': 1.25})
 
         payload = self.wizard.compute(
             product=self.product, margin=self.margin, currency=self.cur, date=fields.Date.today()
         )
-        self.assertEqual(payload['type'], 'labor')
+        # margin = (1.25-1)*10 + (1.25-1)*20 = 2.5 + 5 = 7.5
         self.assertEqual(payload['cost'], 30.0)
-        self.assertAlmostEqual(payload['margin'], 11.0, places=6)
-        self.assertAlmostEqual(payload['price'], 41.0, places=6)
+        self.assertAlmostEqual(payload['margin'], 7.5, places=6)
+        self.assertAlmostEqual(payload['price'], 37.5, places=6)
+
+    def test_04b_stone_labor_uses_labor_stone_rate(self):
+        """REC uses margin.labor_stone_rate."""
+        t = self._create_labor_type(code='REC')
+        self._create_model_cost(t, 15.0, self.cur)
+        self.margin.write({'labor_stone_rate': 1.40})
+
+        payload = self.wizard.compute(
+            product=self.product, margin=self.margin, currency=self.cur, date=fields.Date.today()
+        )
+        # margin = (1.40-1)*15 = 6.0
+        self.assertEqual(payload['cost'], 15.0)
+        self.assertAlmostEqual(payload['margin'], 6.0, places=6)
+        self.assertAlmostEqual(payload['price'], 21.0, places=6)
 
     def test_05_currency_conversion_is_used(self):
         """_convert should be called for each cost line when currencies differ."""
@@ -234,16 +228,15 @@ class TestPriceLabor(TransactionCase):
         self.assertEqual(payload['price'], 50.0)
 
     def test_07_set_margin_applied_to_setting_cost(self):
-        """SET margin rate is applied to the setting cost."""
+        """SET uses margin.labor_stone_rate (stone labor category)."""
         self._setup_stone_composition([(100.0, 2)])  # cost = 200.0
-        set_type = self.env['pdp.labor.type'].search([('code', '=', 'SET')], limit=1)
-        self._create_margin_labor_rate(self.margin, set_type, rate_factor=1.25)
+        self.margin.write({'labor_stone_rate': 1.25})
 
         payload = self.wizard.compute(
             product=self.product, margin=self.margin, currency=self.cur, date=fields.Date.today()
         )
         self.assertEqual(payload['cost'], 200.0)
-        self.assertAlmostEqual(payload['margin'], 50.0, places=6)   # (1.25 - 1) × 200
+        self.assertAlmostEqual(payload['margin'], 50.0, places=6)   # (1.25-1) × 200
         self.assertAlmostEqual(payload['price'], 250.0, places=6)
 
     def test_08_stone_lines_with_zero_setting_ignored(self):
