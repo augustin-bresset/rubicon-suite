@@ -1209,36 +1209,18 @@
                                                t-on-change="(ev) => this.setMarginPartRate(ev.target.value)"/>
                                     </div>
                                     <div class="fw-bold small mt-3 mb-1 border-bottom pb-1">Labor Rates</div>
-                                    <table class="table table-sm table-bordered mb-1" style="font-size:11px;">
-                                        <thead class="bg-light"><tr><th>Labor Type</th><th style="width:70px;" class="text-end">Margin</th><th style="width:24px;"></th></tr></thead>
-                                        <tbody>
-                                            <t t-foreach="state.marginLabors" t-as="ml" t-key="ml._key">
-                                                <tr t-attf-class="{{ ml._dirty ? 'table-warning' : '' }}">
-                                                    <td>
-                                                        <select class="form-select form-select-sm p-0" style="font-size:11px;"
-                                                                t-on-change="(ev) => this.setMarginLaborField(ml._key, 'labor_id', ev.target.value)">
-                                                            <option value="">--</option>
-                                                            <t t-foreach="this.laborTypes" t-as="lt2" t-key="lt2.id">
-                                                                <option t-att-value="lt2.id"
-                                                                        t-att-selected="lt2.id === (Array.isArray(ml.labor_id) ? ml.labor_id[0] : ml.labor_id)">
-                                                                    <t t-esc="lt2.code"/>
-                                                                </option>
-                                                            </t>
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="number" step="0.001" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
-                                                               t-att-value="ml.rate"
-                                                               t-on-change="(ev) => this.setMarginLaborField(ml._key, 'rate', ev.target.value)"/></td>
-                                                    <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px;"
-                                                            t-on-click="() => this.removeMarginLabor(ml._key)">✕</button></td>
-                                                </tr>
-                                            </t>
-                                            <t t-if="state.marginLabors.length === 0">
-                                                <tr><td colspan="3" class="text-muted text-center">None</td></tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
-                                    <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="() => this.addMarginLabor()">+ Add</button>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <label class="small" style="width:90px;">Metal Labor</label>
+                                        <input type="number" step="0.001" class="form-control form-control-sm text-end" style="width:80px; font-size:11px;"
+                                               t-att-value="state.laborMetalRate"
+                                               t-on-change="(ev) => this.setLaborMetalRate(ev.target.value)"/>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <label class="small" style="width:90px;">Stone Labor</label>
+                                        <input type="number" step="0.001" class="form-control form-control-sm text-end" style="width:80px; font-size:11px;"
+                                               t-att-value="state.laborStoneRate"
+                                               t-on-change="(ev) => this.setLaborStoneRate(ev.target.value)"/>
+                                    </div>
                                 </div>
 
                                 <!-- Right: Misc (Addon) -->
@@ -1418,16 +1400,23 @@
                                     <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" t-on-click="() => this.addMarginStoneNorm()">+ Add</button>
                                 </div>
                                 <table class="table table-sm table-bordered" style="font-size:11px;">
-                                    <thead class="bg-light"><tr><th>Stone Type</th><th>Category</th><th style="width:90px;" class="text-end">Margin</th><th style="width:24px;"></th></tr></thead>
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Stone Type</th>
+                                            <th>Shape</th>
+                                            <th>Size</th>
+                                            <th>Shade</th>
+                                            <th style="width:80px;" class="text-end">Margin</th>
+                                            <th style="width:24px;"></th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
                                         <t t-foreach="state.marginStonesNormal" t-as="sn" t-key="sn._key">
-                                            <t t-set="snType" t-value="this.getStoneType(sn.stone_type_id)"/>
-                                            <t t-if="!state.stoneCatFilter or (snType and (Array.isArray(snType.category_id) ? snType.category_id[0] : snType.category_id) == state.stoneCatFilter)">
                                             <tr t-attf-class="{{ sn._dirty ? 'table-warning' : '' }}">
                                                 <td>
                                                     <select class="form-select form-select-sm p-0" style="font-size:11px;"
                                                             t-on-change="(ev) => this.setMarginStoneNormField(sn._key, 'stone_type_id', ev.target.value)">
-                                                        <option value="">--</option>
+                                                        <option value="">All</option>
                                                         <t t-foreach="this.stoneTypes" t-as="styp" t-key="styp.id">
                                                             <option t-att-value="styp.id"
                                                                     t-att-selected="styp.id === (Array.isArray(sn.stone_type_id) ? sn.stone_type_id[0] : sn.stone_type_id)">
@@ -1436,17 +1425,51 @@
                                                         </t>
                                                     </select>
                                                 </td>
-                                                <td class="text-muted align-middle small"><t t-esc="snType and Array.isArray(snType.category_id) ? snType.category_id[1] : ''"/></td>
+                                                <td>
+                                                    <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                            t-on-change="(ev) => this.setMarginStoneNormField(sn._key, 'stone_shape_id', ev.target.value)">
+                                                        <option value="">All</option>
+                                                        <t t-foreach="this.stoneShapes" t-as="ssp" t-key="ssp.id">
+                                                            <option t-att-value="ssp.id"
+                                                                    t-att-selected="ssp.id === (Array.isArray(sn.stone_shape_id) ? sn.stone_shape_id[0] : sn.stone_shape_id)">
+                                                                <t t-esc="ssp.shape"/>
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                            t-on-change="(ev) => this.setMarginStoneNormField(sn._key, 'stone_size_id', ev.target.value)">
+                                                        <option value="">All</option>
+                                                        <t t-foreach="this.stoneSizes" t-as="ssz" t-key="ssz.id">
+                                                            <option t-att-value="ssz.id"
+                                                                    t-att-selected="ssz.id === (Array.isArray(sn.stone_size_id) ? sn.stone_size_id[0] : sn.stone_size_id)">
+                                                                <t t-esc="ssz.name"/>
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-select form-select-sm p-0" style="font-size:11px;"
+                                                            t-on-change="(ev) => this.setMarginStoneNormField(sn._key, 'stone_shade_id', ev.target.value)">
+                                                        <option value="">All</option>
+                                                        <t t-foreach="this.stoneShades" t-as="ssh" t-key="ssh.id">
+                                                            <option t-att-value="ssh.id"
+                                                                    t-att-selected="ssh.id === (Array.isArray(sn.stone_shade_id) ? sn.stone_shade_id[0] : sn.stone_shade_id)">
+                                                                <t t-esc="ssh.shade"/>
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </td>
                                                 <td><input type="number" step="0.001" class="form-control form-control-sm p-0 text-end" style="font-size:11px;"
                                                            t-att-value="sn.rate"
                                                            t-on-change="(ev) => this.setMarginStoneNormField(sn._key, 'rate', ev.target.value)"/></td>
                                                 <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:10px;"
                                                         t-on-click="() => this.removeMarginStoneNorm(sn._key)">✕</button></td>
                                             </tr>
-                                            </t>
                                         </t>
                                         <t t-if="state.marginStonesNormal.length === 0">
-                                            <tr><td colspan="4" class="text-muted text-center">None</td></tr>
+                                            <tr><td colspan="6" class="text-muted text-center">None</td></tr>
                                         </t>
                                     </tbody>
                                 </table>

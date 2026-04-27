@@ -56,7 +56,9 @@ export class PdpWorkspace extends Component {
             marginTab: 'misc',
             marginStoneTab: 'conditional',
             marginPartRecord: null,
-            marginLabors: [],
+            laborMetalRate: 1.0,
+            laborStoneRate: 1.0,
+            laborRateDirty: false,
             marginAddons: [],
             marginMetals: [],
             marginStonesConditional: [],
@@ -1619,10 +1621,13 @@ export class PdpWorkspace extends Component {
                     await this.orm.create("pdp.margin.part", pRules.map(r => ({ margin_id: newId, rate: r.rate })));
                 }
 
-                // Copy Labors
-                const lRules = await this.orm.searchRead("pdp.margin.labor", [["margin_id", "=", srcId]], ["labor_id", "rate"]);
-                if (lRules.length) {
-                    await this.orm.create("pdp.margin.labor", lRules.map(r => ({ margin_id: newId, labor_id: r.labor_id[0], rate: r.rate })));
+                // Copy Labor rates (fields on pdp.margin directly)
+                const srcMarginRec = await this.orm.read("pdp.margin", [srcId], ["labor_metal_rate", "labor_stone_rate"]);
+                if (srcMarginRec.length) {
+                    await this.orm.write("pdp.margin", [newId], {
+                        labor_metal_rate: srcMarginRec[0].labor_metal_rate,
+                        labor_stone_rate: srcMarginRec[0].labor_stone_rate,
+                    });
                 }
 
                 // Copy Addons
@@ -1651,9 +1656,16 @@ export class PdpWorkspace extends Component {
                 }
 
                 // Copy Stone Normal
-                const snRules = await this.orm.searchRead("pdp.margin.stone", [["margin_id", "=", srcId]], ["stone_type_id", "rate"]);
+                const snRules = await this.orm.searchRead("pdp.margin.stone", [["margin_id", "=", srcId]], ["stone_type_id", "stone_shape_id", "stone_size_id", "stone_shade_id", "rate"]);
                 if (snRules.length) {
-                    await this.orm.create("pdp.margin.stone", snRules.map(r => ({ margin_id: newId, stone_type_id: r.stone_type_id[0], rate: r.rate })));
+                    await this.orm.create("pdp.margin.stone", snRules.map(r => ({
+                        margin_id: newId,
+                        stone_type_id:  r.stone_type_id  ? r.stone_type_id[0]  : false,
+                        stone_shape_id: r.stone_shape_id ? r.stone_shape_id[0] : false,
+                        stone_size_id:  r.stone_size_id  ? r.stone_size_id[0]  : false,
+                        stone_shade_id: r.stone_shade_id ? r.stone_shade_id[0] : false,
+                        rate: r.rate,
+                    })));
                 }
             }
 
@@ -1670,21 +1682,24 @@ export class PdpWorkspace extends Component {
     }
 
     async loadMarginData(marginId) {
-        const [parts, labors, addons, metals, stoneCond, stoneNorm] = await Promise.all([
+        const [marginRec, parts, addons, metals, stoneCond, stoneNorm] = await Promise.all([
+            this.orm.read("pdp.margin", [marginId], ["labor_metal_rate", "labor_stone_rate"]),
             this.orm.searchRead("pdp.margin.part", [["margin_id", "=", marginId]], ["id", "rate"]),
-            this.orm.searchRead("pdp.margin.labor", [["margin_id", "=", marginId]], ["id", "labor_id", "rate"]),
             this.orm.searchRead("pdp.margin.addon", [["margin_id", "=", marginId]], ["id", "addon_id", "rate"]),
             this.orm.searchRead("pdp.margin.metal", [["margin_id", "=", marginId]], ["id", "metal_purity_id", "rate"]),
             this.orm.searchRead("pdp.margin.stone.conditional", [["margin_id", "=", marginId]], ["id", "stone_cat_id", "operator", "comparative_cost", "currency_id", "rate"]),
-            this.orm.searchRead("pdp.margin.stone", [["margin_id", "=", marginId]], ["id", "stone_type_id", "rate"]),
+            this.orm.searchRead("pdp.margin.stone", [["margin_id", "=", marginId]], ["id", "stone_type_id", "stone_shape_id", "stone_size_id", "stone_shade_id", "rate"]),
         ]);
+        const mr = marginRec[0] || {};
+        this.state.laborMetalRate = mr.labor_metal_rate || 1.0;
+        this.state.laborStoneRate = mr.labor_stone_rate || 1.0;
+        this.state.laborRateDirty = false;
         this.state.marginPartRecord = parts.length ? { ...parts[0], _dirty: false } : { id: null, rate: 1.0, _dirty: false };
-        this.state.marginLabors = labors.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.marginAddons = addons.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.marginMetals = metals.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.marginStonesConditional = stoneCond.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.marginStonesNormal = stoneNorm.map(r => ({ ...r, _key: r.id, _dirty: false }));
-        this._mDelLaborIds = []; this._mDelAddonIds = [];
+        this._mDelAddonIds = [];
         this._mDelMetalIds = []; this._mDelStoneCondIds = []; this._mDelStoneNormIds = [];
     }
 
@@ -1694,21 +1709,13 @@ export class PdpWorkspace extends Component {
         this.state.marginPartRecord.rate = parseFloat(value) || 1.0;
         this.state.marginPartRecord._dirty = true;
     }
-    addMarginLabor() {
-        this.state.marginLabors.push({ id: null, _key: -Date.now(), _dirty: true, labor_id: false, rate: 1.0 });
+    setLaborMetalRate(value) {
+        this.state.laborMetalRate = parseFloat(value) || 1.0;
+        this.state.laborRateDirty = true;
     }
-    removeMarginLabor(key) {
-        const idx = this.state.marginLabors.findIndex(r => r._key === key);
-        if (idx === -1) return;
-        const r = this.state.marginLabors[idx];
-        if (r.id) this._mDelLaborIds.push(r.id);
-        this.state.marginLabors.splice(idx, 1);
-    }
-    setMarginLaborField(key, field, value) {
-        const r = this.state.marginLabors.find(r => r._key === key);
-        if (!r) return;
-        r[field] = field === 'rate' ? parseFloat(value) || 1.0 : (parseInt(value) || false);
-        r._dirty = true;
+    setLaborStoneRate(value) {
+        this.state.laborStoneRate = parseFloat(value) || 1.0;
+        this.state.laborRateDirty = true;
     }
     addMarginAddon() {
         this.state.marginAddons.push({ id: null, _key: -Date.now(), _dirty: true, addon_id: false, rate: 1.0 });
@@ -1771,7 +1778,12 @@ export class PdpWorkspace extends Component {
 
     // --- Stone Normal tab ---
     addMarginStoneNorm() {
-        this.state.marginStonesNormal.push({ id: null, _key: -Date.now(), _dirty: true, stone_type_id: false, rate: 1.0 });
+        this.state.marginStonesNormal.push({
+            id: null, _key: -Date.now(), _dirty: true,
+            stone_type_id: false, stone_shape_id: false,
+            stone_size_id: false, stone_shade_id: false,
+            rate: 1.0,
+        });
     }
     removeMarginStoneNorm(key) {
         const idx = this.state.marginStonesNormal.findIndex(r => r._key === key);
@@ -1792,7 +1804,6 @@ export class PdpWorkspace extends Component {
         if (!mid) return;
         try {
             // Unlink deleted
-            if (this._mDelLaborIds.length) { await this.orm.unlink("pdp.margin.labor", this._mDelLaborIds); this._mDelLaborIds = []; }
             if (this._mDelAddonIds.length) { await this.orm.unlink("pdp.margin.addon", this._mDelAddonIds); this._mDelAddonIds = []; }
             if (this._mDelMetalIds.length) { await this.orm.unlink("pdp.margin.metal", this._mDelMetalIds); this._mDelMetalIds = []; }
             if (this._mDelStoneCondIds.length) { await this.orm.unlink("pdp.margin.stone.conditional", this._mDelStoneCondIds); this._mDelStoneCondIds = []; }
@@ -1805,13 +1816,13 @@ export class PdpWorkspace extends Component {
                 else { const [nid] = await this.orm.create("pdp.margin.part", [{ margin_id: mid, rate: pr.rate }]); pr.id = nid; }
                 pr._dirty = false;
             }
-            // Labor
-            for (const r of this.state.marginLabors) {
-                if (!r._dirty) continue;
-                const v = { labor_id: this.m2oId(r.labor_id), rate: r.rate };
-                if (r.id) await this.orm.write("pdp.margin.labor", [r.id], v);
-                else { const [nid] = await this.orm.create("pdp.margin.labor", [{ ...v, margin_id: mid }]); r.id = nid; r._key = nid; }
-                r._dirty = false;
+            // Labor (fields on pdp.margin directly)
+            if (this.state.laborRateDirty) {
+                await this.orm.write("pdp.margin", [mid], {
+                    labor_metal_rate: this.state.laborMetalRate,
+                    labor_stone_rate: this.state.laborStoneRate,
+                });
+                this.state.laborRateDirty = false;
             }
             // Addon
             for (const r of this.state.marginAddons) {
@@ -1840,7 +1851,13 @@ export class PdpWorkspace extends Component {
             // Stone Normal
             for (const r of this.state.marginStonesNormal) {
                 if (!r._dirty) continue;
-                const v = { stone_type_id: this.m2oId(r.stone_type_id), rate: r.rate };
+                const v = {
+                    stone_type_id:  this.m2oId(r.stone_type_id)  || false,
+                    stone_shape_id: this.m2oId(r.stone_shape_id) || false,
+                    stone_size_id:  this.m2oId(r.stone_size_id)  || false,
+                    stone_shade_id: this.m2oId(r.stone_shade_id) || false,
+                    rate: r.rate,
+                };
                 if (r.id) await this.orm.write("pdp.margin.stone", [r.id], v);
                 else { const [nid] = await this.orm.create("pdp.margin.stone", [{ ...v, margin_id: mid }]); r.id = nid; r._key = nid; }
                 r._dirty = false;
