@@ -1,6 +1,37 @@
 # wizard/component_stone.py
 from odoo import models, api
 
+
+def _find_stone_rate(stone, margin_lines):
+    """Return the most specific matching margin rate for a stone.
+
+    A margin line matches if every non-None dimension on the line equals the
+    corresponding dimension on the stone. Among all matches, the line with the
+    most dimensions set wins. Returns 1.0 when no line matches.
+    """
+    tid  = stone.type_id.id  if stone.type_id  else False
+    spid = stone.shape_id.id if stone.shape_id else False
+    szid = stone.size_id.id  if stone.size_id  else False
+    shid = stone.shade_id.id if stone.shade_id else False
+
+    best_score, best_rate = -1, 1.0
+    for line in margin_lines:
+        if line.stone_type_id  and line.stone_type_id.id  != tid:  continue
+        if line.stone_shape_id and line.stone_shape_id.id != spid: continue
+        if line.stone_size_id  and line.stone_size_id.id  != szid: continue
+        if line.stone_shade_id and line.stone_shade_id.id != shid: continue
+        score = (
+            bool(line.stone_type_id) +
+            bool(line.stone_shape_id) +
+            bool(line.stone_size_id) +
+            bool(line.stone_shade_id)
+        )
+        if score > best_score:
+            best_score = score
+            best_rate = line.rate or 1.0
+    return best_rate
+
+
 class PriceStone(models.TransientModel):
     _name = 'pdp.price.stone'
     _description = 'Stone Price Component'
@@ -25,17 +56,14 @@ class PriceStone(models.TransientModel):
         stones = lines.mapped('stone_id')
         stones.mapped('type_id').mapped('category_id')
 
-        # --- Pre-fetch normal margin rates by stone type (1 query) ---
-        type_ids = stones.mapped('type_id').ids
-        rate_by_type = {}
-        if margin and type_ids:
-            mlines = self.env['pdp.margin.stone'].with_context(clean_ctx).search([
+        # --- Pre-fetch ALL normal margin lines for this margin (one query) ---
+        stone_margin_lines = []
+        if margin:
+            stone_margin_lines = self.env['pdp.margin.stone'].with_context(clean_ctx).search([
                 ('margin_id', '=', margin.id),
-                ('stone_type_id', 'in', type_ids),
             ])
-            rate_by_type = {ml.stone_type_id.id: (ml.rate or 1.0) for ml in mlines}
 
-        # --- Pre-fetch conditional margins by category (1 query, not 1 per stone) ---
+        # --- Pre-fetch conditional margins by category (1 query) ---
         cond_by_cat = {}
         if margin:
             cat_ids = stones.mapped('type_id.category_id').ids
@@ -63,7 +91,7 @@ class PriceStone(models.TransientModel):
             cost = unit_cost * (line.pieces or 1.0)
             total_cost += cost
 
-            # Conditional margin — dict lookup (no SQL)
+            # Conditional margin takes priority when its condition is met
             rate = 0.0
             if margin:
                 cat_id = stone.type_id.category_id.id if stone.type_id and stone.type_id.category_id else False
@@ -79,8 +107,7 @@ class PriceStone(models.TransientModel):
                         rate = cond.rate
 
             if rate == 0.0:
-                stype_id = stone.type_id.id if stone.type_id else False
-                rate = rate_by_type.get(stype_id, 1.0)
+                rate = _find_stone_rate(stone, stone_margin_lines)
 
             total_margin += (rate - 1.0) * cost
 

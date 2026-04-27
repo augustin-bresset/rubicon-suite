@@ -183,3 +183,46 @@ class TestPriceStone(TransactionCase):
         self.assertEqual(res['cost'], self.currency.round(30.0))
         self.assertEqual(res['margin'], self.currency.round(9.0))
         self.assertEqual(res['price'], self.currency.round(39.0))
+
+    def test_compute_stone_margin_shape_exact_match(self):
+        """A margin line with type+shape matches over a type-only line."""
+        # Add a type+shape specific line with higher rate
+        self.env['pdp.margin.stone'].create({
+            'margin_id': self.margin.id,
+            'stone_type_id': self.stone_type.id,
+            'stone_shape_id': self.stone_shape.id,
+            'rate': 1.5,  # more specific: +50%
+        })
+        # The existing line has type only (rate=1.2). The new line has type+shape.
+        # Our stone has both type and shape set → should pick the type+shape line (1.5).
+        res = self.component.compute(
+            product=self.product,
+            margin=self.margin,
+            currency=self.currency,
+            date=fields.Date.today(),
+        )
+        # cost=30, rate=1.5, margin=0.5*30=15
+        self.assertEqual(res['cost'], self.currency.round(30.0))
+        self.assertEqual(res['margin'], self.currency.round(15.0))
+        self.assertEqual(res['price'], self.currency.round(45.0))
+
+    def test_compute_stone_margin_shape_fallback_to_type_only(self):
+        """When no line matches the stone's shape, falls back to type-only line."""
+        other_shape = self.env['pdp.stone.shape'].create({'code': 'OTH', 'shape': 'Other'})
+        # Add a line for a DIFFERENT shape — should NOT match our stone
+        self.env['pdp.margin.stone'].create({
+            'margin_id': self.margin.id,
+            'stone_type_id': self.stone_type.id,
+            'stone_shape_id': other_shape.id,
+            'rate': 2.0,
+        })
+        # Only type-only line (rate=1.2) should match our stone's shape
+        res = self.component.compute(
+            product=self.product,
+            margin=self.margin,
+            currency=self.currency,
+            date=fields.Date.today(),
+        )
+        self.assertEqual(res['cost'], self.currency.round(30.0))
+        self.assertEqual(res['margin'], self.currency.round(6.0))   # fallback: 1.2 rate
+        self.assertEqual(res['price'], self.currency.round(36.0))
