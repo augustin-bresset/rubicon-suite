@@ -536,8 +536,12 @@ def make_row_to_document(lookups):
 
         xml_id = f'sis_doc_{doc_type}_{legacy_id}'
         party_raw = s(row[6])
-        closed = s(row[9]) in ('1', 'True')
-        canceled = s(row[10]) in ('1', 'True')
+        # col 9 = ship_method legacy ID, col 10 = pay_term legacy ID
+        # col 29 = closed bit, col 30 = canceled bit
+        ship_raw = s(row[9])
+        pay_raw = s(row[10])
+        closed = s(row[29]) in ('1', 'True') if len(row) > 29 else False
+        canceled = s(row[30]) in ('1', 'True') if len(row) > 30 else False
 
         return {
             'id': xml_id,
@@ -549,19 +553,21 @@ def make_row_to_document(lookups):
             'date_due': safe_date(row[5]),
             'party_id': lookups['party'].get(party_raw, ''),
             'party_code': party_raw,
-            'margin_name': s(row[7]),
+            'stamp': s(row[7]),
             'customer_po': s(row[8]),
+            'ship_method_id': lookups['shipper'].get(ship_raw, ''),
+            'pay_term_id': lookups['payterm'].get(pay_raw, ''),
             'closed': closed,
             'canceled': canceled,
             'employee': s(row[11]),
+            'notes': s(row[12]),
             'currency': s(row[19]),
             'total_qty': safe_int(safe_float(row[15])),
             'total_cost': safe_float(row[16]),
-            'total_amount': safe_float(row[17]),
+            'total_profit': safe_float(row[17]),
             'total_fob': safe_float(row[20]),
             'freight_insurance': safe_float(row[21]),
             'total_cif': safe_float(row[26]) if len(row) > 26 else 0.0,
-            'notes': s(row[27]) if len(row) > 27 else '',
             'footnotes': s(row[28]) if len(row) > 28 else '',
         }
     return row_to_document
@@ -743,10 +749,11 @@ if __name__ == '__main__':
         csv_name='SalesDocs.csv',
         fieldnames=['id', 'name', 'doc_type_code', 'doc_type_id', 'legacy_id',
                     'date_created', 'date_due', 'party_id', 'party_code',
-                    'margin_name', 'customer_po', 'closed', 'canceled',
-                    'employee', 'currency', 'total_qty', 'total_cost',
-                    'total_amount', 'total_fob', 'freight_insurance',
-                    'total_cif', 'notes', 'footnotes'],
+                    'stamp', 'customer_po', 'ship_method_id', 'pay_term_id',
+                    'closed', 'canceled', 'employee', 'notes',
+                    'currency', 'total_qty', 'total_cost', 'total_profit',
+                    'total_fob', 'freight_insurance',
+                    'total_cif', 'footnotes'],
         row_to_dict=make_row_to_document(lookups),
         dest_folder=sis_doc_data,
         src_folder=backup_sis,
