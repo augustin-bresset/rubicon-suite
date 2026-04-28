@@ -4,7 +4,7 @@
     'license': 'LGPL-3',
     'category': 'Sales',
     'summary': 'SIS Sales Documents (Quotations, Orders, Invoices)',
-    'depends': ['base', 'sis_party', 'pdp_product'],
+    'depends': ['base', 'sis_party', 'pdp_product', 'rubicon_frontend'],
     'data': [
         'security/ir.model.access.csv',
         'data/sis.doc.type.csv',
@@ -17,14 +17,6 @@
         'views/doc_type_views.xml',
         'views/menus.xml',
     ],
-    'assets': {
-        'web._assets_primary_variables': [
-            ('prepend', 'sis_document/static/src/scss/variables.scss'),
-        ],
-        'web.assets_backend': [
-            'sis_document/static/src/scss/style.scss',
-        ],
-    },
     'installable': True,
     'application': False,
 }
