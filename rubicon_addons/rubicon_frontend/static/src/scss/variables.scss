@@ -1,0 +1,24 @@
+// Variables SCSS Odoo (compilées au build)
+$o-brand-primary: #000000;
+$o-brand-odoo: #000000;
+$o-navbar-background-color: #000000;
+$o-navbar-color: #ffffff;
+$primary: $o-brand-primary;
+$secondary: #6c757d;
+$success: #28a745;
+$info: #17a2b8;
+$warning: #ffc107;
+$danger: #dc3545;
+$black: #000 !default;
+$white: #fff !default;
+
+// CSS custom properties Rubicon (disponibles à runtime dans les templates)
+:root {
+    --rbn-brand: #000000;
+    --rbn-ws-bg: #f2f2f2;
+    --rbn-toolbar-bg: #ffffff;
+    --rbn-border: #cccccc;
+    --rbn-border-light: #dddddd;
+    --rbn-font-ws: 13px;
+    --rbn-font-table: 12px;
+}
