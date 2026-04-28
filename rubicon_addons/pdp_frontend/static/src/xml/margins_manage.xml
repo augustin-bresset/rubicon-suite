@@ -103,50 +103,25 @@
               </div>
             </div>
 
-            <!-- Labor rates table -->
+            <!-- Labor rates -->
             <div class="mb-4">
-              <div class="d-flex align-items-center mb-1">
-                <span class="fw-semibold small text-uppercase text-muted me-auto">Labor Rates</span>
-                <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.addLabor()">+ Add</button>
+              <div class="fw-semibold small text-uppercase text-muted mb-2">Labor Rates</div>
+              <div class="d-flex align-items-center gap-4">
+                <div class="d-flex align-items-center gap-2">
+                  <label class="form-label mb-0 small">Metal labor</label>
+                  <input type="number" step="0.001" class="form-control form-control-sm" style="width:120px;"
+                         t-att-value="state.laborMetalRate"
+                         t-on-input="(e) => this.onHeaderFieldChange('laborMetalRate', e.target.value)"
+                         placeholder="e.g. 1.10"/>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <label class="form-label mb-0 small">Stone labor</label>
+                  <input type="number" step="0.001" class="form-control form-control-sm" style="width:120px;"
+                         t-att-value="state.laborStoneRate"
+                         t-on-input="(e) => this.onHeaderFieldChange('laborStoneRate', e.target.value)"
+                         placeholder="e.g. 1.10"/>
+                </div>
               </div>
-              <table class="table table-sm table-bordered pdp-manage-table">
-                <thead class="table-light">
-                  <tr>
-                    <th>Labor Type</th>
-                    <th style="width:110px;">Rate</th>
-                    <th style="width:36px;"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <t t-foreach="state.labors" t-as="row" t-key="row._key">
-                    <tr t-att-class="row._dirty ? 'table-warning' : ''">
-                      <td>
-                        <select class="form-select form-select-sm"
-                                t-on-change="(e) => this.onFieldChange(row, 'labor_id', +e.target.value)">
-                          <option value="">-- Select --</option>
-                          <t t-foreach="this.laborTypes" t-as="ltype" t-key="ltype.id">
-                            <option t-att-value="ltype.id"
-                                    t-att-selected="this.m2oId(row.labor_id) === ltype.id">
-                              <t t-esc="ltype.code"/>
-                            </option>
-                          </t>
-                        </select>
-                      </td>
-                      <td>
-                        <input type="number" step="0.001" class="form-control form-control-sm"
-                               t-att-value="row.rate"
-                               t-on-input="(e) => this.onFieldChange(row, 'rate', e.target.value)"/>
-                      </td>
-                      <td>
-                        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeLabor(row)">×</button>
-                      </td>
-                    </tr>
-                  </t>
-                  <t t-if="!state.labors.length">
-                    <tr><td colspan="3" class="text-muted small text-center">No labor rates</td></tr>
-                  </t>
-                </tbody>
-              </table>
             </div>
 
             <!-- Addon rates table -->
@@ -348,8 +323,11 @@
               <table class="table table-sm table-bordered pdp-manage-table">
                 <thead class="table-light">
                   <tr>
-                    <th>Stone Type</th>
-                    <th style="width:110px;">Rate</th>
+                    <th>Type</th>
+                    <th>Shape</th>
+                    <th>Size</th>
+                    <th>Shade</th>
+                    <th style="width:100px;">Rate</th>
                     <th style="width:36px;"></th>
                   </tr>
                 </thead>
@@ -361,9 +339,41 @@
                                 t-on-change="(e) => this.onFieldChange(row, 'stone_type_id', +e.target.value)">
                           <option value="">-- Select --</option>
                           <t t-foreach="this.stoneTypes" t-as="st" t-key="st.id">
-                            <option t-att-value="st.id"
-                                    t-att-selected="this.m2oId(row.stone_type_id) === st.id">
+                            <option t-att-value="st.id" t-att-selected="this.m2oId(row.stone_type_id) === st.id">
                               <t t-esc="st.code"/>
+                            </option>
+                          </t>
+                        </select>
+                      </td>
+                      <td>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(e) => this.onFieldChange(row, 'stone_shape_id', e.target.value ? +e.target.value : false)">
+                          <option value="">All</option>
+                          <t t-foreach="this.stoneShapes" t-as="sh" t-key="sh.id">
+                            <option t-att-value="sh.id" t-att-selected="this.m2oId(row.stone_shape_id) === sh.id">
+                              <t t-esc="sh.code"/>
+                            </option>
+                          </t>
+                        </select>
+                      </td>
+                      <td>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(e) => this.onFieldChange(row, 'stone_size_id', e.target.value ? +e.target.value : false)">
+                          <option value="">All</option>
+                          <t t-foreach="this.stoneSizes" t-as="sz" t-key="sz.id">
+                            <option t-att-value="sz.id" t-att-selected="this.m2oId(row.stone_size_id) === sz.id">
+                              <t t-esc="sz.name"/>
+                            </option>
+                          </t>
+                        </select>
+                      </td>
+                      <td>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(e) => this.onFieldChange(row, 'stone_shade_id', e.target.value ? +e.target.value : false)">
+                          <option value="">All</option>
+                          <t t-foreach="this.stoneShades" t-as="sd" t-key="sd.id">
+                            <option t-att-value="sd.id" t-att-selected="this.m2oId(row.stone_shade_id) === sd.id">
+                              <t t-esc="sd.code"/>
                             </option>
                           </t>
                         </select>
@@ -379,7 +389,7 @@
                     </tr>
                   </t>
                   <t t-if="!filteredStoneNormal.length">
-                    <tr><td colspan="3" class="text-muted small text-center">No normal rates</td></tr>
+                    <tr><td colspan="6" class="text-muted small text-center">No normal rates</td></tr>
                   </t>
                 </tbody>
               </table>

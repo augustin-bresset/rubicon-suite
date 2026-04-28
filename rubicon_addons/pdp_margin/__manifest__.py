@@ -16,6 +16,7 @@
         'views/pdp_views.xml',
         'views/pdp_menus.xml',
         ],                    
+    'post_init_hook': 'post_init',
     'installable': True,
     'application': True,
 }

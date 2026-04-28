@@ -12,15 +12,16 @@ export class MarginsManage extends Component {
         this.notification = useService("notification");
 
         // Non-reactive lookups
-        this.laborTypes = [];
         this.addonTypes = [];
         this.purities = [];
         this.stoneCategories = [];
         this.stoneTypes = [];
+        this.stoneShapes = [];
+        this.stoneSizes = [];
+        this.stoneShades = [];
         this.currencies = [];
 
         // Deleted ID trackers
-        this._deletedLaborIds = [];
         this._deletedAddonIds = [];
         this._deletedMetalIds = [];
         this._deletedStoneCondIds = [];
@@ -32,6 +33,8 @@ export class MarginsManage extends Component {
 
             marginCode: "",
             marginName: "",
+            laborMetalRate: 1.0,
+            laborStoneRate: 1.0,
             marginHeaderDirty: false,
 
             activeTab: "misc",
@@ -39,7 +42,6 @@ export class MarginsManage extends Component {
             stoneCatFilter: "",
 
             partRate: null,
-            labors: [],
             addons: [],
             metals: [],
             stonesConditional: [],
@@ -60,22 +62,26 @@ export class MarginsManage extends Component {
     }
 
     async _loadAll() {
-        const [margins, laborTypes, addonTypes, purities, stoneCategories, stoneTypes, currencies] =
+        const [margins, addonTypes, purities, stoneCategories, stoneTypes, stoneShapes, stoneSizes, stoneShades, currencies] =
             await Promise.all([
-                this.orm.searchRead("pdp.margin", [], ["id", "code", "name"], { order: "code asc" }),
-                this.orm.searchRead("pdp.labor.type", [], ["id", "code", "name"], { order: "code asc" }),
+                this.orm.searchRead("pdp.margin", [], ["id", "code", "name", "labor_metal_rate", "labor_stone_rate"], { order: "code asc" }),
                 this.orm.searchRead("pdp.addon.type", [], ["id", "code", "name"], { order: "code asc" }),
                 this.orm.searchRead("pdp.metal.purity", [], ["id", "code", "percent"], { order: "percent desc" }),
                 this.orm.searchRead("pdp.stone.category", [], ["id", "code", "name"], { order: "code asc" }),
                 this.orm.searchRead("pdp.stone.type", [], ["id", "code", "name", "category_id"], { order: "code asc" }),
+                this.orm.searchRead("pdp.stone.shape", [], ["id", "code", "shape"], { order: "code asc" }),
+                this.orm.searchRead("pdp.stone.size", [], ["id", "name"], { order: "name asc" }),
+                this.orm.searchRead("pdp.stone.shade", [], ["id", "code", "shade"], { order: "code asc" }),
                 this.orm.searchRead("res.currency", [["active", "=", true]], ["id", "name", "symbol"]),
             ]);
         this.state.margins = margins;
-        this.laborTypes = laborTypes;
         this.addonTypes = addonTypes;
         this.purities = purities;
         this.stoneCategories = stoneCategories;
         this.stoneTypes = stoneTypes;
+        this.stoneShapes = stoneShapes;
+        this.stoneSizes = stoneSizes;
+        this.stoneShades = stoneShades;
         this.currencies = currencies;
         if (margins.length) {
             await this.selectMargin(margins[0].id);
@@ -99,7 +105,6 @@ export class MarginsManage extends Component {
     m2oId(f) { return Array.isArray(f) ? f[0] : f; }
 
     async selectMargin(marginId) {
-        this._deletedLaborIds = [];
         this._deletedAddonIds = [];
         this._deletedMetalIds = [];
         this._deletedStoneCondIds = [];
@@ -110,23 +115,23 @@ export class MarginsManage extends Component {
         this.state.marginHeaderDirty = false;
         this.state.stoneCatFilter = "";
 
-        const [partRates, labors, addons, metals, stonesConditional, stonesNormal] = await Promise.all([
+        const [partRates, addons, metals, stonesConditional, stonesNormal] = await Promise.all([
             this.orm.searchRead("pdp.margin.part", [["margin_id", "=", marginId]], ["id", "margin_id", "rate"], { limit: 1 }),
-            this.orm.searchRead("pdp.margin.labor", [["margin_id", "=", marginId]], ["id", "margin_id", "labor_id", "rate"]),
             this.orm.searchRead("pdp.margin.addon", [["margin_id", "=", marginId]], ["id", "margin_id", "addon_id", "rate"]),
             this.orm.searchRead("pdp.margin.metal", [["margin_id", "=", marginId]], ["id", "margin_id", "metal_purity_id", "rate"]),
             this.orm.searchRead("pdp.margin.stone.conditional", [["margin_id", "=", marginId]], ["id", "margin_id", "stone_cat_id", "operator", "comparative_cost", "currency_id", "rate"]),
-            this.orm.searchRead("pdp.margin.stone", [["margin_id", "=", marginId]], ["id", "margin_id", "stone_type_id", "rate"]),
+            this.orm.searchRead("pdp.margin.stone", [["margin_id", "=", marginId]], ["id", "margin_id", "stone_type_id", "stone_shape_id", "stone_size_id", "stone_shade_id", "rate"]),
         ]);
 
         const margin = this.state.margins.find(m => m.id === marginId);
         this.state.marginCode = margin ? margin.code : "";
         this.state.marginName = margin ? margin.name : "";
+        this.state.laborMetalRate = margin ? margin.labor_metal_rate : 1.0;
+        this.state.laborStoneRate = margin ? margin.labor_stone_rate : 1.0;
 
         this.state.partRate = partRates.length
             ? { ...partRates[0], _key: partRates[0].id, _dirty: false }
             : null;
-        this.state.labors = labors.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.addons = addons.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.metals = metals.map(r => ({ ...r, _key: r.id, _dirty: false }));
         this.state.stonesConditional = stonesConditional.map(r => ({ ...r, _key: r.id, _dirty: false }));
@@ -162,16 +167,6 @@ export class MarginsManage extends Component {
         this.state.isDirty = true;
     }
 
-    addLabor() {
-        this.state.labors.push({ id: null, _key: -Date.now(), _dirty: true, margin_id: [this.state.selectedMarginId, ""], labor_id: false, rate: 1.0 });
-        this.state.isDirty = true;
-    }
-    removeLabor(row) {
-        if (row.id) this._deletedLaborIds.push(row.id);
-        this.state.labors.splice(this.state.labors.indexOf(row), 1);
-        this.state.isDirty = true;
-    }
-
     addAddon() {
         this.state.addons.push({ id: null, _key: -Date.now(), _dirty: true, margin_id: [this.state.selectedMarginId, ""], addon_id: false, rate: 1.0 });
         this.state.isDirty = true;
@@ -204,7 +199,7 @@ export class MarginsManage extends Component {
     }
 
     addStoneNorm() {
-        this.state.stonesNormal.push({ id: null, _key: -Date.now(), _dirty: true, margin_id: [this.state.selectedMarginId, ""], stone_type_id: false, rate: 1.0 });
+        this.state.stonesNormal.push({ id: null, _key: -Date.now(), _dirty: true, margin_id: [this.state.selectedMarginId, ""], stone_type_id: false, stone_shape_id: false, stone_size_id: false, stone_shade_id: false, rate: 1.0 });
         this.state.isDirty = true;
     }
     removeStoneNorm(row) {
@@ -213,14 +208,14 @@ export class MarginsManage extends Component {
         this.state.isDirty = true;
     }
 
-    async _saveRows(model, rows, deletedIds, valsFunc, marginId) {
+    async _saveRows(model, rows, deletedIds, valsFunc) {
         if (deletedIds.length) {
             await this.orm.unlink(model, [...deletedIds]);
             deletedIds.length = 0;
         }
         for (const row of rows) {
             if (!row._dirty) continue;
-            const vals = valsFunc(row, marginId);
+            const vals = valsFunc(row);
             if (row.id) {
                 await this.orm.write(model, [row.id], vals);
             } else {
@@ -237,13 +232,21 @@ export class MarginsManage extends Component {
         if (!marginId) return;
         try {
             if (this.state.marginHeaderDirty) {
-                await this.orm.write("pdp.margin", [marginId], { code: this.state.marginCode, name: this.state.marginName });
+                await this.orm.write("pdp.margin", [marginId], {
+                    code: this.state.marginCode,
+                    name: this.state.marginName,
+                    labor_metal_rate: parseFloat(this.state.laborMetalRate) || 1.0,
+                    labor_stone_rate: parseFloat(this.state.laborStoneRate) || 1.0,
+                });
                 this.state.marginHeaderDirty = false;
                 const m = this.state.margins.find(m => m.id === marginId);
-                if (m) { m.code = this.state.marginCode; m.name = this.state.marginName; }
+                if (m) {
+                    m.code = this.state.marginCode;
+                    m.name = this.state.marginName;
+                    m.labor_metal_rate = parseFloat(this.state.laborMetalRate) || 1.0;
+                    m.labor_stone_rate = parseFloat(this.state.laborStoneRate) || 1.0;
+                }
             }
-            await this._saveRows("pdp.margin.labor", this.state.labors, this._deletedLaborIds,
-                (r) => ({ margin_id: marginId, labor_id: this.m2oId(r.labor_id), rate: parseFloat(r.rate) || 0 }));
             await this._saveRows("pdp.margin.addon", this.state.addons, this._deletedAddonIds,
                 (r) => ({ margin_id: marginId, addon_id: this.m2oId(r.addon_id), rate: parseFloat(r.rate) || 0 }));
             await this._saveRows("pdp.margin.metal", this.state.metals, this._deletedMetalIds,
@@ -251,7 +254,7 @@ export class MarginsManage extends Component {
             await this._saveRows("pdp.margin.stone.conditional", this.state.stonesConditional, this._deletedStoneCondIds,
                 (r) => ({ margin_id: marginId, stone_cat_id: this.m2oId(r.stone_cat_id), operator: r.operator, comparative_cost: parseFloat(r.comparative_cost) || 0, currency_id: this.m2oId(r.currency_id), rate: parseFloat(r.rate) || 0 }));
             await this._saveRows("pdp.margin.stone", this.state.stonesNormal, this._deletedStoneNormIds,
-                (r) => ({ margin_id: marginId, stone_type_id: this.m2oId(r.stone_type_id), rate: parseFloat(r.rate) || 0 }));
+                (r) => ({ margin_id: marginId, stone_type_id: this.m2oId(r.stone_type_id), stone_shape_id: this.m2oId(r.stone_shape_id) || false, stone_size_id: this.m2oId(r.stone_size_id) || false, stone_shade_id: this.m2oId(r.stone_shade_id) || false, rate: parseFloat(r.rate) || 0 }));
             if (this.state.partRate && this.state.partRate._dirty) {
                 if (this.state.partRate.id) {
                     await this.orm.write("pdp.margin.part", [this.state.partRate.id], { rate: parseFloat(this.state.partRate.rate) || 0 });
@@ -279,21 +282,25 @@ export class MarginsManage extends Component {
             const srcId = this.state.newMarginCopySourceId;
             const rate = parseFloat(this.state.newMarginCopyRate) || 1.0;
             if (srcId) {
-                const [partRates, labors, addons, metals, stonesConditional, stonesNormal] = await Promise.all([
+                const srcMargin = this.state.margins.find(m => m.id === srcId);
+                const [partRates, addons, metals, stonesConditional, stonesNormal] = await Promise.all([
                     this.orm.searchRead("pdp.margin.part", [["margin_id", "=", srcId]], ["rate"], { limit: 1 }),
-                    this.orm.searchRead("pdp.margin.labor", [["margin_id", "=", srcId]], ["labor_id", "rate"]),
                     this.orm.searchRead("pdp.margin.addon", [["margin_id", "=", srcId]], ["addon_id", "rate"]),
                     this.orm.searchRead("pdp.margin.metal", [["margin_id", "=", srcId]], ["metal_purity_id", "rate"]),
                     this.orm.searchRead("pdp.margin.stone.conditional", [["margin_id", "=", srcId]], ["stone_cat_id", "operator", "comparative_cost", "currency_id", "rate"]),
-                    this.orm.searchRead("pdp.margin.stone", [["margin_id", "=", srcId]], ["stone_type_id", "rate"]),
+                    this.orm.searchRead("pdp.margin.stone", [["margin_id", "=", srcId]], ["stone_type_id", "stone_shape_id", "stone_size_id", "stone_shade_id", "rate"]),
                 ]);
                 const m2oId = (f) => Array.isArray(f) ? f[0] : f;
                 const creates = [];
+                if (srcMargin) {
+                    creates.push(this.orm.write("pdp.margin", [newId], {
+                        labor_metal_rate: (srcMargin.labor_metal_rate || 1.0) * rate,
+                        labor_stone_rate: (srcMargin.labor_stone_rate || 1.0) * rate,
+                    }));
+                }
                 if (partRates.length) {
                     creates.push(this.orm.create("pdp.margin.part", [{ margin_id: newId, rate: partRates[0].rate * rate }]));
                 }
-                for (const r of labors)
-                    creates.push(this.orm.create("pdp.margin.labor", [{ margin_id: newId, labor_id: m2oId(r.labor_id), rate: r.rate * rate }]));
                 for (const r of addons)
                     creates.push(this.orm.create("pdp.margin.addon", [{ margin_id: newId, addon_id: m2oId(r.addon_id), rate: r.rate * rate }]));
                 for (const r of metals)
@@ -301,10 +308,10 @@ export class MarginsManage extends Component {
                 for (const r of stonesConditional)
                     creates.push(this.orm.create("pdp.margin.stone.conditional", [{ margin_id: newId, stone_cat_id: m2oId(r.stone_cat_id), operator: r.operator, comparative_cost: r.comparative_cost, currency_id: m2oId(r.currency_id), rate: r.rate * rate }]));
                 for (const r of stonesNormal)
-                    creates.push(this.orm.create("pdp.margin.stone", [{ margin_id: newId, stone_type_id: m2oId(r.stone_type_id), rate: r.rate * rate }]));
+                    creates.push(this.orm.create("pdp.margin.stone", [{ margin_id: newId, stone_type_id: m2oId(r.stone_type_id), stone_shape_id: m2oId(r.stone_shape_id) || false, stone_size_id: m2oId(r.stone_size_id) || false, stone_shade_id: m2oId(r.stone_shade_id) || false, rate: r.rate * rate }]));
                 await Promise.all(creates);
             }
-            const margins = await this.orm.searchRead("pdp.margin", [], ["id", "code", "name"], { order: "code asc" });
+            const margins = await this.orm.searchRead("pdp.margin", [], ["id", "code", "name", "labor_metal_rate", "labor_stone_rate"], { order: "code asc" });
             this.state.margins = margins;
             this.state.showNewMarginForm = false;
             this.state.newMarginCode = "";
@@ -323,10 +330,9 @@ export class MarginsManage extends Component {
         if (!window.confirm(`Delete margin "${m.code} - ${m.name}"?`)) return;
         try {
             await this.orm.unlink("pdp.margin", [m.id]);
-            const margins = await this.orm.searchRead("pdp.margin", [], ["id", "code", "name"], { order: "code asc" });
+            const margins = await this.orm.searchRead("pdp.margin", [], ["id", "code", "name", "labor_metal_rate", "labor_stone_rate"], { order: "code asc" });
             this.state.margins = margins;
             this.state.selectedMarginId = null;
-            this.state.labors = [];
             this.state.addons = [];
             this.state.metals = [];
             this.state.stonesConditional = [];
