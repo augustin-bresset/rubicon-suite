@@ -76,7 +76,7 @@ class SisDocument(models.Model):
         """Return {category_name: total_qty} grouped by product category."""
         counts = {}
         for item in self.item_ids:
-            cat_name = item.product_id.category_id.name if item.product_id and item.product_id.category_id else 'Other'
+            cat_name = item.get_category_name() or 'Other'
             counts[cat_name] = counts.get(cat_name, 0) + int(item.qty)
         return counts
 

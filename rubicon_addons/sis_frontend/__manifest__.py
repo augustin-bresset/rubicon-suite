@@ -9,7 +9,7 @@
         but integrated cleanly into Odoo's environment.
     """,
     'author': 'Rubicon',
-    'depends': ['base', 'web', 'sis_party', 'sis_document'],
+    'depends': ['base', 'web', 'sis_party', 'sis_document', 'pdp_price'],
     'data': [
         'views/sis_menus.xml',
         'views/sis_settings_views.xml',

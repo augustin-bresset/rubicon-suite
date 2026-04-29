@@ -23,6 +23,10 @@ export class SisWorkspace extends Component {
         this.receivingModes = [];
         this.tradeFairs = [];
         this.sisPartners = [];
+        this.currencies = [];
+        this.metals = [];
+        this.companyCurrencyId = null;
+        this._allModelMetals = [];
 
         this.state = useState({
             page: "lobby", // lobby | parties | document
@@ -59,6 +63,26 @@ export class SisWorkspace extends Component {
             printType: 'with_weights',
             printMarkup: 0.0,
 
+            // ── Prices modal (PDP suggestion) ───────────────────
+            showPricesModal: false,
+            selectedItemId: null,
+            pricesModelCode: '',
+            pricesProductId: null,
+            pricesDesigns: [],
+            pricesPurities: [],
+            pricesPurity: null,
+            pricesConvMetal: '',
+            pricesQty: 1,
+            pricesChangeByPct: 0,
+            pricesRoundOff: false,
+            pricesMetal: [],
+            pricesStones: [],
+            pricesHistory: [],
+            pricesMarginId: null,
+            pricesCurrencyId: null,
+            pricesResult: null,
+            pricesLoading: false,
+
             // ── Items filter ───────────────────────────────────
             docItemsFilter: '',
             showClosedItems: false,
@@ -75,7 +99,7 @@ export class SisWorkspace extends Component {
     // LOOKUP TABLES (non-reactive)
 
     async _loadLookups() {
-        const [margins, payTerms, shippers, sisCountries, allStates, receivingModes, tradeFairs, sisPartners] =
+        const [margins, payTerms, shippers, sisCountries, allStates, receivingModes, tradeFairs, sisPartners, currencies, companies, metals] =
             await Promise.all([
                 this.orm.searchRead("pdp.margin", [], ["id", "name"], { order: "name" }),
                 this.orm.searchRead("sis.pay.term", [], ["id", "name"], { order: "name" }),
@@ -90,6 +114,9 @@ export class SisWorkspace extends Component {
                     ["id", "name", "sis_code"],
                     { order: "name", limit: 2000 }
                 ),
+                this.orm.searchRead("res.currency", [["active", "=", true]], ["id", "name", "symbol"], { order: "name" }),
+                this.orm.searchRead("res.company", [], ["currency_id"], { limit: 1 }),
+                this.orm.searchRead("pdp.metal", [], ["id", "code"], { order: "code" }),
             ]);
         this.margins = margins;
         this.payTerms = payTerms;
@@ -99,6 +126,9 @@ export class SisWorkspace extends Component {
         this.receivingModes = receivingModes;
         this.tradeFairs = tradeFairs;
         this.sisPartners = sisPartners;
+        this.currencies = currencies;
+        this.companyCurrencyId = companies[0]?.currency_id?.[0] || false;
+        this.metals = metals;
     }
 
     // LOBBY NAVIGATION
@@ -689,6 +719,213 @@ export class SisWorkspace extends Component {
                 print_markup: this.state.printMarkup,
             }
         });
+    }
+
+    // PRICES (PDP suggestion)
+
+    selectItem(item) {
+        this.state.selectedItemId = item.id;
+    }
+
+    async openPricesModal() {
+        if (!this.state.doc?.id) return;
+        this.state.pricesMarginId = this._m2oId(this.state.doc?.margin_id) || null;
+        this.state.pricesCurrencyId = this.companyCurrencyId || null;
+        this.state.pricesResult = null;
+        this.state.pricesDesigns = [];
+        this.state.pricesPurities = [];
+        this.state.pricesPurity = null;
+        this.state.pricesConvMetal = '';
+        this.state.pricesQty = 1;
+        this.state.pricesChangeByPct = 0;
+        this.state.pricesRoundOff = false;
+        this.state.pricesMetal = [];
+        this.state.pricesStones = [];
+        this.state.pricesHistory = [];
+        this.state.pricesProductId = null;
+        this.state.showPricesModal = true;
+
+        // Pre-fill model from selected item's design code
+        const item = this.state.items.find(it => it.id === this.state.selectedItemId);
+        const modelCode = item?.design ? item.design.split('-')[0] : '';
+        this.state.pricesModelCode = modelCode;
+        if (modelCode) await this._loadPricesDesigns(modelCode, item?.design || null);
+    }
+
+    closePricesModal() {
+        this.state.showPricesModal = false;
+    }
+
+    async onPricesModelChange(ev) {
+        const code = (ev.target.value || '').toUpperCase().trim();
+        this.state.pricesModelCode = code;
+        this.state.pricesProductId = null;
+        this.state.pricesDesigns = [];
+        this.state.pricesPurities = [];
+        this.state.pricesPurity = null;
+        this.state.pricesMetal = [];
+        this.state.pricesStones = [];
+        this.state.pricesHistory = [];
+        this.state.pricesResult = null;
+        this._allModelMetals = [];
+        if (code) await this._loadPricesDesigns(code, null);
+    }
+
+    async _loadPricesDesigns(modelCode, preferredDesignCode) {
+        const [designs, allMetals] = await Promise.all([
+            this.orm.searchRead('pdp.product', [['model_id.code', '=', modelCode]], ['id', 'code'], { order: 'code' }),
+            this.orm.searchRead('pdp.product.model.metal', [['model_id.code', '=', modelCode]],
+                ['metal_id', 'purity_id', 'weight'], { order: 'purity_id' }),
+        ]);
+        this.state.pricesDesigns = designs;
+        this._allModelMetals = allMetals;
+
+        // Build purity list from metal records
+        const seen = new Set();
+        const purities = [];
+        for (const m of allMetals) {
+            if (m.purity_id && !seen.has(m.purity_id[0])) {
+                seen.add(m.purity_id[0]);
+                purities.push({ id: m.purity_id[0], code: m.purity_id[1] });
+            }
+        }
+        this.state.pricesPurities = purities;
+        if (purities.length) this.state.pricesPurity = purities[0].id;
+        this._updatePricesMetal();
+
+        // Select preferred design, or first one
+        const preferred = preferredDesignCode ? designs.find(d => d.code === preferredDesignCode) : null;
+        const toSelect = preferred || designs[0] || null;
+        if (toSelect) await this._selectPricesDesign(toSelect.id);
+    }
+
+    async onPricesDesignChange(ev) {
+        const id = parseInt(ev.target.value) || null;
+        if (id) await this._selectPricesDesign(id);
+    }
+
+    async _selectPricesDesign(productId) {
+        this.state.pricesProductId = productId;
+        this.state.pricesResult = null;
+
+        // Load product to get stone_composition_id
+        const [prod] = await this.orm.read('pdp.product', [productId], ['code', 'stone_composition_id']);
+        if (!prod) return;
+
+        // Stone lines (via composition)
+        let stones = [];
+        if (prod.stone_composition_id) {
+            const compId = Array.isArray(prod.stone_composition_id) ? prod.stone_composition_id[0] : prod.stone_composition_id;
+            stones = await this.orm.searchRead(
+                'pdp.product.stone', [['composition_id', '=', compId]],
+                ['stone_id', 'pieces', 'weight'], {}
+            );
+        }
+        // pdp.product.stone.weight may be stored as 0 (import artefact); fall back to pdp.stone.weight
+        if (stones.length) {
+            const stoneIds = stones.map(s => Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id).filter(Boolean);
+            const stoneRecs = stoneIds.length
+                ? await this.orm.read('pdp.stone', stoneIds, ['id', 'weight'])
+                : [];
+            const weightById = Object.fromEntries(stoneRecs.map(r => [r.id, r.weight]));
+            this.state.pricesStones = stones.map(s => {
+                const sid = Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id;
+                return {
+                    stone: Array.isArray(s.stone_id) ? s.stone_id[1] : '',
+                    pcs: s.pieces,
+                    weight: s.weight || weightById[sid] || 0,
+                };
+            });
+        } else {
+            this.state.pricesStones = [];
+        }
+
+        // Purchase history for this design
+        const code = prod.code || '';
+        if (code) {
+            const hist = await this.orm.searchRead(
+                'sis.document.item', [['design', '=', code]],
+                ['document_id', 'qty', 'unit_price', 'amount'],
+                { order: 'id desc', limit: 5 }
+            );
+            this.state.pricesHistory = hist.map(h => ({
+                docname: Array.isArray(h.document_id) ? h.document_id[1] : '',
+                qty: h.qty,
+                uprice: h.unit_price,
+                amount: h.amount,
+            }));
+        } else {
+            this.state.pricesHistory = [];
+        }
+    }
+
+    onPricesPurityChange(ev) {
+        this.state.pricesPurity = parseInt(ev.target.value) || null;
+        this.state.pricesResult = null;
+        this._updatePricesMetal();
+    }
+
+    _updatePricesMetal() {
+        const purityId = this.state.pricesPurity;
+        const filtered = (this._allModelMetals || []).filter(m =>
+            !purityId || (m.purity_id && m.purity_id[0] === purityId)
+        );
+        this.state.pricesMetal = filtered.map(m => ({
+            metal: Array.isArray(m.metal_id) ? m.metal_id[1] : '',
+            weight: m.weight,
+        }));
+    }
+
+    get adjustedPrice() {
+        if (!this.state.pricesResult) return 0;
+        let price = this.state.pricesResult.totals.price * (this.state.pricesQty || 1);
+        if (this.state.pricesChangeByPct) price *= (1 + this.state.pricesChangeByPct / 100);
+        return this.state.pricesRoundOff ? Math.round(price) : price;
+    }
+
+    get adjustedCost() {
+        if (!this.state.pricesResult) return 0;
+        return this.state.pricesResult.totals.cost * (this.state.pricesQty || 1);
+    }
+
+    async computePdpPrice() {
+        if (!this.state.pricesProductId) {
+            this.notification.add("Select a design first.", { type: "warning" });
+            return;
+        }
+        this.state.pricesLoading = true;
+        this.state.pricesResult = null;
+        try {
+            const result = await this.orm.call(
+                'pdp.price.service', 'compute_price_by_ids',
+                [
+                    this.state.pricesProductId,
+                    this.state.pricesMarginId || false,
+                    this.state.pricesCurrencyId || this.companyCurrencyId || false,
+                    this.state.pricesPurity || false,
+                    this.state.pricesConvMetal || false,
+                ]
+            );
+            this.state.pricesResult = result;
+        } catch (e) {
+            this.notification.add(`Error: ${e.message || e}`, { type: "danger" });
+        } finally {
+            this.state.pricesLoading = false;
+        }
+    }
+
+    async acceptPdpPrice() {
+        const item = this.state.items.find(it => it.id === this.state.selectedItemId);
+        if (!item?.id || !this.state.pricesResult) return;
+        const unitPrice = this.adjustedPrice / (this.state.pricesQty || 1);
+        const unitCost = this.adjustedCost / (this.state.pricesQty || 1);
+        await this.orm.write('sis.document.item', [item.id], {
+            unit_price: unitPrice,
+            unit_cost: unitCost,
+        });
+        this.notification.add("Price applied from PDP.", { type: "success" });
+        this.closePricesModal();
+        if (this.state.doc?.id) await this._loadDocument(this.state.doc.id);
     }
 
     // HELPERS
