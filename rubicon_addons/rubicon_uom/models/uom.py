@@ -48,6 +48,15 @@ class RubiconUom(models.Model):
                         _('Category "%s" already has a global default unit.') % rec.category_id.code
                     )
 
+    # Value in a shared absolute scale that spans categories of the same physical dimension.
+    # Example for mass: ct=0.2, g=1.0, oz_t=31.1035.
+    # Leave 0.0 for units that have no cross-category relationship (stone size, density…).
+    absolute_factor = fields.Float(
+        string='Absolute Factor',
+        digits=(16, 10),
+        default=0.0,
+    )
+
     def convert(self, value, to_uom):
         """Convert value expressed in self to to_uom.
 
@@ -63,6 +72,25 @@ class RubiconUom(models.Model):
         if not value:
             return 0
         return value * self.ratio / to_uom.ratio
+
+    @api.model
+    def add_as(self, pairs, target_uom):
+        """Sum values from potentially different categories and return in target_uom.
+
+        pairs      — list of (float_value, rubicon.uom recordset), each value in its
+                     unit's reference scale (i.e. as stored in the DB).
+        target_uom — rubicon.uom recordset; the unit the result is expressed in.
+
+        All participating units and target_uom must have absolute_factor > 0.
+        Returns 0.0 if target_uom has no absolute_factor defined.
+        """
+        if not target_uom or not target_uom.absolute_factor:
+            return 0.0
+        total_absolute = sum(
+            (value or 0.0) * (uom.absolute_factor or 0.0)
+            for value, uom in pairs
+        )
+        return total_absolute / target_uom.absolute_factor
 
     def set_global_default(self):
         """Atomically set this unit as the global default for its category.

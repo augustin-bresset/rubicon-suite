@@ -73,21 +73,10 @@ class SisDocument(models.Model):
         'parent_id', 'child_id', string='Child Documents')
 
     def get_ornament_quantities(self):
-        """Return {category_name: total_qty} grouped by design prefix → pdp.product.category."""
-        categories = {
-            c.code: c.name
-            for c in self.env['pdp.product.category'].sudo().search([])
-        }
+        """Return {category_name: total_qty} grouped by product category."""
         counts = {}
         for item in self.item_ids:
-            design = item.design or ''
-            prefix = ''
-            for ch in design:
-                if ch.isalpha():
-                    prefix += ch
-                else:
-                    break
-            cat_name = categories.get(prefix, prefix or 'Other')
+            cat_name = item.product_id.category_id.name if item.product_id and item.product_id.category_id else 'Other'
             counts[cat_name] = counts.get(cat_name, 0) + int(item.qty)
         return counts
 

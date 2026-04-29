@@ -51,3 +51,17 @@ class SisDocumentItem(models.Model):
 
     # Sequence within document
     sequence = fields.Integer(string='Seq', default=0)
+
+    def get_category_name(self):
+        """Return the product category name from the design code alphabetic prefix."""
+        self.ensure_one()
+        prefix = ''
+        for ch in (self.design or ''):
+            if ch.isalpha():
+                prefix += ch
+            else:
+                break
+        if not prefix:
+            return ''
+        cat = self.env['pdp.product.category'].sudo().search([('code', '=', prefix)], limit=1)
+        return cat.name if cat else ''

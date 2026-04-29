@@ -11,6 +11,10 @@
                     <div class="page sis-doc-page">
                         <t t-call="sis_document.report_sis_document_content"/>
                     </div>
+                    <!-- Page numbers extracted by Odoo and passed to wkhtmltopdf as footer-html -->
+                    <div class="footer" style="text-align:center; font-size:9px; color:#666; padding:3px 0; width:100%;">
+                        <span class="page"/> / <span class="topage"/>
+                    </div>
                 </t>
             </t>
         </t>
@@ -20,6 +24,30 @@
     <!-- Document content                                        -->
     <!-- ════════════════════════════════════════════════════════ -->
     <template id="report_sis_document_content">
+
+        <!-- ── Print context ── -->
+        <t t-set="print_type"    t-value="env.context.get('print_type', 'normal')"/>
+        <t t-set="markup_pct"    t-value="float(env.context.get('print_markup', 0) or 0)"/>
+        <t t-set="markup_factor" t-value="1.0 + markup_pct / 100.0"/>
+        <t t-set="show_weights"  t-value="print_type in ('with_weights', 'compressed')"/>
+        <t t-set="is_compressed" t-value="print_type == 'compressed'"/>
+
+
+
+        <!-- ── Weight UOM: display symbols + reference units for cross-category total ── -->
+        <t t-set="_stone_uom"  t-value="env['rubicon.uom'].sudo().search([('category_id.code', '=', 'stone_weight'), ('is_global_default', '=', True)], limit=1)"/>
+        <t t-set="_metal_uom"  t-value="env['rubicon.uom'].sudo().search([('category_id.code', '=', 'metal_weight'), ('is_global_default', '=', True)], limit=1)"/>
+        <t t-set="stone_sym"   t-value="_stone_uom.symbol if _stone_uom else 'ct'"/>
+        <t t-set="metal_sym"   t-value="_metal_uom.symbol if _metal_uom else 'g'"/>
+        <!-- Reference units: DB values are always stored in reference scale -->
+        <t t-set="_stone_ref"  t-value="env['rubicon.uom'].sudo().search([('category_id.code', '=', 'stone_weight'), ('is_reference', '=', True)], limit=1)"/>
+        <t t-set="_metal_ref"  t-value="env['rubicon.uom'].sudo().search([('category_id.code', '=', 'metal_weight'), ('is_reference', '=', True)], limit=1)"/>
+        <!-- Target unit for total weight column: gramme in metal_weight category -->
+        <t t-set="_g_target"   t-value="env['rubicon.uom'].sudo().search([('category_id.code', '=', 'metal_weight'), ('is_reference', '=', True)], limit=1)"/>
+        <t t-set="_stone_abs"  t-value="_stone_ref.absolute_factor if _stone_ref else 0.0"/>
+        <t t-set="_metal_abs"  t-value="_metal_ref.absolute_factor if _metal_ref else 0.0"/>
+        <t t-set="_target_abs" t-value="_g_target.absolute_factor if _g_target and _g_target.absolute_factor else 1.0"/>
+
         <style>
             .sis-doc-page {
                 font-family: Arial, Helvetica, sans-serif;
@@ -28,9 +56,7 @@
             }
 
             /* ── Header ── */
-            .sis-header {
-                margin-bottom: 0;
-            }
+            .sis-header { margin-bottom: 0; }
             .sis-company-name {
                 font-size: 20px;
                 font-weight: bold;
@@ -42,10 +68,7 @@
                 font-size: 10px;
                 line-height: 1.4;
             }
-            .sis-logo {
-                max-height: 60px;
-                margin-bottom: 5px;
-            }
+            .sis-logo { max-height: 60px; margin-bottom: 5px; }
             .sis-separator {
                 border: none;
                 border-top: 3px solid #000;
@@ -61,11 +84,7 @@
             }
 
             /* ── Consignee ── */
-            .sis-consignee-row {
-                display: flex;
-                align-items: flex-start;
-                margin-bottom: 12px;
-            }
+            .sis-consignee-row { display: flex; align-items: flex-start; margin-bottom: 12px; }
             .sis-consignee-box {
                 border: 1.5px solid #000;
                 border-radius: 8px;
@@ -75,10 +94,7 @@
                 font-size: 11px;
                 line-height: 1.5;
             }
-            .sis-consignee-label {
-                font-weight: bold;
-                margin-bottom: 2px;
-            }
+            .sis-consignee-label { font-weight: bold; margin-bottom: 2px; }
 
             /* ── Details table ── */
             .sis-details-table {
@@ -100,13 +116,6 @@
                 text-align: center;
             }
 
-            /* ── Page indicator ── */
-            .sis-page-indicator {
-                text-align: center;
-                font-size: 10px;
-                margin: 6px 0;
-            }
-
             /* ── Items table ── */
             .sis-items-table {
                 width: 100%;
@@ -116,7 +125,7 @@
             }
             .sis-items-table th {
                 border: 1px solid #000;
-                padding: 3px 5px;
+                padding: 3px 4px;
                 text-align: center;
                 font-weight: bold;
                 background: #f5f5f5;
@@ -125,17 +134,11 @@
                 border-left: 1px solid #000;
                 border-right: 1px solid #000;
                 border-bottom: 1px solid #ddd;
-                padding: 3px 5px;
+                padding: 3px 4px;
             }
-            .sis-items-table tr:last-child td {
-                border-bottom: 1px solid #000;
-            }
-            .sis-items-table .text-right {
-                text-align: right;
-            }
-            .sis-items-table .text-center {
-                text-align: center;
-            }
+            .sis-items-table tr:last-child td { border-bottom: 1px solid #000; }
+            .sis-items-table .text-right  { text-align: right; }
+            .sis-items-table .text-center { text-align: center; }
             .sis-group-header td {
                 font-weight: bold;
                 font-style: italic;
@@ -176,31 +179,15 @@
                 padding: 1px 8px;
                 border-bottom: 1px solid #000;
             }
-            .sis-ornament-table td {
-                padding: 1px 8px;
-                border-bottom: 1px solid #ddd;
-            }
+            .sis-ornament-table td { padding: 1px 8px; border-bottom: 1px solid #ddd; }
 
             /* ── Remark ── */
-            .sis-remark {
-                margin-top: 18px;
-                font-size: 10px;
-                line-height: 1.5;
-            }
-            .sis-remark-title {
-                font-weight: bold;
-                font-size: 11px;
-                margin-bottom: 4px;
-            }
-            .sis-remark p {
-                margin: 4px 0;
-            }
+            .sis-remark { margin-top: 18px; font-size: 10px; line-height: 1.5; }
+            .sis-remark-title { font-weight: bold; font-size: 11px; margin-bottom: 4px; }
+            .sis-remark p { margin: 4px 0; }
 
             /* ── Signature ── */
-            .sis-signature {
-                margin-top: 30px;
-                text-align: center;
-            }
+            .sis-signature { margin-top: 30px; text-align: center; }
             .sis-signature-line {
                 border-top: 1px solid #000;
                 width: 250px;
@@ -216,7 +203,9 @@
             <div class="row">
                 <div class="col-6">
                     <div class="sis-doc-title" style="text-align: left; margin-top: 10px;">
-                        <t t-if="doc.doc_type_code == 'SO'">Sales Order</t>
+                        <t t-if="print_type == 'tax_invoice'">Tax Invoice</t>
+                        <t t-elif="print_type == 'proforma'">Pro-forma Invoice</t>
+                        <t t-elif="doc.doc_type_code == 'SO'">Sales Order</t>
                         <t t-elif="doc.doc_type_code == 'SQ'">Sales Quotation</t>
                         <t t-elif="doc.doc_type_code == 'SI'">Invoice</t>
                         <t t-elif="doc.doc_type_code == 'CO'">Casting Order</t>
@@ -224,7 +213,7 @@
                         <t t-elif="doc.doc_type_code == 'SR'">Sales Return</t>
                         <t t-else=""><t t-esc="doc.doc_type_id.name or 'Document'"/></t>
                     </div>
-                    <img t-if="doc" t-att-src="'/sis_document/static/src/img/logo.webp'" class="sis-logo" style="margin-top: 5px;"/>
+                    <img t-att-src="'/sis_document/static/src/img/logo.webp'" class="sis-logo" style="margin-top: 5px;"/>
                 </div>
                 <div class="col-6 text-right">
                     <div class="sis-company-name">Rubicon Co., Ltd.</div>
@@ -233,9 +222,7 @@
                         Silom 17 road, Bangrak,<br/>
                         Bangkok 10500<br/>
                         THAILAND<br/>
-                        <div style="margin-top: 5px; font-weight: bold;">
-                            Tel: +66 2236 7043 ext 105
-                        </div>
+                        <div style="margin-top: 5px; font-weight: bold;">Tel: +66 2236 7043 ext 105</div>
                     </div>
                 </div>
             </div>
@@ -248,28 +235,17 @@
                 <div class="sis-consignee-label">Consignee</div>
                 <t t-if="doc.party_id">
                     <span t-field="doc.party_id.name"/><br/>
-                    <t t-if="doc.party_id.street">
-                        <span t-field="doc.party_id.street"/><br/>
-                    </t>
-                    <t t-if="doc.party_id.street2">
-                        <span t-field="doc.party_id.street2"/><br/>
-                    </t>
+                    <t t-if="doc.party_id.street"><span t-field="doc.party_id.street"/><br/></t>
+                    <t t-if="doc.party_id.street2"><span t-field="doc.party_id.street2"/><br/></t>
                     <t t-if="doc.party_id.city or doc.party_id.zip">
                         <t t-if="doc.party_id.city"><span t-field="doc.party_id.city"/></t>
                         <t t-if="doc.party_id.zip"> <span t-field="doc.party_id.zip"/></t>
                         <br/>
                     </t>
-                    <t t-if="doc.party_id.country_id">
-                        <span t-field="doc.party_id.country_id.name"/>
-                    </t>
-                    <t t-if="doc.party_id.phone">
-                        <br/>
-                        Tel: <span t-field="doc.party_id.phone"/>
-                    </t>
+                    <t t-if="doc.party_id.country_id"><span t-field="doc.party_id.country_id.name"/></t>
+                    <t t-if="doc.party_id.phone"><br/>Tel: <span t-field="doc.party_id.phone"/></t>
                 </t>
-                <t t-else="">
-                    <span t-esc="doc.party_code or ''"/>
-                </t>
+                <t t-else=""><span t-esc="doc.party_code or ''"/></t>
             </div>
         </div>
 
@@ -290,70 +266,80 @@
                 <tr>
                     <td><span t-field="doc.name"/></td>
                     <td><span t-field="doc.customer_po"/></td>
-                    <td>
-                        <t t-if="doc.ship_method_id"><span t-field="doc.ship_method_id.name"/></t>
-                    </td>
-                    <td>
-                        <t t-if="doc.pay_term_id"><span t-field="doc.pay_term_id.name"/></t>
-                    </td>
+                    <td><t t-if="doc.ship_method_id"><span t-field="doc.ship_method_id.name"/></t></td>
+                    <td><t t-if="doc.pay_term_id"><span t-field="doc.pay_term_id.name"/></t></td>
                     <td><span t-field="doc.date_created" t-options='{"format": "dd MMM, yyyy"}'/></td>
                     <td><span t-field="doc.date_due" t-options='{"format": "dd MMM, yyyy"}'/></td>
-                    <td>
-                        <t t-if="doc.stamp"><span t-field="doc.stamp"/></t>
-                    </td>
+                    <td><t t-if="doc.stamp"><span t-field="doc.stamp"/></t></td>
                 </tr>
             </tbody>
         </table>
 
         <!-- ═══ ITEMS TABLE ═══ -->
+        <!-- Column order with weights: SNo | Desc | Design | Size | Qty | weights... | Unit Price | Amount -->
+        <t t-set="ncols" t-value="12 if show_weights else 7"/>
         <table class="sis-items-table">
             <thead>
                 <tr>
-                    <th style="width:30px;">SNo</th>
-                    <th style="width:140px;">Description</th>
-                    <th style="width:200px;">Design</th>
-                    <th style="width:70px;">Size/Rem.</th>
-                    <th style="width:55px;">Quantity</th>
-                    <th style="width:75px;">Unit Price</th>
-                    <th style="width:75px;">Amount</th>
+                    <t t-if="show_weights">
+                        <th style="width:25px;">SNo</th>
+                        <th style="width:90px;">Description</th>
+                        <th style="width:100px;">Design</th>
+                        <th style="width:40px;">Size/Rem.</th>
+                        <th style="width:35px;">Qty</th>
+                        <th style="width:42px;">Diam.<br/><small t-esc="stone_sym"/></th>
+                        <th style="width:42px;">Stone<br/><small t-esc="stone_sym"/></th>
+                        <th style="width:42px;">Div.<br/><small t-esc="stone_sym"/></th>
+                        <th style="width:42px;">Metal<br/><small t-esc="metal_sym"/></th>
+                        <th style="width:45px;">Total<br/><small>g</small></th>
+                        <th style="width:52px;">Unit Price</th>
+                        <th style="width:52px;">Amount</th>
+                    </t>
+                    <t t-else="">
+                        <th style="width:30px;">SNo</th>
+                        <th style="width:80px;">Description</th>
+                        <th style="width:220px;">Design</th>
+                        <th style="width:70px;">Size/Rem.</th>
+                        <th style="width:55px;">Quantity</th>
+                        <th style="width:75px;">Unit Price</th>
+                        <th style="width:75px;">Amount</th>
+                    </t>
                 </tr>
             </thead>
             <tbody>
-                <!-- Group header: Gold Jewelry -->
                 <tr class="sis-group-header">
-                    <td colspan="7">Gold Jewelry</td>
+                    <td t-att-colspan="ncols">Gold Jewelry</td>
                 </tr>
 
-                <t t-set="line_no" t-value="0"/>
+                <t t-set="line_no"   t-value="0"/>
                 <t t-set="total_qty" t-value="0"/>
                 <t t-foreach="doc.item_ids" t-as="line">
-                    <t t-set="line_no" t-value="line_no + 1"/>
-                    <t t-set="total_qty" t-value="total_qty + line.qty"/>
+                    <t t-set="line_no"     t-value="line_no + 1"/>
+                    <t t-set="total_qty"   t-value="total_qty + line.qty"/>
+                    <t t-set="disp_price"  t-value="line.unit_price * markup_factor"/>
+                    <t t-set="disp_amount" t-value="line.amount * markup_factor"/>
 
-                    <!-- Purity sub-header row if purity changes -->
+                    <!-- Purity sub-header on change -->
                     <t t-if="line_index == 0 or (line.purity and line.purity != doc.item_ids[line_index - 1].purity)">
                         <t t-if="line.purity">
                             <tr class="sis-group-header">
-                                <td colspan="7" style="padding-left: 20px;">
+                                <td t-att-colspan="ncols" style="padding-left: 20px;">
                                     <span t-esc="line.purity"/>
                                 </td>
                             </tr>
                         </t>
                     </t>
 
-                    <!-- Ref document row (if any) -->
-                    <t t-if="line.ref_document">
+                    <!-- Ref document rows — hidden in compressed mode -->
+                    <t t-if="not is_compressed and line.ref_document">
                         <tr class="sis-ref-row">
-                            <td/>
-                            <td/>
-                            <td style="font-size:8px; color:#777;">
-                                Ref. Doc.
-                            </td>
-                            <td colspan="4"/>
+                            <td/><td/>
+                            <td style="font-size:8px; color:#777;">Ref. Doc.</td>
+                            <td t-att-colspan="ncols - 3"/>
                         </tr>
                         <tr class="sis-ref-row">
                             <td/>
-                            <td colspan="6" style="font-size:8px; color:#555;">
+                            <td t-att-colspan="ncols - 1" style="font-size:8px; color:#555;">
                                 <span t-esc="line.ref_document"/>
                             </td>
                         </tr>
@@ -362,32 +348,41 @@
                     <!-- Main item row -->
                     <tr>
                         <td class="text-center"><span t-esc="line_no"/></td>
+                        <!-- Description column: product type from design prefix → pdp.product.category -->
+                        <td><span t-esc="line.get_category_name()"/></td>
+                        <!-- Design column: code prominent, description small below -->
                         <td>
-                            <span t-esc="line.description or ''"/>
-                        </td>
-                        <td>
-                            <span t-esc="line.design or ''"/>
-                            <t t-if="line.special_instruction">
-                                <br/><small style="color:#555;"><span t-esc="line.special_instruction"/></small>
+                            <div style="font-weight:bold; font-size:11px; line-height:1.2;"><span t-esc="line.design or ''"/></div>
+                            <t t-if="not is_compressed and line.description">
+                                <div style="font-size:7px; color:#777; margin-top:1px;"><span t-esc="line.description"/></div>
                             </t>
                         </td>
                         <td class="text-center"><span t-esc="line.size_remarks or ''"/></td>
                         <td class="text-right">
                             <span t-esc="int(line.qty) if line.qty == int(line.qty) else line.qty"/>
                         </td>
-                        <td class="text-right">
-                            <span t-esc="'%.2f' % line.unit_price"/>
-                        </td>
-                        <td class="text-right">
-                            <span t-esc="'%.2f' % line.amount"/>
-                        </td>
+                        <!-- Weight columns inserted between Qty and Unit Price -->
+                        <t t-if="show_weights">
+                            <td class="text-right"><span t-esc="'%.4f' % (line.diamond_weight or 0)"/></td>
+                            <td class="text-right"><span t-esc="'%.4f' % (line.stone_weight or 0)"/></td>
+                            <td class="text-right"><span t-esc="'%.4f' % (line.diverse_weight or 0)"/></td>
+                            <td class="text-right"><span t-esc="'%.4f' % (line.metal_weight or 0)"/></td>
+                            <td class="text-right">
+                                <!-- add_as via absolute_factor: no hardcoded conversion -->
+                                <t t-set="_tw_abs" t-value="((line.diamond_weight or 0) + (line.stone_weight or 0) + (line.diverse_weight or 0)) * _stone_abs + (line.metal_weight or 0) * _metal_abs"/>
+                                <span t-esc="'%.4f' % (_tw_abs / _target_abs)"/>
+                            </td>
+                        </t>
+                        <td class="text-right"><span t-esc="'%.2f' % disp_price"/></td>
+                        <td class="text-right"><span t-esc="'%.2f' % disp_amount"/></td>
                     </tr>
                 </t>
             </tbody>
         </table>
 
         <!-- ═══ TOTAL ═══ -->
-        <t t-set="display_total" t-value="doc.total_fob if doc.total_fob else sum(line.amount for line in doc.item_ids)"/>
+        <t t-set="base_total"    t-value="doc.total_fob if doc.total_fob else sum(line.amount for line in doc.item_ids)"/>
+        <t t-set="display_total" t-value="base_total * markup_factor"/>
         <table class="sis-total-row">
             <tr>
                 <td style="width:80%; text-align:right; border:none;"/>
@@ -400,14 +395,35 @@
             </tr>
         </table>
 
+        <!-- ═══ TAX LINE (tax_invoice only) ═══ -->
+        <t t-if="print_type == 'tax_invoice'">
+            <t t-set="vat_amount" t-value="display_total * 0.07"/>
+            <table class="sis-total-row" style="margin-top:0;">
+                <tr>
+                    <td style="width:80%; text-align:right; border:none; font-weight:normal;">VAT 7%</td>
+                    <td style="width:10%; text-align:right;">
+                        <span t-esc="doc.currency_id.name if doc.currency_id else 'US'"/>$
+                    </td>
+                    <td style="width:10%; text-align:right;"><span t-esc="'{:,.2f}'.format(vat_amount)"/></td>
+                </tr>
+                <tr>
+                    <td style="width:80%; text-align:right; border:none;">Total incl. VAT</td>
+                    <td style="width:10%; text-align:right;">
+                        <span t-esc="doc.currency_id.name if doc.currency_id else 'US'"/>$
+                    </td>
+                    <td style="width:10%; text-align:right;">
+                        <span t-esc="'{:,.2f}'.format(display_total + vat_amount)"/>
+                    </td>
+                </tr>
+            </table>
+        </t>
+
         <!-- ═══ ORNAMENT QUANTITIES ═══ -->
         <t t-set="ornament_counts" t-value="doc.get_ornament_quantities()"/>
         <t t-if="ornament_counts">
             <table class="sis-ornament-table">
                 <thead>
-                    <tr>
-                        <th colspan="2">Ornament Quantities</th>
-                    </tr>
+                    <tr><th colspan="2">Ornament Quantities</th></tr>
                 </thead>
                 <tbody>
                     <t t-foreach="ornament_counts" t-as="cat_name">
@@ -433,7 +449,7 @@
             </div>
         </t>
 
-        <!-- ═══ NOTES (if any) ═══ -->
+        <!-- ═══ NOTES ═══ -->
         <t t-if="doc.notes">
             <div style="margin-top:8px; font-size:10px;">
                 <b>Notes:</b> <span t-field="doc.notes"/>

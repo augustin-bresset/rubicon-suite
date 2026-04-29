@@ -26,6 +26,7 @@
     <field name="ratio">1.0</field>
     <field name="is_reference" eval="True"/>
     <field name="is_global_default" eval="True"/>
+    <field name="absolute_factor">1.0</field>
   </record>
   <record id="uom_troy_oz" model="rubicon.uom">
     <field name="name">Troy Ounce</field>
@@ -34,6 +35,7 @@
     <field name="ratio">31.1035</field>
     <field name="is_reference" eval="False"/>
     <field name="is_global_default" eval="False"/>
+    <field name="absolute_factor">31.1035</field>
   </record>
 
   <!-- Stone Weight units -->
@@ -44,6 +46,7 @@
     <field name="ratio">1.0</field>
     <field name="is_reference" eval="True"/>
     <field name="is_global_default" eval="True"/>
+    <field name="absolute_factor">0.2</field>
   </record>
   <record id="uom_g_stone" model="rubicon.uom">
     <field name="name">Gramme (stone)</field>
@@ -52,6 +55,7 @@
     <field name="ratio">5.0</field>
     <field name="is_reference" eval="False"/>
     <field name="is_global_default" eval="False"/>
+    <field name="absolute_factor">1.0</field>
   </record>
 
   <!-- Stone Density units -->
