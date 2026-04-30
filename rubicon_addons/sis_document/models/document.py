@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class SisDocument(models.Model):
@@ -82,3 +82,29 @@ class SisDocument(models.Model):
 
     def action_print_pdf(self):
         return self.env.ref('sis_document.action_report_sis_document').report_action(self)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            name = vals.get('name', '')
+            parts = name.split('-')
+            # Partial prefix: "SO-EMA-" → ['SO', 'EMA', '']
+            if len(parts) == 3 and parts[2] == '':
+                doc_type, client_code = parts[0], parts[1]
+                date = vals.get('date_created') or fields.Date.today()
+                # date arrives as string "2025-01-15" via JSON-RPC
+                if isinstance(date, str):
+                    yy = date[2:4]
+                else:
+                    yy = str(date.year)[2:]
+                prefix = f'{doc_type}-{client_code}-{yy}'
+                self.env.cr.execute(
+                    "SELECT MAX(name) FROM sis_document WHERE name LIKE %s",
+                    [prefix + '%']
+                )
+                row = self.env.cr.fetchone()
+                last = row[0] if row and row[0] else None
+                seq = (int(last[-3:]) + 1) if last else 1
+                vals['name'] = f'{prefix}{seq:03d}'
+                vals['doc_type_code'] = doc_type
+        return super().create(vals_list)
