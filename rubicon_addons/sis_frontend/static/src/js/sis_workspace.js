@@ -15,6 +15,7 @@ export class SisWorkspace extends Component {
         this.notification = useService("notification");
 
         // Non-reactive lookup tables (loaded once, never change)
+        this.docTypeFootnotes = {}; // code → footer_note
         this.margins = [];
         this.payTerms = [];
         this.shippers = [];
@@ -59,6 +60,10 @@ export class SisWorkspace extends Component {
             items: [],
             childDocs: [],
 
+            // ── Delete confirm ─────────────────────────────────
+            showDeleteConfirm: false,
+            deletePartyDocCount: 0,
+
             // ── Print modal ────────────────────────────────────
             showPrintModal: false,
             printType: 'with_weights',
@@ -86,7 +91,7 @@ export class SisWorkspace extends Component {
 
             // ── Items filter ───────────────────────────────────
             docItemsFilter: '',
-            showClosedItems: false,
+            showClosedItems: true,
 
             // ── Customer address (derived, read-only display) ──
             docPartyAddress: '',
@@ -100,7 +105,7 @@ export class SisWorkspace extends Component {
     // LOOKUP TABLES (non-reactive)
 
     async _loadLookups() {
-        const [margins, payTerms, shippers, sisCountries, allStates, receivingModes, tradeFairs, sisPartners, currencies, companies, metals] =
+        const [margins, payTerms, shippers, sisCountries, allStates, receivingModes, tradeFairs, sisPartners, currencies, companies, metals, docTypes] =
             await Promise.all([
                 this.orm.searchRead("pdp.margin", [], ["id", "name"], { order: "name" }),
                 this.orm.searchRead("sis.pay.term", [], ["id", "name"], { order: "name" }),
@@ -118,6 +123,7 @@ export class SisWorkspace extends Component {
                 this.orm.searchRead("res.currency", [["active", "=", true]], ["id", "name", "symbol"], { order: "name" }),
                 this.orm.searchRead("res.company", [], ["currency_id"], { limit: 1 }),
                 this.orm.searchRead("pdp.metal", [], ["id", "code"], { order: "code" }),
+                this.orm.searchRead("sis.doc.type", [], ["code", "footer_note"]),
             ]);
         this.margins = margins;
         this.payTerms = payTerms;
@@ -130,6 +136,9 @@ export class SisWorkspace extends Component {
         this.currencies = currencies;
         this.companyCurrencyId = companies[0]?.currency_id?.[0] || false;
         this.metals = metals;
+        this.docTypeFootnotes = Object.fromEntries(
+            docTypes.filter(dt => dt.footer_note).map(dt => [dt.code, dt.footer_note])
+        );
     }
 
     // LOBBY NAVIGATION
@@ -148,6 +157,7 @@ export class SisWorkspace extends Component {
         };
         this.state.docType = docType;
         this.state.docTypeTitle = titles[docType] || "Maintain Sales Documents.";
+        this.state.docYear = String(new Date().getFullYear());
         await this._reloadDocuments();
         this.state.page = "document";
     }
@@ -321,7 +331,7 @@ export class SisWorkspace extends Component {
     newParty() {
         this.state.party = {
             id: null, name: "", is_company: true, active: true,
-            title: "", street: "", city: "", state_id: false, zip: "", country_id: false,
+            title: "", street: "", street2: "", city: "", state_id: false, zip: "", country_id: false,
             phone: "", email: "", website: "", comment: "",
             margin_id: false, sis_pay_term_id: false,
             sis_is_customer: true,
@@ -347,7 +357,12 @@ export class SisWorkspace extends Component {
     async saveParty() {
         if (!this.state.party) return;
         const p = this.state.party;
+        if (!p.name || !p.name.trim()) {
+            this.notification.add("Company name is required.", { type: "warning" });
+            return;
+        }
         const isNew = !p.id;
+        try {
         const vals = {
             name: p.name,
             sis_code: p.sis_code || "",
@@ -451,6 +466,34 @@ export class SisWorkspace extends Component {
         this.notification.add(isNew ? "Party created." : "Party saved.", { type: "success" });
         await this._reloadParties();
         await this._loadParty(savedPartyId);
+        } catch (e) {
+            this.notification.add(`Save failed: ${e.message || e}`, { type: "danger" });
+        }
+    }
+
+    async openDeleteConfirm() {
+        if (!this.state.party?.id) return;
+        this.state.deletePartyDocCount = await this.orm.searchCount(
+            'sis.document', [['party_id', '=', this.state.party.id]]
+        );
+        this.state.showDeleteConfirm = true;
+    }
+
+    cancelDeleteConfirm() {
+        this.state.showDeleteConfirm = false;
+    }
+
+    async confirmDeleteParty() {
+        this.state.showDeleteConfirm = false;
+        const id = this.state.party.id;
+        if (!id) return;
+        try {
+            await this.orm.unlink('res.partner', [id]);
+            this.notification.add('Party deleted.', { type: 'success' });
+            await this._reloadParties();
+        } catch (e) {
+            this.notification.add(`Delete failed: ${e.message || e}`, { type: 'danger' });
+        }
     }
 
     // DOCUMENTS
@@ -513,6 +556,11 @@ export class SisWorkspace extends Component {
 
         // Resolve M2O fields from legacy data when M2O is unset (imported documents)
         if (this.state.doc) {
+            // Auto-set currency from company default when not imported
+            if (!this.state.doc.currency_id && this.companyCurrencyId) {
+                const curr = this.currencies.find(c => c.id === this.companyCurrencyId);
+                if (curr) this.state.doc.currency_id = [curr.id, curr.symbol || curr.name];
+            }
             if (!this.state.doc.party_id && this.state.doc.name) {
                 // party_code stores a legacy numeric ID, not the sis_code.
                 // Extract the customer code from the document name (SO-EMA-25001 → "EMA").
@@ -641,7 +689,7 @@ export class SisWorkspace extends Component {
             margin_id: defaultMargin ? [defaultMargin.id, defaultMargin.name] : false,
             date_created: fmt(today),
             date_due: fmt(due),
-            currency_id: false,
+            currency_id: this.companyCurrencyId ? [this.companyCurrencyId, ''] : false,
             party_id: false, party_code: "",
             ship_method_id: false, pay_term_id: false,
             stamp: "", notes: "", footnotes: "",
@@ -662,6 +710,22 @@ export class SisWorkspace extends Component {
     async saveDocument() {
         if (!this.state.doc) return;
         const d = this.state.doc;
+        if (!this._m2oId(d.party_id)) {
+            this.notification.add("Please select a customer before saving.", { type: "warning" });
+            return;
+        }
+        // If saving a new doc whose name still lacks the customer code, auto-fill it
+        // so the backend auto-numbering can produce TYPE-CODE-YYnnn.
+        if (!d.id) {
+            const nameParts = (d.name || '').split('-');
+            if (nameParts.length < 3 || !nameParts[1]) {
+                const pid = this._m2oId(d.party_id);
+                const partner = this.sisPartners.find(p => p.id === pid);
+                if (partner?.sis_code) {
+                    d.name = `${this.state.docType}-${partner.sis_code}-`;
+                }
+            }
+        }
         const vals = {
             name: d.name,
             doc_type_code: d.doc_type_code || this.state.docType || "",
@@ -686,6 +750,8 @@ export class SisWorkspace extends Component {
             ship_book: d.ship_book || "",
             ship_page: d.ship_page || "",
             deposit: parseFloat(d.deposit) || 0,
+            freight_insurance: parseFloat(d.freight_insurance) || 0,
+            currency_id: this._m2oId(d.currency_id) || false,
         };
         if (d.id) {
             await this.orm.write("sis.document", [d.id], vals);

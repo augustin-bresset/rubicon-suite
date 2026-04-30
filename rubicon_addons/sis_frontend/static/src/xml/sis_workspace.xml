@@ -47,6 +47,7 @@
                                    t-on-keydown="ev => ev.key === 'Enter' &amp;&amp; this.filteredParties.length &amp;&amp; this._loadParty(this.filteredParties[0].id)"/>
                             <select class="form-select form-select-sm" style="width:200px;"
                                     t-on-change="(ev) => this.onSelectParty(ev)">
+                                <option value="" t-att-selected="!state.party or !state.party.id">— New Party —</option>
                                 <t t-foreach="filteredParties" t-as="p" t-key="p.id">
                                     <option t-att-value="p.id"
                                             t-att-selected="state.party and state.party.id === p.id">
@@ -68,6 +69,12 @@
                                class="form-control form-control-sm border-primary" style="width:100px; font-weight: 600;"
                                t-att-value="state.party ? state.party.sis_code || '' : ''"
                                t-on-input="ev => this.setPartyField('sis_code', ev.target.value)"/>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <label class="form-label mb-0 text-nowrap small fw-semibold text-muted">ID</label>
+                        <input type="text" class="form-control form-control-sm bg-light" style="width:60px;"
+                               readonly="1"
+                               t-att-value="state.party ? state.party.id || '' : ''"/>
                     </div>
                     <div class="form-check mb-0 ms-2">
                         <input type="checkbox" class="form-check-input"
@@ -235,84 +242,89 @@
 
                     <!-- ─── DEFAULTS ─── -->
                     <t t-elif="state.partyTab === 'defaults'">
-                        <div class="d-flex gap-4 mb-3">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input"
-                                       t-att-checked="state.party.sis_is_customer"
-                                       t-on-change="ev => this.setPartyField('sis_is_customer', ev.target.checked)"/>
-                                <label class="form-check-label">Is a Customer</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input"
-                                       t-att-checked="state.party.sis_is_vendor"
-                                       t-on-change="ev => this.setPartyField('sis_is_vendor', ev.target.checked)"/>
-                                <label class="form-check-label">Is a Vendor</label>
-                            </div>
-                        </div>
-
                         <div class="d-flex gap-4 flex-wrap">
-                            <fieldset t-if="state.party.sis_is_customer" class="border rounded p-3" style="min-width:340px;">
-                                <legend class="float-none w-auto px-2 small">Sales Defaults</legend>
-                                <div class="row g-2 align-items-center">
-                                    <div class="col-4 small fw-semibold">Account</div>
-                                    <div class="col-8">
-                                        <input class="form-control form-control-sm"
-                                               t-att-value="state.party.sis_account || ''"
-                                               t-on-input="ev => this.setPartyField('sis_account', ev.target.value)"/>
-                                    </div>
-                                    <div class="col-4 small fw-semibold">Margin</div>
-                                    <div class="col-8">
-                                        <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setPartyField('margin_id', +ev.target.value || false)">
-                                            <option value="">—</option>
-                                            <t t-foreach="this.margins" t-as="m" t-key="m.id">
-                                                <option t-att-value="m.id"
-                                                        t-att-selected="(state.party.margin_id ? (state.party.margin_id[0] || state.party.margin_id) : 0) === m.id">
-                                                    <t t-esc="m.name"/>
-                                                </option>
-                                            </t>
-                                        </select>
-                                    </div>
-                                    <div class="col-4 small fw-semibold">PayTerm</div>
-                                    <div class="col-8">
-                                        <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setPartyField('sis_pay_term_id', +ev.target.value || false)">
-                                            <option value="">—</option>
-                                            <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
-                                                <option t-att-value="pt.id"
-                                                        t-att-selected="(state.party.sis_pay_term_id ? (state.party.sis_pay_term_id[0] || state.party.sis_pay_term_id) : 0) === pt.id">
-                                                    <t t-esc="pt.name"/>
-                                                </option>
-                                            </t>
-                                        </select>
-                                    </div>
-                                </div>
-                            </fieldset>
 
-                            <fieldset t-if="state.party.sis_is_vendor" class="border rounded p-3" style="min-width:340px;">
-                                <legend class="float-none w-auto px-2 small">Purchase Defaults</legend>
-                                <div class="row g-2 align-items-center">
-                                    <div class="col-4 small fw-semibold">A/P Account</div>
-                                    <div class="col-8">
-                                        <input class="form-control form-control-sm"
-                                               t-att-value="state.party.sis_vendor_account || ''"
-                                               t-on-input="ev => this.setPartyField('sis_vendor_account', ev.target.value)"/>
-                                    </div>
-                                    <div class="col-4 small fw-semibold">PayTerm</div>
-                                    <div class="col-8">
-                                        <select class="form-select form-select-sm"
-                                                t-on-change="ev => this.setPartyField('sis_vendor_pay_term_id', +ev.target.value || false)">
-                                            <option value="">—</option>
-                                            <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
-                                                <option t-att-value="pt.id"
-                                                        t-att-selected="(state.party.sis_vendor_pay_term_id ? (state.party.sis_vendor_pay_term_id[0] || state.party.sis_vendor_pay_term_id) : 0) === pt.id">
-                                                    <t t-esc="pt.name"/>
-                                                </option>
-                                            </t>
-                                        </select>
-                                    </div>
+                            <!-- Left: Is a Customer + Sales Defaults -->
+                            <div style="min-width:340px;">
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input"
+                                           t-att-checked="state.party.sis_is_customer"
+                                           t-on-change="ev => this.setPartyField('sis_is_customer', ev.target.checked)"/>
+                                    <label class="form-check-label">Is a Customer</label>
                                 </div>
-                            </fieldset>
+                                <fieldset t-if="state.party.sis_is_customer" class="border rounded p-3">
+                                    <legend class="float-none w-auto px-2 small">Sales Defaults</legend>
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-4 small fw-semibold">Account</div>
+                                        <div class="col-8">
+                                            <input class="form-control form-control-sm"
+                                                   t-att-value="state.party.sis_account || ''"
+                                                   t-on-input="ev => this.setPartyField('sis_account', ev.target.value)"/>
+                                        </div>
+                                        <div class="col-4 small fw-semibold">Margin</div>
+                                        <div class="col-8">
+                                            <select class="form-select form-select-sm"
+                                                    t-on-change="ev => this.setPartyField('margin_id', +ev.target.value || false)">
+                                                <option value="">—</option>
+                                                <t t-foreach="this.margins" t-as="m" t-key="m.id">
+                                                    <option t-att-value="m.id"
+                                                            t-att-selected="(state.party.margin_id ? (state.party.margin_id[0] || state.party.margin_id) : 0) === m.id">
+                                                        <t t-esc="m.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="col-4 small fw-semibold">PayTerm</div>
+                                        <div class="col-8">
+                                            <select class="form-select form-select-sm"
+                                                    t-on-change="ev => this.setPartyField('sis_pay_term_id', +ev.target.value || false)">
+                                                <option value="">—</option>
+                                                <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
+                                                    <option t-att-value="pt.id"
+                                                            t-att-selected="(state.party.sis_pay_term_id ? (state.party.sis_pay_term_id[0] || state.party.sis_pay_term_id) : 0) === pt.id">
+                                                        <t t-esc="pt.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <!-- Right: Is a Vendor + Purchase Defaults -->
+                            <div style="min-width:340px;">
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input"
+                                           t-att-checked="state.party.sis_is_vendor"
+                                           t-on-change="ev => this.setPartyField('sis_is_vendor', ev.target.checked)"/>
+                                    <label class="form-check-label">Is a Vendor</label>
+                                </div>
+                                <fieldset t-if="state.party.sis_is_vendor" class="border rounded p-3">
+                                    <legend class="float-none w-auto px-2 small">Purchase Defaults</legend>
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-4 small fw-semibold">A/P Account</div>
+                                        <div class="col-8">
+                                            <input class="form-control form-control-sm"
+                                                   t-att-value="state.party.sis_vendor_account || ''"
+                                                   t-on-input="ev => this.setPartyField('sis_vendor_account', ev.target.value)"/>
+                                        </div>
+                                        <div class="col-4 small fw-semibold">PayTerm</div>
+                                        <div class="col-8">
+                                            <select class="form-select form-select-sm"
+                                                    t-on-change="ev => this.setPartyField('sis_vendor_pay_term_id', +ev.target.value || false)">
+                                                <option value="">—</option>
+                                                <t t-foreach="this.payTerms" t-as="pt" t-key="pt.id">
+                                                    <option t-att-value="pt.id"
+                                                            t-att-selected="(state.party.sis_vendor_pay_term_id ? (state.party.sis_vendor_pay_term_id[0] || state.party.sis_vendor_pay_term_id) : 0) === pt.id">
+                                                        <t t-esc="pt.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
                         </div>
                     </t>
 
@@ -455,6 +467,9 @@
                         <button class="btn btn-outline-secondary" title="Last"     t-on-click="() => this.partyNav('last')">▶|</button>
                     </div>
                     <button class="btn btn-sm btn-outline-success" title="New Party" t-on-click="() => this.newParty()">＋ New</button>
+                    <button class="btn btn-sm btn-outline-danger"
+                            t-att-disabled="!state.party or !state.party.id"
+                            t-on-click="() => this.openDeleteConfirm()">Delete</button>
                     <span t-if="state.partyDirty" class="text-warning small ms-1">● Unsaved</span>
                     <button class="btn btn-sm btn-primary ms-auto" t-on-click="() => this.saveParty()">Save</button>
                 </div>
@@ -627,9 +642,9 @@
                                 </div>
                                 <div>
                                     <label class="form-label mb-1 small">Foot Notes</label>
-                                    <textarea class="form-control form-control-sm" rows="4"
-                                              t-att-value="state.doc.footnotes || ''"
-                                              t-on-input="ev => this.setDocField('footnotes', ev.target.value)"></textarea>
+                                    <textarea class="form-control form-control-sm bg-light" rows="4"
+                                              readonly="1"
+                                              t-att-value="state.doc.footnotes || this.docTypeFootnotes[state.doc.doc_type_code] || ''"></textarea>
                                 </div>
                             </div>
 
@@ -673,6 +688,9 @@
                                        t-on-change="ev => this.state.showClosedItems = ev.target.checked"/>
                                 <label class="form-check-label small" for="itemClosedChk">Item Closed</label>
                             </div>
+                            <button class="btn btn-sm btn-outline-success ms-1 text-nowrap"
+                                    t-att-disabled="!state.doc"
+                                    t-on-click="() => this.addItem()">+ Add Item</button>
                         </div>
 
                         <!-- Items table (filtered) -->
@@ -691,23 +709,67 @@
                                             <th class="text-end">U.Price</th>
                                             <th class="text-end">Amount</th>
                                             <th>Description</th>
+                                            <th style="width:28px;"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <t t-foreach="filteredItems" t-as="item" t-key="item.id">
-                                            <tr t-att-class="state.selectedItemId === item.id ? 'table-primary' : ''"
-                                                style="cursor:pointer;" t-on-click="() => this.selectItem(item)">
-                                                <td><t t-esc="item.design"/></td>
-                                                <td><t t-esc="item.purity"/></td>
-                                                <td class="text-end"><t t-esc="item.qty"/></td>
-                                                <td><t t-esc="item.currency_id ? item.currency_id[1] : ''"/></td>
-                                                <td class="text-end"><t t-esc="this.fmt(item.unit_price)"/></td>
-                                                <td class="text-end"><t t-esc="this.fmt(item.amount)"/></td>
-                                                <td><t t-esc="item.description"/></td>
+                                        <t t-foreach="filteredItems" t-as="item" t-key="item._key">
+                                            <tr t-att-class="state.selectedItemId === item._key ? 'table-primary' : ''"
+                                                t-on-click="() => this.selectItem(item)">
+                                                <td style="min-width:130px;">
+                                                    <input type="text" class="form-control form-control-sm border-0 p-0 bg-transparent"
+                                                           style="min-width:120px;"
+                                                           t-att-value="item.design || ''"
+                                                           t-on-change="ev => this.setItemField(item, 'design', ev.target.value.toUpperCase())"/>
+                                                </td>
+                                                <td style="width:60px;">
+                                                    <input type="text" class="form-control form-control-sm border-0 p-0 bg-transparent"
+                                                           style="width:55px;"
+                                                           t-att-value="item.purity || ''"
+                                                           t-on-change="ev => this.setItemField(item, 'purity', ev.target.value)"/>
+                                                </td>
+                                                <td style="width:55px;">
+                                                    <input type="number" class="form-control form-control-sm border-0 p-0 bg-transparent text-end"
+                                                           style="width:50px;" min="0" step="1"
+                                                           t-att-value="item.qty"
+                                                           t-on-change="ev => this.setItemField(item, 'qty', +ev.target.value || 0)"/>
+                                                </td>
+                                                <td style="width:72px;">
+                                                    <select class="form-select form-select-sm border-0 p-0 bg-transparent"
+                                                            style="width:68px;"
+                                                            t-on-change="ev => this.setItemField(item, 'currency_id', +ev.target.value || false)">
+                                                        <option value="">—</option>
+                                                        <t t-foreach="currencies" t-as="c" t-key="c.id">
+                                                            <option t-att-value="c.id"
+                                                                    t-att-selected="(item.currency_id ? (Array.isArray(item.currency_id) ? item.currency_id[0] : item.currency_id) : 0) === c.id">
+                                                                <t t-esc="c.symbol or c.name"/>
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td style="width:80px;">
+                                                    <input type="number" class="form-control form-control-sm border-0 p-0 bg-transparent text-end"
+                                                           style="width:76px;" min="0" step="0.01"
+                                                           t-att-value="item.unit_price"
+                                                           t-on-change="ev => this.setItemField(item, 'unit_price', +ev.target.value || 0)"/>
+                                                </td>
+                                                <td class="text-end align-middle" style="width:72px;">
+                                                    <t t-esc="this.fmt(item.amount)"/>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm border-0 p-0 bg-transparent"
+                                                           t-att-value="item.description || ''"
+                                                           t-on-change="ev => this.setItemField(item, 'description', ev.target.value)"/>
+                                                </td>
+                                                <td class="text-center align-middle" style="width:28px;">
+                                                    <button class="btn btn-sm text-danger p-0 lh-1"
+                                                            style="font-size:14px;"
+                                                            t-on-click.stop="() => this.removeItem(item)">×</button>
+                                                </td>
                                             </tr>
                                         </t>
                                         <t t-if="!filteredItems.length">
-                                            <tr><td colspan="7" class="text-center text-muted py-3">No items.</td></tr>
+                                            <tr><td colspan="8" class="text-center text-muted py-3">No items.</td></tr>
                                         </t>
                                     </tbody>
                                 </t>
@@ -722,12 +784,20 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <t t-foreach="filteredItems" t-as="item" t-key="item.id">
-                                            <tr t-att-class="state.selectedItemId === item.id ? 'table-primary' : ''"
-                                                style="cursor:pointer;" t-on-click="() => this.selectItem(item)">
-                                                <td><t t-esc="item.design"/></td>
-                                                <td><t t-esc="item.item_group"/></td>
-                                                <td><t t-esc="item.special_instruction"/></td>
+                                        <t t-foreach="filteredItems" t-as="item" t-key="item._key">
+                                            <tr t-att-class="state.selectedItemId === item._key ? 'table-primary' : ''"
+                                                t-on-click="() => this.selectItem(item)">
+                                                <td class="align-middle small"><t t-esc="item.design"/></td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm border-0 p-0 bg-transparent"
+                                                           t-att-value="item.item_group || ''"
+                                                           t-on-change="ev => this.setItemField(item, 'item_group', ev.target.value)"/>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm border-0 p-0 bg-transparent"
+                                                           t-att-value="item.special_instruction || ''"
+                                                           t-on-change="ev => this.setItemField(item, 'special_instruction', ev.target.value)"/>
+                                                </td>
                                             </tr>
                                         </t>
                                         <t t-if="!filteredItems.length">
@@ -746,12 +816,16 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <t t-foreach="filteredItems" t-as="item" t-key="item.id">
-                                            <tr t-att-class="state.selectedItemId === item.id ? 'table-primary' : ''"
-                                                style="cursor:pointer;" t-on-click="() => this.selectItem(item)">
-                                                <td><t t-esc="item.design"/></td>
-                                                <td class="text-end"><t t-esc="item.qty"/></td>
-                                                <td><t t-esc="item.size_remarks"/></td>
+                                        <t t-foreach="filteredItems" t-as="item" t-key="item._key">
+                                            <tr t-att-class="state.selectedItemId === item._key ? 'table-primary' : ''"
+                                                t-on-click="() => this.selectItem(item)">
+                                                <td class="align-middle small"><t t-esc="item.design"/></td>
+                                                <td class="text-end align-middle"><t t-esc="item.qty"/></td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm border-0 p-0 bg-transparent"
+                                                           t-att-value="item.size_remarks || ''"
+                                                           t-on-change="ev => this.setItemField(item, 'size_remarks', ev.target.value)"/>
+                                                </td>
                                             </tr>
                                         </t>
                                         <t t-if="!filteredItems.length">
@@ -775,17 +849,39 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <t t-foreach="filteredItems" t-as="item" t-key="item.id">
-                                            <tr t-att-class="state.selectedItemId === item.id ? 'table-primary' : ''"
-                                                style="cursor:pointer;" t-on-click="() => this.selectItem(item)">
-                                                <td><t t-esc="item.design"/></td>
-                                                <td><t t-esc="item.purity"/></td>
-                                                <td class="text-end"><t t-esc="item.qty"/></td>
-                                                <td class="text-end"><t t-esc="this.fmt(item.diamond_weight, 4)"/></td>
-                                                <td class="text-end"><t t-esc="this.fmt(item.stone_weight, 4)"/></td>
-                                                <td class="text-end"><t t-esc="this.fmt(item.diverse_weight, 4)"/></td>
-                                                <td class="text-end"><t t-esc="this.fmt(item.metal_weight, 4)"/></td>
-                                                <td class="text-end"><t t-esc="this.fmt((item.diamond_weight||0)+(item.stone_weight||0)+(item.diverse_weight||0)+(item.metal_weight||0), 4)"/></td>
+                                        <t t-foreach="filteredItems" t-as="item" t-key="item._key">
+                                            <tr t-att-class="state.selectedItemId === item._key ? 'table-primary' : ''"
+                                                t-on-click="() => this.selectItem(item)">
+                                                <td class="align-middle small"><t t-esc="item.design"/></td>
+                                                <td class="align-middle small"><t t-esc="item.purity"/></td>
+                                                <td class="text-end align-middle"><t t-esc="item.qty"/></td>
+                                                <td style="width:80px;">
+                                                    <input type="number" class="form-control form-control-sm border-0 p-0 bg-transparent text-end"
+                                                           step="0.0001" min="0"
+                                                           t-att-value="item.diamond_weight"
+                                                           t-on-change="ev => this.setItemField(item, 'diamond_weight', +ev.target.value || 0)"/>
+                                                </td>
+                                                <td style="width:80px;">
+                                                    <input type="number" class="form-control form-control-sm border-0 p-0 bg-transparent text-end"
+                                                           step="0.0001" min="0"
+                                                           t-att-value="item.stone_weight"
+                                                           t-on-change="ev => this.setItemField(item, 'stone_weight', +ev.target.value || 0)"/>
+                                                </td>
+                                                <td style="width:80px;">
+                                                    <input type="number" class="form-control form-control-sm border-0 p-0 bg-transparent text-end"
+                                                           step="0.0001" min="0"
+                                                           t-att-value="item.diverse_weight"
+                                                           t-on-change="ev => this.setItemField(item, 'diverse_weight', +ev.target.value || 0)"/>
+                                                </td>
+                                                <td style="width:80px;">
+                                                    <input type="number" class="form-control form-control-sm border-0 p-0 bg-transparent text-end"
+                                                           step="0.0001" min="0"
+                                                           t-att-value="item.metal_weight"
+                                                           t-on-change="ev => this.setItemField(item, 'metal_weight', +ev.target.value || 0)"/>
+                                                </td>
+                                                <td class="text-end align-middle">
+                                                    <t t-esc="this.fmt((item.diamond_weight||0)+(item.stone_weight||0)+(item.diverse_weight||0)+(item.metal_weight||0), 4)"/>
+                                                </td>
                                             </tr>
                                         </t>
                                         <t t-if="!filteredItems.length">
@@ -809,8 +905,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <t t-foreach="filteredItems" t-as="item" t-key="item.id">
-                                            <tr t-att-class="state.selectedItemId === item.id ? 'table-primary' : ''"
+                                        <t t-foreach="filteredItems" t-as="item" t-key="item._key">
+                                            <tr t-att-class="state.selectedItemId === item._key ? 'table-primary' : ''"
                                                 style="cursor:pointer;" t-on-click="() => this.selectItem(item)">
                                                 <td><t t-esc="item.design"/></td>
                                                 <td><t t-esc="item.purity"/></td>
@@ -975,7 +1071,10 @@
                                 </div>
                                 <div class="col-7">Add Freight and Insurance US$</div>
                                 <div class="col-5 text-end">
-                                    <t t-esc="this.fmt(state.doc ? state.doc.freight_insurance : 0)"/>
+                                    <input type="number" class="form-control form-control-sm text-end py-0"
+                                           style="height:22px; font-size:12px;"
+                                           t-att-value="state.doc ? state.doc.freight_insurance || 0 : 0"
+                                           t-on-change="ev => this.setDocField('freight_insurance', +ev.target.value || 0)"/>
                                 </div>
                                 <div class="col-7">Total C.I.F. PARIS US$</div>
                                 <div class="col-5 text-end">
@@ -1009,8 +1108,15 @@
                                     <t t-esc="this.fmt(state.doc ? state.doc.total_cost : 0)"/>
                                 </div>
                                 <div class="col-6">
-                                    <select class="form-select form-select-sm" style="font-size:11px; padding:1px 4px; height:22px;">
-                                        <option>US$</option>
+                                    <select class="form-select form-select-sm" style="font-size:11px; padding:1px 4px; height:22px;"
+                                            t-on-change="ev => this.setDocField('currency_id', +ev.target.value || false)">
+                                        <option value="">—</option>
+                                        <t t-foreach="this.currencies" t-as="c" t-key="c.id">
+                                            <option t-att-value="c.id"
+                                                    t-att-selected="(state.doc and state.doc.currency_id ? (Array.isArray(state.doc.currency_id) ? state.doc.currency_id[0] : state.doc.currency_id) : 0) === c.id">
+                                                <t t-esc="c.symbol or c.name"/>
+                                            </option>
+                                        </t>
                                     </select>
                                 </div>
                                 <div class="col-6"></div>
@@ -1053,6 +1159,35 @@
             </t>
 
         </div>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <!--  DELETE PARTY CONFIRM                             -->
+        <!-- ══════════════════════════════════════════════════ -->
+        <t t-if="state.showDeleteConfirm">
+            <div class="modal d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-sm modal-dialog-centered">
+                    <div class="modal-content shadow">
+                        <div class="modal-header py-2 bg-danger text-white">
+                            <h6 class="modal-title">Delete Party</h6>
+                        </div>
+                        <div class="modal-body py-3">
+                            <p class="mb-2 fw-semibold">
+                                <t t-esc="state.party.name"/> (id: <t t-esc="state.party.id"/>)
+                            </p>
+                            <p t-if="state.deletePartyDocCount > 0" class="text-danger small mb-2">
+                                This party has <strong><t t-esc="state.deletePartyDocCount"/></strong>
+                                linked SIS document(s). They will lose their customer reference.
+                            </p>
+                            <p class="text-muted small mb-0">This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer py-2 gap-2">
+                            <button class="btn btn-sm btn-secondary" t-on-click="() => this.cancelDeleteConfirm()">Cancel</button>
+                            <button class="btn btn-sm btn-danger"    t-on-click="() => this.confirmDeleteParty()">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
 
         <!-- ══════════════════════════════════════════════════ -->
         <!--  PRINT MODAL                                       -->
