@@ -104,7 +104,7 @@ class SisDocument(models.Model):
                 )
                 row = self.env.cr.fetchone()
                 last = row[0] if row and row[0] else None
-                seq = (int(last[-3:]) + 1) if last else 1
+                seq = (int(last[len(prefix):]) + 1) if last else 1
                 vals['name'] = f'{prefix}{seq:03d}'
                 vals['doc_type_code'] = doc_type
         return super().create(vals_list)

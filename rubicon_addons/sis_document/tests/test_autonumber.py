@@ -11,16 +11,6 @@ class TestSisDocumentAutoNumber(common.TransactionCase):
         self.yy = str(odoo_fields.Date.today().year)[2:]
         self.today = odoo_fields.Date.today()
 
-        self.partner_ema = self.env['res.partner'].create({
-            'name': 'EMA Test',
-            'is_company': True,
-            'sis_code': 'EMA',
-        })
-        self.partner_abc = self.env['res.partner'].create({
-            'name': 'ABC Test',
-            'is_company': True,
-            'sis_code': 'ABC',
-        })
 
     def _make_doc(self, name_prefix):
         return self.Doc.create({
