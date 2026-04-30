@@ -27,6 +27,7 @@ export class SisWorkspace extends Component {
         this.metals = [];
         this.companyCurrencyId = null;
         this._allModelMetals = [];
+        this._deletedItemIds = [];
 
         this.state = useState({
             page: "lobby", // lobby | parties | document
@@ -528,7 +529,8 @@ export class SisWorkspace extends Component {
             }
         }
 
-        this.state.items = items;
+        this.state.items = items.map(r => ({ ...r, _key: r.id, _dirty: false }));
+        this._deletedItemIds = [];
         this.state.docDirty = false;
         this.state.docTab = "general";
         this.state.docItemsTab = "general";
@@ -556,6 +558,12 @@ export class SisWorkspace extends Component {
             if (p) {
                 if (!this._m2oId(this.state.doc.pay_term_id) && p.sis_pay_term_id)
                     this.state.doc.pay_term_id = p.sis_pay_term_id;
+            }
+            if (!this.state.doc.id) {
+                const partner = this.sisPartners.find(pt => pt.id === id);
+                if (partner?.sis_code) {
+                    this.state.doc.name = `${this.state.docType}-${partner.sis_code}-`;
+                }
             }
         }
         await this._fetchPartyAddress(id);
@@ -654,6 +662,7 @@ export class SisWorkspace extends Component {
         const d = this.state.doc;
         const vals = {
             name: d.name,
+            doc_type_code: d.doc_type_code || this.state.docType || "",
             closed: d.closed || false,
             canceled: d.canceled || false,
             margin_id: this._m2oId(d.margin_id),
@@ -678,11 +687,13 @@ export class SisWorkspace extends Component {
         };
         if (d.id) {
             await this.orm.write("sis.document", [d.id], vals);
+            await this.saveItems(d.id);
             this.state.docDirty = false;
             this.notification.add("Document saved.", { type: "success" });
             await this._loadDocument(d.id);
         } else {
             const newId = (await this.orm.create("sis.document", [vals]))[0];
+            await this.saveItems(newId);
             this.state.docDirty = false;
             this.notification.add("Document created.", { type: "success" });
             await this._reloadDocuments();
@@ -721,10 +732,94 @@ export class SisWorkspace extends Component {
         });
     }
 
+    // ITEMS CRUD
+
+    addItem() {
+        const seq = this.state.items.length
+            ? Math.max(...this.state.items.map(i => i.sequence || 0)) + 10
+            : 10;
+        const item = {
+            id: null, _key: -Date.now(), _dirty: true,
+            sequence: seq,
+            design: '', purity: '', description: '',
+            qty: 1, qty_shipped: 0, qty_balance: 0,
+            currency_id: false,
+            unit_price: 0, amount: 0,
+            unit_cost: 0, cost: 0, profit: 0, profit_pct: 0,
+            item_group: '', special_instruction: '', size_remarks: '',
+            diamond_weight: 0, stone_weight: 0, diverse_weight: 0, metal_weight: 0,
+        };
+        this.state.items.push(item);
+        this.state.selectedItemId = item._key;
+        this.state.docItemsTab = 'general';
+        this.state.docDirty = true;
+    }
+
+    removeItem(item) {
+        if (item.id) this._deletedItemIds.push(item.id);
+        const idx = this.state.items.findIndex(i => i._key === item._key);
+        if (idx >= 0) this.state.items.splice(idx, 1);
+        if (this.state.selectedItemId === item._key) this.state.selectedItemId = null;
+        this.state.docDirty = true;
+    }
+
+    setItemField(item, field, value) {
+        this.state.selectedItemId = item._key;
+        item[field] = value;
+        item._dirty = true;
+        if (field === 'qty' || field === 'unit_price') {
+            item.amount = (parseFloat(item.qty) || 0) * (parseFloat(item.unit_price) || 0);
+        }
+        this.state.docDirty = true;
+    }
+
+    _itemVals(item, docId) {
+        return {
+            document_id: docId,
+            sequence: item.sequence || 0,
+            design: item.design || '',
+            purity: item.purity || '',
+            description: item.description || '',
+            qty: parseFloat(item.qty) || 0,
+            qty_shipped: parseFloat(item.qty_shipped) || 0,
+            qty_balance: parseFloat(item.qty_balance) || 0,
+            currency_id: this._m2oId(item.currency_id) || false,
+            unit_price: parseFloat(item.unit_price) || 0,
+            amount: parseFloat(item.amount) || 0,
+            unit_cost: parseFloat(item.unit_cost) || 0,
+            item_group: item.item_group || '',
+            special_instruction: item.special_instruction || '',
+            size_remarks: item.size_remarks || '',
+            diamond_weight: parseFloat(item.diamond_weight) || 0,
+            stone_weight: parseFloat(item.stone_weight) || 0,
+            diverse_weight: parseFloat(item.diverse_weight) || 0,
+            metal_weight: parseFloat(item.metal_weight) || 0,
+        };
+    }
+
+    async saveItems(docId) {
+        if (this._deletedItemIds.length) {
+            await this.orm.unlink('sis.document.item', this._deletedItemIds);
+            this._deletedItemIds = [];
+        }
+        for (const item of this.state.items) {
+            if (!item._dirty) continue;
+            const vals = this._itemVals(item, docId);
+            if (item.id) {
+                await this.orm.write('sis.document.item', [item.id], vals);
+            } else {
+                const [newId] = await this.orm.create('sis.document.item', [vals]);
+                item.id = newId;
+                item._key = newId;
+            }
+            item._dirty = false;
+        }
+    }
+
     // PRICES (PDP suggestion)
 
     selectItem(item) {
-        this.state.selectedItemId = item.id;
+        this.state.selectedItemId = item._key;
     }
 
     async openPricesModal() {
@@ -746,7 +841,7 @@ export class SisWorkspace extends Component {
         this.state.showPricesModal = true;
 
         // Pre-fill model from selected item's design code
-        const item = this.state.items.find(it => it.id === this.state.selectedItemId);
+        const item = this.state.items.find(it => it._key === this.state.selectedItemId);
         const modelCode = item?.design ? item.design.split('-')[0] : '';
         this.state.pricesModelCode = modelCode;
         if (modelCode) await this._loadPricesDesigns(modelCode, item?.design || null);
@@ -915,7 +1010,7 @@ export class SisWorkspace extends Component {
     }
 
     async acceptPdpPrice() {
-        const item = this.state.items.find(it => it.id === this.state.selectedItemId);
+        const item = this.state.items.find(it => it._key === this.state.selectedItemId);
         if (!item?.id || !this.state.pricesResult) return;
         const unitPrice = this.adjustedPrice / (this.state.pricesQty || 1);
         const unitCost = this.adjustedCost / (this.state.pricesQty || 1);
