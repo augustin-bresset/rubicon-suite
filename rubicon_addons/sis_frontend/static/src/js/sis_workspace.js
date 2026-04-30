@@ -565,6 +565,8 @@ export class SisWorkspace extends Component {
                     this.state.doc.name = `${this.state.docType}-${partner.sis_code}-`;
                 }
             }
+        } else if (!this.state.doc.id) {
+            this.state.doc.name = `${this.state.docType}-`;
         }
         await this._fetchPartyAddress(id);
     }
