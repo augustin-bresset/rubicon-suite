@@ -10,3 +10,6 @@ def pre_init_hook(env):
 
     # Remove all PDP margin records
     env['pdp.margin'].search([]).unlink()
+
+    # Remove currency settings (UNIQUE constraint on currency_id — clear before reload)
+    env['pdp.currency.setting'].search([]).unlink()
