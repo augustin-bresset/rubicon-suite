@@ -185,6 +185,7 @@
         <field name="category_id" ref="demo_cat_rng"/>
         <field name="metal">W</field>
         <field name="active" eval="True"/>
+        <field name="in_collection" eval="True"/>
         <field name="stone_composition_id" ref="demo_comp_r01_dts"/>
     </record>
 
@@ -203,6 +204,7 @@
         <field name="category_id" ref="demo_cat_ear"/>
         <field name="metal">W</field>
         <field name="active" eval="True"/>
+        <field name="in_collection" eval="True"/>
         <field name="stone_composition_id" ref="demo_comp_e01_dts"/>
     </record>
 
@@ -220,6 +222,7 @@
         <field name="category_id" ref="demo_cat_pnd"/>
         <field name="metal">W</field>
         <field name="active" eval="True"/>
+        <field name="in_collection" eval="True"/>
         <field name="stone_composition_id" ref="demo_comp_p01_dts"/>
     </record>
 
@@ -678,7 +681,7 @@
          ========================================================= -->
 
     <record id="demo_doc_quot" model="sis.document">
-        <field name="name">DEMO-Q-001</field>
+        <field name="name">SQ-SJC-26001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SQ"/>
         <field name="doc_type_code">SQ</field>
         <field name="party_id" ref="demo_party_bkk"/>
@@ -687,10 +690,11 @@
         <field name="date_created">2026-01-15</field>
         <field name="date_due">2026-02-15</field>
         <field name="notes">Demo quotation for review</field>
+        <field name="footnotes">All prices are in USD. Valid for 30 days from the date of issue. Prices are subject to change based on metal market fluctuations.</field>
     </record>
 
     <record id="demo_doc_quot2" model="sis.document">
-        <field name="name">DEMO-Q-002</field>
+        <field name="name">SQ-TFJ-26001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SQ"/>
         <field name="doc_type_code">SQ</field>
         <field name="party_id" ref="demo_party_tky"/>
@@ -701,7 +705,7 @@
     </record>
 
     <record id="demo_doc_quot3" model="sis.document">
-        <field name="name">DEMO-Q-003</field>
+        <field name="name">SQ-MDO-26001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SQ"/>
         <field name="doc_type_code">SQ</field>
         <field name="party_id" ref="demo_party_par"/>
@@ -712,7 +716,7 @@
     </record>
 
     <record id="demo_doc_order" model="sis.document">
-        <field name="name">DEMO-O-001</field>
+        <field name="name">SO-SJC-26001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SO"/>
         <field name="doc_type_code">SO</field>
         <field name="party_id" ref="demo_party_bkk"/>
@@ -720,10 +724,11 @@
         <field name="currency_id" ref="base.USD"/>
         <field name="date_created">2026-02-01</field>
         <field name="date_due">2026-03-01</field>
+        <field name="footnotes">Delivery timeline: 8–10 weeks after order confirmation and receipt of deposit. Rush orders available on request.</field>
     </record>
 
     <record id="demo_doc_order2" model="sis.document">
-        <field name="name">DEMO-O-002</field>
+        <field name="name">SO-GPT-26001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SO"/>
         <field name="doc_type_code">SO</field>
         <field name="party_id" ref="demo_party_dxb"/>
@@ -734,7 +739,7 @@
     </record>
 
     <record id="demo_doc_order3" model="sis.document">
-        <field name="name">DEMO-O-003</field>
+        <field name="name">SO-MGI-26001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SO"/>
         <field name="doc_type_code">SO</field>
         <field name="party_id" ref="demo_party_nyc"/>
@@ -745,17 +750,18 @@
     </record>
 
     <record id="demo_doc_invoice" model="sis.document">
-        <field name="name">DEMO-I-001</field>
+        <field name="name">SI-TFJ-26001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SI"/>
         <field name="doc_type_code">SI</field>
         <field name="party_id" ref="demo_party_tky"/>
         <field name="margin_id" ref="demo_margin_wholesale"/>
         <field name="currency_id" ref="base.USD"/>
         <field name="date_created">2026-02-15</field>
+        <field name="footnotes">Payment due within 60 days of invoice date. Late payments are subject to a 1.5% monthly fee. Bank wire details available on request.</field>
     </record>
 
     <record id="demo_doc_invoice2" model="sis.document">
-        <field name="name">DEMO-I-002</field>
+        <field name="name">SI-SJC-26001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SI"/>
         <field name="doc_type_code">SI</field>
         <field name="party_id" ref="demo_party_bkk"/>
@@ -765,7 +771,7 @@
     </record>
 
     <record id="demo_doc_invoice3" model="sis.document">
-        <field name="name">DEMO-I-003</field>
+        <field name="name">SI-MDO-26001</field>
         <field name="doc_type_id" ref="sis_document.sis_doctype_SI"/>
         <field name="doc_type_code">SI</field>
         <field name="party_id" ref="demo_party_par"/>
@@ -997,6 +1003,28 @@
         <field name="metal_code">W</field>
         <field name="purity">18K</field>
         <field name="sequence">2</field>
+    </record>
+
+    <!-- =========================================================
+         21. PDP CURRENCY SETTINGS
+         ========================================================= -->
+
+    <record id="demo_currency_usd" model="pdp.currency.setting">
+        <field name="currency_id" ref="base.USD"/>
+        <field name="rate">1.0</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="demo_currency_eur" model="pdp.currency.setting">
+        <field name="currency_id" ref="base.EUR"/>
+        <field name="rate">0.92</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <record id="demo_currency_hkd" model="pdp.currency.setting">
+        <field name="currency_id" ref="base.HKD"/>
+        <field name="rate">7.82</field>
+        <field name="sequence">3</field>
     </record>
 
 </odoo>
