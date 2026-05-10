@@ -1150,9 +1150,12 @@
                     <button class="btn btn-sm btn-outline-secondary"
                             t-att-disabled="!state.doc or !state.doc.id"
                             t-on-click="() => this.openPricesModal()">Prices</button>
-                    <button class="btn btn-sm btn-outline-secondary" disabled="1">Copy</button>
-                    <button class="btn btn-sm btn-outline-secondary" disabled="1">Customers</button>
-                    <button class="btn btn-sm btn-outline-secondary" disabled="1">Metal Req.</button>
+                    <button class="btn btn-sm btn-outline-secondary"
+                            t-on-click="() => this.openCopyModal()">Copy</button>
+                    <button class="btn btn-sm btn-outline-secondary"
+                            t-on-click="() => this.openCustomers()">Customers</button>
+                    <button class="btn btn-sm btn-outline-secondary"
+                            t-on-click="() => this.openMetalReqModal()">Metal Req.</button>
                     <span t-if="state.docDirty" class="text-warning small ms-2">● Unsaved</span>
                 </div>
 
@@ -1485,6 +1488,270 @@
                                     t-on-click="() => this.acceptPdpPrice()">Accept Price</button>
                         </div>
 
+                    </div>
+                </div>
+            </div>
+        </t>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <!--  METAL REQ. MODAL                                 -->
+        <!-- ══════════════════════════════════════════════════ -->
+        <t t-if="state.showMetalReqModal">
+            <div class="modal d-block" tabindex="-1" style="background:rgba(0,0,0,0.4);">
+                <div class="modal-dialog modal-sm modal-dialog-centered">
+                    <div class="modal-content shadow">
+                        <div class="modal-header py-2">
+                            <h6 class="modal-title">Metal Weight Summary</h6>
+                            <button type="button" class="btn-close" t-on-click="() => this.closeMetalReqModal()"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <table class="table table-sm table-bordered mb-0" style="font-size:13px;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Gold Type</th>
+                                        <th class="text-end">Grams</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.metalReq" t-as="mr" t-key="mr.goldType">
+                                        <tr>
+                                            <td><t t-esc="mr.goldType"/></td>
+                                            <td class="text-end"><t t-esc="this.fmt(mr.grams, 4)"/></td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="!state.metalReq.length">
+                                        <tr><td colspan="2" class="text-center text-muted py-3">No metal data.</td></tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer py-2">
+                            <button class="btn btn-sm btn-secondary" t-on-click="() => this.closeMetalReqModal()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <!--  COPY BROWSER MODAL                               -->
+        <!-- ══════════════════════════════════════════════════ -->
+        <t t-if="state.showCopyModal">
+            <div class="modal d-block" tabindex="-1" style="background:rgba(0,0,0,0.4);">
+                <div class="modal-dialog modal-dialog-centered modal-xl">
+                    <div class="modal-content shadow">
+                        <div class="modal-header py-2">
+                            <h6 class="modal-title">Document Browser</h6>
+                            <button type="button" class="btn-close" t-on-click="() => this.closeCopyModal()"></button>
+                        </div>
+                        <div class="modal-body p-3" style="font-size:12px;">
+
+                            <!-- Filters row -->
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <label class="small fw-semibold text-nowrap mb-0">Doc. Type</label>
+                                <select class="form-select form-select-sm" style="width:200px;"
+                                        t-on-change="ev => this.onCopyDocTypeChange(ev)">
+                                    <t t-foreach="this.docTypes" t-as="dt" t-key="dt.code">
+                                        <option t-att-value="dt.code"
+                                                t-att-selected="state.copyDocTypeFilter === dt.code">
+                                            <t t-esc="dt.name or dt.code"/>
+                                        </option>
+                                    </t>
+                                </select>
+                                <label class="small fw-semibold text-nowrap mb-0 ms-2">Doc.</label>
+                                <input class="form-control form-control-sm" style="width:140px;"
+                                       placeholder="Filter…"
+                                       t-att-value="state.copyDocNameFilter"
+                                       t-on-input="ev => this.state.copyDocNameFilter = ev.target.value"
+                                       t-on-change="ev => this.onCopyDocNameFilterChange(ev)"/>
+                            </div>
+
+                            <!-- Document table -->
+                            <div class="d-flex gap-2">
+                                <div class="table-responsive mb-2 flex-grow-1" style="max-height:160px; overflow-y:auto; border:1px solid #dee2e6;">
+                                    <table class="table table-sm table-bordered table-hover mb-0" style="font-size:12px;">
+                                        <thead class="table-light sticky-top">
+                                            <tr>
+                                                <th>Document</th>
+                                                <th>Cust. PO.</th>
+                                                <th>Company</th>
+                                                <th>Created</th>
+                                                <th>Due</th>
+                                                <th class="text-end">Qty</th>
+                                                <th class="text-end">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.copyDocs" t-as="cd" t-key="cd.id">
+                                                <tr t-att-class="state.copyDocId === cd.id ? 'table-primary' : ''"
+                                                    style="cursor:pointer;"
+                                                    t-on-click="() => this.onCopyDocSelect(cd.id)">
+                                                    <td><t t-esc="cd.name"/></td>
+                                                    <td><t t-esc="cd.customer_po or ''"/></td>
+                                                    <td><t t-esc="cd.party_id ? cd.party_id[1] : ''"/></td>
+                                                    <td><t t-esc="cd.date_created or ''"/></td>
+                                                    <td><t t-esc="cd.date_due or ''"/></td>
+                                                    <td class="text-end"><t t-esc="cd.total_qty or 0"/></td>
+                                                    <td class="text-end"><t t-esc="this.fmt(cd.total_fob or 0)"/></td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="!state.copyDocs.length">
+                                                <tr><td colspan="7" class="text-center text-muted py-3">No documents found.</td></tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Visible Documents radio panel -->
+                                <div class="border rounded px-3 py-2 mb-2" style="min-width:130px;">
+                                    <div class="small fw-semibold mb-2">Visible Documents</div>
+                                    <div class="form-check mb-1">
+                                        <input type="radio" class="form-check-input" name="copyVis" value="all"
+                                               t-att-checked="state.copyVisibility === 'all'"
+                                               t-on-change="() => this.onCopyVisibilityChange('all')"/>
+                                        <label class="form-check-label small">All</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input type="radio" class="form-check-input" name="copyVis" value="open"
+                                               t-att-checked="state.copyVisibility === 'open'"
+                                               t-on-change="() => this.onCopyVisibilityChange('open')"/>
+                                        <label class="form-check-label small">Open only</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input type="radio" class="form-check-input" name="copyVis" value="closed"
+                                               t-att-checked="state.copyVisibility === 'closed'"
+                                               t-on-change="() => this.onCopyVisibilityChange('closed')"/>
+                                        <label class="form-check-label small">Closed only</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="radio" class="form-check-input" name="copyVis" value="canceled"
+                                               t-att-checked="state.copyVisibility === 'canceled'"
+                                               t-on-change="() => this.onCopyVisibilityChange('canceled')"/>
+                                        <label class="form-check-label small">Canceled only</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Serial filter + Items table -->
+                            <div class="d-flex gap-2">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <label class="small fw-semibold mb-0">Serial</label>
+                                        <input class="form-control form-control-sm" style="width:140px;"
+                                               placeholder="Filter design…"
+                                               t-att-value="state.copySerialFilter"
+                                               t-on-input="ev => this.state.copySerialFilter = ev.target.value"/>
+                                        <span class="text-muted small">
+                                            (<t t-esc="this.filteredCopyItems.length"/> items)
+                                        </span>
+                                    </div>
+                                    <div class="table-responsive" style="max-height:160px; overflow-y:auto; border:1px solid #dee2e6;">
+                                        <table class="table table-sm table-bordered table-hover mb-0" style="font-size:12px;">
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th style="width:24px;"></th>
+                                                    <th>Ref. Document</th>
+                                                    <th>Design</th>
+                                                    <th>Purity</th>
+                                                    <th class="text-end">Qty</th>
+                                                    <th class="text-end">Qty Ship.</th>
+                                                    <th class="text-end">QtyBal</th>
+                                                    <th class="text-end">UPrice</th>
+                                                    <th class="text-end">Amount</th>
+                                                    <th>ItemGroup</th>
+                                                    <th>SizeRemarks</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="this.filteredCopyItems" t-as="ci" t-key="ci.id">
+                                                    <tr t-att-class="state.copySelectedItemIds.includes(ci.id) ? 'table-primary' : ''"
+                                                        style="cursor:pointer;"
+                                                        t-on-click="() => this.toggleCopyItem(ci.id)">
+                                                        <td class="text-center align-middle">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                   t-att-checked="state.copySelectedItemIds.includes(ci.id)"
+                                                                   t-on-click.stop="() => this.toggleCopyItem(ci.id)"/>
+                                                        </td>
+                                                        <td class="small text-muted text-nowrap"><t t-esc="this.copySelectedDocName"/></td>
+                                                        <td><t t-esc="ci.design"/></td>
+                                                        <td><t t-esc="ci.purity"/></td>
+                                                        <td class="text-end"><t t-esc="ci.qty"/></td>
+                                                        <td class="text-end"><t t-esc="ci.qty_shipped or 0"/></td>
+                                                        <td class="text-end"><t t-esc="ci.qty_balance or 0"/></td>
+                                                        <td class="text-end"><t t-esc="this.fmt(ci.unit_price)"/></td>
+                                                        <td class="text-end"><t t-esc="this.fmt(ci.amount)"/></td>
+                                                        <td><t t-esc="ci.item_group or ''"/></td>
+                                                        <td><t t-esc="ci.size_remarks or ''"/></td>
+                                                    </tr>
+                                                </t>
+                                                <t t-if="!this.filteredCopyItems.length">
+                                                    <tr><td colspan="11" class="text-center text-muted py-3">No items. Select a document above.</td></tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <!-- Visible Items radio panel -->
+                                <div class="border rounded px-3 py-2" style="min-width:130px; align-self:start;">
+                                    <div class="small fw-semibold mb-2">Visible Items</div>
+                                    <div class="form-check mb-1">
+                                        <input type="radio" class="form-check-input" name="copyItemVis" value="all"
+                                               t-att-checked="state.copyItemsVisibility === 'all'"
+                                               t-on-change="() => this.onCopyItemsVisibilityChange('all')"/>
+                                        <label class="form-check-label small">All</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input type="radio" class="form-check-input" name="copyItemVis" value="open"
+                                               t-att-checked="state.copyItemsVisibility === 'open'"
+                                               t-on-change="() => this.onCopyItemsVisibilityChange('open')"/>
+                                        <label class="form-check-label small">Open only</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input type="radio" class="form-check-input" name="copyItemVis" value="closed"
+                                               t-att-checked="state.copyItemsVisibility === 'closed'"
+                                               t-on-change="() => this.onCopyItemsVisibilityChange('closed')"/>
+                                        <label class="form-check-label small">Closed only</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="radio" class="form-check-input" name="copyItemVis" value="canceled"
+                                               t-att-checked="state.copyItemsVisibility === 'canceled'"
+                                               t-on-change="() => this.onCopyItemsVisibilityChange('canceled')"/>
+                                        <label class="form-check-label small">Canceled only</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Copy Items section -->
+                            <div class="d-flex align-items-center gap-3 flex-wrap border-top pt-2 mt-2">
+                                <span class="small fw-semibold">Copy Items:</span>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        t-att-disabled="!state.copySelectedItemIds.length"
+                                        t-on-click="() => this.doCopyItems(false)">Selected</button>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        t-att-disabled="!state.copyDocId"
+                                        t-on-click="() => this.doCopyItems(true)">All</button>
+                                <div class="form-check mb-0 ms-2">
+                                    <input type="checkbox" class="form-check-input" id="copyCopyDocName"
+                                           t-att-checked="state.copyCopyDocName"
+                                           t-on-change="ev => this.state.copyCopyDocName = ev.target.checked"/>
+                                    <label class="form-check-label small" for="copyCopyDocName">Copy Doc Name</label>
+                                </div>
+                                <div class="form-check mb-0">
+                                    <input type="checkbox" class="form-check-input" id="copyReCalcCost"
+                                           t-att-checked="state.copyReCalcCost"
+                                           t-on-change="ev => this.state.copyReCalcCost = ev.target.checked"/>
+                                    <label class="form-check-label small" for="copyReCalcCost">ReCalc Cost</label>
+                                </div>
+                                <t t-if="this.copySourceDiffParty">
+                                    <span class="text-warning small ms-auto">
+                                        Warning: This document does not belong to the selected customer.
+                                    </span>
+                                </t>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer py-2">
+                            <button class="btn btn-sm btn-secondary" t-on-click="() => this.closeCopyModal()">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>

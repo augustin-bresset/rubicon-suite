@@ -26,9 +26,12 @@ export class SisWorkspace extends Component {
         this.sisPartners = [];
         this.currencies = [];
         this.metals = [];
+        this.metalNameById = {};
         this.companyCurrencyId = null;
         this._allModelMetals = [];
         this._deletedItemIds = [];
+        this._fromPage = null;
+        this.docTypes = [];
 
         this.state = useState({
             page: "lobby", // lobby | parties | document
@@ -95,6 +98,24 @@ export class SisWorkspace extends Component {
 
             // ── Customer address (derived, read-only display) ──
             docPartyAddress: '',
+
+            // ── Metal Req. modal ───────────────────────────────
+            showMetalReqModal: false,
+            metalReq: [],
+
+            // ── Copy modal ─────────────────────────────────────
+            showCopyModal: false,
+            copyDocTypeFilter: 'SQ',
+            copyDocNameFilter: '',
+            copyVisibility: 'open',
+            copyItemsVisibility: 'all',
+            copyDocs: [],
+            copyDocId: null,
+            copyItems: [],
+            copySerialFilter: '',
+            copySelectedItemIds: [],
+            copyCopyDocName: true,
+            copyReCalcCost: true,
         });
 
         onWillStart(async () => {
@@ -122,8 +143,8 @@ export class SisWorkspace extends Component {
                 ),
                 this.orm.searchRead("res.currency", [["active", "=", true]], ["id", "name", "symbol"], { order: "name" }),
                 this.orm.searchRead("res.company", [], ["currency_id"], { limit: 1 }),
-                this.orm.searchRead("pdp.metal", [], ["id", "code"], { order: "code" }),
-                this.orm.searchRead("sis.doc.type", [], ["code", "footer_note"]),
+                this.orm.searchRead("pdp.metal", [], ["id", "code", "name"], { order: "code" }),
+                this.orm.searchRead("sis.doc.type", [], ["code", "name", "footer_note"]),
             ]);
         this.margins = margins;
         this.payTerms = payTerms;
@@ -136,9 +157,11 @@ export class SisWorkspace extends Component {
         this.currencies = currencies;
         this.companyCurrencyId = companies[0]?.currency_id?.[0] || false;
         this.metals = metals;
+        this.metalNameById = Object.fromEntries(metals.map(m => [m.id, m.name || m.code]));
         this.docTypeFootnotes = Object.fromEntries(
             docTypes.filter(dt => dt.footer_note).map(dt => [dt.code, dt.footer_note])
         );
+        this.docTypes = docTypes.map(dt => ({ code: dt.code, name: dt.name || dt.code }));
     }
 
     // LOBBY NAVIGATION
@@ -163,7 +186,18 @@ export class SisWorkspace extends Component {
     }
 
     goLobby() {
-        this.state.page = "lobby";
+        if (this._fromPage === 'document') {
+            this._fromPage = null;
+            this.state.page = 'document';
+        } else {
+            this._fromPage = null;
+            this.state.page = 'lobby';
+        }
+    }
+
+    async openCustomers() {
+        this._fromPage = 'document';
+        await this.goParties();
     }
 
     // PARTIES
@@ -494,6 +528,230 @@ export class SisWorkspace extends Component {
         } catch (e) {
             this.notification.add(`Delete failed: ${e.message || e}`, { type: 'danger' });
         }
+    }
+
+    // METAL REQ.
+
+    async openMetalReqModal() {
+        if (!this.state.doc?.id) return;
+        const items = this.state.items.filter(it => it.design && parseFloat(it.qty) > 0);
+        if (!items.length) {
+            this.notification.add("No items with design codes in this document.", { type: "warning" });
+            return;
+        }
+        const designCodes = [...new Set(items.map(it => it.design))];
+        const products = await this.orm.searchRead(
+            'pdp.product', [['code', 'in', designCodes]], ['id', 'code', 'model_id'], {}
+        );
+        const productByCode = Object.fromEntries(products.map(p => [p.code, p]));
+        const modelIds = [...new Set(
+            products.map(p => Array.isArray(p.model_id) ? p.model_id[0] : p.model_id).filter(Boolean)
+        )];
+        if (!modelIds.length) {
+            this.notification.add("No PDP model data found for items in this document.", { type: "warning" });
+            return;
+        }
+        const metalRecs = await this.orm.searchRead(
+            'pdp.product.model.metal', [['model_id', 'in', modelIds]],
+            ['model_id', 'metal_id', 'purity_id', 'weight'], {}
+        );
+        const metalByModel = {};
+        for (const m of metalRecs) {
+            const modelId = Array.isArray(m.model_id) ? m.model_id[0] : m.model_id;
+            const metalCode = Array.isArray(m.metal_id) ? m.metal_id[1] : '';
+            const purityCode = Array.isArray(m.purity_id) ? m.purity_id[1] : '';
+            const goldType = `${metalCode}-${purityCode}`;
+            if (!metalByModel[modelId]) metalByModel[modelId] = [];
+            metalByModel[modelId].push({ goldType, weight: m.weight });
+        }
+        const totals = {};
+        for (const item of items) {
+            const product = productByCode[item.design];
+            if (!product) continue;
+            const modelId = Array.isArray(product.model_id) ? product.model_id[0] : product.model_id;
+            const qty = parseFloat(item.qty) || 0;
+            for (const { goldType, weight } of (metalByModel[modelId] || [])) {
+                totals[goldType] = (totals[goldType] || 0) + weight * qty;
+            }
+        }
+        this.state.metalReq = Object.entries(totals)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([goldType, grams]) => ({ goldType, grams }));
+        this.state.showMetalReqModal = true;
+    }
+
+    closeMetalReqModal() {
+        this.state.showMetalReqModal = false;
+    }
+
+    // COPY BROWSER
+
+    async openCopyModal() {
+        const defaultType = this.state.docType === 'SO' ? 'SQ' : this.state.docType;
+        this.state.copyDocTypeFilter = defaultType;
+        this.state.copyDocNameFilter = '';
+        this.state.copyVisibility = 'all';
+        this.state.copyItemsVisibility = 'all';
+        this.state.copyDocs = [];
+        this.state.copyDocId = null;
+        this.state.copyItems = [];
+        this.state.copySerialFilter = '';
+        this.state.copySelectedItemIds = [];
+        this.state.copyCopyDocName = true;
+        this.state.copyReCalcCost = true;
+        this.state.showCopyModal = true;
+        await this._loadCopyDocs();
+    }
+
+    closeCopyModal() {
+        this.state.showCopyModal = false;
+    }
+
+    async _loadCopyDocs() {
+        const domain = [['doc_type_code', '=', this.state.copyDocTypeFilter]];
+        if (this.state.copyVisibility === 'open') {
+            domain.push(['closed', '=', false], ['canceled', '=', false]);
+        } else if (this.state.copyVisibility === 'closed') {
+            domain.push(['closed', '=', true]);
+        } else if (this.state.copyVisibility === 'canceled') {
+            domain.push(['canceled', '=', true]);
+        }
+        if (this.state.copyDocNameFilter) {
+            domain.push(['name', 'ilike', this.state.copyDocNameFilter]);
+        }
+        this.state.copyDocs = await this.orm.searchRead(
+            'sis.document', domain,
+            ['id', 'name', 'party_id', 'customer_po', 'date_created', 'date_due',
+             'total_qty', 'total_fob'],
+            { order: 'name', limit: 200 }
+        );
+        this.state.copyDocId = null;
+        this.state.copyItems = [];
+        this.state.copySelectedItemIds = [];
+    }
+
+    async onCopyDocTypeChange(ev) {
+        this.state.copyDocTypeFilter = ev.target.value;
+        await this._loadCopyDocs();
+    }
+
+    async onCopyDocNameFilterChange(ev) {
+        this.state.copyDocNameFilter = ev.target.value;
+        await this._loadCopyDocs();
+    }
+
+    async onCopyVisibilityChange(visibility) {
+        this.state.copyVisibility = visibility;
+        await this._loadCopyDocs();
+    }
+
+    async onCopyDocSelect(docId) {
+        this.state.copyDocId = docId;
+        this.state.copySelectedItemIds = [];
+        this.state.copyItems = await this.orm.searchRead(
+            'sis.document.item', [['document_id', '=', docId]],
+            ['id', 'sequence', 'design', 'purity', 'qty', 'qty_shipped', 'qty_balance',
+             'unit_price', 'amount', 'description', 'unit_cost',
+             'item_group', 'special_instruction', 'size_remarks',
+             'diamond_weight', 'stone_weight', 'diverse_weight', 'metal_weight'],
+            { order: 'sequence' }
+        );
+    }
+
+    onCopyItemsVisibilityChange(visibility) {
+        this.state.copyItemsVisibility = visibility;
+    }
+
+    get copySelectedDocName() {
+        if (!this.state.copyDocId) return '';
+        return this.state.copyDocs.find(d => d.id === this.state.copyDocId)?.name || '';
+    }
+
+    toggleCopyItem(itemId) {
+        const idx = this.state.copySelectedItemIds.indexOf(itemId);
+        if (idx >= 0) {
+            this.state.copySelectedItemIds.splice(idx, 1);
+        } else {
+            this.state.copySelectedItemIds.push(itemId);
+        }
+    }
+
+    get filteredCopyItems() {
+        let items = this.state.copyItems;
+        const f = (this.state.copySerialFilter || '').toLowerCase();
+        if (f) items = items.filter(it => (it.design || '').toLowerCase().includes(f));
+        const vis = this.state.copyItemsVisibility;
+        if (vis === 'open') {
+            items = items.filter(it => (parseFloat(it.qty_balance) || 0) > 0 || (parseFloat(it.qty_shipped) || 0) === 0);
+        } else if (vis === 'closed') {
+            items = items.filter(it => (parseFloat(it.qty_balance) || 0) === 0 && (parseFloat(it.qty_shipped) || 0) > 0);
+        }
+        return items;
+    }
+
+    get copySourceDiffParty() {
+        if (!this.state.copyDocId || !this.state.doc) return false;
+        const sourceDoc = this.state.copyDocs.find(d => d.id === this.state.copyDocId);
+        if (!sourceDoc) return false;
+        const sourcePartyId = Array.isArray(sourceDoc.party_id) ? sourceDoc.party_id[0] : sourceDoc.party_id;
+        const currentPartyId = this._m2oId(this.state.doc.party_id);
+        return sourcePartyId && currentPartyId && sourcePartyId !== currentPartyId;
+    }
+
+    async doCopyItems(all) {
+        if (!this.state.doc) {
+            this.notification.add("Please open or create a document first.", { type: "warning" });
+            return;
+        }
+        const pool = this.filteredCopyItems;
+        const itemsToCopy = all
+            ? pool
+            : pool.filter(it => this.state.copySelectedItemIds.includes(it.id));
+        if (!itemsToCopy.length) {
+            this.notification.add("No items to copy.", { type: "warning" });
+            return;
+        }
+        const maxSeq = this.state.items.length
+            ? Math.max(...this.state.items.map(i => i.sequence || 0))
+            : 0;
+        let seq = maxSeq + 10;
+        const now = Date.now();
+        for (const src of itemsToCopy) {
+            this.state.items.push({
+                id: null, _key: -(now + seq), _dirty: true,
+                sequence: seq,
+                design: src.design || '',
+                purity: src.purity || '',
+                description: src.description || '',
+                qty: src.qty,
+                qty_shipped: 0, qty_balance: 0,
+                currency_id: false,
+                unit_price: src.unit_price,
+                amount: src.amount,
+                unit_cost: this.state.copyReCalcCost ? 0 : src.unit_cost,
+                cost: 0, profit: 0, profit_pct: 0,
+                item_group: src.item_group || '',
+                special_instruction: src.special_instruction || '',
+                size_remarks: src.size_remarks || '',
+                diamond_weight: src.diamond_weight || 0,
+                stone_weight: src.stone_weight || 0,
+                diverse_weight: src.diverse_weight || 0,
+                metal_weight: src.metal_weight || 0,
+            });
+            seq += 10;
+        }
+        if (this.state.copyCopyDocName) {
+            const sourceDoc = this.state.copyDocs.find(d => d.id === this.state.copyDocId);
+            if (sourceDoc) {
+                const ref = `[Copied from ${sourceDoc.name}]`;
+                this.state.doc.notes = this.state.doc.notes
+                    ? this.state.doc.notes + '\n' + ref
+                    : ref;
+            }
+        }
+        this.state.docDirty = true;
+        this.state.showCopyModal = false;
+        this.notification.add(`${itemsToCopy.length} item(s) copied. Save to apply.`, { type: "success" });
     }
 
     // DOCUMENTS
@@ -988,17 +1246,30 @@ export class SisWorkspace extends Component {
         if (stones.length) {
             const stoneIds = stones.map(s => Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id).filter(Boolean);
             const stoneRecs = stoneIds.length
-                ? await this.orm.read('pdp.stone', stoneIds, ['id', 'weight'])
+                ? await this.orm.read('pdp.stone', stoneIds, ['id', 'weight', 'type_id'])
                 : [];
+            const typeIds = [...new Set(
+                stoneRecs.map(r => Array.isArray(r.type_id) ? r.type_id[0] : null).filter(Boolean)
+            )];
+            const typeRecs = typeIds.length
+                ? await this.orm.read('pdp.stone.type', typeIds, ['id', 'name'])
+                : [];
+            const typeNameById = Object.fromEntries(typeRecs.map(r => [r.id, r.name]));
             const weightById = Object.fromEntries(stoneRecs.map(r => [r.id, r.weight]));
-            this.state.pricesStones = stones.map(s => {
+            const stoneTypeIdById = Object.fromEntries(
+                stoneRecs.map(r => [r.id, Array.isArray(r.type_id) ? r.type_id[0] : null])
+            );
+            // Aggregate by stone type name
+            const byType = {};
+            for (const s of stones) {
                 const sid = Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id;
-                return {
-                    stone: Array.isArray(s.stone_id) ? s.stone_id[1] : '',
-                    pcs: s.pieces,
-                    weight: s.weight || weightById[sid] || 0,
-                };
-            });
+                const typeId = stoneTypeIdById[sid];
+                const typeName = (typeId && typeNameById[typeId]) || (Array.isArray(s.stone_id) ? s.stone_id[1] : '');
+                if (!byType[typeName]) byType[typeName] = { stone: typeName, pcs: 0, weight: 0 };
+                byType[typeName].pcs += (s.pieces || 0);
+                byType[typeName].weight += s.weight || weightById[sid] || 0;
+            }
+            this.state.pricesStones = Object.values(byType);
         } else {
             this.state.pricesStones = [];
         }
@@ -1033,10 +1304,13 @@ export class SisWorkspace extends Component {
         const filtered = (this._allModelMetals || []).filter(m =>
             !purityId || (m.purity_id && m.purity_id[0] === purityId)
         );
-        this.state.pricesMetal = filtered.map(m => ({
-            metal: Array.isArray(m.metal_id) ? m.metal_id[1] : '',
-            weight: m.weight,
-        }));
+        this.state.pricesMetal = filtered.map(m => {
+            const id = Array.isArray(m.metal_id) ? m.metal_id[0] : null;
+            return {
+                metal: (id && this.metalNameById[id]) || (Array.isArray(m.metal_id) ? m.metal_id[1] : ''),
+                weight: m.weight,
+            };
+        });
     }
 
     get adjustedPrice() {

@@ -564,7 +564,7 @@ By clicking on `Copy` at the bottom of the page, the window `Document Browser` w
 
 ![orderscopy](./images/sis_orders_copy.png)
 
-Here you can filter by `Doc. Types` and `Doc.` with a drop-down menu and by their boolean attribute : `Open`, `Closed`, `Canceled` with tick boxes.
+Here you can filter by `Doc. Types` and `Doc.` with a drop-down menu and with a little menue on the right of the table called `Visible Documents`, their boolean attribute : `All`, `Open only`, `Closed only`, `Canceled only` with tick boxes.
 
 Then on the table bellow it, the documents appeared with those fields :
 * Document (`DOCTYPE-AAA-XXXXX`)
@@ -575,7 +575,15 @@ Then on the table bellow it, the documents appeared with those fields :
 * Qty
 * Amount
 
-Then a second table where you can filter with the field `Serial` contains those fields :
+In our case we have multiple documents and we can see only 5 documents (the other can be see by scrolling down).
+With Doc.Type : Sales Quotation and Visible Documents : Open only there is :
+* SQ -,,RUBICON CO.,LTD.,13/10/20XX, 12/11/20XX,0,0
+* SQ-A&J-05001,,A&J INTERNATIONAL,03/05/20XX,02/06/20XX,,
+* SQ-A&J-05002,,A&J INTERNATIONAL,03/05/20XX,02/06/20XX,,
+* SQ-A&J-05003,,A&J INTERNATIONAL,23/12/20XX,,132,37781
+* SQ-A&J-07001,,A&J INTERNATIONAL,13/02/20XX,15/03/20XX,6,1946
+
+Then a second table with the same box that filter the document with same kind of little menue on the right of the table called `Visible Items` with tick boxes : `All`, `Open only`, `Closed only`, `Canceled only` and a line where you can filter with the field `Serial` contains those fields :
 * Ref. Document
 * Design
 * Purity
@@ -588,9 +596,18 @@ Then a second table where you can filter with the field `Serial` contains those 
 * SizeRemarks
 * ...
 
+In our case, the table is empty.
+
+Then at the bottom, below the `Visible Items` choosing you have an other menue `Copy Items` with two buttons `Selected` and `All`.
+And two tick boxes `Copy Doc Name` and `ReCalc Cost`. 
+
 This window allows you to copy `Item` from other `Document` of any kind.
 Because you are on `Sales Orders` it look at `Sales Quotation` by default. 
 
+There is a Warning at the bottom of the page : 
+```
+Warning: This document does not belongs to the selected customer
+```
 
 #### Customers
 By clicking on `Customers` at the bottom of the page, the window `Maintain Parties` will be displayed.
