@@ -971,4 +971,9 @@
         <field name="sequence">3</field>
     </record>
 
+<record id="base.user_admin" model="res.users">                                                                                           
+    <field name="name">Dev Admin</field>                 
+    <field name="image_1920" type="base64" file="rubicon_demo/static/img/emeu.jpeg"/>
+</record>    
+
 </odoo>
