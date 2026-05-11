@@ -37,9 +37,9 @@ No new data model is created. The module extends `sis.document` with two compute
 | Field | Type | store | Purpose |
 |---|---|---|---|
 | `analysis_year` | Integer | True | Year extracted from `date_created`; stored for pivot performance |
-| `analysis_country_group_ids` | M2M → `res.country.group` | False | Regions via `party_id.country_id.country_group_ids`; enables Region group-by |
+| `analysis_country_group_ids` | M2M → `res.country.group` | True | Regions via `party_id.country_id.country_group_ids`; stored so Odoo can group-by |
 
-`analysis_year` recomputes on module upgrade (no data migration needed).
+`analysis_year` and `analysis_country_group_ids` recompute on module upgrade (no data migration needed). Both are stored so Odoo can index and group-by them in the pivot view — non-stored fields cannot be used as group-by targets in Odoo views.
 
 Existing measures on `sis.document` used as-is: `total_amount`, `total_qty`, `total_cost`, `total_profit`.
 
