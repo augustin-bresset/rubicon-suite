@@ -4,6 +4,7 @@
     'license': 'LGPL-3',
     'category': 'Product',
     'author': 'Rubicon',
+    'summary': "PDP Margin module to manage margin types and addons",
     'depends': ['rubicon_env', 'pdp_stone', 'pdp_metal', 'pdp_labor', 'pdp_labor'],           
     'data': [
         # Security

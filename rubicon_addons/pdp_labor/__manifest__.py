@@ -2,6 +2,7 @@
     'name': 'PDP Labor',
     'version': '1.0',
     'license': 'LGPL-3',
+    "summary": "PDP Labor module to manage labor types and addons",
     'depends': ['rubicon_env', 'pdp_product', 'pdp_base'],
     'data': [
         './security/ir.model.access.csv',

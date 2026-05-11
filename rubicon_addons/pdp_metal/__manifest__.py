@@ -4,6 +4,7 @@
     'license': 'LGPL-3',
     'category': 'Product',
     'author': 'Rubicon',
+    'summary': "PDP Metal module to manage metal types and addons",
     'depends': ['rubicon_env'],           
     'data': [
         # Security
