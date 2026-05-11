@@ -8,14 +8,12 @@ class SisDocumentAnalysis(models.Model):
         string='Year',
         compute='_compute_analysis_year',
         store=True,
-        depends=['date_created'],
     )
     analysis_region_id = fields.Many2one(
         'res.country.group',
         string='Region',
         compute='_compute_analysis_region',
         store=True,
-        depends=['party_id.country_id.country_group_ids'],
     )
     analysis_country_id = fields.Many2one(
         'res.country',
@@ -32,8 +30,4 @@ class SisDocumentAnalysis(models.Model):
     @api.depends('party_id.country_id.country_group_ids')
     def _compute_analysis_region(self):
         for rec in self:
-            groups = rec.party_id.country_id.country_group_ids
-            if groups:
-                rec.analysis_region_id = groups[0]
-            else:
-                rec.analysis_region_id = False
+            rec.analysis_region_id = rec.party_id.country_id.country_group_ids[:1]
