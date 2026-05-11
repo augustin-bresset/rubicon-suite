@@ -3,6 +3,7 @@
     'version': '0.1.0',
     'license': 'LGPL-3',
     'depends': [
+        'rubicon_env',
         'pdp_frontend',
         'sis_frontend',
         'rubicon_uom',

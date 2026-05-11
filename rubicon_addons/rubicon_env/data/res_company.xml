@@ -1,5 +1,5 @@
 <odoo>
-    <record id="main_company" model="res.company">
+    <record id="base.main_company" model="res.company">
         <field name="name">Rubicon</field>
         <field name="currency_id" ref="base.USD"/>
         <field name="country_id" ref="base.th"/>
