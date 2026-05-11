@@ -1,3 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <menuitem
+        id="menu_sis_analysis"
+        name="Analysis"
+        parent="sis_document.menu_sis_document_root"
+        action="action_sis_analysis"
+        sequence="50"/>
+
 </odoo>
