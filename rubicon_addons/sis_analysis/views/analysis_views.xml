@@ -1,3 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <!-- ============ Search ============ -->
+    <record id="view_sis_analysis_search" model="ir.ui.view">
+        <field name="name">sis.document.analysis.search</field>
+        <field name="model">sis.document</field>
+        <field name="arch" type="xml">
+            <search string="Analysis">
+                <field name="party_id"/>
+                <field name="trade_fair_id"/>
+                <separator/>
+                <filter string="Sales" name="filter_sales"
+                    domain="[('doc_type_id.category', '=', 'S')]"/>
+                <filter string="Workshop" name="filter_workshop"
+                    domain="[('doc_type_id.category', '=', 'W')]"/>
+                <separator/>
+                <filter string="This Year" name="this_year"
+                    domain="[('date_created', '&gt;=', (context_today() + relativedelta(day=1, month=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Last Year" name="last_year"
+                    domain="[('date_created', '&gt;=', (context_today() + relativedelta(years=-1, day=1, month=1)).strftime('%Y-%m-%d')),
+                             ('date_created', '&lt;', (context_today() + relativedelta(day=1, month=1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Customer" name="group_party"
+                        context="{'group_by': 'party_id'}"/>
+                    <filter string="Region" name="group_region"
+                        context="{'group_by': 'analysis_region_id'}"/>
+                    <filter string="Country" name="group_country"
+                        context="{'group_by': 'analysis_country_id'}"/>
+                    <filter string="Fair" name="group_fair"
+                        context="{'group_by': 'trade_fair_id'}"/>
+                    <filter string="Year" name="group_year"
+                        context="{'group_by': 'analysis_year'}"/>
+                    <filter string="Quarter" name="group_quarter"
+                        context="{'group_by': 'date_created:quarter'}"/>
+                    <filter string="Month" name="group_month"
+                        context="{'group_by': 'date_created:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ Pivot ============ -->
+    <record id="view_sis_analysis_pivot" model="ir.ui.view">
+        <field name="name">sis.document.analysis.pivot</field>
+        <field name="model">sis.document</field>
+        <field name="arch" type="xml">
+            <pivot string="Sales Analysis">
+                <field name="party_id" type="row"/>
+                <field name="analysis_year" type="col"/>
+                <field name="total_amount" type="measure"/>
+                <field name="total_qty" type="measure"/>
+                <field name="total_cost" type="measure"/>
+                <field name="total_profit" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ============ Graph ============ -->
+    <record id="view_sis_analysis_graph" model="ir.ui.view">
+        <field name="name">sis.document.analysis.graph</field>
+        <field name="model">sis.document</field>
+        <field name="arch" type="xml">
+            <graph string="Sales Trend" type="bar">
+                <field name="analysis_year" type="row"/>
+                <field name="total_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ============ List ============ -->
+    <record id="view_sis_analysis_list" model="ir.ui.view">
+        <field name="name">sis.document.analysis.list</field>
+        <field name="model">sis.document</field>
+        <field name="arch" type="xml">
+            <list string="Documents">
+                <field name="name"/>
+                <field name="party_id"/>
+                <field name="analysis_year"/>
+                <field name="analysis_region_id"/>
+                <field name="analysis_country_id"/>
+                <field name="trade_fair_id"/>
+                <field name="total_qty"/>
+                <field name="total_amount"/>
+                <field name="total_cost"/>
+                <field name="total_profit"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ Action ============ -->
+    <record id="action_sis_analysis" model="ir.actions.act_window">
+        <field name="name">Analysis</field>
+        <field name="res_model">sis.document</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_sis_analysis_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_sis_analysis_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_sis_analysis_graph')}),
+            (0, 0, {'view_mode': 'list',  'view_id': ref('view_sis_analysis_list')})]"/>
+        <field name="context">{'search_default_filter_sales': 1}</field>
+    </record>
+
 </odoo>
