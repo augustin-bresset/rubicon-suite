@@ -1,202 +1,164 @@
 # Rubicon Demo — Deployment Guide
 
-The demo runs as a separate Docker stack on port `8070`, using the database `rubicondemo`.
-It shares the same codebase as production — no code is duplicated.
+The demo runs as a separate Docker stack on port `8070`, fronté par un tunnel Cloudflare (HTTPS).
+Il partage le même codebase que la production — aucun code n'est dupliqué.
 
 ---
 
-## Local demo (quick test on your dev machine)
+## Prérequis
+
+- Ubuntu 22.04 / Debian 12 VPS — minimum 2 vCPU, 2 GB RAM, 20 GB disk
+- Docker + Docker Compose installés
+- Accès SSH au serveur
+
+---
+
+## Première installation
+
+### 1. Cloner le repo sur le serveur
 
 ```bash
-# 1. Create credentials file (never committed)
+git clone <repo-url> ~/rubicon-suite
+cd ~/rubicon-suite
+```
+
+### 2. Créer le fichier de credentials
+
+```bash
 cp .env.demo.example .env.demo
-# Edit .env.demo — change DEMO_DB_PASS to anything
+nano .env.demo
+```
 
-# 2. Set the Odoo master password in odoo_conf/odoo_demo.conf
-#    Replace CHANGE_ME_BEFORE_GOING_ONLINE with a real value:
-python3 -c "import secrets; print(secrets.token_hex(24))"
-# Paste the output into admin_passwd = ...
+Remplir les deux variables :
+```bash
+POSTGRES_PASSWORD=<mot_de_passe_db_fort>
+DEMO_ADMIN_PASSWORD=<mot_de_passe_admin_odoo>
+```
 
-# 3. Start the stack
+Pour générer des mots de passe forts :
+```bash
+python3 -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(24)))"
+```
+
+### 3. Démarrer le stack et initialiser la base
+
+```bash
 docker compose -f docker-compose.demo.yml up -d
-
-# 4. Fix filestore permissions (required after every fresh volume creation)
-#    Docker creates volumes as root; Odoo needs to own them.
 sleep 8
 docker compose -f docker-compose.demo.yml exec --user root odoo_demo \
   chown -R odoo:odoo /var/lib/odoo
 
-# 5. Initialize the database (first time only — takes ~3 minutes)
-docker compose -f docker-compose.demo.yml exec odoo_demo odoo \
+# Initialisation (~3-5 min)
+docker compose -f docker-compose.demo.yml run --rm odoo_demo odoo \
   -d rubicondemo \
   -i rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom \
   --stop-after-init
 
-# 6. Restart Odoo in normal mode
 docker compose -f docker-compose.demo.yml up -d
-
-# 6. Open http://localhost:8070
-#    Login: admin / admin
 ```
-If failing with a filestore error (e.g. FileNotFoundError), it means the filestore volume is in a bad state. To reset it, run:
 
-```sh
+> Note : utiliser `run --rm` (pas `exec`) pour l'initialisation — évite le conflit de port si Odoo tourne déjà.
+
+### 4. Sécuriser le serveur
+
+```bash
+# Génère admin_passwd, active list_db=False, proxy_mode=True
+./ops/harden_demo.sh --restart
+
+# Applique le mot de passe admin Odoo (depuis DEMO_ADMIN_PASSWORD dans .env.demo)
+./ops/start_demo.sh
+
+# Installe cloudflared comme service systemd → tunnel HTTPS *.trycloudflare.com
+./ops/setup_cloudflare_tunnel.sh --service
+
+# Ferme le port 8070 à l'extérieur (UFW)
+./ops/setup_firewall.sh demo
+```
+
+**Si hébergé sur Oracle Cloud :** fermer aussi le port 8070 dans la console cloud :
+Oracle Cloud Console → Networking → Virtual Cloud Networks → ton VCN → Security Lists → supprimer la règle ingress TCP 8070.
+
+### 5. Récupérer l'URL HTTPS
+
+```bash
+sudo journalctl -u cloudflared-tunnel -n 50 --no-pager | grep -i trycloudflare
+```
+
+L'URL `https://xxx.trycloudflare.com` est ce que tu envoies aux clients.
+**Attention :** elle change à chaque redémarrage du service cloudflared.
+
+---
+
+## Mise à jour du code
+
+```bash
+cd ~/rubicon-suite
+git pull
+docker compose -f docker-compose.demo.yml stop odoo_demo
+docker compose -f docker-compose.demo.yml run --rm odoo_demo odoo \
+  -d rubicondemo \
+  -u rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom \
+  --stop-after-init
+docker compose -f docker-compose.demo.yml up -d
+```
+
+---
+
+## Reset complet (repartir de zéro)
+
+À faire après un changement de données demo ou si la DB est dans un état incohérent.
+
+```bash
+git pull
 docker compose -f docker-compose.demo.yml down -v
 docker compose -f docker-compose.demo.yml up -d
-                                       
-docker compose -f docker-compose.demo.yml exec --user root odoo_demo chown -R odoo:odoo /var/lib/odoo
+sleep 8
+docker compose -f docker-compose.demo.yml exec --user root odoo_demo \
+  chown -R odoo:odoo /var/lib/odoo
 
-docker compose -f docker-compose.demo.yml exec odoo_demo odoo \
-  -d rubicondemo -i rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom \
-  --stop-after-init
-
-docker compose -f docker-compose.demo.yml up -d  
-
-```
-
-## VPS deployment (publicly accessible demo)
-
-### Requirements
-
-- Ubuntu 22.04 / Debian 12 VPS — minimum 2 vCPU, 2 GB RAM, 20 GB disk
-- Docker + Docker Compose installed
-- A domain name pointing to the VPS (or just use the IP)
-
-### Steps
-
-#### 1. Copy files to the server
-
-```bash
-# From your dev machine — copy only what the demo needs
-rsync -av \
-  rubicon_addons/ \
-  external_addons/ \
-  data/pictures/ \
-  odoo_conf/odoo_demo.conf \
-  docker-compose.demo.yml \
-  .env.demo.example \
-  user@YOUR_VPS_IP:/opt/rubicon-demo/
-```
-
-> Or clone the full repo and use the same directory layout.
-
-#### 2. Set credentials on the server
-
-```bash
-ssh user@YOUR_VPS_IP
-cd /opt/rubicon-demo
-
-# Create .env.demo with strong passwords
-cp .env.demo.example .env.demo
-nano .env.demo
-# Set DEMO_DB_PASS to a strong random value
-
-# Set Odoo master password
-python3 -c "import secrets; print(secrets.token_hex(24))"
-nano odoo_conf/odoo_demo.conf
-# Replace CHANGE_ME_BEFORE_GOING_ONLINE with the generated value
-```
-
-#### 3. Initialize and start
-
-```bash
-docker compose -f docker-compose.demo.yml up -d
-docker compose -f docker-compose.demo.yml exec odoo_demo odoo \
+docker compose -f docker-compose.demo.yml run --rm odoo_demo odoo \
   -d rubicondemo \
   -i rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom \
   --stop-after-init
-docker compose -f docker-compose.demo.yml up -d
-
-```
-
-The demo is now running on `http://YOUR_VPS_IP:8070`.
-* http://89.168.58.215:8070
-
-#### 4. HTTPS with nginx + Let's Encrypt (required for a real public demo)
-
-```bash
-apt install nginx certbot python3-certbot-nginx
-
-# Get SSL certificate (replace demo.yourdomain.com)
-certbot --nginx -d demo.yourdomain.com
-```
-
-Create `/etc/nginx/sites-available/rubicon-demo`:
-
-```nginx
-server {
-    listen 80;
-    server_name demo.yourdomain.com;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name demo.yourdomain.com;
-
-    ssl_certificate     /etc/letsencrypt/live/demo.yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/demo.yourdomain.com/privkey.pem;
-
-    # Required for Odoo long-polling
-    proxy_read_timeout 720s;
-    proxy_connect_timeout 720s;
-    proxy_send_timeout 720s;
-
-    location / {
-        proxy_pass http://127.0.0.1:8070;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-```bash
-ln -s /etc/nginx/sites-available/rubicon-demo /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
-```
-
-The demo is now at `https://demo.yourdomain.com`.
-
----
-
-## Securing the admin account
-
-After the first login (`admin` / `admin`), immediately:
-
-1. Go to **Settings → Users → Administrator**
-2. Change the password to something strong
-3. Optionally rename the user to a less obvious name
-
-If the demo is public, consider restricting who can log in:
-- Create a read-only demo user (`demo` / `demo123`) with limited menus
-- Or add HTTP Basic Auth at the nginx level so only invited people can access it
-
----
-
-## Resetting the demo data
-
-To wipe and re-initialize the database from scratch:
-
-```bash
-# Drop and recreate
-docker compose -f docker-compose.demo.yml exec odoo_demo odoo \
-  -d rubicondemo --drop-db 2>/dev/null; \
-docker compose -f docker-compose.demo.yml exec odoo_demo odoo \
-  -d rubicondemo \
-  -i rubicon_demo,pdp_frontend,sis_frontend,rubicon_uom,metal_price \
-  --stop-after-init
 
 docker compose -f docker-compose.demo.yml up -d
+./ops/start_demo.sh
 ```
 
 ---
 
-## Stopping the demo
+## Vérifications
 
 ```bash
+# Odoo répond en local
+curl -s http://localhost:8070/web/health
+
+# Port 8070 inaccessible depuis l'extérieur (doit timeout)
+curl --max-time 5 http://<IP_VPS>:8070/web/health
+
+# URL Cloudflare
+sudo journalctl -u cloudflared-tunnel -n 50 --no-pager | grep -i trycloudflare
+```
+
+---
+
+## En cas d'erreur filestore
+
+Si l'initialisation échoue avec `FileNotFoundError` sur le filestore :
+
+```bash
+docker compose -f docker-compose.demo.yml down -v
+# Reprendre depuis l'étape "Démarrer le stack" ci-dessus
+```
+
+---
+
+## Arrêter la démo
+
+```bash
+# Arrêt simple (données conservées)
 docker compose -f docker-compose.demo.yml down
-# To also delete all data:
+
+# Arrêt + suppression de toutes les données
 docker compose -f docker-compose.demo.yml down -v
 ```
