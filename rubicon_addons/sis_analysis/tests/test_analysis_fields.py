@@ -9,7 +9,7 @@ class TestSisDocumentAnalysisFields(common.TransactionCase):
         super().setUp()
         self.region = self.env['res.country.group'].create({'name': '_Test Region'})
         self.country = self.env['res.country'].search([('code', '=', 'FR')], limit=1)
-        self.country.country_group_ids = [(4, self.region.id)]
+        self.country.country_group_ids = [(5, 0), (4, self.region.id)]
         self.partner = self.env['res.partner'].create({
             'name': '_Test Partner',
             'country_id': self.country.id,
