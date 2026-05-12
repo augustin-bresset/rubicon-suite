@@ -9,6 +9,11 @@
         'views/analysis_views.xml',
         'views/menus.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'sis_analysis/static/src/scss/pivot_sticky.scss',
+        ],
+    },
     'installable': True,
     'application': False,
 }

@@ -6,7 +6,6 @@
     "license": "LGPL-3",
     "depends": [
         "base",
-        "pdp_api",
     ],
     "data": [
         "security/ir.model.access.csv",

@@ -1,0 +1,48 @@
+// Sticky column headers and row labels for the Analysis pivot.
+// Keeps year headers visible when scrolling down, customer names when scrolling right.
+//
+// Header structure (with 4 measures and N year columns):
+//   Row 1: [corner, rowspan=2] | [1980, colspan=4] | [2004, colspan=4] | ...
+//   Row 2:                     | [Amt|Qty|Cost|Pft] | [Amt|Qty|Cost|Pft] | ...
+//
+// "thead tr > th:first-child" would wrongly sticky the first measure cell of row 2
+// (the "Total Amount" cell of the 1980 column), keeping it visible at the left edge.
+// Must target the corner cell only: thead tr:first-child > th:first-child.
+
+.o_pivot_view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .o_pivot {
+        thead {
+            position: sticky;
+            top: 0;
+
+            th {
+                position: relative;
+                z-index: 1;
+                background-color: #f8f9fa;
+            }
+
+            th.bg-view {
+                background-color: #fff;
+            }
+
+            // Corner cell only (first row, first column)
+            tr:first-child > th:first-child {
+                position: sticky;
+                left: 0;
+                z-index: 3;
+            }
+        }
+
+        // Row labels (customer names): stick to the left, above all header cells
+        tbody tr > th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background-color: #fff !important;
+        }
+    }
+}

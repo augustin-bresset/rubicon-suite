@@ -11,6 +11,13 @@ exported_pictures/
 exported_pictures_v2/
 random/
 
+# Meta data
+analysis
+pcs
+sis
+sis_report
+rubicon_storage
+psutilities
 
 # Security
 .env
