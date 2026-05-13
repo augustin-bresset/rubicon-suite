@@ -345,8 +345,8 @@ class TestDocumentSOEMA25001:
     def test_total_qty(self):
         assert self.doc['total_qty'] == 1
 
-    def test_total_fob(self):
-        assert self.doc['total_fob'] == 195.0
+    def test_total_amount(self):
+        assert self.doc['total_amount'] == 195.0
 
     def test_freight_insurance(self):
         assert self.doc['freight_insurance'] == 0.0

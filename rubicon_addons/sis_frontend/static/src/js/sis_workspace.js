@@ -622,7 +622,7 @@ export class SisWorkspace extends Component {
         this.state.copyDocs = await this.orm.searchRead(
             'sis.document', domain,
             ['id', 'name', 'party_id', 'customer_po', 'date_created', 'date_due',
-             'total_qty', 'total_fob'],
+             'total_qty', 'total_amount'],
             { order: 'name', limit: 200 }
         );
         this.state.copyDocId = null;
@@ -789,8 +789,8 @@ export class SisWorkspace extends Component {
                 "customer_po", "rcv_mode_id", "trade_fair_id", "employee",
                 "ship_address", "ship_consignee_bank",
                 "ship_for_acc_of", "ship_book", "ship_page",
-                "total_fob", "freight_insurance", "total_cif",
-                "deposit", "total_amount",
+                "total_amount", "freight_insurance", "total_cif",
+                "deposit",
                 "total_qty", "total_cost", "total_profit", "profit_pct",
                 "child_doc_ids",
             ]),
@@ -954,8 +954,8 @@ export class SisWorkspace extends Component {
             customer_po: "", rcv_mode_id: false, trade_fair_id: false, employee: "",
             ship_address: "", ship_consignee_bank: false,
             ship_for_acc_of: "", ship_book: "", ship_page: "",
-            total_fob: 0, freight_insurance: 0, total_cif: 0,
-            deposit: 0, total_amount: 0,
+            total_amount: 0, freight_insurance: 0, total_cif: 0,
+            deposit: 0,
             total_qty: 0, total_cost: 0, total_profit: 0, profit_pct: 0,
             child_doc_ids: [],
         };

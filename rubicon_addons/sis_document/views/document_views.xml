@@ -130,11 +130,10 @@
                         <page string="Financials" name="financials">
                             <group>
                                 <group string="Summary">
-                                    <field name="total_fob" string="Total F.O.B Bangkok US$"/>
+                                    <field name="total_amount" string="Total Amount US$"/>
                                     <field name="freight_insurance" string="Freight &amp; Insurance US$"/>
                                     <field name="total_cif" string="Total C.I.F US$"/>
                                     <field name="deposit" string="Less Deposit"/>
-                                    <field name="total_amount" string="Total"/>
                                 </group>
                                 <group string="Profit">
                                     <field name="total_qty" string="Qty"/>

@@ -1065,9 +1065,9 @@
                     <div class="row g-0">
                         <div class="col-7 border-end pe-3">
                             <div class="row g-1 align-items-center" style="font-size:12px;">
-                                <div class="col-7">Total F.O.B. Bangkok US$</div>
+                                <div class="col-7">Total Amount US$</div>
                                 <div class="col-5 text-end fw-semibold">
-                                    <t t-esc="this.fmt(state.doc ? state.doc.total_fob : 0)"/>
+                                    <t t-esc="this.fmt(state.doc ? state.doc.total_amount : 0)"/>
                                 </div>
                                 <div class="col-7">Add Freight and Insurance US$</div>
                                 <div class="col-5 text-end">
@@ -1592,7 +1592,7 @@
                                                     <td><t t-esc="cd.date_created or ''"/></td>
                                                     <td><t t-esc="cd.date_due or ''"/></td>
                                                     <td class="text-end"><t t-esc="cd.total_qty or 0"/></td>
-                                                    <td class="text-end"><t t-esc="this.fmt(cd.total_fob or 0)"/></td>
+                                                    <td class="text-end"><t t-esc="this.fmt(cd.total_amount or 0)"/></td>
                                                 </tr>
                                             </t>
                                             <t t-if="!state.copyDocs.length">

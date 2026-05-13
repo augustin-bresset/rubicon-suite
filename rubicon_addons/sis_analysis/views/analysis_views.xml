@@ -8,12 +8,19 @@
         <field name="arch" type="xml">
             <search string="Analysis">
                 <field name="party_id"/>
+                <field name="doc_type_id"/>
                 <field name="trade_fair_id"/>
                 <separator/>
-                <filter string="Sales" name="filter_sales"
-                    domain="[('doc_type_id.category', '=', 'S')]"/>
-                <filter string="Workshop" name="filter_workshop"
-                    domain="[('doc_type_id.category', '=', 'W')]"/>
+                <filter string="Sales Orders" name="filter_so"
+                    domain="[('doc_type_id.code', '=', 'SO')]"/>
+                <filter string="Invoices" name="filter_si"
+                    domain="[('doc_type_id.code', '=', 'SI')]"/>
+                <filter string="Quotations" name="filter_sq"
+                    domain="[('doc_type_id.code', '=', 'SQ')]"/>
+                <filter string="Repairs" name="filter_se"
+                    domain="[('doc_type_id.code', '=', 'SE')]"/>
+                <filter string="Casting Orders" name="filter_co"
+                    domain="[('doc_type_id.code', '=', 'CO')]"/>
                 <separator/>
                 <filter string="This Year" name="this_year"
                     domain="[('date_created', '&gt;=', (context_today() + relativedelta(day=1, month=1)).strftime('%Y-%m-%d'))]"/>
@@ -21,6 +28,8 @@
                     domain="[('date_created', '&gt;=', (context_today() + relativedelta(years=-1, day=1, month=1)).strftime('%Y-%m-%d')),
                              ('date_created', '&lt;', (context_today() + relativedelta(day=1, month=1)).strftime('%Y-%m-%d'))]"/>
                 <group expand="0" string="Group By">
+                    <filter string="Document Type" name="group_doc_type"
+                        context="{'group_by': 'doc_type_id'}"/>
                     <filter string="Customer" name="group_party"
                         context="{'group_by': 'party_id'}"/>
                     <filter string="Region" name="group_region"
@@ -98,7 +107,7 @@
             (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_sis_analysis_pivot')}),
             (0, 0, {'view_mode': 'graph', 'view_id': ref('view_sis_analysis_graph')}),
             (0, 0, {'view_mode': 'list',  'view_id': ref('view_sis_analysis_list')})]"/>
-        <field name="context">{'search_default_filter_sales': 1}</field>
+        <field name="context">{'search_default_filter_so': 1}</field>
     </record>
 
 </odoo>
