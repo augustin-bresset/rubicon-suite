@@ -1,2 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo/>
+<odoo>
+
+    <template id="report_stone_list">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.basic_layout">
+                    <div class="page">
+                        <t t-call="rubicon_storage.report_stone_list_content"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_stone_list_content">
+        <t t-set="stone_lines" t-value="doc.get_stones_for_report()"/>
+        <style>
+            .rus-report { font-family: Arial, sans-serif; font-size: 11px; color: #000; }
+            .rus-heading { font-size: 14px; font-weight: bold; }
+            .rus-order-name { font-size: 22px; font-weight: bold; }
+            hr.rus-divider { border: none; border-top: 2px solid #000; margin: 8px 0 12px 0; }
+            .rus-table { width: 100%; border-collapse: collapse; }
+            .rus-table th { font-weight: bold; border-bottom: 1px dashed #888; padding: 4px 8px; text-align: left; }
+            .rus-table td { padding: 3px 8px; }
+            .rus-table .text-right { text-align: right; }
+        </style>
+        <div class="rus-report">
+            <div>
+                <span class="rus-heading">Sale Order : </span>
+                <span class="rus-order-name" t-esc="doc.name"/>
+            </div>
+            <hr class="rus-divider"/>
+            <table class="rus-table">
+                <thead>
+                    <tr>
+                        <th style="width:36px">No.</th>
+                        <th>Stone</th>
+                        <th>Shape</th>
+                        <th>Shade</th>
+                        <th class="text-right">Size</th>
+                        <th class="text-right">Wgt</th>
+                        <th class="text-right">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="stone_lines" t-as="line">
+                        <tr>
+                            <td t-esc="line_index + 1"/>
+                            <td t-esc="line['type']"/>
+                            <td t-esc="line['shape']"/>
+                            <td t-esc="line['shade']"/>
+                            <td class="text-right" t-esc="line['size']"/>
+                            <td class="text-right" t-esc="line['weight']"/>
+                            <td class="text-right" t-esc="line['pcs']"/>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+</odoo>
