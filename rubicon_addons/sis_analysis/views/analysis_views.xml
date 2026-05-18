@@ -61,6 +61,12 @@
                 <field name="total_qty" type="measure"/>
                 <field name="total_cost" type="measure"/>
                 <field name="total_profit" type="measure"/>
+                <!-- hide non-analysis financial fields from Measures dropdown -->
+                <field name="total_cif" invisible="1"/>
+                <field name="freight_insurance" invisible="1"/>
+                <field name="deposit" invisible="1"/>
+                <field name="profit_pct" invisible="1"/>
+                <field name="legacy_id" invisible="1"/>
             </pivot>
         </field>
     </record>
@@ -73,6 +79,12 @@
             <graph string="Sales Trend" type="bar">
                 <field name="analysis_year" type="row"/>
                 <field name="total_amount" type="measure"/>
+                <!-- hide non-analysis financial fields from Measures dropdown -->
+                <field name="total_cif" invisible="1"/>
+                <field name="freight_insurance" invisible="1"/>
+                <field name="deposit" invisible="1"/>
+                <field name="profit_pct" invisible="1"/>
+                <field name="legacy_id" invisible="1"/>
             </graph>
         </field>
     </record>
