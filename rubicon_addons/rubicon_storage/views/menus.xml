@@ -1,2 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo/>
+<odoo>
+    <record id="action_rubicon_storage" model="ir.actions.client">
+        <field name="name">Stone List</field>
+        <field name="tag">rubicon_storage_action</field>
+    </record>
+
+    <menuitem id="menu_rubicon_storage_stone_list"
+              name="Stone List"
+              parent="sis_frontend.menu_sis_reports"
+              action="action_rubicon_storage"
+              sequence="30"/>
+</odoo>
