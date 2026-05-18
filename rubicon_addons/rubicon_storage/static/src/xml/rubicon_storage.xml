@@ -28,7 +28,7 @@
                         t-on-click="onLoad">Load</button>
 
                 <button class="btn btn-sm btn-secondary"
-                        t-att-disabled="!state.selectedOrderId or state.rows.length === 0"
+                        t-att-disabled="!state.selectedOrderId || state.rows.length === 0"
                         t-on-click="onPrint">Print</button>
 
                 <div class="form-check mb-0 ms-2">
