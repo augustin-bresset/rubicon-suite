@@ -3,7 +3,7 @@
     'version': '1.0',
     'license': 'LGPL-3',
     'summary': 'Stone list from Sale Orders',
-    'depends': ['web', 'pdp_product', 'sis_document', 'sis_frontend'],
+    'depends': ['web', 'pdp_product', 'sis_document'],
     'data': [
         'report/report_action.xml',
         'report/report_stone_list.xml',

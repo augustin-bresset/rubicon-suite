@@ -5,9 +5,9 @@
         <field name="tag">rubicon_storage_action</field>
     </record>
 
-    <menuitem id="menu_rubicon_storage_stone_list"
-              name="Stone List"
-              parent="sis_frontend.menu_sis_reports"
+    <menuitem id="menu_rubicon_storage_root"
+              name="Rubicon Storage"
+              sequence="10"
               action="action_rubicon_storage"
-              sequence="30"/>
+              web_icon="rubicon_storage,static/description/icon.png"/>
 </odoo>
