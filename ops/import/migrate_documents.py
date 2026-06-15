@@ -35,6 +35,25 @@ print("Fetching PDP products...")
 products = search_read('pdp.product', [], ['id', 'code'])
 product_by_code = {p['code'].strip().upper(): p['id'] for p in products if p.get('code')}
 
+# Secondary lookup: strip metal suffix (e.g. /Y, /P) and remap to /W reference product.
+# In PDP all products are stored under white gold (/W) as the reference metal.
+product_by_base = {}
+for p in products:
+    code = (p.get('code') or '').strip().upper()
+    if '/' in code:
+        base = code.rsplit('/', 1)[0]
+        if base not in product_by_base:
+            product_by_base[base] = p['id']
+
+def resolve_product(design):
+    key = design.strip().upper()
+    if key in product_by_code:
+        return product_by_code[key]
+    if '/' in key:
+        base = key.rsplit('/', 1)[0]
+        return product_by_base.get(base)
+    return None
+
 # Normalize currency strings from legacy data to iso
 CURRENCY_MAP = {
     'US$': 'USD', '$US': 'USD', 'USD': 'USD',
@@ -84,9 +103,9 @@ for item in items:
         if currency_id:
             v['currency_id'] = currency_id
             
-    design = item.get('design', '').strip().upper()
+    design = (item.get('design') or '').strip().upper()
     if design and not item.get('product_id'):
-        product_id = product_by_code.get(design)
+        product_id = resolve_product(design)
         if product_id:
             v['product_id'] = product_id
         else:
