@@ -148,7 +148,7 @@
                           <t t-foreach="this.addonTypes" t-as="at" t-key="at.id">
                             <option t-att-value="at.id"
                                     t-att-selected="this.m2oId(row.addon_id) === at.id">
-                              <t t-esc="at.code"/>
+                              <t t-esc="at.name"/>
                             </option>
                           </t>
                         </select>
@@ -256,7 +256,7 @@
                           <t t-foreach="this.stoneCategories" t-as="sc" t-key="sc.id">
                             <option t-att-value="sc.id"
                                     t-att-selected="this.m2oId(row.stone_cat_id) === sc.id">
-                              <t t-esc="sc.code"/>
+                              <t t-esc="sc.name"/>
                             </option>
                           </t>
                         </select>
@@ -314,7 +314,7 @@
                   <t t-foreach="this.stoneCategories" t-as="sc" t-key="sc.id">
                     <option t-att-value="sc.id"
                             t-att-selected="this.state.stoneCatFilter == sc.id">
-                      <t t-esc="sc.code"/>
+                      <t t-esc="sc.name"/>
                     </option>
                   </t>
                 </select>

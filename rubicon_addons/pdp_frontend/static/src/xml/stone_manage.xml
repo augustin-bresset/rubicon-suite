@@ -471,7 +471,7 @@
                                 <option
                                     t-att-value="s_opt.id"
                                     t-att-selected="this.state.costFilterShapeId == s_opt.id">
-                                    <t t-esc="s_opt.code"/>
+                                    <t t-esc="s_opt.shape"/>
                                 </option>
                             </t>
                         </select>
@@ -555,7 +555,7 @@
                                                     <option
                                                         t-att-value="s_opt.id"
                                                         t-att-selected="this.m2oId(row.shape_id) === s_opt.id">
-                                                        <t t-esc="s_opt.code"/>
+                                                        <t t-esc="s_opt.shape"/>
                                                     </option>
                                                 </t>
                                             </select>
@@ -681,7 +681,7 @@
                                 <option
                                     t-att-value="s_opt.id"
                                     t-att-selected="this.state.weightFilterShapeId == s_opt.id">
-                                    <t t-esc="s_opt.code"/>
+                                    <t t-esc="s_opt.shape"/>
                                 </option>
                             </t>
                         </select>
@@ -763,7 +763,7 @@
                                                     <option
                                                         t-att-value="s_opt.id"
                                                         t-att-selected="this.m2oId(row.shape_id) === s_opt.id">
-                                                        <t t-esc="s_opt.code"/>
+                                                        <t t-esc="s_opt.shape"/>
                                                     </option>
                                                 </t>
                                             </select>
