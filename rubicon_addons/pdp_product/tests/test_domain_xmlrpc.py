@@ -133,14 +133,14 @@ def main():
     print("-"*60)
     
     if product_ids:
-        print("\n[TEST] pdp.price.service.compute_product_price()")
+        print("\n[TEST] pdp.price.service.compute_price_by_ids()")
         try:
-            # Call API service which uses price service
-            result = models.execute_kw(DB, uid, PASSWORD, 'pdp.api.service', 'compute_price', 
-                                       [], {'product_id': product_ids[0], 'margin_id': None, 'currency_id': 1})
+            # margin_id=False (XML-RPC cannot marshal None); currency_id=1.
+            result = models.execute_kw(DB, uid, PASSWORD, 'pdp.price.service', 'compute_price_by_ids',
+                                       [product_ids[0], False, 1])
             if isinstance(result, dict) and 'totals' in result:
                 print(f"  [PASS] Totals: {result.get('totals')}")
-            elif 'error' in result:
+            elif isinstance(result, dict) and 'error' in result:
                 print(f"  [INFO] {result.get('error')}")
             else:
                 print(f"  [FAIL] Unexpected: {result}")
