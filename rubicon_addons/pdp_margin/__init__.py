@@ -1,4 +1,8 @@
+import logging
+
 from . import models
+
+_logger = logging.getLogger(__name__)
 
 
 def post_init(env):
@@ -113,4 +117,4 @@ def post_init(env):
         existing_conds.add((mid, scid))
 
     env.cr.commit()
-    print("post_init done.")
+    _logger.info("pdp_margin post_init: margin seed data ensured")
