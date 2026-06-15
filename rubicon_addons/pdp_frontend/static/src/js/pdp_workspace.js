@@ -1938,156 +1938,132 @@ export class PdpWorkspace extends Component {
 
     async saveAll() {
         if (!this.state.selectedModelId) return;
+
+        const m2o = (v) => this.m2oId(v);
+
+        // Build the payload from dirty rows. Value coercion stays here so the
+        // backend persists exactly what the UI computed (no semantic change);
+        // the whole save then runs as a single RPC = one transaction.
+        const stones = [];
+        if (this.state.selectedProductId) {
+            for (const row of this.state.stoneRows) {
+                if (!row._dirty) continue;
+                if (!row._stoneValid || !row.stone_id) {
+                    this.notification.add(`Pierre "${row._stoneCode || '?'}" invalide — ignorée.`, { type: 'warning' });
+                    continue;
+                }
+                stones.push({
+                    id: row.id, key: row._key,
+                    line_num: row.line_num || '',
+                    stone_id: m2o(row.stone_id),
+                    pieces: row.pieces || 1,
+                    weight: parseFloat(row.weight) || 0,
+                    reshaped_weight: parseFloat(row.reshaped_weight) || 0,
+                    setting: parseFloat(row.setting) || 0,
+                    setting_type_id: m2o(row.setting_type_id) || false,
+                    reshaped_shape_id: m2o(row.reshaped_shape_id) || false,
+                    reshaped_size_id: m2o(row.reshaped_size_id) || false,
+                });
+            }
+        }
+
+        const metals = this.state.metalWeights.filter(r => r._dirty).map(row => ({
+            id: row.id, key: row._key,
+            metal_id: m2o(row.metal_id),
+            purity_id: m2o(row.purity_id),
+            weight: row.weight || 0,
+            metal_version: row.metal_version || 'W',
+        }));
+
+        const laborModel = this.state.laborModelCosts.filter(r => r._dirty).map(row => ({
+            id: row.id, key: row._key,
+            labor_id: m2o(row.labor_id),
+            metal: row.metal || 'W',
+            cost: row.cost || 0,
+            currency_id: m2o(row.currency_id),
+        }));
+
+        let laborProduct = [], addons = [], parts = [];
+        if (this.state.selectedProductId) {
+            laborProduct = this.state.laborProductCosts.filter(r => r._dirty).map(row => ({
+                id: row.id, key: row._key,
+                labor_id: m2o(row.labor_id),
+                cost: row.cost || 0,
+                currency_id: m2o(row.currency_id),
+            }));
+            addons = this.state.addonCosts.filter(r => r._dirty).map(row => ({
+                id: row.id, key: row._key,
+                addon_id: m2o(row.addon_id),
+                cost: row.cost || 0,
+                currency_id: m2o(row.currency_id),
+            }));
+            parts = this.state.parts.filter(r => r._dirty).map(row => ({
+                id: row.id, key: row._key,
+                part_id: m2o(row.part_id),
+                quantity: row.quantity || 0,
+            }));
+        }
+
+        const payload = {
+            model_id: this.state.selectedModelId,
+            product_id: this.state.selectedProductId || false,
+            composition_id: this._currentCompId || false,
+            deleted: {
+                metal: this._deletedMetalIds,
+                labor_model: this._deletedLaborModelIds,
+                labor_product: this._deletedLaborProductIds,
+                addon: this._deletedAddonCostIds,
+                part: this._deletedPartIds,
+                stone: this._deletedStoneIds,
+            },
+            stones,
+            metals,
+            labor_model: laborModel,
+            labor_product: laborProduct,
+            addons,
+            parts,
+        };
+
         try {
-            // 1. Unlink deleted records
-            if (this._deletedMetalIds.length) {
-                await this.orm.unlink("pdp.product.model.metal", this._deletedMetalIds);
-                this._deletedMetalIds = [];
+            const result = await this.orm.call(
+                "pdp.workspace.service", "save_product_workspace", [payload]
+            );
+
+            // Adopt the database ids of the rows the backend created.
+            if (result.composition_id) this._currentCompId = result.composition_id;
+            const newIds = result.new_ids || {};
+            const adopt = (rows, map) => {
+                if (!map) return;
+                for (const row of rows) {
+                    const nid = map[String(row._key)];
+                    if (nid) { row.id = nid; row._key = nid; }
+                }
+            };
+            adopt(this.state.stoneRows, newIds.stones);
+            adopt(this.state.metalWeights, newIds.metals);
+            adopt(this.state.laborModelCosts, newIds.labor_model);
+            adopt(this.state.laborProductCosts, newIds.labor_product);
+            adopt(this.state.addonCosts, newIds.addons);
+            adopt(this.state.parts, newIds.parts);
+
+            // Mark every sent row clean (invalid stones stay dirty for a retry).
+            for (const r of [...this.state.metalWeights, ...this.state.laborModelCosts,
+                             ...this.state.laborProductCosts, ...this.state.addonCosts,
+                             ...this.state.parts]) {
+                r._dirty = false;
             }
-            if (this._deletedLaborModelIds.length) {
-                await this.orm.unlink("pdp.labor.cost.model", this._deletedLaborModelIds);
-                this._deletedLaborModelIds = [];
-            }
-            if (this._deletedLaborProductIds.length) {
-                await this.orm.unlink("pdp.labor.cost.product", this._deletedLaborProductIds);
-                this._deletedLaborProductIds = [];
-            }
-            if (this._deletedAddonCostIds.length) {
-                await this.orm.unlink("pdp.addon.cost", this._deletedAddonCostIds);
-                this._deletedAddonCostIds = [];
-            }
-            if (this._deletedPartIds.length) {
-                await this.orm.unlink("pdp.product.part", this._deletedPartIds);
-                this._deletedPartIds = [];
-            }
-            if (this._deletedStoneIds.length) {
-                await this.orm.unlink("pdp.product.stone", this._deletedStoneIds);
-                this._deletedStoneIds = [];
+            for (const r of this.state.stoneRows) {
+                if (r._stoneValid && r.stone_id) r._dirty = false;
             }
 
-            // 2. Save stones (product level)
-            if (this.state.selectedProductId) {
-                const dirtyStones = this.state.stoneRows.filter(r => r._dirty);
-                if (dirtyStones.length) {
-                    // Create composition if product doesn't have one yet
-                    if (!this._currentCompId) {
-                        const product = this.activeProduct;
-                        const compCode = product ? product.code : ('COMP-' + this.state.selectedProductId);
-                        this._currentCompId = (await this.orm.create("pdp.product.stone.composition", [{ code: compCode }]))[0];
-                        await this.orm.write("pdp.product", [this.state.selectedProductId], { stone_composition_id: this._currentCompId });
-                    }
-                    for (const row of dirtyStones) {
-                        if (!row._stoneValid || !row.stone_id) {
-                            this.notification.add(`Pierre "${row._stoneCode || '?'}" invalide — ignorée.`, { type: 'warning' });
-                            continue;
-                        }
-                        const vals = {
-                            line_num: row.line_num || '',
-                            stone_id: this.m2oId(row.stone_id),
-                            pieces: row.pieces || 1,
-                            weight: parseFloat(row.weight) || 0,
-                            reshaped_weight: parseFloat(row.reshaped_weight) || 0,
-                            setting: parseFloat(row.setting) || 0,
-                            setting_type_id: this.m2oId(row.setting_type_id) || false,
-                            reshaped_shape_id: this.m2oId(row.reshaped_shape_id) || false,
-                            reshaped_size_id: this.m2oId(row.reshaped_size_id) || false,
-                        };
-                        if (row.id) {
-                            await this.orm.write("pdp.product.stone", [row.id], vals);
-                        } else {
-                            const nid = (await this.orm.create("pdp.product.stone", [{ ...vals, composition_id: this._currentCompId }]))[0];
-                            row.id = nid; row._key = nid;
-                        }
-                        row._dirty = false;
-                    }
-                }
-            }
-
-            // 3. Save metal weights
-            for (const row of this.state.metalWeights) {
-                if (!row._dirty) continue;
-                const vals = {
-                    metal_id: this.m2oId(row.metal_id),
-                    purity_id: this.m2oId(row.purity_id),
-                    weight: row.weight || 0,
-                    metal_version: row.metal_version || 'W',
-                };
-                if (row.id) {
-                    await this.orm.write("pdp.product.model.metal", [row.id], vals);
-                } else {
-                    const nid = (await this.orm.create("pdp.product.model.metal", [{ ...vals, model_id: this.state.selectedModelId }]))[0];
-                    row.id = nid; row._key = nid;
-                }
-                row._dirty = false;
-            }
-
-            // 3. Save labor model costs
-            for (const row of this.state.laborModelCosts) {
-                if (!row._dirty) continue;
-                const vals = {
-                    labor_id: this.m2oId(row.labor_id),
-                    metal: row.metal || 'W',
-                    cost: row.cost || 0,
-                    currency_id: this.m2oId(row.currency_id),
-                };
-                if (row.id) {
-                    await this.orm.write("pdp.labor.cost.model", [row.id], vals);
-                } else {
-                    const nid = (await this.orm.create("pdp.labor.cost.model", [{ ...vals, model_id: this.state.selectedModelId }]))[0];
-                    row.id = nid; row._key = nid;
-                }
-                row._dirty = false;
-            }
-
-            // Product-level saves
-            if (this.state.selectedProductId) {
-                for (const row of this.state.laborProductCosts) {
-                    if (!row._dirty) continue;
-                    const vals = {
-                        labor_id: this.m2oId(row.labor_id),
-                        cost: row.cost || 0,
-                        currency_id: this.m2oId(row.currency_id),
-                    };
-                    if (row.id) {
-                        await this.orm.write("pdp.labor.cost.product", [row.id], vals);
-                    } else {
-                        const nid = (await this.orm.create("pdp.labor.cost.product", [{ ...vals, product_id: this.state.selectedProductId }]))[0];
-                        row.id = nid; row._key = nid;
-                    }
-                    row._dirty = false;
-                }
-
-                for (const row of this.state.addonCosts) {
-                    if (!row._dirty) continue;
-                    const vals = {
-                        addon_id: this.m2oId(row.addon_id),
-                        cost: row.cost || 0,
-                        currency_id: this.m2oId(row.currency_id),
-                    };
-                    if (row.id) {
-                        await this.orm.write("pdp.addon.cost", [row.id], vals);
-                    } else {
-                        const nid = (await this.orm.create("pdp.addon.cost", [{ ...vals, product_id: this.state.selectedProductId }]))[0];
-                        row.id = nid; row._key = nid;
-                    }
-                    row._dirty = false;
-                }
-
-                for (const row of this.state.parts) {
-                    if (!row._dirty) continue;
-                    const vals = {
-                        part_id: this.m2oId(row.part_id),
-                        quantity: row.quantity || 0,
-                    };
-                    if (row.id) {
-                        await this.orm.write("pdp.product.part", [row.id], vals);
-                    } else {
-                        const nid = (await this.orm.create("pdp.product.part", [{ ...vals, product_id: this.state.selectedProductId }]))[0];
-                        row.id = nid; row._key = nid;
-                    }
-                    row._dirty = false;
-                }
-            }
+            // Deletions were applied in the same transaction; clear the queues.
+            // (Not _resetDeletedLists: that also nulls the composition id.)
+            this._deletedStoneIds = [];
+            this._deletedMetalIds = [];
+            this._deletedLaborModelIds = [];
+            this._deletedLaborProductIds = [];
+            this._deletedAddonCostIds = [];
+            this._deletedPartIds = [];
 
             this.state.isDirty = false;
             this.notification.add("Saved successfully.", { type: "success" });
