@@ -1020,7 +1020,7 @@ export class PdpWorkspace extends Component {
                 const stones = await this.orm.searchRead(
                     "pdp.product.stone", [["composition_id", "=", compId]],
                     ["id", "line_num", "stone_id", "pieces", "weight", "reshaped_weight", "setting", "setting_type_id",
-                     "reshaped_shape_id", "reshaped_size_id", "reshaped_weight"]
+                     "reshaped_shape_id", "reshaped_size_id"]
                 );
                 // Batch-fetch stone details (type/shade/shape/size/cost/currency) in one query
                 const stoneIds = stones.filter(s => s.stone_id).map(s => Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id);
@@ -1391,7 +1391,7 @@ export class PdpWorkspace extends Component {
             id: null, _key: key, _dirty: true,
             line_num: '', stone_id: false, _stoneCode: '', _stoneValid: false, _stoneDetail: null, _stoneTypeName: '',
             pieces: 1, weight: '0', reshaped_weight: 0, setting: 0, setting_type_id: false,
-            reshaped_shape_id: false, reshaped_size_id: false, reshaped_weight: '',
+            reshaped_shape_id: false, reshaped_size_id: false,
         });
         this.state.selectedStoneKey = key;
         this.state.isDirty = true;
@@ -1542,7 +1542,7 @@ export class PdpWorkspace extends Component {
 
         const stones = await this.orm.searchRead(
             "pdp.product.stone", [["composition_id", "=", compId]],
-            ["stone_id", "pieces", "weight", "reshaped_weight", "reshaped_shape_id", "reshaped_size_id", "reshaped_weight"]
+            ["stone_id", "pieces", "weight", "reshaped_weight", "reshaped_shape_id", "reshaped_size_id"]
         );
         if (!stones.length) return;
 
@@ -1556,7 +1556,6 @@ export class PdpWorkspace extends Component {
                 reshaped_weight: s.reshaped_weight || 0,
                 reshaped_shape_id: s.reshaped_shape_id ? s.reshaped_shape_id[0] : false,
                 reshaped_size_id: s.reshaped_size_id ? s.reshaped_size_id[0] : false,
-                reshaped_weight: s.reshaped_weight || 0,
             }]);
         }
         await this.orm.write("pdp.product", [newProductId], { stone_composition_id: newCompId });
@@ -1954,7 +1953,6 @@ export class PdpWorkspace extends Component {
                             setting_type_id: this.m2oId(row.setting_type_id) || false,
                             reshaped_shape_id: this.m2oId(row.reshaped_shape_id) || false,
                             reshaped_size_id: this.m2oId(row.reshaped_size_id) || false,
-                            reshaped_weight: row.reshaped_weight || '',
                         };
                         if (row.id) {
                             await this.orm.write("pdp.product.stone", [row.id], vals);
