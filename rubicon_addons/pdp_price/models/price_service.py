@@ -1,4 +1,8 @@
+import logging
+
 from odoo import models, fields, api
+
+_logger = logging.getLogger(__name__)
 
 
 class PdpPriceService(models.AbstractModel):
@@ -30,9 +34,6 @@ class PdpPriceService(models.AbstractModel):
         currency = currency or self.env.company.currency_id
         date = date or fields.Date.context_today(self)
         purity = self.env['pdp.metal.purity'].browse(purity_id) if purity_id else None
-
-        import logging
-        _logger = logging.getLogger(__name__)
 
         def _safe_compute(model_name, label, **kwargs):
             comp = self.env.get(model_name)
