@@ -474,19 +474,17 @@ export class SisWorkspace extends Component {
         }
         vals.sis_phone_ids = phoneCommands;
 
-        if (p.id) {
-            await this.orm.write("res.partner", [p.id], vals);
-        } else {
-            const newId = (await this.orm.create("res.partner", [vals]))[0];
-            this.state.party.id = newId;
-        }
-
-        // Save delivery child
+        // Build the party + its delivery/contact/bank children into one payload.
+        // The backend sets each child's parent link, so a freshly created party
+        // id propagates, and the whole save commits in one transaction.
         const dp = this.state.deliveryPartner;
-        const savedPartyId = this.state.party.id;
+        const cp = this.state.contactPartner;
+        const bk = this.state.partyBank;
+
+        const payload = { party_id: p.id || false, party_vals: vals };
+
         const deliveryVals = {
             type: "delivery",
-            parent_id: savedPartyId,
             name: dp.name || this.state.party.name || "",
             street: dp.street || "",
             street2: dp.street2 || "",
@@ -496,46 +494,32 @@ export class SisWorkspace extends Component {
             country_id: this._m2oId(dp.country_id) || false,
         };
         if (dp.id) {
-            await this.orm.write("res.partner", [dp.id], deliveryVals);
+            payload.delivery = { id: dp.id, vals: deliveryVals };
         } else if (dp.city || dp.country_id) {
-            const [newId] = await this.orm.create("res.partner", [deliveryVals]);
-            this.state.deliveryPartner.id = newId;
+            payload.delivery = { id: false, vals: deliveryVals };
         }
 
-        // Save contact child
-        const cp = this.state.contactPartner;
         if (cp.name) {
-            const contactVals = {
-                type: "contact",
-                parent_id: savedPartyId,
-                name: cp.name,
-                is_company: false,
+            payload.contact = {
+                id: cp.id || false,
+                vals: { type: "contact", name: cp.name, is_company: false },
             };
-            if (cp.id) {
-                await this.orm.write("res.partner", [cp.id], contactVals);
-            } else {
-                const [newId] = await this.orm.create("res.partner", [contactVals]);
-                this.state.contactPartner.id = newId;
-            }
         }
 
-        // Save bank account
-        const bk = this.state.partyBank;
         if (bk.sis_bank_name || bk.acc_number) {
-            const bankVals = {
-                partner_id:       savedPartyId,
-                acc_number:       bk.acc_number || "—",
-                acc_holder_name:  bk.acc_holder_name || "",
-                sis_bank_name:    bk.sis_bank_name || "",
-                sis_bank_address: bk.sis_bank_address || "",
+            payload.bank = {
+                id: bk.id || false,
+                vals: {
+                    acc_number:       bk.acc_number || "—",
+                    acc_holder_name:  bk.acc_holder_name || "",
+                    sis_bank_name:    bk.sis_bank_name || "",
+                    sis_bank_address: bk.sis_bank_address || "",
+                },
             };
-            if (bk.id) {
-                await this.orm.write("res.partner.bank", [bk.id], bankVals);
-            } else {
-                const [newId] = await this.orm.create("res.partner.bank", [bankVals]);
-                this.state.partyBank.id = newId;
-            }
         }
+
+        const savedPartyId = await this.orm.call("sis.workspace.service", "save_party", [payload]);
+        this.state.party.id = savedPartyId;
 
         this.state.partyDirty = false;
         this.notification.add(isNew ? "Party created." : "Party saved.", { type: "success" });
@@ -1053,19 +1037,28 @@ export class SisWorkspace extends Component {
             freight_insurance: parseFloat(d.freight_insurance) || 0,
             currency_id: this._m2oId(d.currency_id) || false,
         };
-        if (d.id) {
-            await this.orm.write("sis.document", [d.id], vals);
-            await this.saveItems(d.id);
+        const isNewDoc = !d.id;
+        const items = this.state.items
+            .filter(i => i._dirty)
+            .map(i => ({ id: i.id || false, vals: this._itemVals(i, false) }));
+        const payload = {
+            id: d.id || false,
+            doc_vals: vals,
+            deleted_items: this._deletedItemIds,
+            items,
+        };
+
+        try {
+            // One RPC = one transaction: document + item writes/creates/deletes
+            // all commit together or not at all.
+            const res = await this.orm.call("sis.workspace.service", "save_document", [payload]);
+            this._deletedItemIds = [];
             this.state.docDirty = false;
-            this.notification.add("Document saved.", { type: "success" });
-            await this._loadDocument(d.id);
-        } else {
-            const newId = (await this.orm.create("sis.document", [vals]))[0];
-            await this.saveItems(newId);
-            this.state.docDirty = false;
-            this.notification.add("Document created.", { type: "success" });
-            await this._reloadDocuments();
-            await this._loadDocument(newId);
+            this.notification.add(isNewDoc ? "Document created." : "Document saved.", { type: "success" });
+            if (isNewDoc) await this._reloadDocuments();
+            await this._loadDocument(res.id);
+        } catch (e) {
+            this.notification.add(`Save failed: ${e.message || e}`, { type: "danger" });
         }
     }
 
@@ -1163,25 +1156,6 @@ export class SisWorkspace extends Component {
             diverse_weight: parseFloat(item.diverse_weight) || 0,
             metal_weight: parseFloat(item.metal_weight) || 0,
         };
-    }
-
-    async saveItems(docId) {
-        if (this._deletedItemIds.length) {
-            await this.orm.unlink('sis.document.item', this._deletedItemIds);
-            this._deletedItemIds = [];
-        }
-        for (const item of this.state.items) {
-            if (!item._dirty) continue;
-            const vals = this._itemVals(item, docId);
-            if (item.id) {
-                await this.orm.write('sis.document.item', [item.id], vals);
-            } else {
-                const [newId] = await this.orm.create('sis.document.item', [vals]);
-                item.id = newId;
-                item._key = newId;
-            }
-            item._dirty = false;
-        }
     }
 
     // PRICES (PDP suggestion)
