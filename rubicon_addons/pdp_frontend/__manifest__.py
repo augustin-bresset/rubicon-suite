@@ -12,7 +12,6 @@
     ],
     "data": [
         "security/ir.model.access.csv",
-        "views/pdp_currency_setting_views.xml",
         "views/pdp_product_views.xml",
         "views/pdp_frontend_templates.xml",
         "views/pdp_menus.xml",

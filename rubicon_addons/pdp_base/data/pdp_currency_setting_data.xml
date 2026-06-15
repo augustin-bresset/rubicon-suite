@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="currency_setting_usd" model="pdp.currency.setting">
+        <field name="currency_id" ref="base.USD"/>
+        <field name="rate">31.48</field>
+        <field name="sequence">10</field>
+        <field name="active">True</field>
+    </record>
+    <record id="currency_setting_eur" model="pdp.currency.setting">
+        <field name="currency_id" ref="base.EUR"/>
+        <field name="rate">35.92</field>
+        <field name="sequence">20</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

@@ -125,7 +125,7 @@
   <menuitem id="menu_pdp_settings_currency"
             name="Currency Rates"
             parent="menu_pdp_frontend_settings"
-            action="action_pdp_currency_setting"
+            action="pdp_base.action_pdp_currency_setting"
             sequence="1"/>
 
   <menuitem id="menu_pdp_settings_uom"

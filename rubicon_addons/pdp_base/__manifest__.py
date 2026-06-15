@@ -7,8 +7,10 @@
     'data': [
         'security/ir.model.access.csv',
         'data/pdp_config_data.xml',
+        'data/pdp_currency_setting_data.xml',
         'views/pdp_config_views.xml',
         'views/pdp_config_menus.xml',
+        'views/pdp_currency_setting_views.xml',
     ],
     'installable': True,
     'application': False,
