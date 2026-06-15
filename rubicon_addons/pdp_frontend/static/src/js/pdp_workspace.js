@@ -5,6 +5,9 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, useState, onWillStart } from "@odoo/owl";
 import { UomSelector } from "@rubicon_uom/js/rubicon_uom_selector";
 
+// Persists across component destroy/recreate within the same page load.
+let _workspaceNav = null;
+
 export class PdpWorkspace extends Component {
     static components = { UomSelector };
 
@@ -231,6 +234,27 @@ export class PdpWorkspace extends Component {
                 this.state.selectedCurrencyId = this.state.currencies[0].id;
                 this.state.currencySymbol = this.state.currencies[0].symbol;
                 this.state.usRate = this.state.currencies[0].rate || 1.0;
+            }
+
+            if (_workspaceNav) {
+                const nav = _workspaceNav;
+                _workspaceNav = null;
+                if (nav.selectedMarginId) this.state.selectedMarginId = nav.selectedMarginId;
+                if (nav.selectedCurrencyId) {
+                    const cur = this.state.currencies.find(c => c.id === nav.selectedCurrencyId);
+                    if (cur) {
+                        this.state.selectedCurrencyId = cur.id;
+                        this.state.currencySymbol = cur.symbol;
+                        this.state.usRate = cur.rate || 1.0;
+                    }
+                }
+                if (nav.activeTab) this.state.activeTab = nav.activeTab;
+                if (nav.selectedModelId) {
+                    await this.selectModel(nav.selectedModelId);
+                    if (nav.selectedProductId && nav.selectedProductId !== this.state.selectedProductId) {
+                        await this.selectProduct(nav.selectedProductId);
+                    }
+                }
             }
 
         } catch (e) {
@@ -649,6 +673,7 @@ export class PdpWorkspace extends Component {
                 this.fetchAddonCosts(),
             ]);
             await this.recalculatePrice();
+            this._saveNavState();
         } catch (e) {
             console.error("Error fetching product details", e);
         }
@@ -671,6 +696,7 @@ export class PdpWorkspace extends Component {
 
     setTab(tabName) {
         this.state.activeTab = tabName;
+        this._saveNavState();
     }
 
     async onMarginChange(ev) {
@@ -693,7 +719,8 @@ export class PdpWorkspace extends Component {
     }
 
     openCurrencyRates() {
-        this.action.doAction('pdp_frontend.action_pdp_currency_setting');
+        this._saveNavState();
+        this.action.doAction('pdp_base.action_pdp_currency_setting');
     }
 
 // ==========================================
@@ -1401,7 +1428,18 @@ export class PdpWorkspace extends Component {
         this.state.selectedStoneKey = this.state.selectedStoneKey === key ? null : key;
     }
 
+    _saveNavState() {
+        _workspaceNav = {
+            selectedModelId: this.state.selectedModelId,
+            selectedProductId: this.state.selectedProductId,
+            activeTab: this.state.activeTab,
+            selectedMarginId: this.state.selectedMarginId,
+            selectedCurrencyId: this.state.selectedCurrencyId,
+        };
+    }
+
     goToManage(actionTag) {
+        this._saveNavState();
         this.action.doAction({ type: 'ir.actions.client', tag: actionTag });
     }
 

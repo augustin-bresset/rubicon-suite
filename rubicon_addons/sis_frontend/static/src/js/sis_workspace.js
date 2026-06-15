@@ -6,6 +6,9 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component, useState, onWillStart } from "@odoo/owl";
 
+// Persists across component destroy/recreate within the same page load.
+let _sisWorkspaceNav = null;
+
 export class SisWorkspace extends Component {
     parseInt = parseInt;
 
@@ -162,6 +165,29 @@ export class SisWorkspace extends Component {
             docTypes.filter(dt => dt.footer_note).map(dt => [dt.code, dt.footer_note])
         );
         this.docTypes = docTypes.map(dt => ({ code: dt.code, name: dt.name || dt.code }));
+
+        if (_sisWorkspaceNav) {
+            const nav = _sisWorkspaceNav;
+            _sisWorkspaceNav = null;
+            const docTitles = { SQ: "Maintain Sales Quotations.", SO: "Maintain Sales Orders.", SI: "Maintain Sales Invoices." };
+            if (nav.page === 'parties') {
+                await this._reloadParties();
+                if (nav.partyId && this.state.party?.id !== nav.partyId) {
+                    await this._loadParty(nav.partyId);
+                }
+                if (nav.partyTab) this.state.partyTab = nav.partyTab;
+                this.state.page = 'parties';
+            } else if (nav.page === 'document' && nav.docType) {
+                this.state.docType = nav.docType;
+                this.state.docTypeTitle = docTitles[nav.docType] || "Maintain Sales Documents.";
+                if (nav.docYear) this.state.docYear = nav.docYear;
+                await this._reloadDocuments();
+                if (nav.docId && this.state.doc?.id !== nav.docId) {
+                    await this._loadDocument(nav.docId);
+                }
+                this.state.page = 'document';
+            }
+        }
     }
 
     // LOBBY NAVIGATION
@@ -170,6 +196,7 @@ export class SisWorkspace extends Component {
         await this._reloadParties();
         this.state.page = "parties";
         this.state.partyTab = "general";
+        this._saveNavState();
     }
 
     async goDocument(docType) {
@@ -183,6 +210,18 @@ export class SisWorkspace extends Component {
         this.state.docYear = String(new Date().getFullYear());
         await this._reloadDocuments();
         this.state.page = "document";
+        this._saveNavState();
+    }
+
+    _saveNavState() {
+        _sisWorkspaceNav = {
+            page: this.state.page,
+            docType: this.state.docType,
+            docYear: this.state.docYear,
+            partyId: this.state.party?.id || null,
+            docId: this.state.doc?.id || null,
+            partyTab: this.state.partyTab,
+        };
     }
 
     goLobby() {
@@ -296,6 +335,7 @@ export class SisWorkspace extends Component {
 
         const idx = this.state.parties.findIndex((p) => p.id === partyId);
         if (idx >= 0) this.state.partyIndex = idx;
+        this._saveNavState();
     }
 
     async onSelectParty(ev) {
@@ -305,6 +345,7 @@ export class SisWorkspace extends Component {
 
     setPartyTab(tab) {
         this.state.partyTab = tab;
+        this._saveNavState();
     }
 
     setPartyField(field, value) {
@@ -852,6 +893,7 @@ export class SisWorkspace extends Component {
         if (idx >= 0) this.state.docIndex = idx;
 
         await this._fetchPartyAddress(doc?.party_id);
+        this._saveNavState();
     }
 
     async onCustomerChange(ev) {
