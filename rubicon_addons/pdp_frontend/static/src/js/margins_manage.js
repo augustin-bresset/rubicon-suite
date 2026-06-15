@@ -104,6 +104,39 @@ export class MarginsManage extends Component {
 
     m2oId(f) { return Array.isArray(f) ? f[0] : f; }
 
+    /**
+     * Order rows by the position of their `field` value in a lookup table.
+     * The lookup tables are loaded once in a fixed order (e.g. code asc), so
+     * every margin shows its rates in the same order. Rows whose value is
+     * unset (new rows) sort to the end.
+     */
+    _sortByLookup(rows, field, lookup) {
+        const pos = new Map(lookup.map((rec, i) => [rec.id, i]));
+        const rank = (row) => {
+            const id = this.m2oId(row[field]);
+            return pos.has(id) ? pos.get(id) : Number.MAX_SAFE_INTEGER;
+        };
+        return rows.sort((a, b) => rank(a) - rank(b));
+    }
+
+    /** Stone-normal rows have no single key: order by type, then shape, size, shade. */
+    _sortStoneNormal(rows) {
+        const posType  = new Map(this.stoneTypes.map((r, i) => [r.id, i]));
+        const posShape = new Map(this.stoneShapes.map((r, i) => [r.id, i]));
+        const posSize  = new Map(this.stoneSizes.map((r, i) => [r.id, i]));
+        const posShade = new Map(this.stoneShades.map((r, i) => [r.id, i]));
+        const rank = (map, f) => {
+            const id = this.m2oId(f);
+            return map.has(id) ? map.get(id) : Number.MAX_SAFE_INTEGER;
+        };
+        return rows.sort((a, b) =>
+            rank(posType, a.stone_type_id)   - rank(posType, b.stone_type_id) ||
+            rank(posShape, a.stone_shape_id) - rank(posShape, b.stone_shape_id) ||
+            rank(posSize, a.stone_size_id)   - rank(posSize, b.stone_size_id) ||
+            rank(posShade, a.stone_shade_id) - rank(posShade, b.stone_shade_id)
+        );
+    }
+
     async selectMargin(marginId) {
         this._deletedAddonIds = [];
         this._deletedMetalIds = [];
@@ -132,10 +165,14 @@ export class MarginsManage extends Component {
         this.state.partRate = partRates.length
             ? { ...partRates[0], _key: partRates[0].id, _dirty: false }
             : null;
-        this.state.addons = addons.map(r => ({ ...r, _key: r.id, _dirty: false }));
-        this.state.metals = metals.map(r => ({ ...r, _key: r.id, _dirty: false }));
-        this.state.stonesConditional = stonesConditional.map(r => ({ ...r, _key: r.id, _dirty: false }));
-        this.state.stonesNormal = stonesNormal.map(r => ({ ...r, _key: r.id, _dirty: false }));
+        this.state.addons = this._sortByLookup(
+            addons.map(r => ({ ...r, _key: r.id, _dirty: false })), 'addon_id', this.addonTypes);
+        this.state.metals = this._sortByLookup(
+            metals.map(r => ({ ...r, _key: r.id, _dirty: false })), 'metal_purity_id', this.purities);
+        this.state.stonesConditional = this._sortByLookup(
+            stonesConditional.map(r => ({ ...r, _key: r.id, _dirty: false })), 'stone_cat_id', this.stoneCategories);
+        this.state.stonesNormal = this._sortStoneNormal(
+            stonesNormal.map(r => ({ ...r, _key: r.id, _dirty: false })));
     }
 
     onHeaderFieldChange(field, value) {
