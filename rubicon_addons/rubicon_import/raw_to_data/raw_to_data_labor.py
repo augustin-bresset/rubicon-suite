@@ -100,7 +100,7 @@ if __name__ == '__main__':
         csv_name = "ModelLabor.csv"
         fieldnames = ["id", "model_id", "metal_id", "labor_id", "cost", "currency_id"]
         def row_to_dict(row):
-            if not row[0].isalpha():
+            if not row[0].strip().isalpha():
                 return
             model_code = create_model_code(row[0], row[1])
             metal_code = strip_code_space(row[2])
