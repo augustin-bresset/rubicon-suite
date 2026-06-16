@@ -27,7 +27,7 @@ export class StoneManage extends Component {
             activeTab: "cats_types",
 
             // Recutting global config
-            recutting: { id: null, cost: 50, currency_id: false, _dirty: false },
+            recutting: { id: null, cost: 50, currency_id: false, min_weight: 0.25, _dirty: false },
 
             // Tab 1: Categories & Types
             categories: [],
@@ -197,7 +197,7 @@ export class StoneManage extends Component {
             this.orm.searchRead(
                 "pdp.stone.recutting.config",
                 [],
-                ["id", "cost", "currency_id"],
+                ["id", "cost", "currency_id", "min_weight"],
                 {}
             ),
         ]);
@@ -214,7 +214,7 @@ export class StoneManage extends Component {
             this.state.recutting = { ...rc, _dirty: false };
         } else {
             const thb = currencies.find(c => c.name === 'THB');
-            this.state.recutting = { id: null, cost: 50, currency_id: thb ? [thb.id, thb.name] : false, _dirty: false };
+            this.state.recutting = { id: null, cost: 50, currency_id: thb ? [thb.id, thb.name] : false, min_weight: 0.25, _dirty: false };
         }
 
         this.state.categories = cats.map(r => ({ ...r, _key: r.id, _dirty: false }));
@@ -618,6 +618,7 @@ export class StoneManage extends Component {
         const vals = {
             cost: parseFloat(rc.cost) || 0,
             currency_id: this.m2oId(rc.currency_id) || false,
+            min_weight: parseFloat(rc.min_weight) || 0,
         };
         try {
             if (rc.id) {

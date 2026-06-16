@@ -80,6 +80,10 @@
                                 </option>
                             </t>
                         </select>
+                        <span class="fw-semibold">Min Weight /ct</span>
+                        <input type="number" class="form-control form-control-sm text-end" step="0.01" style="width:110px;"
+                               t-att-value="state.recutting.min_weight || 0"
+                               t-on-input="(e) => this.onRecuttigFieldChange('min_weight', e.target.value)"/>
                         <button class="btn btn-primary btn-sm"
                                 t-att-disabled="!state.recutting._dirty"
                                 t-on-click="() => this.saveRecutting()">Save</button>
