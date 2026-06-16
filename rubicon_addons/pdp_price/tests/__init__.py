@@ -5,3 +5,4 @@ from . import test_component_addon
 from . import test_component_part
 from . import test_component_labor
 from . import test_price_computation
+from . import test_price_table_golden
