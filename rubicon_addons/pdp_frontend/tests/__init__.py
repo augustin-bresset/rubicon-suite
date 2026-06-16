@@ -2,3 +2,4 @@ from . import test_pdp_processes
 from . import test_pdp_product_copy
 from . import test_tours
 from . import test_workspace_service
+from . import test_r132_smoke
