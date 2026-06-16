@@ -173,3 +173,56 @@ class TestRubiconUomUserPref(TransactionCase):
         self.troy_oz.set_global_default()
         self.assertTrue(self.troy_oz.is_global_default)
         self.assertFalse(self.gram.is_global_default)
+
+
+class TestStandardOunceMetalCost(TransactionCase):
+    """Introduce the standard (avoirdupois) ounce and reproduce the legacy
+    metal cost from meta/pdp/smoke_test.md through rubicon_uom.
+
+    R132's metal line was 758.45 in the old PDP capture, priced per *standard*
+    ounce (28.349523125 g). The current engine prices per *troy* ounce
+    (31.1034768 g), giving 690.69. Adding the standard ounce as a unit and
+    converting through rubicon_uom must yield each figure for its own unit —
+    a check against an externally-sourced value, not a snapshot of our output,
+    and an exercise of the uom module on a real pricing basis.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.mass = cls.env['rubicon.uom.category'].create({
+            'name': 'Metal Weight', 'code': 'mw_oz_test',
+        })
+        cls.gram = cls.env['rubicon.uom'].create({
+            'name': 'Gramme', 'symbol': 'g', 'category_id': cls.mass.id,
+            'ratio': 1.0, 'is_reference': True, 'is_global_default': True,
+        })
+        cls.troy_oz = cls.env['rubicon.uom'].create({
+            'name': 'Troy Ounce', 'symbol': 'oz t', 'category_id': cls.mass.id,
+            'ratio': 31.1034768,
+        })
+        # The unit being introduced: the standard (avoirdupois) ounce.
+        cls.std_oz = cls.env['rubicon.uom'].create({
+            'name': 'Standard Ounce', 'symbol': 'oz', 'category_id': cls.mass.id,
+            'ratio': 28.349523125,
+        })
+
+    def test_standard_ounce_conversion(self):
+        # 1 standard ounce == 28.349523125 g, and back.
+        self.assertAlmostEqual(self.std_oz.convert(1.0, self.gram), 28.349523125, places=6)
+        self.assertAlmostEqual(self.gram.convert(28.349523125, self.std_oz), 1.0, places=6)
+
+    def test_metal_cost_basis_matches_smoke_test(self):
+        # R132 white gold: 3255 $/oz, 8.8 g alloy, 18K = 75% pure (smoke_test.md).
+        cost_per_oz = 3255.0
+        pure_grams = 8.8 * 0.75
+
+        cost_standard = cost_per_oz * self.gram.convert(pure_grams, self.std_oz)  # ~757.8
+        cost_troy = cost_per_oz * self.gram.convert(pure_grams, self.troy_oz)     # 690.69
+
+        # Standard ounce reproduces the legacy capture (758.45) within screenshot rounding.
+        self.assertAlmostEqual(cost_standard, 758.45, delta=1.0)
+        # Troy ounce reproduces the current engine figure exactly.
+        self.assertAlmostEqual(cost_troy, 690.69, delta=0.1)
+        # Pricing per standard ounce is heavier than per (larger) troy ounce.
+        self.assertGreater(cost_standard, cost_troy)
