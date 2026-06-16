@@ -3,4 +3,4 @@ from . import test_pdp_product_copy
 from . import test_tours
 from . import test_workspace_service
 from . import test_r132_smoke
-from . import test_r132_cost_golden
+from . import test_r132_cost_checks

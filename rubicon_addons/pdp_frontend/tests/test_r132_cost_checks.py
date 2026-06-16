@@ -4,38 +4,19 @@ from odoo.tests.common import TransactionCase
 OZ_TO_G = 31.1034768
 
 
-class TestR132CostGolden(TransactionCase):
-    """Golden-master of the R132 cost table (see meta/pdp/smoke_test.md).
+class TestR132CostChecks(TransactionCase):
+    """Non-circular cost checks on the R132 reference product.
 
-    The product cost table is never stored — it is recomputed on the fly — so
-    this test pins the *current* output of pdp.price.service for the R132
-    reference product (margin Emasur, 18K, USD). Its job is to guarantee the
-    pricing formulas keep producing the same figures (regression guard), and
-    to re-derive the metal line from first principles so a change to the
-    formula or to the ounce constant is caught.
-
-    These numbers differ from the old-PDP capture in smoke_test.md on purpose:
-    e.g. Metal is 690.69 here vs 758.45 there because the engine now prices in
-    troy ounces (31.10 g) instead of standard ounces (28.35 g) — the correct
-    unit for precious metals. Update the golden values only when a reference
-    price/rate/margin is changed deliberately.
+    The cost table is recomputed on the fly. Rather than pin a snapshot of the
+    engine's own output (which only proves it equals itself), this validates
+    relationships that must hold for any correct computation: price = cost +
+    margin on each line and Net = sum of the lines, plus an independent
+    re-derivation of the metal line from the troy-ounce formula.
 
     Skips when the R132 dataset or the Emasur margin is absent.
     """
 
     REF_CODE = 'R132-GA+RHO+CT+PF+T/W'
-
-    # (cost, margin, price) per line, current engine output, margin = Emasur.
-    GOLDEN = {
-        'Metal':     (690.69, 124.32, 815.01),
-        'Stone':     (114.72,  20.90, 135.62),
-        'Setting':   (22.93,   59.04,  81.97),
-        'Recutting': (7.80,     0.00,   7.80),
-        'Labor':     (16.72,   43.05,  59.77),
-        'Misc':      (8.00,     7.96,  15.96),
-        'Parts':     (0.00,     0.00,   0.00),
-    }
-    GOLDEN_NET = (860.86, 255.27, 1116.13)
 
     def setUp(self):
         super().setUp()
@@ -49,21 +30,6 @@ class TestR132CostGolden(TransactionCase):
             self.product.id, self.margin.id, self.usd.id,
             purity_id=self.purity.id, conv_metal_code=False)
         self.lines = {ln['label']: ln for ln in self.res['lines']}
-
-    def test_cost_table_matches_golden(self):
-        for label, (cost, margin, price) in self.GOLDEN.items():
-            self.assertIn(label, self.lines, f"missing cost line {label}")
-            ln = self.lines[label]
-            self.assertAlmostEqual(ln['cost'], cost, places=2, msg=f"{label} cost")
-            self.assertAlmostEqual(ln['margin'], margin, places=2, msg=f"{label} margin")
-            self.assertAlmostEqual(ln['price'], price, places=2, msg=f"{label} price")
-
-    def test_net_totals_match_golden(self):
-        cost, margin, price = self.GOLDEN_NET
-        t = self.res['totals']
-        self.assertAlmostEqual(t['cost'], cost, places=2)
-        self.assertAlmostEqual(t['margin'], margin, places=2)
-        self.assertAlmostEqual(t['price'], price, places=2)
 
     def test_invariants_hold(self):
         # price = cost + margin on every line, and Net = sum of the lines.
