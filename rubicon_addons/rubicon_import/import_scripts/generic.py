@@ -1,4 +1,5 @@
 import csv
+import logging
 import os
 import time
 import re
@@ -6,6 +7,8 @@ import re
 from odoo import fields as odoo_fields
 
 from ..tools.standard import create_stone_code
+
+_logger = logging.getLogger(__name__)
 
 many2one_cache = {}
 
@@ -19,7 +22,7 @@ def resolve_many2one(env, field, raw_value):
 
     # Initialiser le cache pour ce comodel
     if comodel not in many2one_cache:
-        print(f"[INFO] Loading {comodel} references via `{rec_name}`...")
+        _logger.info("Loading %s references via `%s`...", comodel, rec_name)
         many2one_cache[comodel] = {
             str(r[rec_name]).strip(): r.id
             for r in env[comodel].search([])
@@ -28,7 +31,8 @@ def resolve_many2one(env, field, raw_value):
     # Résolution via cache
     result = many2one_cache[comodel].get(raw_value)
     if result is None:
-        print(f"[WARN] Unresolved Many2one: {field.name} = '{raw_value}' in {comodel} using {rec_name}")
+        _logger.warning("Unresolved Many2one: %s = '%s' in %s using %s",
+                        field.name, raw_value, comodel, rec_name)
         return ''
     return result
 
@@ -97,7 +101,7 @@ def import_csv(
         rows = list(reader)
 
         if not rows:
-            print("CSV file is empty.")
+            _logger.warning("CSV file is empty: %s", data_path)
             return
 
         headers = rows[0][1:]  # skip XML ID
@@ -118,7 +122,7 @@ def import_csv(
                 if not field:
                     continue
                 if field.required and is_empty(raw_value):
-                    print(f"[WARN] Required field {field.name} empty : {raw_value} => Skipped {row} ")
+                    _logger.warning("Required field %s empty: %r => skipped %s", field.name, raw_value, row)
                     skipped = True
                     break
                 if fields_maj and field_name in fields_maj:
@@ -180,7 +184,7 @@ def import_csv(
         logs['created'] += len(created)
 
     # Phase 2: write deferred fields
-    print(f"[INFO] Deferred size {len(deferred_updates)}")
+    _logger.info("Deferred size %d", len(deferred_updates))
     for rec, deferred in deferred_updates:
         # print(f"[INFO] {rec.id} updated with {deferred_vals}")
         for field_name in deferred.keys():
@@ -191,11 +195,9 @@ def import_csv(
     duration = time.time() - start
 
     if verbose:
-        print(f"Import for {model._name}:")
-        print(f"  => Total rows    : {logs['total']}")
-        print(f"  => Created       : {logs['created']}")
-        print(f"  => Updated       : {logs['updated']}")
-        print(f"  => Skipped       : {logs['skipped']}")
-        print(f"  => Time elapsed  : {duration:.2f} seconds")
+        _logger.info(
+            "Import for %s: total=%d created=%d updated=%d skipped=%d in %.2fs",
+            model._name, logs['total'], logs['created'], logs['updated'], logs['skipped'], duration,
+        )
 
     return logs

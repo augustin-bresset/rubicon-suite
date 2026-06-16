@@ -1,3 +1,7 @@
+import logging
+
+_logger = logging.getLogger(__name__)
+
 # Cache M2O mutualisé
 _many2one_cache = {}
 
@@ -20,7 +24,7 @@ def resolve_many2one(env, field, raw_value):
     # init cache
     global _many2one_cache
     if comodel not in _many2one_cache:
-        print(f"[INFO] Loading {comodel} references via `{rec_name}`...")
+        _logger.info("Loading %s references via `%s`...", comodel, rec_name)
         _many2one_cache[comodel] = {
             str(r[rec_name]).strip(): r.id
             for r in env[comodel].search([])
@@ -28,5 +32,6 @@ def resolve_many2one(env, field, raw_value):
 
     hit = _many2one_cache[comodel].get(raw)
     if hit is None:
-        print(f"[WARN] Unresolved Many2one: {field.name} = '{raw}' in {comodel} using {rec_name}")
+        _logger.warning("Unresolved Many2one: %s = '%s' in %s using %s",
+                        field.name, raw, comodel, rec_name)
     return hit

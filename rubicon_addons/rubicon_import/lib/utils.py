@@ -1,6 +1,9 @@
+import logging
 import os
 import time
 from contextlib import contextmanager
+
+_logger = logging.getLogger(__name__)
 
 def is_empty(value):
     """Considère vide: '', None, '\\x00'."""
@@ -16,4 +19,4 @@ def chrono():
     t0 = time.time()
     yield
     dt = time.time() - t0
-    print(f"[INFO] Time elapsed: {dt:.2f}s")
+    _logger.info("Time elapsed: %.2fs", dt)

@@ -1,4 +1,8 @@
 import csv
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 def read_csv_as_dicts(path):
     """
@@ -9,7 +13,7 @@ def read_csv_as_dicts(path):
         reader = csv.reader(f)
         rows = list(reader)
     if not rows:
-        print("CSV file is empty.")
+        _logger.warning("CSV file is empty: %s", path)
         return [], []
     headers = rows[0]
     dict_rows = [dict(zip(headers, r)) for r in rows[1:]]

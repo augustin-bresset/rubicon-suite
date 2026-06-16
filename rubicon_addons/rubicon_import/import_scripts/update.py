@@ -1,9 +1,12 @@
 import csv
+import logging
 import os
 import time
-# useful 
+# useful
 import re
 from odoo import fields as odoo_fields
+
+_logger = logging.getLogger(__name__)
 
 many2one_cache = {}
 
@@ -16,7 +19,7 @@ def resolve_many2one(env, field, raw_value):
     raw_value = str(raw_value).strip()
 
     if comodel not in many2one_cache:
-        print(f"[INFO] Loading {comodel} references via `{rec_name}`...")
+        _logger.info("Loading %s references via `%s`...", comodel, rec_name)
         many2one_cache[comodel] = {
             str(r[rec_name]).strip(): r.id
             for r in env[comodel].search([])
@@ -24,7 +27,8 @@ def resolve_many2one(env, field, raw_value):
 
     result = many2one_cache[comodel].get(raw_value)
     if result is None:
-        print(f"[WARN] Unresolved Many2one: {field.name} = '{raw_value}' in {comodel} using {rec_name}")
+        _logger.warning("Unresolved Many2one: %s = '%s' in %s using %s",
+                        field.name, raw_value, comodel, rec_name)
     return result
 
 def fields_type_to_func(env, field, value):
@@ -66,7 +70,7 @@ def update_from_csv(env, model, datafile_path, mapping=None, match_field=None, v
         reader = csv.reader(csvfile)
         rows = list(reader)
         if not rows:
-            print("CSV file is empty.")
+            _logger.warning("CSV file is empty: %s", data_path)
             return
 
         headers = rows[0]
@@ -96,15 +100,15 @@ def update_from_csv(env, model, datafile_path, mapping=None, match_field=None, v
                     val = raw_value
                     
                 if field.required and is_empty(val):
-                    print(f"[WARN] Required field {field.name} empty : {raw_value} | {val} => no created {row} ")
+                    _logger.warning("Required field %s empty: %r | %r => not created %s",
+                                    field.name, raw_value, val, row)
                     skipped = True
                     
                 if is_empty(val): continue
                 vals[model_field] = fields_type_to_func(env, field, val)
             
             if i == 20:
-                print(match_field)
-                print(vals)
+                _logger.debug("sample row 20: match_field=%s vals=%s", match_field, vals)
             if vals == {}:
                 continue
             key = vals.get(match_field)
@@ -130,11 +134,8 @@ def update_from_csv(env, model, datafile_path, mapping=None, match_field=None, v
             records_set.add(key)
             
             if i == 20:
-                print(match_field)
-                print(vals)
-                print(ref)
-                print(records_set)
-                print(key)
+                _logger.debug("sample row 20: match_field=%s vals=%s ref=%s records=%s key=%s",
+                              match_field, vals, ref, records_set, key)
                         
             # ref = None
             # if match_field and match_field in vals:
@@ -157,10 +158,9 @@ def update_from_csv(env, model, datafile_path, mapping=None, match_field=None, v
 
     duration = time.time() - start
     if verbose:
-        print(f"Import for {model._name}:")
-        print(f"  => Total rows    : {logs['total']}")
-        print(f"  => Created       : {logs['created']}")
-        print(f"  => Updated       : {logs['updated']}")
-        print(f"  => Time elapsed  : {duration:.2f} seconds")
+        _logger.info(
+            "Import for %s: total=%d created=%d updated=%d in %.2fs",
+            model._name, logs['total'], logs['created'], logs['updated'], duration,
+        )
 
     return logs
