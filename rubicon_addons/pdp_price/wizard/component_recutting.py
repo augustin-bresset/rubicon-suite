@@ -1,6 +1,6 @@
 from odoo import models, api
 
-MIN_REC_WEIGHT = 0.4  # minimum recutting weight per stone (carats)
+MIN_REC_WEIGHT = 0.25  # minimum recutting weight charged per stone (carats)
 
 
 class PriceRecutting(models.TransientModel):
@@ -35,7 +35,13 @@ class PriceRecutting(models.TransientModel):
             rw = line.reshaped_weight or 0.0
             if rw <= 0.0:
                 continue
+            # Charge the reshaped weight, with a per-stone minimum (a small
+            # stone still costs the same to recut).
             effective_weight = max(MIN_REC_WEIGHT, rw)
             total_cost += converted_cost * effective_weight * (line.pieces or 1)
 
-        return self._payload('recutting', total_cost, 0.0, currency)
+        # Recutting (REC) is stone labor, so it carries the stone-labor margin,
+        # the same rate the setting line uses.
+        stone_rate = (margin.labor_stone_rate or 1.0) if margin else 1.0
+        total_margin = (stone_rate - 1.0) * total_cost
+        return self._payload('recutting', total_cost, total_margin, currency)
