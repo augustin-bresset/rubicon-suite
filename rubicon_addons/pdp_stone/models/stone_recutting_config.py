@@ -11,6 +11,13 @@ class StoneRecuttigConfig(models.Model):
         default=50.0,
     )
     currency_id = fields.Many2one('res.currency', string='Currency', required=True)
+    min_weight = fields.Float(
+        string='Minimum Recutting Weight /ct',
+        default=0.25,
+        digits=(7, 4),
+        help='A stone lighter than this is still charged this minimum weight '
+             'per piece (a small stone costs the same to recut).',
+    )
 
     @api.model
     def get_config(self):
