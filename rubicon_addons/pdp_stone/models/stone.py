@@ -52,20 +52,32 @@ class Stone(models.Model):
         ("cost_currency_chk", "CHECK (cost IS NULL OR currency_id IS NOT NULL)", "Currency required when a cost is set."),
     ]
     
-    @api.depends('type_id', 'shape_id', 'size_id', 'shade_id')
+    @api.depends('type_id', 'shape_id', 'size_id')
     def _compute_weight_id(self):
         for record in self:
             if record.type_id and record.shape_id and record.size_id:
-                domain = [
+                # Weight is keyed by type/shape/size only: shade (colour) does
+                # not change the physical weight, and the weight catalogue is
+                # stored without shade. Matching on shade left every coloured
+                # stone (with a shade) unable to find its shadeless weight row.
+                weight_record = self.env['pdp.stone.weight'].search([
                     ('type_id', '=', record.type_id.id),
                     ('shape_id', '=', record.shape_id.id),
                     ('size_id', '=', record.size_id.id),
-                    ('shade_id', '=', record.shade_id.id if record.shade_id else False),
-                ]
-                weight_record = self.env['pdp.stone.weight'].search(domain, limit=1)
+                ], limit=1)
                 record.weight_id = weight_record.id if weight_record else False
             else:
                 record.weight_id = False
+
+    def _recompute_weight_id(self):
+        """Force a refresh of the stored weight_id.
+
+        _compute_weight_id searches pdp.stone.weight but cannot @api.depends on
+        it, so a change to the weight catalogue must be pushed back here.
+        """
+        if self:
+            self.invalidate_recordset(['weight_id', 'weight'])
+            self._compute_weight_id()
                 
     @staticmethod
     def get_stone_code(type, shade, shape, size):

@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class StoneWeight(models.Model):
     """Weight for a specific type, shape, shade and size of stone.
@@ -46,4 +46,43 @@ class StoneWeight(models.Model):
             ]
             label = f"{'/'.join(parts)} → {rec.weight} ct"
             res.append((rec.id, label))
+        return res
+
+    # ------------------------------------------------------------------
+    # Propagation to pdp.stone.weight_id
+    #
+    # pdp.stone._compute_weight_id() searches this catalogue but cannot
+    # @api.depends on it, so a stored weight_id stays stale when a weight row
+    # is created/changed/removed. Push the refresh back to the matching stones.
+    # ------------------------------------------------------------------
+
+    def _matching_stones(self):
+        """Stones whose (type, shape, size) match any of these weight rows."""
+        Stone = self.env['pdp.stone']
+        stones = Stone.browse()
+        for rec in self:
+            if rec.type_id and rec.shape_id and rec.size_id:
+                stones |= Stone.search([
+                    ('type_id', '=', rec.type_id.id),
+                    ('shape_id', '=', rec.shape_id.id),
+                    ('size_id', '=', rec.size_id.id),
+                ])
+        return stones
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._matching_stones()._recompute_weight_id()
+        return records
+
+    def write(self, vals):
+        before = self._matching_stones()
+        res = super().write(vals)
+        (before | self._matching_stones())._recompute_weight_id()
+        return res
+
+    def unlink(self):
+        stones = self._matching_stones()
+        res = super().unlink()
+        stones._recompute_weight_id()
         return res
