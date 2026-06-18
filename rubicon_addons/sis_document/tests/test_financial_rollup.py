@@ -36,8 +36,8 @@ class TestSisFinancialRollup(TransactionCase):
         self.assertAlmostEqual(self.doc.total_amount, 350.0, places=2)
         self.assertAlmostEqual(self.doc.total_cost, 240.0, places=2)
         self.assertAlmostEqual(self.doc.total_profit, 110.0, places=2)
-        # document profit_pct field stores 2 decimals (digits=(6, 2))
-        self.assertAlmostEqual(self.doc.profit_pct, 110.0 / 240.0, places=2)
+        # document profit_pct stores 4 decimals (digits=(6, 4)), matching the line
+        self.assertAlmostEqual(self.doc.profit_pct, 110.0 / 240.0, places=4)
 
     def test_totals_follow_an_edit(self):
         # Editing a line's qty re-rolls the line and the document totals.

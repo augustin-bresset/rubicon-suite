@@ -62,7 +62,7 @@ class SisDocument(models.Model):
                               compute='_compute_totals', store=True)
     total_profit = fields.Float(string='Total Profit', digits=(12, 2),
                                 compute='_compute_totals', store=True)
-    profit_pct = fields.Float(string='Profit %', digits=(6, 2),
+    profit_pct = fields.Float(string='Profit %', digits=(6, 4),
                               compute='_compute_totals', store=True)
 
     # Company info stamp

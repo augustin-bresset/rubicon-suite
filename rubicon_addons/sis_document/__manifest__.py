@@ -1,6 +1,6 @@
 {
     'name': 'SIS Document',
-    'version': '18.0.1.1.0',
+    'version': '18.0.1.1.1',
     'license': 'LGPL-3',
     'category': 'Sales',
     'summary': 'SIS Sales Documents (Quotations, Orders, Invoices)',
