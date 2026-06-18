@@ -1146,7 +1146,8 @@ export class SisWorkspace extends Component {
             qty_balance: parseFloat(item.qty_balance) || 0,
             currency_id: this._m2oId(item.currency_id) || false,
             unit_price: parseFloat(item.unit_price) || 0,
-            amount: parseFloat(item.amount) || 0,
+            // amount/cost/profit are computed on the model from qty/unit_price/
+            // unit_cost — don't send them (the local amount calc is display-only).
             unit_cost: parseFloat(item.unit_cost) || 0,
             item_group: item.item_group || '',
             special_instruction: item.special_instruction || '',

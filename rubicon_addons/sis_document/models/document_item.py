@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class SisDocumentItem(models.Model):
@@ -29,11 +29,15 @@ class SisDocumentItem(models.Model):
     currency_id = fields.Many2one('res.currency', string='Currency')
     currency_legacy = fields.Char(string='Currency (legacy)')  # preserve original
     unit_price = fields.Float(string='Unit Price', digits=(12, 2))
-    amount = fields.Float(string='Amount', digits=(12, 2))
+    amount = fields.Float(string='Amount', digits=(12, 2),
+                          compute='_compute_amounts', store=True)
     unit_cost = fields.Float(string='Unit Cost', digits=(12, 2))
-    cost = fields.Float(string='Cost', digits=(12, 2))
-    profit = fields.Float(string='Profit', digits=(12, 2))
-    profit_pct = fields.Float(string='Profit %', digits=(6, 4))
+    cost = fields.Float(string='Cost', digits=(12, 2),
+                        compute='_compute_amounts', store=True)
+    profit = fields.Float(string='Profit', digits=(12, 2),
+                          compute='_compute_amounts', store=True)
+    profit_pct = fields.Float(string='Profit %', digits=(6, 4),
+                              compute='_compute_amounts', store=True)
 
     # Weights
     diamond_weight = fields.Float(string='Diamond Wt.', digits=(10, 4))
@@ -51,6 +55,16 @@ class SisDocumentItem(models.Model):
 
     # Sequence within document
     sequence = fields.Integer(string='Seq', default=0)
+
+    @api.depends('qty', 'unit_price', 'unit_cost')
+    def _compute_amounts(self):
+        # Frozen inputs are unit_price / unit_cost; the line rollups derive from
+        # them, with the same formulas as the legacy import (profit% = profit / cost).
+        for item in self:
+            item.amount = (item.qty or 0.0) * (item.unit_price or 0.0)
+            item.cost = (item.qty or 0.0) * (item.unit_cost or 0.0)
+            item.profit = item.amount - item.cost
+            item.profit_pct = (item.profit / item.cost) if item.cost else 0.0
 
     def get_category_name(self):
         """Return the product category name from the design code alphabetic prefix."""

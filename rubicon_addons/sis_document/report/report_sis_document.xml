@@ -381,7 +381,7 @@
         </table>
 
         <!-- ═══ TOTAL ═══ -->
-        <t t-set="base_total"    t-value="doc.total_amount if doc.total_amount else sum(line.amount for line in doc.item_ids)"/>
+        <t t-set="base_total"    t-value="doc.total_amount"/>
         <t t-set="display_total" t-value="base_total * markup_factor"/>
         <table class="sis-total-row">
             <tr>

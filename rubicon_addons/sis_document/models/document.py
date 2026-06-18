@@ -50,15 +50,20 @@ class SisDocument(models.Model):
     ship_book = fields.Char(string='Book')
     ship_page = fields.Char(string='Page')
 
-    # Financials (stored from import / legacy)
-    total_amount = fields.Float(string='Total Amount', digits=(12, 2))
+    # Financials — rolled up from the line items (frozen via item unit_price/cost)
+    total_amount = fields.Float(string='Total Amount', digits=(12, 2),
+                                compute='_compute_totals', store=True)
     freight_insurance = fields.Float(string='Freight & Insurance', digits=(12, 2))
     total_cif = fields.Float(string='Total C.I.F', digits=(12, 2))
     deposit = fields.Float(string='Less Deposit', digits=(12, 2))
-    total_qty = fields.Integer(string='Total Qty')
-    total_cost = fields.Float(string='Total Cost', digits=(12, 2))
-    total_profit = fields.Float(string='Total Profit', digits=(12, 2))
-    profit_pct = fields.Float(string='Profit %', digits=(6, 2))
+    total_qty = fields.Integer(string='Total Qty',
+                               compute='_compute_totals', store=True)
+    total_cost = fields.Float(string='Total Cost', digits=(12, 2),
+                              compute='_compute_totals', store=True)
+    total_profit = fields.Float(string='Total Profit', digits=(12, 2),
+                                compute='_compute_totals', store=True)
+    profit_pct = fields.Float(string='Profit %', digits=(6, 2),
+                              compute='_compute_totals', store=True)
 
     # Company info stamp
     stamp = fields.Text(string='Stamp')
@@ -70,6 +75,16 @@ class SisDocument(models.Model):
     child_doc_ids = fields.Many2many(
         'sis.document', 'sis_doc_parent_child_rel',
         'parent_id', 'child_id', string='Child Documents')
+
+    @api.depends('item_ids.amount', 'item_ids.cost', 'item_ids.profit', 'item_ids.qty')
+    def _compute_totals(self):
+        for doc in self:
+            items = doc.item_ids
+            doc.total_qty = int(sum(items.mapped('qty')))
+            doc.total_amount = sum(items.mapped('amount'))
+            doc.total_cost = sum(items.mapped('cost'))
+            doc.total_profit = sum(items.mapped('profit'))
+            doc.profit_pct = (doc.total_profit / doc.total_cost) if doc.total_cost else 0.0
 
     def get_ornament_quantities(self):
         """Return {category_name: total_qty} grouped by product category."""
