@@ -1,2 +1,3 @@
 beautifulsoup4
 requests
+websocket-client  # Odoo HttpCase browser tours (pdp_frontend/tests/test_tours)
