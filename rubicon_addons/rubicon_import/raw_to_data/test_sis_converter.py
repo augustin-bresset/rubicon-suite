@@ -155,7 +155,7 @@ class TestParty7AJ:
     def test_notes_contain_mobile(self):
         assert 'mobile 089-0440321' in self.company['notes']
 
-    # ── contact name still in CSV (used by sync_parties.py for contact child) ──────
+    # ── contact name still in CSV (used by import_sis_parties.py for contact child) ──────
 
     def test_contact_name_in_csv(self):
         assert self.company['sis_contact'] == 'Mr. Jose V. ROSAS'
@@ -187,7 +187,7 @@ class TestParty7AJ:
         assert 'sis_ship_stamp' in self.company
         assert self.company['sis_ship_stamp'] == '750 + 2'
 
-    # ── ship data still present in CSV (used by sync_parties.py for delivery child) ───
+    # ── ship data still present in CSV (used by import_sis_parties.py for delivery child) ───
 
     def test_ship_name_is_care_of(self):
         # delivery.name = addressee / care-of (first address line)
@@ -340,7 +340,7 @@ class TestDocumentSOEMA25001:
     # ── financials ────────────────────────────────────────
 
     def test_currency(self):
-        assert self.doc['currency'] == 'US'
+        assert self.doc['currency_legacy'] == 'US'
 
     def test_total_qty(self):
         assert self.doc['total_qty'] == 1

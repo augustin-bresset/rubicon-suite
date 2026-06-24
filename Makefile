@@ -47,6 +47,7 @@ TEST_TAGS        ?= pdp_frontend
 .PHONY: help reset_odoo_db init-data-modules update-data-modules update-pdp-modules \
         update-sis-modules upgrade deploy-demo logs-demo logs-prod \
         raw_to_data_all import_all import_csv import_pictures import-pictures \
+        raw-to-data-sis import-sis sis-all \
         export-pictures audit_counts create_diagram \
         stone-data stone-install stone-import stone-all backup backup-help \
         cleanup-none-all migrate-picture-scope cleanup-orphan-pictures \
@@ -76,8 +77,11 @@ help:
 	@echo "    make logs-prod              Follow production Odoo logs"
 	@echo ""
 	@echo "  Import"
-	@echo "    make import_all             Run full CSV import"
+	@echo "    make import_all             Run full CSV import (PDP)"
 	@echo "    make import_csv WHAT=...    Import a specific CSV"
+	@echo "    make raw-to-data-sis        Generate SIS CSVs from data/backup_sis/"
+	@echo "    make import-sis             Import SIS parties + documents (backs up first)"
+	@echo "    make sis-all                Full SIS pipeline: CSVs, modules, import"
 	@echo "    make export-pictures        Extract photos/drawings from Pictures.bak → data/pictures/"
 	@echo "    make import-pictures        Import data/pictures/ into Odoo (pdp.picture)"
 	@echo "    make audit_counts           Print record counts to log"
@@ -162,6 +166,20 @@ import_all: backup
 
 import_csv:
 	@WHAT=$(WHAT) $(ODOO_SHELL) < ops/import/import_csv.py
+
+# --- SIS data pipeline ---
+
+raw-to-data-sis:
+	$(PY) -m rubicon_import.raw_to_data.raw_to_data_sis
+
+import-sis: backup
+	@mkdir -p $(LOG_DIR)
+	@echo "→ DB=$(DB)  parties → ops/import/import_sis_parties.py"
+	$(ODOO_SHELL) < ops/import/import_sis_parties.py   2>&1 | tee $(LOG_DIR)/import_sis_parties_$(TIMESTAMP).log
+	@echo "→ DB=$(DB)  documents → ops/import/import_sis_documents.py"
+	$(ODOO_SHELL) < ops/import/import_sis_documents.py 2>&1 | tee $(LOG_DIR)/import_sis_docs_$(TIMESTAMP).log
+
+sis-all: raw-to-data-sis update-sis-modules import-sis
 
 export-pictures:
 	@echo "→ Starting temporary SQL Server container…"

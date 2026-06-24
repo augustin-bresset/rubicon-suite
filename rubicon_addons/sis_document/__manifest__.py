@@ -10,7 +10,7 @@
         'data/sis.doc.type.csv',
         'data/doc_type_remarks.xml',
         'data/sis.doc.in.mode.csv',
-        # sis.document and sis.document.item are business data — loaded via import_sis_odoo.py
+        # sis.document and sis.document.item are business data — loaded via ops/import/import_sis_documents.py
         'report/report_action.xml',
         'report/report_sis_document.xml',
         'views/document_views.xml',
