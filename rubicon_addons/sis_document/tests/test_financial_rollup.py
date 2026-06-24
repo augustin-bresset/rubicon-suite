@@ -12,7 +12,7 @@ class TestSisFinancialRollup(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.doc = cls.env['sis.document'].create({'name': 'SQ-TEST-1', 'doc_type_code': 'SQ'})
+        cls.doc = cls.env['sis.document'].create({'name': 'SQ-ZZT-1', 'doc_type_code': 'SQ'})
         Item = cls.env['sis.document.item']
         cls.item1 = Item.create({
             'document_id': cls.doc.id, 'sequence': 10,

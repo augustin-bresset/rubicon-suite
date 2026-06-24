@@ -7,6 +7,10 @@ class SisDocument(models.Model):
     _rec_name = 'name'
     _order = 'date_created desc, id desc'
 
+    _sql_constraints = [
+        ('name_uniq', 'unique(name)', 'A document with this name already exists.'),
+    ]
+
     # Header
     name = fields.Char(string='Doc Name', required=True, index=True)
     doc_type_id = fields.Many2one('sis.doc.type', string='Document Type')
@@ -99,6 +103,12 @@ class SisDocument(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # Allocate the running number for any "SO-EMA-" style partial name.
+        # An advisory lock serialises concurrent allocations for the same prefix
+        # until commit (no two transactions read the same MAX), and a per-prefix
+        # local counter keeps a single create([...]) batch from reusing a number.
+        # The unique constraint on `name` is the final backstop.
+        local_seq = {}
         for vals in vals_list:
             name = vals.get('name', '')
             parts = name.split('-')
@@ -107,18 +117,18 @@ class SisDocument(models.Model):
                 doc_type, client_code = parts[0], parts[1]
                 date = vals.get('date_created') or fields.Date.today()
                 # date arrives as string "2025-01-15" via JSON-RPC
-                if isinstance(date, str):
-                    yy = date[2:4]
-                else:
-                    yy = str(date.year)[2:]
+                yy = date[2:4] if isinstance(date, str) else str(date.year)[2:]
                 prefix = f'{doc_type}-{client_code}-{yy}'
-                self.env.cr.execute(
-                    "SELECT MAX(name) FROM sis_document WHERE name LIKE %s",
-                    [prefix + '%']
-                )
-                row = self.env.cr.fetchone()
-                last = row[0] if row and row[0] else None
-                seq = (int(last[len(prefix):]) + 1) if last else 1
-                vals['name'] = f'{prefix}{seq:03d}'
+                if prefix not in local_seq:
+                    self.env.cr.execute(
+                        "SELECT pg_advisory_xact_lock(hashtext(%s))", [prefix])
+                    self.env.cr.execute(
+                        "SELECT MAX(name) FROM sis_document WHERE name LIKE %s",
+                        [prefix + '%'])
+                    row = self.env.cr.fetchone()
+                    last = row[0] if row and row[0] else None
+                    local_seq[prefix] = int(last[len(prefix):]) if last else 0
+                local_seq[prefix] += 1
+                vals['name'] = f'{prefix}{local_seq[prefix]:03d}'
                 vals['doc_type_code'] = doc_type
         return super().create(vals_list)

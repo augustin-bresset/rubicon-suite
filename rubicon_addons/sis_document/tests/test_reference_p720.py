@@ -16,8 +16,10 @@ class TestSisReferenceP720(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # Synthetic client code (ZZQ) so the fixture never collides with seeded
+        # SIS data; the documented order this mirrors is SO-EMA-25001.
         cls.doc = cls.env['sis.document'].create({
-            'name': 'SO-EMA-25001', 'doc_type_code': 'SO',
+            'name': 'SO-ZZQ-25001', 'doc_type_code': 'SO',
         })
         cls.item = cls.env['sis.document.item'].create({
             'document_id': cls.doc.id,
