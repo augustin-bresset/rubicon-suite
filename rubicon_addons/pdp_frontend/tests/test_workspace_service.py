@@ -126,3 +126,42 @@ class TestWorkspaceService(TransactionCase):
 
         after = self.env['pdp.product.model.metal'].search_count([('model_id', '=', self.model.id)])
         self.assertEqual(before, after, "the valid metal create must roll back with the failed save")
+
+    def test_center_stone_switch_through_service(self):
+        """Switching the center stone sends both rows (old cleared, new set);
+        the single-center constraint must accept the flip because it is checked
+        at flush, after both writes land."""
+        type_b = self.env['pdp.stone.type'].create({'code': 'WST2', 'name': 'WS Type 2'})
+        stone_b = self.env['pdp.stone'].create({
+            'code': 'WST2-WSP-WS-1.0', 'type_id': type_b.id, 'size_id': self.stone_size.id,
+        })
+        Stone = self.env['pdp.product.stone']
+
+        def _line(rec_id, stone, center):
+            return {
+                'id': rec_id, 'key': rec_id or -(stone.id), 'stone_id': stone.id,
+                'pieces': 1, 'weight': 1.0, 'reshaped_weight': 0, 'setting': 0,
+                'setting_type_id': False, 'reshaped_shape_id': False,
+                'reshaped_size_id': False, 'line_num': '', 'is_center': center,
+            }
+
+        # 1. Two stones, A is the center.
+        res = self.svc.save_product_workspace(self._base_payload(
+            stones=[_line(None, self.stone, True), _line(None, stone_b, False)],
+        ))
+        comp_id = res['composition_id']
+        a_id = res['new_ids']['stones'][str(-self.stone.id)]
+        b_id = res['new_ids']['stones'][str(-stone_b.id)]
+        self.assertTrue(Stone.browse(a_id).is_center)
+        self.assertFalse(Stone.browse(b_id).is_center)
+
+        # 2. Switch the center to B: both rows carry the flip in one save.
+        self.svc.save_product_workspace(self._base_payload(
+            composition_id=comp_id,
+            stones=[
+                {**_line(a_id, self.stone, False)},
+                {**_line(b_id, stone_b, True)},
+            ],
+        ))
+        self.assertFalse(Stone.browse(a_id).is_center)
+        self.assertTrue(Stone.browse(b_id).is_center)

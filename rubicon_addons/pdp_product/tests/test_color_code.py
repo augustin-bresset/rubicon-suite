@@ -165,3 +165,45 @@ class TestColorCode(TransactionCase):
         })
         self.assertEqual(product.compute_color_code(), '')
         self.assertEqual(product.compute_suggested_code(), 'ZMODCC1/W')
+
+    # ------------------------------------------ stateless line-data (workspace)
+
+    def test_color_code_from_line_data(self):
+        Comp = self.env['pdp.product.stone.composition']
+        line_data = [
+            {'type_id': self.t_light.id, 'weight': 0.5},
+            {'type_id': self.t_heavy.id, 'weight': 1.0},
+            {'type_id': self.t_heavy.id, 'weight': 0.2},
+        ]
+        self.assertEqual(Comp.color_code_from_line_data(line_data), 'ZRU+ADIA')
+
+    def test_color_code_from_line_data_uses_reshaped(self):
+        Comp = self.env['pdp.product.stone.composition']
+        line_data = [
+            {'type_id': self.t_light.id, 'weight': 0.5, 'reshaped_weight': 2.0},
+            {'type_id': self.t_heavy.id, 'weight': 1.0, 'reshaped_weight': 0.0},
+        ]
+        self.assertEqual(Comp.color_code_from_line_data(line_data), 'ADIA+ZRU')
+
+    def test_color_code_from_line_data_center(self):
+        Comp = self.env['pdp.product.stone.composition']
+        line_data = [
+            {'type_id': self.t_light.id, 'weight': 0.5, 'is_center': True},
+            {'type_id': self.t_heavy.id, 'weight': 1.0},
+        ]
+        self.assertEqual(Comp.color_code_from_line_data(line_data), 'ADIA+ZRU')
+
+    def test_color_code_from_line_data_empty_and_typeless(self):
+        Comp = self.env['pdp.product.stone.composition']
+        self.assertEqual(Comp.color_code_from_line_data([]), '')
+        self.assertEqual(Comp.color_code_from_line_data([{'weight': 1.0}]), '')
+
+    def test_suggest_from_line_data(self):
+        Comp = self.env['pdp.product.stone.composition']
+        line_data = [
+            {'type_id': self.t_heavy.id, 'weight': 1.0},
+            {'type_id': self.t_light.id, 'weight': 0.5},
+        ]
+        res = Comp.suggest_from_line_data(line_data, 'ZMODCC1', 'W')
+        self.assertEqual(res['colors'], 'ZRU+ADIA')
+        self.assertEqual(res['product_code'], 'ZMODCC1-ZRU+ADIA/W')

@@ -114,6 +114,8 @@ export class PdpWorkspace extends Component {
             // Stones tab (editable)
             stoneRows: [],
             selectedStoneKey: null,
+            suggestedColors: "",
+            suggestedCode: "",
 
             // Labor tab
             laborModelCosts: [],
@@ -369,6 +371,7 @@ export class PdpWorkspace extends Component {
             row._stoneDetail = null;
             row._dirty = true;
             this.state.isDirty = true;
+            this._refreshSuggestedCode();
             return;
         }
         const found = await this.orm.searchRead(
@@ -420,6 +423,7 @@ export class PdpWorkspace extends Component {
         }
         row._dirty = true;
         this.state.isDirty = true;
+        this._refreshSuggestedCode();
     }
 
     async onStoneAttrChange(key, field, newId) {
@@ -465,6 +469,7 @@ export class PdpWorkspace extends Component {
         }
         row._dirty = true;
         this.state.isDirty = true;
+        this._refreshSuggestedCode();
     }
 
     getStoneType(stone_type_id_val) {
@@ -1047,7 +1052,7 @@ export class PdpWorkspace extends Component {
                 const stones = await this.orm.searchRead(
                     "pdp.product.stone", [["composition_id", "=", compId]],
                     ["id", "line_num", "stone_id", "pieces", "weight", "reshaped_weight", "setting", "setting_type_id",
-                     "reshaped_shape_id", "reshaped_size_id"]
+                     "reshaped_shape_id", "reshaped_size_id", "is_center"]
                 );
                 // Batch-fetch stone details (type/shade/shape/size/cost/currency) in one query
                 const stoneIds = stones.filter(s => s.stone_id).map(s => Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id);
@@ -1206,6 +1211,7 @@ export class PdpWorkspace extends Component {
             this.state.stoneOriginal = [];
             this.state.stoneRecut = [];
         }
+        this._refreshSuggestedCode();
     }
 
     async fetchProductParts() {
@@ -1418,10 +1424,11 @@ export class PdpWorkspace extends Component {
             id: null, _key: key, _dirty: true,
             line_num: '', stone_id: false, _stoneCode: '', _stoneValid: false, _stoneDetail: null, _stoneTypeName: '',
             pieces: 1, weight: '0', reshaped_weight: 0, setting: 0, setting_type_id: false,
-            reshaped_shape_id: false, reshaped_size_id: false,
+            reshaped_shape_id: false, reshaped_size_id: false, is_center: false,
         });
         this.state.selectedStoneKey = key;
         this.state.isDirty = true;
+        this._refreshSuggestedCode();
     }
 
     selectStoneRow(key) {
@@ -1450,6 +1457,57 @@ export class PdpWorkspace extends Component {
         if (row.id) this._deletedStoneIds.push(row.id);
         this.state.stoneRows.splice(idx, 1);
         this.state.isDirty = true;
+        this._refreshSuggestedCode();
+    }
+
+    setCenterStone(key) {
+        const target = this.state.stoneRows.find(r => r._key === key);
+        if (!target) return;
+        const wasCenter = !!target.is_center;
+        // Single center per composition: clear any other and mark it dirty so the
+        // save payload carries the flip (the backend constraint needs both rows).
+        for (const row of this.state.stoneRows) {
+            if (row.is_center && row._key !== key) {
+                row.is_center = false;
+                row._dirty = true;
+            }
+        }
+        // Clicking the current center clears it (no center -> None).
+        target.is_center = !wasCenter;
+        target._dirty = true;
+        this.state.isDirty = true;
+        this._refreshSuggestedCode();
+    }
+
+    _buildStoneLineData() {
+        return this.state.stoneRows
+            .filter(r => r._stoneValid && this.m2oId(r._stoneDetail?.type_id))
+            .map(r => ({
+                type_id: this.m2oId(r._stoneDetail?.type_id),
+                weight: parseFloat(r.weight) || 0,
+                reshaped_weight: parseFloat(r.reshaped_weight) || 0,
+                is_center: !!r.is_center,
+            }));
+    }
+
+    async _refreshSuggestedCode() {
+        if (!this.state.selectedProductId) {
+            this.state.suggestedColors = "";
+            this.state.suggestedCode = "";
+            return;
+        }
+        try {
+            const res = await this.orm.call(
+                "pdp.product.stone.composition", "suggest_from_line_data",
+                [this._buildStoneLineData(), this.activeModel?.code || "", this.activeProduct?.metal || ""]
+            );
+            this.state.suggestedColors = res.colors || "";
+            this.state.suggestedCode = res.product_code || "";
+        } catch (e) {
+            // Preview only — never block the workspace on a failed suggestion.
+            this.state.suggestedColors = "";
+            this.state.suggestedCode = "";
+        }
     }
 
     setStoneField(key, field, value) {
@@ -1963,6 +2021,7 @@ export class PdpWorkspace extends Component {
                     setting_type_id: m2o(row.setting_type_id) || false,
                     reshaped_shape_id: m2o(row.reshaped_shape_id) || false,
                     reshaped_size_id: m2o(row.reshaped_size_id) || false,
+                    is_center: !!row.is_center,
                 });
             }
         }
@@ -2068,6 +2127,7 @@ export class PdpWorkspace extends Component {
             this.state.isDirty = false;
             this.notification.add("Saved successfully.", { type: "success" });
             await this.recalculatePrice();
+            this._refreshSuggestedCode();
         } catch (e) {
             console.error("Save error:", e);
             this.notification.add("Save error: " + (e.message || e), { type: "danger" });

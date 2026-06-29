@@ -513,11 +513,16 @@
                             <span class="fw-bold small">Stones</span>
                             <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addStone()">+ Add</button>
                         </div>
+                        <div t-if="state.suggestedCode" class="d-flex align-items-center gap-3 mb-1 small text-muted">
+                            <span>Code couleur calculé : <span class="fw-bold text-dark"><t t-esc="state.suggestedColors || '—'"/></span></span>
+                            <span>Code produit suggéré : <span class="fw-bold text-dark"><t t-esc="state.suggestedCode"/></span></span>
+                        </div>
                         <div style="overflow-x:auto;">
                         <table class="table table-sm table-bordered table-hover mb-0" style="font-size: 11px; min-width: 1100px;">
                             <thead class="bg-light">
                                 <tr>
                                     <th style="width:70px;">LineNum</th>
+                                    <th style="width:46px;" class="text-center" title="Center stone">Centre</th>
                                     <th style="min-width:110px;">Stone</th>
                                     <th style="min-width:60px;">Shade</th>
                                     <th style="min-width:60px;">Shape</th>
@@ -542,6 +547,12 @@
                                                    t-att-value="sr.line_num"
                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'line_num', ev.target.value)"
                                                    placeholder="Num"/>
+                                        </td>
+                                        <td class="text-center align-middle" t-on-click.stop="">
+                                            <input type="checkbox" class="form-check-input m-0" style="cursor:pointer;"
+                                                   t-att-checked="sr.is_center"
+                                                   t-on-change="() => this.setCenterStone(sr._key)"
+                                                   title="Center stone"/>
                                         </td>
                                         <td t-on-click.stop="">
                                             <input type="text"
@@ -655,7 +666,7 @@
                                     </tr>
                                 </t>
                                 <t t-if="state.stoneRows.length === 0">
-                                    <tr><td colspan="14" class="text-muted text-center p-3">No stones. Click "+ Add" to add a stone.</td></tr>
+                                    <tr><td colspan="15" class="text-muted text-center p-3">No stones. Click "+ Add" to add a stone.</td></tr>
                                 </t>
                             </tbody>
                         </table>
