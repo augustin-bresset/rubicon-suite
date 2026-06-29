@@ -516,6 +516,9 @@
                         <div t-if="state.suggestedCode" class="d-flex align-items-center gap-3 mb-1 small text-muted">
                             <span>Code couleur calculé : <span class="fw-bold text-dark"><t t-esc="state.suggestedColors || '—'"/></span></span>
                             <span>Code produit suggéré : <span class="fw-bold text-dark"><t t-esc="state.suggestedCode"/></span></span>
+                            <button class="btn btn-sm btn-outline-primary py-0 px-2"
+                                    t-if="activeProduct and state.suggestedCode and state.suggestedCode !== activeProduct.code"
+                                    t-on-click="() => this.applySuggestedCode()">Appliquer</button>
                         </div>
                         <div style="overflow-x:auto;">
                         <table class="table table-sm table-bordered table-hover mb-0" style="font-size: 11px; min-width: 1100px;">

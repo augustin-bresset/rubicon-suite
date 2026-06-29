@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError, UserError
 
 class Product(models.Model):
     _name = 'pdp.product'
@@ -7,11 +8,18 @@ class Product(models.Model):
     _rec_name='code'
     
     code = fields.Char(
-        string='Design reference code', 
-        required=True, 
+        string='Design reference code',
+        required=True,
         index=True
     )
-    
+
+    legacy_code = fields.Char(
+        string='Legacy code',
+        index=True,
+        help="Original design reference, preserved when the structured colour "
+             "code is imposed, so historical references stay searchable.",
+    )
+
     category_id = fields.Many2one(
         comodel_name='pdp.product.category',
         string='Category',
@@ -88,6 +96,58 @@ class Product(models.Model):
         return Composition.build_product_code(
             model_code, self.compute_color_code(), self.metal
         )
+
+    @api.constrains('code')
+    def _check_code_unique(self):
+        """Product codes are unique. Checked only on create and on code
+        changes, so untouched legacy records are never re-validated; this
+        imposes unique numbering going forward without rewriting the past.
+        """
+        for product in self:
+            if not product.code:
+                continue
+            duplicate = self.with_context(active_test=False).search_count([
+                ('code', '=', product.code),
+                ('id', '!=', product.id),
+            ])
+            if duplicate:
+                raise ValidationError(
+                    "Product code '%s' already exists; codes must be unique."
+                    % product.code
+                )
+
+    def apply_suggested_code(self):
+        """Set this product's code to the computed structured code.
+
+        Preserves the previous code in ``legacy_code`` and keeps the
+        composition code aligned. Raises if the suggestion is empty or already
+        used by another product. Opt-in and per-record: legacy codes are never
+        rewritten automatically.
+        """
+        self.ensure_one()
+        new_code = self.compute_suggested_code()
+        if not new_code:
+            raise UserError("No structured code can be computed for this product yet.")
+        if new_code == self.code:
+            return self.code
+        duplicate = self.with_context(active_test=False).search([
+            ('code', '=', new_code), ('id', '!=', self.id),
+        ], limit=1)
+        if duplicate:
+            raise UserError(
+                "The suggested code '%s' is already used by another product."
+                % new_code
+            )
+        vals = {'code': new_code}
+        if self.code:
+            vals['legacy_code'] = self.code
+        self.write(vals)
+        if self.stone_composition_id:
+            Composition = self.env['pdp.product.stone.composition']
+            self.stone_composition_id.code = Composition.build_composition_code(
+                self.model_id.code if self.model_id else '', self.compute_color_code()
+            )
+        return new_code
 
     # =========================================================================
     # Domain Methods - Reusable by API, Cron, OWL, Reports

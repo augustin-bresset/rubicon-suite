@@ -1510,6 +1510,22 @@ export class PdpWorkspace extends Component {
         }
     }
 
+    async applySuggestedCode() {
+        const productId = this.state.selectedProductId;
+        if (!productId) return;
+        if (this.state.isDirty) {
+            this.notification.add("Save your changes before applying the suggested code.", { type: "warning" });
+            return;
+        }
+        try {
+            await this.orm.call("pdp.product", "apply_suggested_code", [[productId]]);
+            this.notification.add("Suggested code applied.", { type: "success" });
+            await this._reloadProducts(productId);
+        } catch (e) {
+            this.notification.add(`Apply failed: ${e.message || e}`, { type: "danger" });
+        }
+    }
+
     setStoneField(key, field, value) {
         const row = this.state.stoneRows.find(r => r._key === key);
         if (!row) return;
