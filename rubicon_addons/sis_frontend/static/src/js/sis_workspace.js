@@ -559,16 +559,16 @@ export class SisWorkspace extends Component {
 
     async openMetalReqModal() {
         if (!this.state.doc?.id) return;
-        const items = this.state.items.filter(it => it.design && parseFloat(it.qty) > 0);
+        const items = this.state.items.filter(it => this._m2oId(it.product_id) && parseFloat(it.qty) > 0);
         if (!items.length) {
-            this.notification.add("No items with design codes in this document.", { type: "warning" });
+            this.notification.add("No items linked to a PDP product in this document.", { type: "warning" });
             return;
         }
-        const designCodes = [...new Set(items.map(it => it.design))];
+        const productIds = [...new Set(items.map(it => this._m2oId(it.product_id)))];
         const products = await this.orm.searchRead(
-            'pdp.product', [['code', 'in', designCodes]], ['id', 'code', 'model_id'], {}
+            'pdp.product', [['id', 'in', productIds]], ['id', 'model_id'], {}
         );
-        const productByCode = Object.fromEntries(products.map(p => [p.code, p]));
+        const productById = Object.fromEntries(products.map(p => [p.id, p]));
         const modelIds = [...new Set(
             products.map(p => Array.isArray(p.model_id) ? p.model_id[0] : p.model_id).filter(Boolean)
         )];
@@ -591,7 +591,7 @@ export class SisWorkspace extends Component {
         }
         const totals = {};
         for (const item of items) {
-            const product = productByCode[item.design];
+            const product = productById[this._m2oId(item.product_id)];
             if (!product) continue;
             const modelId = Array.isArray(product.model_id) ? product.model_id[0] : product.model_id;
             const qty = parseFloat(item.qty) || 0;
@@ -823,7 +823,7 @@ export class SisWorkspace extends Component {
                 "sis.document.item",
                 [["document_id", "=", docId]],
                 [
-                    "id", "sequence", "design", "purity",
+                    "id", "sequence", "design", "product_id", "purity",
                     "qty", "qty_shipped", "qty_balance",
                     "currency_id", "unit_price", "amount", "description",
                     "item_group", "special_instruction", "size_remarks",
@@ -1187,7 +1187,7 @@ export class SisWorkspace extends Component {
         const item = this.state.items.find(it => it._key === this.state.selectedItemId);
         const modelCode = item?.design ? item.design.split('-')[0] : '';
         this.state.pricesModelCode = modelCode;
-        if (modelCode) await this._loadPricesDesigns(modelCode, item?.design || null);
+        if (modelCode) await this._loadPricesDesigns(modelCode, this._m2oId(item?.product_id) || null);
     }
 
     closePricesModal() {
@@ -1209,7 +1209,7 @@ export class SisWorkspace extends Component {
         if (code) await this._loadPricesDesigns(code, null);
     }
 
-    async _loadPricesDesigns(modelCode, preferredDesignCode) {
+    async _loadPricesDesigns(modelCode, preferredProductId) {
         const [designs, allMetals] = await Promise.all([
             this.orm.searchRead('pdp.product', [['model_id.code', '=', modelCode]], ['id', 'code'], { order: 'code' }),
             this.orm.searchRead('pdp.product.model.metal', [['model_id.code', '=', modelCode]],
@@ -1232,7 +1232,7 @@ export class SisWorkspace extends Component {
         this._updatePricesMetal();
 
         // Select preferred design, or first one
-        const preferred = preferredDesignCode ? designs.find(d => d.code === preferredDesignCode) : null;
+        const preferred = preferredProductId ? designs.find(d => d.id === preferredProductId) : null;
         const toSelect = preferred || designs[0] || null;
         if (toSelect) await this._selectPricesDesign(toSelect.id);
     }
@@ -1291,11 +1291,10 @@ export class SisWorkspace extends Component {
             this.state.pricesStones = [];
         }
 
-        // Purchase history for this design
-        const code = prod.code || '';
-        if (code) {
+        // Purchase history for this product (follows the FK, not the design string)
+        if (prod.id) {
             const hist = await this.orm.searchRead(
-                'sis.document.item', [['design', '=', code]],
+                'sis.document.item', [['product_id', '=', prod.id]],
                 ['document_id', 'qty', 'unit_price', 'amount'],
                 { order: 'id desc', limit: 5 }
             );

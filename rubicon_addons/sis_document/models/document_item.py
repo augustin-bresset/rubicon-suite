@@ -66,6 +66,80 @@ class SisDocumentItem(models.Model):
             item.profit = item.amount - item.cost
             item.profit_pct = (item.profit / item.cost) if item.cost else 0.0
 
+    # =========================================================================
+    # Product linking — keep the product_id FK in sync with the design code
+    #
+    # 'design' is the historical snapshot of what was ordered and equals
+    # pdp.product.code. The FK lets callers use the stable product id instead
+    # of re-matching the string, so products can later be renamed without
+    # breaking documents. product_id is fully server-derived: the client never
+    # sends it, it is resolved here from 'design'.
+    # =========================================================================
+
+    @api.model
+    def _resolve_product_ids(self, designs):
+        """Map design strings to pdp.product ids (matched on product code).
+
+        Includes archived products (active_test=False); most legacy products
+        are archived. When several products share a code (codes are not unique
+        until the colour-code migration), the active one with the lowest id
+        wins, deterministically.
+        """
+        designs = {d for d in designs if d}
+        if not designs:
+            return {}
+        products = self.env['pdp.product'].with_context(active_test=False).search(
+            [('code', 'in', list(designs))], order='active desc, id'
+        )
+        mapping = {}
+        for product in products:
+            mapping.setdefault(product.code, product.id)
+        return mapping
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        to_resolve = [
+            v['design'] for v in vals_list
+            if v.get('design') and not v.get('product_id')
+        ]
+        if to_resolve:
+            mapping = self._resolve_product_ids(to_resolve)
+            for vals in vals_list:
+                if vals.get('design') and not vals.get('product_id'):
+                    product_id = mapping.get(vals['design'])
+                    if product_id:
+                        vals['product_id'] = product_id
+        return super().create(vals_list)
+
+    def write(self, vals):
+        # Re-link whenever the design changes, unless an explicit product_id is
+        # provided. Clears the FK when the new design matches no product.
+        if 'design' in vals and 'product_id' not in vals:
+            design = vals.get('design')
+            mapping = self._resolve_product_ids([design]) if design else {}
+            vals = dict(vals, product_id=mapping.get(design) or False)
+        return super().write(vals)
+
+    @api.model
+    def _backfill_product_links(self):
+        """Link items to products by design==code where product_id is empty.
+
+        Idempotent: only touches still-unlinked items. Returns
+        ``{'linked': n, 'unmatched': m}``.
+        """
+        items = self.search([('product_id', '=', False), ('design', '!=', False)])
+        mapping = self._resolve_product_ids(items.mapped('design'))
+        by_product = {}
+        for item in items:
+            product_id = mapping.get(item.design)
+            if product_id:
+                by_product.setdefault(product_id, []).append(item.id)
+        linked = 0
+        for product_id, item_ids in by_product.items():
+            self.browse(item_ids).write({'product_id': product_id})
+            linked += len(item_ids)
+        return {'linked': linked, 'unmatched': len(items) - linked}
+
     def get_category_name(self):
         """Return the product category name from the design code alphabetic prefix."""
         self.ensure_one()
