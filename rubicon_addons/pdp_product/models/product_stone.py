@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class ProductStone(models.Model):
     _name = 'pdp.product.stone'
@@ -64,6 +65,31 @@ class ProductStone(models.Model):
         required=True,
         ondelete='cascade'
     )
+
+    is_center = fields.Boolean(
+        string='Center Stone',
+        default=False,
+        help="Designates this line as the center stone of the composition. "
+             "It is placed first in the computed colour code. "
+             "At most one center stone is allowed per composition.",
+    )
+
+    @api.constrains('is_center', 'composition_id')
+    def _check_single_center(self):
+        """A composition may have at most one center stone."""
+        for line in self:
+            if not (line.is_center and line.composition_id):
+                continue
+            duplicates = self.search_count([
+                ('composition_id', '=', line.composition_id.id),
+                ('is_center', '=', True),
+                ('id', '!=', line.id),
+            ])
+            if duplicates:
+                raise ValidationError(
+                    "A composition can have only one center stone "
+                    "(composition %s)." % line.composition_id.code
+                )
 
     @api.onchange('setting_type_id')
     def _onchange_setting_type(self):

@@ -67,6 +67,29 @@ class Product(models.Model):
             product.total_stone_weight = total
 
     # =========================================================================
+    # Colour / product code computation
+    # =========================================================================
+
+    def compute_color_code(self):
+        """Colour code (ordered stone type codes) from this product's stones."""
+        self.ensure_one()
+        if not self.stone_composition_id:
+            return ''
+        return self.stone_composition_id.compute_color_code()
+
+    def compute_suggested_code(self):
+        """Suggested product code '{model}-{colors}/{metal}' from current data.
+
+        This is a non-destructive suggestion: it never writes to ``code``.
+        """
+        self.ensure_one()
+        Composition = self.env['pdp.product.stone.composition']
+        model_code = self.model_id.code if self.model_id else ''
+        return Composition.build_product_code(
+            model_code, self.compute_color_code(), self.metal
+        )
+
+    # =========================================================================
     # Domain Methods - Reusable by API, Cron, OWL, Reports
     # =========================================================================
 
