@@ -51,6 +51,6 @@ class Metal(models.Model):
         string='Default Purity',
     )
     purity_system = fields.Selection(
-        [('carat', 'Carat'), ('millesimal', 'Millièmes')],
+        [('carat', 'Carat'), ('millesimal', 'Millesimal')],
         string='Purity System',
     )
