@@ -40,9 +40,6 @@
                     <t t-if="state.isDirty">
                         <span class="badge bg-warning text-dark">Unsaved changes</span>
                     </t>
-                    <span class="fw-bold text-warning fs-5" t-if="activeModel">
-                        <t t-esc="activeModel.category_id ? activeModel.category_id[1] : ''"/>
-                    </span>
                 </div>
             </div>
 
