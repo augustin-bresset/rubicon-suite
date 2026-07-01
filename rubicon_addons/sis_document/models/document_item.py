@@ -78,7 +78,13 @@ class SisDocumentItem(models.Model):
 
     @api.model
     def _resolve_product_ids(self, designs):
-        """Map design strings to pdp.product ids (matched on product code).
+        """Map design strings to pdp.product ids.
+
+        A design is matched against the current product code first and, for
+        designs still unresolved, falls back to the legacy code preserved when
+        a product's code was migrated to the structured colour code. The design
+        snapshots hold the original (legacy) code, so this fallback keeps them
+        linked after products are renamed.
 
         Includes archived products (active_test=False); most legacy products
         are archived. When several products share a code (codes are not unique
@@ -88,12 +94,21 @@ class SisDocumentItem(models.Model):
         designs = {d for d in designs if d}
         if not designs:
             return {}
-        products = self.env['pdp.product'].with_context(active_test=False).search(
-            [('code', 'in', list(designs))], order='active desc, id'
-        )
+        Product = self.env['pdp.product'].with_context(active_test=False)
         mapping = {}
-        for product in products:
+        # Primary match: the design equals the product's current code.
+        for product in Product.search(
+            [('code', 'in', list(designs))], order='active desc, id'
+        ):
             mapping.setdefault(product.code, product.id)
+        # Fallback: for designs no current code resolved, match the legacy code
+        # kept when the product was renamed to the structured colour code.
+        remaining = designs - set(mapping)
+        if remaining:
+            for product in Product.search(
+                [('legacy_code', 'in', list(remaining))], order='active desc, id'
+            ):
+                mapping.setdefault(product.legacy_code, product.id)
         return mapping
 
     @api.model_create_multi

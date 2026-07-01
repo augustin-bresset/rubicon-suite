@@ -54,6 +54,30 @@ class TestSisItemProductLink(TransactionCase):
         item = self._item(design='ZLNKMOD-DTS/W')
         self.assertEqual(item.product_id, archived)
 
+    def test_links_by_legacy_code_when_renamed(self):
+        # A product renamed to a structured code keeps its old code in
+        # legacy_code; a design snapshot holding that old code still links.
+        renamed = self.env['pdp.product'].create({
+            'code': 'ZLNKMOD-DTS/W', 'legacy_code': 'OLDCODE-42/W',
+            'model_id': self.model.id, 'active': True, 'metal': 'W',
+        })
+        item = self._item(design='OLDCODE-42/W')
+        self.assertEqual(item.product_id, renamed)
+
+    def test_current_code_wins_over_legacy_code(self):
+        # When a design matches one product's current code and another's legacy
+        # code, the current-code match takes precedence.
+        current = self.env['pdp.product'].create({
+            'code': 'SHARED-CODE/W', 'model_id': self.model.id,
+            'active': True, 'metal': 'W',
+        })
+        self.env['pdp.product'].create({
+            'code': 'ZLNKMOD-XX/W', 'legacy_code': 'SHARED-CODE/W',
+            'model_id': self.model.id, 'active': True, 'metal': 'W',
+        })
+        item = self._item(design='SHARED-CODE/W')
+        self.assertEqual(item.product_id, current)
+
     def test_backfill_links_unlinked_items(self):
         item = self._item(design='ZLNKMOD-RU/W')
         # Simulate legacy data where the FK was never populated.
