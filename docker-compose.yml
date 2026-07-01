@@ -19,6 +19,10 @@ services:
     env_file: .env
     depends_on:
       - db
+    # Dev only: --dev=assets recompiles web assets on the fly so edited JS/XML
+    # is served without a module upgrade. Must be a CLI flag: the config-file
+    # dev_mode key is overwritten by the command-line value in this Odoo build.
+    command: odoo --dev=assets
     ports:
       - "8069:8069"
     environment:
