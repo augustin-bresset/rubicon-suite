@@ -1,5 +1,5 @@
 <odoo>
-  <!-- Form view du wizard -->
+  <!-- Wizard form view -->
   <record id="view_pdp_price_preview_form" model="ir.ui.view">
     <field name="name">pdp.price.preview.form</field>
     <field name="model">pdp.price.preview</field>
@@ -41,7 +41,7 @@
     </field>
   </record>
 
-  <!-- Action fenêtre du wizard -->
+  <!-- Wizard window action -->
   <record id="action_pdp_price_preview_wizard" model="ir.actions.act_window">
     <field name="name">Price Preview</field>
     <field name="res_model">pdp.price.preview</field>

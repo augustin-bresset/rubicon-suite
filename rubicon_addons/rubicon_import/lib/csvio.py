@@ -6,8 +6,8 @@ _logger = logging.getLogger(__name__)
 
 def read_csv_as_dicts(path):
     """
-    Retourne (headers, rows) où rows = [ {header: value}, ... ].
-    Si le fichier est vide: ([], []).
+    Returns (headers, rows) where rows = [ {header: value}, ... ].
+    If the file is empty: ([], []).
     """
     with open(path, newline='', encoding='utf-8') as f:
         reader = csv.reader(f)

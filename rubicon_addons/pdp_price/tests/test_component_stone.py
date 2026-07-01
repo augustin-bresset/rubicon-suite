@@ -11,7 +11,7 @@ class TestPriceStone(TransactionCase):
 
         cls.currency = cls.env.company.currency_id
 
-        # Types / Marges
+        # Types / Margins
         cls.margin_model = cls.env['pdp.margin']
         cls.margin_stone_model = cls.env['pdp.margin.stone']
         
@@ -49,7 +49,7 @@ class TestPriceStone(TransactionCase):
             'currency_id': cls.currency.id,
         })
 
-        # Composition + lignes de pierre
+        # Composition + stone lines
         cls.compo = cls.env['pdp.product.stone.composition'].create({
             'code': 'Comp A',
         })
@@ -78,7 +78,7 @@ class TestPriceStone(TransactionCase):
         cls.component = cls.env['pdp.price.stone']
 
     def test_compute_basic_no_margin(self):
-        """Sans marge: cost=30, margin=0, price=30"""
+        """No margin: cost=30, margin=0, price=30"""
         res = self.component.compute(
             product=self.product,
             margin=None,
@@ -86,13 +86,13 @@ class TestPriceStone(TransactionCase):
             date=fields.Date.today(),
         )
         self.assertEqual(res['type'], 'stone')
-        # arrondi via devise
+        # rounded via currency
         self.assertEqual(res['cost'], self.currency.round(30.0))
         self.assertEqual(res['margin'], self.currency.round(0.0))
         self.assertEqual(res['price'], self.currency.round(30.0))
 
     def test_compute_with_margin_by_stone_type(self):
-        """Marge type 20%: cost=30, margin=6, price=36"""
+        """Type margin 20%: cost=30, margin=6, price=36"""
         
         res = self.component.compute(
             product=self.product,
@@ -106,8 +106,8 @@ class TestPriceStone(TransactionCase):
         self.assertEqual(res['price'], self.currency.round(36.0))
 
     def test_compute_ignores_search_default_context(self):
-        """Le composant ne doit pas exploser si un search_default_* est présent dans le contexte."""
-        # Simule une ouverture depuis une vue qui aurait injecté un filtre par défaut
+        """The component must not blow up if a search_default_* is present in the context."""
+        # Simulate an opening from a view that would have injected a default filter
         comp = self.component.with_context(search_default_product_id=999)
         margin = None
         res = comp.compute(
@@ -116,22 +116,22 @@ class TestPriceStone(TransactionCase):
             currency=self.currency,
             date=fields.Date.today(),
         )
-        # Le résultat doit être le même que sans marge ni contamination
+        # The result must be the same as without margin or contamination
         self.assertEqual(res['cost'], self.currency.round(30.0))
         self.assertEqual(res['margin'], self.currency.round(0.0))
         self.assertEqual(res['price'], self.currency.round(30.0))
 
     def test_compute_with_conditional_margin_applied(self):
-        """Marge conditionnelle appliquée car cost > comparative_cost"""
+        """Conditional margin applied because cost > comparative_cost"""
         cond_margin = self.env['pdp.margin.stone.conditional'].create({
             'margin_id': self.margin.id,
             'stone_cat_id': self.stone_cat.id,
-            'comparative_cost': 20.0,  # seuil
+            'comparative_cost': 20.0,  # threshold
             'currency_id': self.currency.id,
-            'operator': '>' ,  # si cost > comparative_cost
+            'operator': '>' ,  # if cost > comparative_cost
             'rate': 1.5,       # +50%
         })
-        # notre product: cost=30, donc > 20 → marge conditionnelle 50% * 30 = 15
+        # our product: cost=30, so > 20 → conditional margin 50% * 30 = 15
         res = self.component.compute(
             product=self.product,
             margin=self.margin,
@@ -143,16 +143,16 @@ class TestPriceStone(TransactionCase):
         self.assertEqual(res['price'], self.currency.round(45.0))
 
     def test_compute_with_conditional_margin_not_applied(self):
-        """Marge conditionnelle ignorée car cost <= comparative_cost"""
+        """Conditional margin ignored because cost <= comparative_cost"""
         cond_margin = self.env['pdp.margin.stone.conditional'].create({
             'margin_id': self.margin.id,
             'stone_cat_id': self.stone_cat.id,
-            'comparative_cost': 50.0,  # seuil trop haut
+            'comparative_cost': 50.0,  # threshold too high
             'currency_id': self.currency.id,
             'operator': '>' ,
             'rate': 1.5,
         })
-        # cost=30 ≤ 50 → condition pas remplie → fallback marge type 20%
+        # cost=30 ≤ 50 → condition not met → fallback type margin 20%
         res = self.component.compute(
             product=self.product,
             margin=self.margin,
@@ -164,16 +164,16 @@ class TestPriceStone(TransactionCase):
         self.assertEqual(res['price'], self.currency.round(36.0))
 
     def test_compute_with_conditional_margin_operator_less(self):
-        """Marge conditionnelle appliquée avec opérateur '<'"""
+        """Conditional margin applied with operator '<'"""
         cond_margin = self.env['pdp.margin.stone.conditional'].create({
             'margin_id': self.margin.id,
             'stone_cat_id': self.stone_cat.id,
             'comparative_cost': 40.0,
             'currency_id': self.currency.id,
-            'operator': '<',   # si cost < comparative_cost
+            'operator': '<',   # if cost < comparative_cost
             'rate': 1.3,       # +30%
         })
-        # cost=30 < 40 → condition remplie → 30% * 30 = 9
+        # cost=30 < 40 → condition met → 30% * 30 = 9
         res = self.component.compute(
             product=self.product,
             margin=self.margin,

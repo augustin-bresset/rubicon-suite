@@ -14,12 +14,12 @@ class TestCSVImport(TransactionCase):
         super().setUp()
         self.env = self.env(context=dict(self.env.context, tracking_disable=True))
 
-        # Création d'une catégorie de test pour le many2one
+        # Create a test category for the many2one
         self.category = self.env['pdp.stone.category'].create(
             {'code':'CAT1', 'name': 'TestCat'}
             )
 
-        # Création d'un fichier CSV temporaire
+        # Create a temporary CSV file
         self.tmpdir = tempfile.TemporaryDirectory()
         self.csv_path = os.path.join(self.tmpdir.name, 'pdp.stone.type.csv')
 
@@ -34,8 +34,8 @@ class TestCSVImport(TransactionCase):
         model = self.env['pdp.stone.type']
         logs = import_csv(
             self.env, model,
-            csv_path=self.csv_path,  # 👈 on injecte le chemin vers le fichier temporaire
-            module='pdp_stone',  # nécessaire pour le xml_id
+            csv_path=self.csv_path,  # inject the path to the temporary file
+            module='pdp_stone',  # needed for the xml_id
             verbose=False,
             register_xml_id=True
         )

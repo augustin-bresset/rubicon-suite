@@ -5,7 +5,7 @@ class PDPPictureTestWizard(models.TransientModel):
     _description = 'Test PDP Picture'
 
     model_id = fields.Many2one('pdp.product.model', string='Model', required=True)
-    # on lit l’image si une photo existe pour ce modèle
+    # read the image if a picture exists for this model
     picture_id = fields.Many2one('pdp.picture', compute='_compute_picture', store=False)
     image = fields.Image(related='picture_id.image', readonly=True)
     filename = fields.Char(related='picture_id.filename', readonly=True)

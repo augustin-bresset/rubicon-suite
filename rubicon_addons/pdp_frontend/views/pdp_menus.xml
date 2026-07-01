@@ -135,7 +135,7 @@
             sequence="2"/>
 
   <!-- ============ Odoo Manager (Technical Features only) ============ -->
-  <!-- Visible uniquement avec "Technical Features" activé sur le profil utilisateur -->
+  <!-- Visible only when "Technical Features" is enabled on the user profile -->
   <menuitem id="menu_pdp_odoo_manager"
             name="Odoo Manager"
             parent="menu_pdp_frontend_root"

@@ -11,16 +11,16 @@ class PriceProduct(models.Model):
     currency_id = fields.Many2one('res.currency', required=True,
                                   default=lambda self: self.env.company.currency_id)
 
-    # Totaux
+    # Totals
     cost = fields.Monetary(currency_field='currency_id')
     margin = fields.Monetary(currency_field='currency_id')
     price = fields.Monetary(currency_field='currency_id')
 
-    # Détail JSON (option simple) ou One2many dans un autre modèle persistant
+    # JSON detail (simple option) or One2many in another persistent model
     detail_json = fields.Json()
 
     def action_fill_from_preview(self):
-        # ouvre le wizard avec default_…, puis à la fermeture un on_close crée l’enregistrement
+        # open the wizard with default_…, then on close an on_close creates the record
         action = self.env.ref('pdp_price.action_pdp_price_preview').read()[0]
         action['context'] = {
             'default_product_id': self.product_id.id,

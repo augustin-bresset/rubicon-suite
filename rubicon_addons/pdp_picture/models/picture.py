@@ -26,7 +26,7 @@ class Picture(models.Model):
 
     # Actual image payload -> stored in filestore thanks to attachment=True
     image_1920 = fields.Image(string='Image', max_width=1920, max_height=1920, required=False)
-    image = fields.Image(related='image_1920', readonly=False, string=False)  # tu continues à utiliser "image"
+    image = fields.Image(related='image_1920', readonly=False, string=False)  # keep using "image"
 
     filename = fields.Char(string='Filename')
     

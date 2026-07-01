@@ -6,11 +6,11 @@ from contextlib import contextmanager
 _logger = logging.getLogger(__name__)
 
 def is_empty(value):
-    """Considère vide: '', None, '\\x00'."""
+    """Treats as empty: '', None, '\\x00'."""
     return value in {'', None, '\x00'}
 
 def csv_abs_path(module_file, rel_path):
-    """Chemin absolu d'un CSV depuis ce package Odoo."""
+    """Absolute path of a CSV from this Odoo package."""
     module_dir = os.path.dirname(module_file)
     return os.path.join(module_dir, '../..', rel_path)
 

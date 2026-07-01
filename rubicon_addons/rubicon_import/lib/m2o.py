@@ -2,7 +2,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-# Cache M2O mutualisé
+# Shared M2O cache
 _many2one_cache = {}
 
 def reset_m2o_cache():
@@ -11,8 +11,8 @@ def reset_m2o_cache():
 
 def resolve_many2one(env, field, raw_value):
     """
-    Résout un Many2one par rec_name exact, via cache.
-    (Même comportement que ton code “simple” actuel.)
+    Resolve a Many2one by exact rec_name, via cache.
+    (Same behavior as the current "simple" code.)
     """
     from .utils import is_empty
     comodel = field.comodel_name

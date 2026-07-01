@@ -14,7 +14,7 @@ from collections import defaultdict, Counter
 
 def unique_columns_from_clause(clause):
     """
-    Extrait les noms de colonnes d'une clause UNIQUE(...) en tuple.
+    Extract the column names from a UNIQUE(...) clause as a tuple.
     """
     m = re.search(r'unique\s*\((.*?)\)', clause, re.IGNORECASE)
     if not m:
@@ -43,7 +43,7 @@ def test_module_model(env, module_name, model_name,
                 reader = csv.reader(csvfile)
                 rows = list(reader)
 
-                headers = rows[0][1:]  # on ignore la première colonne (XML ID)
+                headers = rows[0][1:]  # skip the first column (XML ID)
                 for row in rows[1:]:
                     key = []
                     for header, value in zip(headers, row[1:]):

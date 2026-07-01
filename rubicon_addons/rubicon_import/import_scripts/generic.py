@@ -20,7 +20,7 @@ def resolve_many2one(env, field, raw_value):
     rec_name = env[comodel]._rec_name
     raw_value = str(raw_value).strip()
 
-    # Initialiser le cache pour ce comodel
+    # Initialize the cache for this comodel
     if comodel not in many2one_cache:
         _logger.info("Loading %s references via `%s`...", comodel, rec_name)
         many2one_cache[comodel] = {
@@ -28,7 +28,7 @@ def resolve_many2one(env, field, raw_value):
             for r in env[comodel].search([])
         }
 
-    # Résolution via cache
+    # Resolve via cache
     result = many2one_cache[comodel].get(raw_value)
     if result is None:
         _logger.warning("Unresolved Many2one: %s = '%s' in %s using %s",

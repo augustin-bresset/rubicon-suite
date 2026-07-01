@@ -1,5 +1,5 @@
 <odoo>
-  <!-- Active la devise THB livrée par base -->
+  <!-- Enable the THB currency shipped by base -->
   <record id="base.THB" model="res.currency">
     <field name="active">True</field>
   </record>

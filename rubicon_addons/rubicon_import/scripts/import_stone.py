@@ -1,15 +1,15 @@
 # scripts/stone_import.py
-# Script à exécuter via:  odoo shell -d <db> < scripts/stone_import.py
-# Dans odoo shell, 'env' est déjà fourni.
+# Script to run via:  odoo shell -d <db> < scripts/stone_import.py
+# In odoo shell, 'env' is already provided.
 
-# On essaie l'import "propre"...
+# Try the "clean" import...
 if not env:
     raise "ENV not defined."
     
 try:
     from odoo.addons.rubicon_import.import_scripts.generic import import_csv
 except Exception:
-    # ...sinon fallback par chemin absolu (zéro dépendance PYTHONPATH)
+    # ...otherwise fall back to an absolute path (zero PYTHONPATH dependency)
     import importlib.util
     PATH = "/mnt/extra-addons/rubicon_import/import_scripts/generic.py"
     spec = importlib.util.spec_from_file_location("generic", PATH)

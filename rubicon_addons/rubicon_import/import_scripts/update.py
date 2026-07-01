@@ -121,7 +121,7 @@ def update_from_csv(env, model, datafile_path, mapping=None, match_field=None, v
                 logs['skipped'] += 1
                 continue
 
-            # existe déjà en DB ? -> update
+            # already exists in DB? -> update
             ref = Model.search([(match_field, '=', key)], limit=1)
             if ref:
                 ref.write(vals)

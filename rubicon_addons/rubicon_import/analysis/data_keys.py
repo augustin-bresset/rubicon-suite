@@ -29,7 +29,7 @@ for pdp_data_folder in pdp_data_folders:
         with open(file_path, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
             rows = list(reader)
-            headers = rows[0][1:]  # on ignore la première colonne (XML ID)
+            headers = rows[0][1:]  # skip the first column (XML ID)
             for row in rows[1:]:
                 xml_id = row[0]
                 if xml_id in records_xml_id:
@@ -62,7 +62,7 @@ for pdp_data_folder in pdp_data_folders:
         with open(file_path, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
             rows = list(reader)
-            headers = rows[0][1:]  # on ignore la première colonne (XML ID)
+            headers = rows[0][1:]  # skip the first column (XML ID)
             for row in rows[1:]:
                 key = "_".join(row[1:])
                 if key in records_key:

@@ -3,7 +3,7 @@ from .m2o import resolve_many2one
 from .utils import is_empty
 
 def fields_type_to_func(env, field, value):
-    """Conversion générique par type de champ Odoo."""
+    """Generic conversion by Odoo field type."""
     if is_empty(value):
         return None
     if isinstance(field, odoo_fields.Float):

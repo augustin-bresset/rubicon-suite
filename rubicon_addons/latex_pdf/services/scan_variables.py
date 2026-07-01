@@ -81,8 +81,8 @@ if __name__ == "__main__":
 
     # variables, tables = scan_variables(latex_template)
 
-    # print("Variables simples :", variables)
-    # print("Tables détectées :", tables)
+    # print("Simple variables :", variables)
+    # print("Detected tables :", tables)
     env = jinja2.Environment(
         block_start_string='\\BLOCK{',
         block_end_string='}',

@@ -6,7 +6,7 @@
     "data": [
         "security/ir.model.access.csv",
         "data/market_metal.xml",        # AU, AG, PD, CU, SN, ...
-        "data/cron.xml",                # désactivé par défaut si provider non config
+        "data/cron.xml",                # disabled by default if the provider is not configured
         "views/market_views.xml",
     ],
     "installable": True,

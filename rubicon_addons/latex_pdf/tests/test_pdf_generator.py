@@ -56,4 +56,4 @@ if __name__ == "__main__":
     with open('generated_table.pdf', 'wb') as f:
         f.write(pdf_content)
 
-    print("PDF généré : generated_table.pdf")
+    print("PDF generated: generated_table.pdf")

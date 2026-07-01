@@ -1,11 +1,11 @@
 <odoo>
-  <!-- Menu racine de l’app PDP Price -->
+  <!-- Root menu of the PDP Price app -->
   <menuitem
       id="menu_root_pdp_price"
       name="PDP Price"
       sequence="10"/>
 
-  <!-- Action définie dans price_preview_views.xml (voir plus bas) -->
+  <!-- Action defined in price_preview_views.xml (see below) -->
   <menuitem id="menu_pdp_price_preview"
             name="Price Preview"
             parent="menu_root_pdp_price"

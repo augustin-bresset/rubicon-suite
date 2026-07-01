@@ -3,19 +3,19 @@ from odoo import fields, api, SUPERUSER_ID
 def post_init_currency_setup(cr, registry=None):
     env = api.Environment(cr, SUPERUSER_ID, {})
 
-    # S'assurer que les devises sont actives
+    # Make sure the currencies are active
     for code in ['THB', 'USD', 'EUR']:
         currency = env['res.currency'].search([('name', '=', code)], limit=1)
         if currency:
             currency.active = True
 
-    # Devise principale de la company : THB
+    # Main company currency: THB
     thb = env['res.currency'].search([('name', '=', 'THB')], limit=1)
     if thb:
         company = env.ref('base.main_company')
         company.write({'currency_id': thb.id})
 
-    # Fonctionnalités currency_rate_update (optionnel — module OCA)
+    # currency_rate_update features (optional — OCA module)
     cru_installed = env['ir.module.module'].search([
         ('name', '=', 'currency_rate_update'),
         ('state', '=', 'installed'),

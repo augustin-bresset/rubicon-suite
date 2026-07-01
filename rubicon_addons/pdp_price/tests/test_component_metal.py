@@ -10,20 +10,20 @@ class TestPriceMetal(TransactionCase):
         super().setUpClass()
         cls.currency = cls.env.company.currency_id
 
-        # Métal (coût exprimé en USD/oz)
+        # Metal (cost expressed in USD/oz)
         cls.metal = cls.env['pdp.metal'].create({
             'name': 'Gold',
             'code': 'G',
             'cost': 2000.0,  # USD / ounce
         })
 
-        # Pureté
+        # Purity
         cls.purity = cls.env['pdp.metal.purity'].create({
             'code': '18K',
             'percent': 0.75,
         })
 
-        # Modèle et rel métal
+        # Model and metal rel
         cls.model = cls.env['pdp.product.model'].create({
             'code': 'R1'
             })
@@ -31,15 +31,15 @@ class TestPriceMetal(TransactionCase):
             'model_id': cls.model.id,
             'metal_id': cls.metal.id,
             'purity_id': cls.purity.id,
-            'metal_version': 'W',   # adapte selon ton selection/char
-            'weight': 10.0,         # grammes
+            'metal_version': 'W',   # adjust to your selection/char
+            'weight': 10.0,         # grams
         })
 
-        # Produit qui référence le modèle + la version de métal
+        # Product that references the model + the metal version
         cls.product = cls.env['pdp.product'].create({
             'code': 'PROD-TEST',
             'model_id': cls.model.id,
-            'metal': 'W',           # même valeur que rel.metal_version
+            'metal': 'W',           # same value as rel.metal_version
         })
 
         cls.component = cls.env['pdp.price.metal']

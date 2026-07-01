@@ -7,10 +7,10 @@ class TestPriceAddon(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.cur = cls.env.company.currency_id
-        cls.addon_model = cls.env['pdp.addon.type']          # adapte si besoin
-        cls.cost_model  = cls.env['pdp.addon.cost']     # idem
+        cls.addon_model = cls.env['pdp.addon.type']          # adjust if needed
+        cls.cost_model  = cls.env['pdp.addon.cost']     # same
 
-        # données
+        # data
         cls.addon_a = cls.addon_model.create({
             'code': 'E',
             'name': 'Engraving',
@@ -70,7 +70,7 @@ class TestPriceAddon(TransactionCase):
             currency=self.cur, date=fields.Date.today(),
         )
         self.assertEqual(res['cost'], self.cur.round(15.0))
-        self.assertEqual(res['margin'], self.cur.round(3.0))  # 20% de 15
+        self.assertEqual(res['margin'], self.cur.round(3.0))  # 20% of 15
         self.assertEqual(res['price'], self.cur.round(18.0))
 
     def test_ignores_search_default_context(self):
