@@ -389,7 +389,7 @@ export class PdpWorkspace extends Component {
 
             if (!s.cost) {
                 this.notification.add(
-                    `Pierre "${s.code}" : prix unitaire non renseigné. Le coût ne sera pas calculé.`,
+                    `Stone "${s.code}": unit price not set. Cost will not be computed.`,
                     { type: 'warning' }
                 );
             }
@@ -419,7 +419,7 @@ export class PdpWorkspace extends Component {
             row._stoneValid = false;
             row._stoneDetail = null;
             row._stoneTypeName = '';
-            this.notification.add(`Pierre "${trimmed}" introuvable.`, { type: 'warning' });
+            this.notification.add(`Stone "${trimmed}" not found.`, { type: 'warning' });
         }
         row._dirty = true;
         this.state.isDirty = true;
@@ -457,15 +457,15 @@ export class PdpWorkspace extends Component {
                 row._stoneTypeName = this._getStoneTypeName(s);
                 if (!s.cost) {
                     this.notification.add(
-                        `Pierre "${s.code}" : prix unitaire non renseigné. Le coût ne sera pas calculé.`,
+                        `Stone "${s.code}": unit price not set. Cost will not be computed.`,
                         { type: 'warning' }
                     );
                 }
             } else {
-                this.notification.add(`Aucune pierre trouvée pour cette combinaison.`, { type: 'warning' });
+                this.notification.add(`No stone found for this combination.`, { type: 'warning' });
             }
         } catch (e) {
-            this.notification.add(`Erreur lors de la recherche de pierre.`, { type: 'danger' });
+            this.notification.add(`Error while searching for a stone.`, { type: 'danger' });
         }
         row._dirty = true;
         this.state.isDirty = true;
@@ -2023,7 +2023,7 @@ export class PdpWorkspace extends Component {
             for (const row of this.state.stoneRows) {
                 if (!row._dirty) continue;
                 if (!row._stoneValid || !row.stone_id) {
-                    this.notification.add(`Pierre "${row._stoneCode || '?'}" invalide — ignorée.`, { type: 'warning' });
+                    this.notification.add(`Stone "${row._stoneCode || '?'}" invalid — skipped.`, { type: 'warning' });
                     continue;
                 }
                 stones.push({

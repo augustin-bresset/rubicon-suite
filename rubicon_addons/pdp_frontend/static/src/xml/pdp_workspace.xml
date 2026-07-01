@@ -514,18 +514,18 @@
                             <button class="btn btn-sm btn-outline-success py-0 px-2" t-on-click="() => this.addStone()">+ Add</button>
                         </div>
                         <div t-if="state.suggestedCode" class="d-flex align-items-center gap-3 mb-1 small text-muted">
-                            <span>Code couleur calculé : <span class="fw-bold text-dark"><t t-esc="state.suggestedColors || '—'"/></span></span>
-                            <span>Code produit suggéré : <span class="fw-bold text-dark"><t t-esc="state.suggestedCode"/></span></span>
+                            <span>Computed color code: <span class="fw-bold text-dark"><t t-esc="state.suggestedColors || '—'"/></span></span>
+                            <span>Suggested product code: <span class="fw-bold text-dark"><t t-esc="state.suggestedCode"/></span></span>
                             <button class="btn btn-sm btn-outline-primary py-0 px-2"
                                     t-if="activeProduct and state.suggestedCode and state.suggestedCode !== activeProduct.code"
-                                    t-on-click="() => this.applySuggestedCode()">Appliquer</button>
+                                    t-on-click="() => this.applySuggestedCode()">Apply</button>
                         </div>
                         <div style="overflow-x:auto;">
                         <table class="table table-sm table-bordered table-hover mb-0" style="font-size: 11px; min-width: 1100px;">
                             <thead class="bg-light">
                                 <tr>
                                     <th style="width:70px;">LineNum</th>
-                                    <th style="width:46px;" class="text-center" title="Center stone">Centre</th>
+                                    <th style="width:46px;" class="text-center" title="Center stone">Center</th>
                                     <th style="min-width:110px;">Stone</th>
                                     <th style="min-width:60px;">Shade</th>
                                     <th style="min-width:60px;">Shape</th>

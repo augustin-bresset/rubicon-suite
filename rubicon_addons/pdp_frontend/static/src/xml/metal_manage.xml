@@ -128,7 +128,7 @@
                                     t-on-change="(e) => this.onMetalFieldChange(row, 'purity_system', e.target.value || false)">
                                     <option value="">—</option>
                                     <option value="carat" t-att-selected="row.purity_system === 'carat'">Carat</option>
-                                    <option value="millesimal" t-att-selected="row.purity_system === 'millesimal'">Millièmes</option>
+                                    <option value="millesimal" t-att-selected="row.purity_system === 'millesimal'">Millesimal</option>
                                 </select>
                             </td>
                             <td t-on-click.stop="() => {}">
@@ -312,7 +312,7 @@
                                                 t-on-change="(e) => this.onPurityFieldChange(row, 'purity_system', e.target.value || false)">
                                                 <option value="">—</option>
                                                 <option value="carat" t-att-selected="row.purity_system === 'carat'">Carat</option>
-                                                <option value="millesimal" t-att-selected="row.purity_system === 'millesimal'">Millièmes</option>
+                                                <option value="millesimal" t-att-selected="row.purity_system === 'millesimal'">Millesimal</option>
                                             </select>
                                         </td>
                                         <td>
