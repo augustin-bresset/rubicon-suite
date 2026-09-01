@@ -14,7 +14,9 @@ from odoo import fields, models
 from odoo.exceptions import UserError
 
 METALPRICE_BASE_URL = "https://api.metalpriceapi.com/v1"
-METALPRICE_API_KEY = os.getenv("API_KEY_METAL_MARKET")
+# The key is read at call time (see _get_api_key), never at import time.
+API_KEY_PARAM = "pdp_metal_market.api_key"
+API_KEY_ENV = "API_KEY_METAL_MARKET"
 
 test_values = {
     "XAU": 4064.9216770891,
@@ -26,6 +28,18 @@ test_values = {
 class MarketProviderNY(models.AbstractModel):
     _name = "pdp.market.provider.nymex"
     _description = "New York market API provider"
+
+    # -- Configuration --------------------------------------------------------
+    def _get_api_key(self):
+        """Return the metalpriceapi.com key.
+
+        The system parameter ``pdp_metal_market.api_key`` (Settings > Technical
+        > System Parameters) takes precedence, so production does not depend on
+        container environment plumbing; the ``API_KEY_METAL_MARKET`` environment
+        variable remains the fallback for development.
+        """
+        param = self.env["ir.config_parameter"].sudo().get_param(API_KEY_PARAM)
+        return (param or os.getenv(API_KEY_ENV) or "").strip()
 
     # -- Public API ---------------------------------------------------------
     def update_prices(self, codes: Iterable[str] = None, day=None):
@@ -112,13 +126,17 @@ class MarketProviderNY(models.AbstractModel):
         if test:
             return test_values
 
-        if not METALPRICE_API_KEY:
-            raise UserError("Missing API_KEY_METAL_MARKET in environment")
+        api_key = self._get_api_key()
+        if not api_key:
+            raise UserError(
+                "Missing metal market API key: set the system parameter "
+                f"{API_KEY_PARAM!r} or the {API_KEY_ENV} environment variable."
+            )
 
         date_fragment = "latest" if target_date is None else target_date.isoformat()
         endpoint = f"{METALPRICE_BASE_URL}/{date_fragment}"
         params = {
-            "api_key": METALPRICE_API_KEY,
+            "api_key": api_key,
             "base": "USD",
             "currencies": "XAU,XAG,XPT,XPD",
         }
