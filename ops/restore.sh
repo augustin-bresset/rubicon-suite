@@ -40,41 +40,12 @@ DATE_ARG="${2:-}"
 [ -n "$ENV" ] && [ -n "$DATE_ARG" ] || usage
 shift 2
 
-SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=lib/common.sh
+source "$(dirname "$0")/lib/common.sh"
+rubicon_env "$ENV"
+
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 die() { echo -e "${RED}ERROR: $*${NC}" >&2; exit 1; }
-
-# ── Environment parameters ─────────────────────────────────────────────────
-case "$ENV" in
-  dev)
-    COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
-    ENV_FILE="$SCRIPT_DIR/.env"
-    DB_SERVICE="db"; ODOO_SERVICE="odoo"; PORT=8069
-    FALLBACK_VOLUME="rubicon-suite_odoo_data"
-    ;;
-  demo)
-    COMPOSE_FILE="$SCRIPT_DIR/docker-compose.demo.yml"
-    ENV_FILE="$SCRIPT_DIR/.env.demo"
-    DB_SERVICE="db_demo"; ODOO_SERVICE="odoo_demo"; PORT=8070
-    FALLBACK_VOLUME="rubicon-suite_odoo_demo_data"
-    ;;
-  prod)
-    COMPOSE_FILE="$SCRIPT_DIR/docker-compose.prod.yml"
-    ENV_FILE="$SCRIPT_DIR/.env.prod"
-    DB_SERVICE="db"; ODOO_SERVICE="odoo"; PORT=8069
-    FALLBACK_VOLUME="rubicon-suite_prod_odoo_data"
-    ;;
-  *) usage ;;
-esac
-PREFIX="$ENV"
-
-[ -f "$ENV_FILE" ] || die "$ENV_FILE not found (copy the matching .example file and fill it in)"
-# shellcheck disable=SC1090
-source "$ENV_FILE"
-DB_NAME="${POSTGRES_DB:-${DB_NAME:-rubicon}}"
-DB_USER="${POSTGRES_USER:-${DB_USER:-odoo}}"
-BACKUP_DIR="${BACKUP_DIR:-/opt/rubicon-backups}"
-OCI_BUCKET="${OCI_BUCKET:-}"
 
 # ── Options ────────────────────────────────────────────────────────────────
 FROM_OCI=0; IDENTITY="${BACKUP_AGE_IDENTITY:-}"; TARGET_DB=""; NEUTRALIZE=0; YES=0
@@ -94,17 +65,8 @@ TARGET_DB="${TARGET_DB:-$DB_NAME}"
 SIDE_RESTORE=0
 [ "$TARGET_DB" = "$DB_NAME" ] || SIDE_RESTORE=1
 
-compose() { docker compose -f "$COMPOSE_FILE" "$@"; }
 psql_admin() { compose exec -T "$DB_SERVICE" psql -v ON_ERROR_STOP=1 -q -U "$DB_USER" -d postgres "$@"; }
-odoo_cli() {
-  if compose ps --status running --services 2>/dev/null | grep -qx "$ODOO_SERVICE"; then
-    compose exec -T "$ODOO_SERVICE" odoo "$@"
-  else
-    compose run --rm --no-deps -T "$ODOO_SERVICE" odoo "$@"
-  fi
-}
-compose ps --status running --services 2>/dev/null | grep -qx "$DB_SERVICE" \
-  || die "container $DB_SERVICE is not running (start the stack first)"
+running "$DB_SERVICE" || die "container $DB_SERVICE is not running (start the stack first)"
 
 # ── Off-site helpers ───────────────────────────────────────────────────────
 oci_list() {
@@ -208,14 +170,7 @@ if [ "$YES" = 0 ]; then
 fi
 
 # ── Data volume ────────────────────────────────────────────────────────────
-resolve_volume() {
-  local cid
-  cid=$(compose ps -a -q "$ODOO_SERVICE" 2>/dev/null | head -1)
-  [ -n "$cid" ] || return 0
-  docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/odoo/.local/share/Odoo"}}{{.Name}}{{end}}{{end}}' "$cid" 2>/dev/null || true
-}
 VOLUME_NAME=$(resolve_volume)
-VOLUME_NAME="${VOLUME_NAME:-$FALLBACK_VOLUME}"
 docker volume inspect "$VOLUME_NAME" >/dev/null 2>&1 || die "Docker volume $VOLUME_NAME not found"
 
 # ── 1. Stop Odoo (full restore only) ───────────────────────────────────────

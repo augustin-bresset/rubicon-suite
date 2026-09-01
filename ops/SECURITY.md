@@ -21,7 +21,7 @@ Internet → Cloudflare → tunnel → localhost:8070
 
 To install/restart the tunnel:
 ```bash
-./ops/setup_cloudflare_tunnel.sh --service
+./ops/server/setup_cloudflare_tunnel.sh --service
 ```
 
 ---
@@ -51,7 +51,7 @@ In the Oracle Cloud console → **Networking → Virtual Cloud Networks → Secu
 
 Run once (or after each reinstall):
 ```bash
-./ops/harden_demo.sh --restart
+./ops/server/harden_demo.sh --restart
 ```
 
 This script configures:
@@ -69,13 +69,13 @@ Port 8069 is only accessible from the internal network (192.168.x.x) or via VPN 
 
 ```bash
 # Install WireGuard
-./ops/setup_wireguard.sh
+./ops/server/setup_wireguard.sh
 
 # Add a user
-./ops/add_vpn_user.sh firstname_lastname
+./ops/server/add_vpn_user.sh firstname_lastname
 
 # Employee guide
-cat ops/VPN_GUIDE.md
+cat ops/server/VPN_GUIDE.md
 ```
 
 ---
@@ -83,17 +83,17 @@ cat ops/VPN_GUIDE.md
 ## Security Checklist
 
 ### Demo (run once)
-- [ ] `./ops/harden_demo.sh --restart` executed
-- [ ] `./ops/setup_cloudflare_tunnel.sh --service` active
-- [ ] `./ops/setup_firewall.sh demo` active
+- [ ] `./ops/server/harden_demo.sh --restart` executed
+- [ ] `./ops/server/setup_cloudflare_tunnel.sh --service` active
+- [ ] `./ops/server/setup_firewall.sh demo` active
 - [ ] Oracle Cloud Security List: port 8070 closed
 - [ ] `DEMO_ADMIN_PASSWORD` set in `.env.demo` (≠ `CHANGE_ME`)
 - [ ] Backup cron configured (see `ops/CRON.md`)
 - [ ] UptimeRobot configured (see `ops/MONITORING.md`)
 
 ### Production (run before go-live)
-- [ ] `./ops/setup_wireguard.sh` executed
-- [ ] `./ops/setup_firewall.sh prod` active
+- [ ] `./ops/server/setup_wireguard.sh` executed
+- [ ] `./ops/server/setup_firewall.sh prod` active
 - [ ] `odoo_conf/odoo.prod.conf` with strong `admin_passwd`, `list_db = False`, no `logfile`
 - [ ] `.env.prod` filled in (`chmod 600`), `BACKUP_AGE_RECIPIENT` set, `age` + oci CLI installed
 - [ ] OCI bucket private, dedicated IAM user, lifecycle policy applied (`ops/setup_oci_backup.md`)

@@ -10,7 +10,7 @@ DB_PORT         ?= 5432
 DB_USER         ?= rubicondev
 DB_PASS         ?= rubicondev
 
-IMPORT_CSV_SCRIPT   ?= ops/import/import_csv.py
+IMPORT_CSV_SCRIPT   ?= ops/migration/import/import_csv.py
 CREATE_DIAGRAM      ?= rubicon_addons/rubicon_import/analysis/diagram.py
 
 LOG_DIR         ?= meta/logs
@@ -49,7 +49,7 @@ TEST_TAGS        ?= pdp_frontend
         raw_to_data_all import_all import_csv import_pictures import-pictures \
         raw-to-data-sis import-sis sis-all \
         export-pictures audit_counts create_diagram \
-        stone-data stone-install stone-import stone-all backup backup-help \
+        stone-data stone-install stone-all backup backup-help \
         cleanup-none-all migrate-picture-scope cleanup-orphan-pictures \
         verify-picture-chain \
         test-db-init test-tours test-tours-fresh
@@ -89,8 +89,7 @@ help:
 	@echo "  Stone pipeline"
 	@echo "    make stone-data             Generate stone CSV from raw data"
 	@echo "    make stone-install          Install pdp_stone module"
-	@echo "    make stone-import           Import stone data"
-	@echo "    make stone-all              Full stone pipeline"
+	@echo "    make stone-all              Stone data: generate CSV and install pdp_stone"
 	@echo ""
 
 
@@ -165,7 +164,7 @@ import_all: backup
 	$(ODOO_SHELL) < $(IMPORT_CSV_SCRIPT) 2>&1 | tee $(LOG_DIR)/import_$(TIMESTAMP).log
 
 import_csv:
-	@WHAT=$(WHAT) $(ODOO_SHELL) < ops/import/import_csv.py
+	@WHAT=$(WHAT) $(ODOO_SHELL) < ops/migration/import/import_csv.py
 
 # --- SIS data pipeline ---
 
@@ -174,10 +173,10 @@ raw-to-data-sis:
 
 import-sis: backup
 	@mkdir -p $(LOG_DIR)
-	@echo "→ DB=$(DB)  parties → ops/import/import_sis_parties.py"
-	$(ODOO_SHELL) < ops/import/import_sis_parties.py   2>&1 | tee $(LOG_DIR)/import_sis_parties_$(TIMESTAMP).log
-	@echo "→ DB=$(DB)  documents → ops/import/import_sis_documents.py"
-	$(ODOO_SHELL) < ops/import/import_sis_documents.py 2>&1 | tee $(LOG_DIR)/import_sis_docs_$(TIMESTAMP).log
+	@echo "→ DB=$(DB)  parties → ops/migration/import/import_sis_parties.py"
+	$(ODOO_SHELL) < ops/migration/import/import_sis_parties.py   2>&1 | tee $(LOG_DIR)/import_sis_parties_$(TIMESTAMP).log
+	@echo "→ DB=$(DB)  documents → ops/migration/import/import_sis_documents.py"
+	$(ODOO_SHELL) < ops/migration/import/import_sis_documents.py 2>&1 | tee $(LOG_DIR)/import_sis_docs_$(TIMESTAMP).log
 
 sis-all: raw-to-data-sis update-sis-modules import-sis
 
@@ -205,19 +204,19 @@ export-pictures:
 	  python:3.11-slim bash -c " \
 	    apt-get update -qq && apt-get install -y -qq unixodbc unixodbc-dev freetds-dev tdsodbc gcc > /dev/null 2>&1; \
 	    pip install -q pyodbc tqdm; \
-	    cd /app && python3 ops/export/export_pictures_products.py"
+	    cd /app && python3 ops/migration/export/export_pictures_products.py"
 	docker stop sqlsrv_pics || true
 	@echo "→ Done. Run 'make import-pictures' to import into Odoo."
 
 import-pictures:
-	$(ODOO_SHELL) < ops/import/import_pictures.py
+	$(ODOO_SHELL) < ops/migration/import/import_pictures.py
 
 import_pictures:
-	@$(ODOO_SHELL) < ops/import/import_pictures.py
+	@$(ODOO_SHELL) < ops/migration/import/import_pictures.py
 
 audit_counts:
 	@mkdir -p $(LOG_DIR)
-	@$(ODOO_SHELL) < ops/audit/audit_counts.py | tee $(LOG_DIR)/counts_$(TIMESTAMP).log
+	@$(ODOO_SHELL) < ops/migration/audit/audit_counts.py | tee $(LOG_DIR)/counts_$(TIMESTAMP).log
 
 create_diagram:
 	@mkdir -p $(LOG_DIR)
@@ -233,10 +232,7 @@ stone-data:
 stone-install:
 	$(ODOO) -i pdp_stone --without-demo=all --stop-after-init --workers=0
 
-stone-import:
-	$(ODOO_SHELL) < ops/import/stone_import.py
-
-stone-all: stone-data stone-install stone-import
+stone-all: stone-data stone-install
 
 # --- Demo ---
 
@@ -245,16 +241,16 @@ stone-all: stone-data stone-install stone-import
 # --- Misc ---
 
 cleanup-none-all: backup
-	$(ODOO_SHELL) < ops/cleanup/cleanup_none_all.py
+	$(ODOO_SHELL) < ops/migration/cleanup/cleanup_none_all.py
 
 migrate-picture-scope:
-	$(ODOO_SHELL) < ops/cleanup/migrate_picture_scope.py
+	$(ODOO_SHELL) < ops/migration/cleanup/migrate_picture_scope.py
 
 cleanup-orphan-pictures:
-	$(ODOO_SHELL) < ops/cleanup/cleanup_orphan_pictures.py
+	$(ODOO_SHELL) < ops/migration/cleanup/cleanup_orphan_pictures.py
 
 verify-picture-chain:
-	$(ODOO_SHELL) < ops/verify/verify_picture_chain.py
+	$(ODOO_SHELL) < ops/migration/verify/verify_picture_chain.py
 
 backup-help:
 	@cat meta/doc/backup.md

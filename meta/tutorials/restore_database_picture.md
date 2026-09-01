@@ -59,7 +59,7 @@ docker run --rm --network=host \
   python:3.11-slim bash -c "
     apt-get update -qq && apt-get install -y -qq unixodbc unixodbc-dev freetds-dev tdsodbc gcc > /dev/null 2>&1
     pip install -q pyodbc tqdm
-    cd /app && python3 ops/export/export_pictures_products.py"
+    cd /app && python3 ops/migration/export/export_pictures_products.py"
 ```
 
 Output files:
@@ -71,7 +71,7 @@ Output files:
 ```bash
 make import-pictures
 # equivalent to:
-docker compose exec -T odoo odoo shell -d rubicon --no-http < ops/import/import_pictures.py
+docker compose exec -T odoo odoo shell -d rubicon --no-http < ops/migration/import/import_pictures.py
 ```
 
 The import script:

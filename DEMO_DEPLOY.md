@@ -63,16 +63,16 @@ docker compose -f docker-compose.demo.yml up -d
 
 ```bash
 # Génère admin_passwd, active list_db=False, proxy_mode=True
-./ops/harden_demo.sh --restart
+./ops/server/harden_demo.sh --restart
 
 # Applique le mot de passe admin Odoo (depuis DEMO_ADMIN_PASSWORD dans .env.demo)
-./ops/start_demo.sh
+./ops/server/start_demo.sh
 
 # Installe cloudflared comme service systemd → tunnel HTTPS *.trycloudflare.com
-./ops/setup_cloudflare_tunnel.sh --service
+./ops/server/setup_cloudflare_tunnel.sh --service
 
 # Ferme le port 8070 à l'extérieur (UFW)
-./ops/setup_firewall.sh demo
+./ops/server/setup_firewall.sh demo
 ```
 
 **Si hébergé sur Oracle Cloud :** fermer aussi le port 8070 dans la console cloud :
@@ -122,7 +122,7 @@ docker compose -f docker-compose.demo.yml run --rm odoo_demo odoo \
   --stop-after-init
 
 docker compose -f docker-compose.demo.yml up -d
-./ops/start_demo.sh
+./ops/server/start_demo.sh
 ```
 
 ---

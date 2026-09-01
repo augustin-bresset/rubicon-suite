@@ -5,24 +5,15 @@
 # Compatible with cron, Nagios, and UptimeRobot (via HTTP if exposed).
 
 ENV="${1:-}"
-SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PROBLEMS=()
 WARNINGS=()
 
-# ── Environment parameters ─────────────────────────────────────────────────
-case "$ENV" in
-  dev)  COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml";      ENV_FILE="$SCRIPT_DIR/.env";      ODOO_SERVICE="odoo";      DB_SERVICE="db";      PORT=8069 ;;
-  demo) COMPOSE_FILE="$SCRIPT_DIR/docker-compose.demo.yml"; ENV_FILE="$SCRIPT_DIR/.env.demo"; ODOO_SERVICE="odoo_demo"; DB_SERVICE="db_demo"; PORT=8070 ;;
-  prod) COMPOSE_FILE="$SCRIPT_DIR/docker-compose.prod.yml"; ENV_FILE="$SCRIPT_DIR/.env.prod"; ODOO_SERVICE="odoo";      DB_SERVICE="db";      PORT=8069 ;;
-  *) echo "Usage: $0 <dev|demo|prod>"; exit 1 ;;
-esac
-PREFIX="$ENV"
-# shellcheck disable=SC1090
-[ -f "$ENV_FILE" ] && source "$ENV_FILE"
-BACKUP_DIR="${BACKUP_DIR:-/opt/rubicon-backups}"
+case "$ENV" in dev|demo|prod) ;; *) echo "Usage: $0 <dev|demo|prod>"; exit 1 ;; esac
+# shellcheck source=lib/common.sh
+source "$(dirname "$0")/lib/common.sh"
+rubicon_env "$ENV" optional
 MIN_DB_BYTES="${MIN_DB_BYTES:-200000}"
 
-running() { docker compose -f "$COMPOSE_FILE" ps --status running --services 2>/dev/null | grep -qx "$1"; }
 
 # ── 1. Odoo HTTP healthcheck ───────────────────────────────────────────────
 if curl -sf "http://localhost:$PORT/web/health" > /dev/null 2>&1; then

@@ -45,7 +45,10 @@ usage() { echo "Usage: $0 <dev|demo|prod> [--no-oci]" >&2; exit 1; }
 [ -n "$ENV" ] || usage
 [ -z "$NO_OCI" ] || [ "$NO_OCI" = "--no-oci" ] || usage
 
-SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=lib/common.sh
+source "$(dirname "$0")/lib/common.sh"
+rubicon_env "$ENV"
+
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 DATE_DIR=$(date +%Y%m%d)
 
@@ -54,46 +57,7 @@ RETENTION_WEEKLY_DAYS="${RETENTION_WEEKLY_DAYS:-35}"
 RETENTION_MONTHLY_DAYS="${RETENTION_MONTHLY_DAYS:-400}"
 MIN_DB_BYTES="${MIN_DB_BYTES:-200000}"           # a real dump is many MB; an empty DB is ~50 KB
 MIN_FILESTORE_BYTES="${MIN_FILESTORE_BYTES:-1024}"
-
-# ── Environment parameters ─────────────────────────────────────────────────
-case "$ENV" in
-  dev)
-    COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
-    ENV_FILE="$SCRIPT_DIR/.env"
-    DB_SERVICE="db"; ODOO_SERVICE="odoo"
-    FALLBACK_VOLUME="rubicon-suite_odoo_data"
-    CONFIG_FILES=(".env" "odoo_conf/odoo.conf")
-    ;;
-  demo)
-    COMPOSE_FILE="$SCRIPT_DIR/docker-compose.demo.yml"
-    ENV_FILE="$SCRIPT_DIR/.env.demo"
-    DB_SERVICE="db_demo"; ODOO_SERVICE="odoo_demo"
-    FALLBACK_VOLUME="rubicon-suite_odoo_demo_data"
-    CONFIG_FILES=(".env.demo" "odoo_conf/odoo_demo.conf")
-    ;;
-  prod)
-    COMPOSE_FILE="$SCRIPT_DIR/docker-compose.prod.yml"
-    ENV_FILE="$SCRIPT_DIR/.env.prod"
-    DB_SERVICE="db"; ODOO_SERVICE="odoo"
-    FALLBACK_VOLUME="rubicon-suite_prod_odoo_data"
-    CONFIG_FILES=(".env.prod" "odoo_conf/odoo.prod.conf")
-    ;;
-  *) usage ;;
-esac
-PREFIX="$ENV"
-
-if [ ! -f "$ENV_FILE" ]; then
-  echo "Error: $ENV_FILE not found (copy the matching .example file and fill it in)." >&2
-  exit 1
-fi
-# shellcheck disable=SC1090
-source "$ENV_FILE"
-DB_NAME="${POSTGRES_DB:-${DB_NAME:-rubicon}}"
-DB_USER="${POSTGRES_USER:-${DB_USER:-odoo}}"
-BACKUP_DIR="${BACKUP_DIR:-/opt/rubicon-backups}"
 LOG_FILE="${LOG_FILE:-$BACKUP_DIR/backup.log}"
-OCI_BUCKET="${OCI_BUCKET:-}"
-BACKUP_AGE_RECIPIENT="${BACKUP_AGE_RECIPIENT:-}"
 
 OUT_DIR="$BACKUP_DIR/$DATE_DIR"
 mkdir -p "$OUT_DIR"
@@ -117,23 +81,12 @@ fail() {
   echo "Backup $ENV FAILED: $* (log: $LOG_FILE)" >&3
   exit 1
 }
-compose() { docker compose -f "$COMPOSE_FILE" "$@"; }
 
 log "=== Starting backup $ENV ($TIMESTAMP) — db=$DB_NAME out=$OUT_DIR ==="
 
 # ── 1. Stack must be running; locate the Odoo data volume ─────────────────
-if ! compose ps --status running --services 2>/dev/null | grep -qx "$DB_SERVICE"; then
-  fail "container $DB_SERVICE is not running (start the stack first)"
-fi
-
-resolve_volume() {
-  local cid
-  cid=$(compose ps -a -q "$ODOO_SERVICE" 2>/dev/null | head -1)
-  [ -n "$cid" ] || return 0
-  docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/odoo/.local/share/Odoo"}}{{.Name}}{{end}}{{end}}' "$cid" 2>/dev/null || true
-}
+running "$DB_SERVICE" || fail "container $DB_SERVICE is not running (start the stack first)"
 VOLUME_NAME=$(resolve_volume)
-VOLUME_NAME="${VOLUME_NAME:-$FALLBACK_VOLUME}"
 docker volume inspect "$VOLUME_NAME" >/dev/null 2>&1 || fail "Docker volume $VOLUME_NAME not found"
 
 # ── 2. Database ────────────────────────────────────────────────────────────
@@ -162,10 +115,10 @@ FILES=("$DB_FILE" "$FS_FILE")
 CONFIG_FILE="$OUT_DIR/${PREFIX}_config_${TIMESTAMP}.tar.gz"
 present=()
 for f in "${CONFIG_FILES[@]}"; do
-  if [ -f "$SCRIPT_DIR/$f" ]; then present+=("$f"); else warn "config file $f not found, not archived"; fi
+  if [ -f "$REPO_DIR/$f" ]; then present+=("$f"); else warn "config file $f not found, not archived"; fi
 done
 if [ ${#present[@]} -gt 0 ]; then
-  (umask 077 && tar czf "$CONFIG_FILE" -C "$SCRIPT_DIR" "${present[@]}") || fail "config archive failed"
+  (umask 077 && tar czf "$CONFIG_FILE" -C "$REPO_DIR" "${present[@]}") || fail "config archive failed"
   chmod 600 "$CONFIG_FILE"
   FILES+=("$CONFIG_FILE")
   log "Config OK — ${present[*]}"

@@ -22,41 +22,23 @@ set -uo pipefail
 ENV="${1:-}"
 [ -n "$ENV" ] || { echo "Usage: $0 <dev|demo|prod>" >&2; exit 1; }
 
-SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-case "$ENV" in
-  dev)  COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml";      ENV_FILE="$SCRIPT_DIR/.env";      DB_SERVICE="db";      ODOO_SERVICE="odoo";      FALLBACK_VOLUME="rubicon-suite_odoo_data" ;;
-  demo) COMPOSE_FILE="$SCRIPT_DIR/docker-compose.demo.yml"; ENV_FILE="$SCRIPT_DIR/.env.demo"; DB_SERVICE="db_demo"; ODOO_SERVICE="odoo_demo"; FALLBACK_VOLUME="rubicon-suite_odoo_demo_data" ;;
-  prod) COMPOSE_FILE="$SCRIPT_DIR/docker-compose.prod.yml"; ENV_FILE="$SCRIPT_DIR/.env.prod"; DB_SERVICE="db";      ODOO_SERVICE="odoo";      FALLBACK_VOLUME="rubicon-suite_prod_odoo_data" ;;
-  *) echo "Usage: $0 <dev|demo|prod>" >&2; exit 1 ;;
-esac
-[ -f "$ENV_FILE" ] || { echo "Error: $ENV_FILE not found" >&2; exit 1; }
-# shellcheck disable=SC1090
-source "$ENV_FILE"
-DB_NAME="${POSTGRES_DB:-${DB_NAME:-rubicon}}"
-DB_USER="${POSTGRES_USER:-${DB_USER:-odoo}}"
-BACKUP_DIR="${BACKUP_DIR:-/opt/rubicon-backups}"
+# shellcheck source=lib/common.sh
+source "$(dirname "$0")/lib/common.sh"
+rubicon_env "$ENV"
 VERIFY_DB="${VERIFY_DB:-${DB_NAME}_verify}"
 VERIFY_TABLES="${VERIFY_TABLES:-res_users res_partner pdp_product_model pdp_product ir_attachment}"
 LOG="$BACKUP_DIR/verify.log"
 MARKER="$BACKUP_DIR/.last_verify_ok_${ENV}"
 mkdir -p "$BACKUP_DIR"
 
-compose() { docker compose -f "$COMPOSE_FILE" "$@"; }
 count() { compose exec -T "$DB_SERVICE" psql -Atq -U "$DB_USER" -d "$VERIFY_DB" -c "$1" 2>/dev/null; }
-
-resolve_volume() {
-  local cid
-  cid=$(compose ps -a -q "$ODOO_SERVICE" 2>/dev/null | head -1)
-  [ -n "$cid" ] || return 0
-  docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/odoo/.local/share/Odoo"}}{{.Name}}{{end}}{{end}}' "$cid" 2>/dev/null || true
-}
 
 cleanup() {
   echo "Cleaning up: dropping $VERIFY_DB and its filestore"
   compose exec -T "$DB_SERVICE" psql -q -U "$DB_USER" -d postgres \
     -c "DROP DATABASE IF EXISTS \"$VERIFY_DB\" WITH (FORCE);" >/dev/null 2>&1 || echo "  (could not drop $VERIFY_DB)"
   local vol
-  vol=$(resolve_volume); vol="${vol:-$FALLBACK_VOLUME}"
+  vol=$(resolve_volume)
   docker run --rm -v "${vol}:/data" alpine:3 rm -rf "/data/filestore/$VERIFY_DB" >/dev/null 2>&1 || true
 }
 
@@ -65,7 +47,7 @@ main() {
   echo "=== Restore test $ENV — $(date '+%Y-%m-%d %H:%M:%S') ==="
   [ "$VERIFY_DB" != "$DB_NAME" ] || { echo "FAIL: VERIFY_DB must differ from the live database"; return 1; }
 
-  if ! "$SCRIPT_DIR/ops/restore.sh" "$ENV" latest --target-db "$VERIFY_DB" --neutralize --yes; then
+  if ! "$REPO_DIR/ops/restore.sh" "$ENV" latest --target-db "$VERIFY_DB" --neutralize --yes; then
     echo "FAIL: restore.sh failed"
     cleanup
     return 1
@@ -81,7 +63,7 @@ main() {
   attachments=$(count "SELECT count(*) FROM ir_attachment WHERE store_fname IS NOT NULL") || attachments=0
   if [ "${attachments:-0}" -gt 0 ]; then
     local vol
-    vol=$(resolve_volume); vol="${vol:-$FALLBACK_VOLUME}"
+    vol=$(resolve_volume)
     files=$(docker run --rm -v "${vol}:/data:ro" alpine:3 sh -c "find /data/filestore/$VERIFY_DB -type f 2>/dev/null | wc -l" || echo 0)
     if [ "${files:-0}" -gt 0 ]; then echo "  ok  filestore: $files files for $attachments stored attachments"
     else echo "FAIL: $attachments attachments reference the filestore but no file was restored"; rc=1; fi

@@ -124,6 +124,6 @@ external_addons/*
 odoo_conf/odoo_demo.conf
 odoo_conf/odoo.prod.conf
 .demo_secrets
-ops/TUNNEL_URL.txt
+ops/server/TUNNEL_URL.txt
 
 superpowers
