@@ -3,6 +3,9 @@
         <field name="name">Rubicon</field>
         <field name="logo" type="base64" file="rubicon_env/static/img/logo.png"/>                                                             
         <field name="currency_id" ref="base.USD"/>
+        <!-- Without a configured layout, the first print of any report opens
+             the "choose your document layout" wizard instead of the PDF. -->
+        <field name="external_report_layout_id" ref="web.external_layout_standard"/>
         <field name="country_id" ref="base.th"/>
         <field name="phone">+66 02 236 7043</field>
         <field name="email">contact@rubicon.com</field>

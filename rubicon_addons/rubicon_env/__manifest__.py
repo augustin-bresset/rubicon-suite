@@ -6,6 +6,7 @@
 
     'depends': [
         'base',
+        'web',   # external_report_layout_id on res.company
         # currency_rate_update is optional — can be installed separately in production
     ],
     'data': [
