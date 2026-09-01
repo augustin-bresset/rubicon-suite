@@ -1,0 +1,921 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="pcs_frontend.PcsWorkspace">
+    <div class="pcs-workspace">
+
+        <!-- Simulation data switch: hooks the simulator's documents into
+             (or out of) every PCS screen. -->
+        <div class="pcs-mode-bar" t-if="state.simMode.has_sim">
+            <label class="pcs-check">
+                <input type="checkbox" t-att-checked="state.simMode.include"
+                       t-on-change="toggleSimMode"/>
+                Include simulation data
+            </label>
+            <span t-if="!state.simMode.include" class="pcs-mode-note">
+                Production data only — the simulator keeps running detached.
+            </span>
+        </div>
+
+        <!-- ══════════ Sales Documents ══════════ -->
+        <t t-if="state.screen === 'sales_docs'">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">Sales Document</span>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-class="state.salesTab === 'docs' ? 'active' : ''"
+                        t-on-click="() => { this.state.salesTab = 'docs'; }">Sales Docs</button>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-class="state.salesTab === 'items' ? 'active' : ''"
+                        t-att-disabled="!state.salesDocId"
+                        t-on-click="() => { this.state.salesTab = 'items'; }">Doc Items</button>
+            </div>
+            <table class="pcs-table" t-if="state.salesTab === 'docs'">
+                <thead><tr>
+                    <th>Doc Name</th><th>Create Date</th><th>Delv Date</th>
+                    <th class="num">Total Qty</th>
+                </tr></thead>
+                <tbody>
+                    <tr t-foreach="state.salesDocs" t-as="doc" t-key="doc.id"
+                        class="pcs-row-click"
+                        t-on-click="() => this.openSalesItems(doc.id)">
+                        <td t-esc="doc.name"/>
+                        <td t-esc="doc.create_date"/>
+                        <td t-esc="doc.delv_date"/>
+                        <td class="num" t-esc="doc.total_qty"/>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="pcs-table" t-if="state.salesTab === 'items'">
+                <thead><tr>
+                    <th>Design</th><th>Purity</th><th class="num">Qty</th><th>UnkID</th>
+                </tr></thead>
+                <tbody>
+                    <tr t-foreach="state.salesItems" t-as="item" t-key="item.id">
+                        <td t-esc="item.design"/>
+                        <td t-esc="item.purity"/>
+                        <td class="num" t-esc="item.qty"/>
+                        <td t-esc="item.unk_id"/>
+                    </tr>
+                </tbody>
+            </table>
+        </t>
+
+        <!-- ══════════ Documents ══════════ -->
+        <t t-if="state.screen === 'documents'">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">Documents</span>
+                <button class="btn btn-sm btn-primary"
+                        t-on-click="() => { this.state.showAddDoc = true; }">New</button>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-disabled="!state.docId"
+                        t-on-click="deleteDocument">Delete</button>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-disabled="!state.docId"
+                        t-on-click="printStockCards">Print Stock Cards</button>
+                <span class="pcs-spacer"/>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-class="state.docTab === 'docs' ? 'active' : ''"
+                        t-on-click="() => this.openDocTab('docs')">Docs</button>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-class="state.docTab === 'barcodes' ? 'active' : ''"
+                        t-att-disabled="!state.docId"
+                        t-on-click="() => this.openDocTab('barcodes')">Barcodes</button>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-class="state.docTab === 'pbarcodes' ? 'active' : ''"
+                        t-att-disabled="!state.docId"
+                        t-on-click="() => this.openDocTab('pbarcodes')">PBarcode</button>
+            </div>
+
+            <div class="pcs-add-doc" t-if="state.showAddDoc">
+                <span>Sales Order:</span>
+                <input type="text" placeholder="SO-AAA-XXXXX"
+                       t-att-value="state.newDocRef"
+                       t-on-input="(ev) => { this.state.newDocRef = ev.target.value; }"
+                       t-on-keydown="onNewDocKeydown"/>
+                <button class="btn btn-sm btn-primary" t-on-click="addDocument">Add</button>
+                <button class="btn btn-sm btn-secondary"
+                        t-on-click="() => { this.state.showAddDoc = false; }">Cancel</button>
+            </div>
+
+            <t t-if="state.docTab === 'docs'">
+                <label class="pcs-check">
+                    <input type="checkbox" t-att-checked="state.docsActiveOnly"
+                           t-on-change="toggleDocsActiveOnly"/>
+                    Active
+                </label>
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>Document</th><th>Date</th><th>Active</th>
+                        <th>Create Date</th><th>Created By</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.documents" t-as="doc" t-key="doc.id"
+                            class="pcs-row-click"
+                            t-att-class="doc.id === state.docId ? 'pcs-selected' : ''"
+                            t-on-click="() => this.selectDocument(doc.id, 'docs')">
+                            <td t-esc="doc.name"/>
+                            <td t-esc="doc.date"/>
+                            <td>
+                                <input type="checkbox" t-att-checked="doc.active"
+                                       t-on-click.stop="() => {}"
+                                       t-on-change="(ev) => this.setDocumentActive(doc, ev)"/>
+                            </td>
+                            <td t-esc="doc.create_date"/>
+                            <td t-esc="doc.created_by"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <t t-if="state.docTab === 'barcodes'">
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>Barcode</th><th>Design</th><th>Purity</th>
+                        <th class="num">Qty</th><th>Tag</th><th>Priority</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.barcodes" t-as="row" t-key="row.id">
+                            <td t-esc="row.barcode"/>
+                            <td t-esc="row.design"/>
+                            <td t-esc="row.purity"/>
+                            <td class="num" t-esc="row.qty"/>
+                            <td>
+                                <input type="text" t-att-value="row.tag"
+                                       t-on-change="(ev) => this.saveBarcodeField(row, 'tag', ev)"/>
+                            </td>
+                            <td>
+                                <input type="checkbox" t-att-checked="row.priority"
+                                       t-on-change="(ev) => this.saveBarcodeField(row, 'priority', ev)"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="btn btn-sm btn-secondary" t-on-click="updatePdp">Update PDP</button>
+            </t>
+
+            <t t-if="state.docTab === 'pbarcodes'">
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>PBarcode</th><th>Dept</th><th>Worker</th>
+                        <th>Trans. ID</th><th>Updated By</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.pbarcodes" t-as="row" t-key="row.id">
+                            <td t-esc="row.pbarcode"/>
+                            <td t-esc="row.dept"/>
+                            <td t-esc="row.worker"/>
+                            <td t-esc="row.trans_id"/>
+                            <td t-esc="row.updated_by"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+        </t>
+
+        <!-- ══════════ Dashboard ══════════ -->
+        <t t-if="state.screen === 'dashboard'">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">Dashboard</span>
+                <span class="pcs-total">Total Pieces <t t-esc="state.dashTotal"/></span>
+                <label class="pcs-check">
+                    <input type="radio" name="dashpanel"
+                           t-att-checked="state.dashPanel === 'prod'"
+                           t-on-change="() => this.setDashPanel('prod')"/> Prod.
+                </label>
+                <label class="pcs-check">
+                    <input type="radio" name="dashpanel"
+                           t-att-checked="state.dashPanel === 'stone'"
+                           t-on-change="() => this.setDashPanel('stone')"/> Stone
+                </label>
+                <label class="pcs-check">
+                    <input type="radio" name="dashmode"
+                           t-att-checked="state.dashMode === 'depts'"
+                           t-on-change="() => this.setDashMode('depts')"/> Depts.
+                </label>
+                <label class="pcs-check">
+                    <input type="radio" name="dashmode"
+                           t-att-checked="state.dashMode === 'orders'"
+                           t-on-change="() => this.setDashMode('orders')"/> Orders
+                </label>
+                <span class="pcs-spacer"/>
+                <span>Barcode</span>
+                <input type="text" t-att-value="state.dashBarcode"
+                       t-on-input="(ev) => { this.state.dashBarcode = ev.target.value; }"
+                       t-on-keydown="onDashboardKeydown"/>
+                <button class="btn btn-sm btn-secondary" t-on-click="loadDashboard">Refresh</button>
+            </div>
+
+            <div class="pcs-toolbar" t-if="state.dashMode === 'orders'">
+                <span>Company</span>
+                <select t-on-change="(ev) => { this.state.dashPartyId = ev.target.value; this.loadDashboard(); }">
+                    <option value="">All</option>
+                    <option t-foreach="state.orderFilters.companies" t-as="company"
+                            t-key="company.id" t-att-value="company.id"
+                            t-att-selected="company.id == state.dashPartyId"
+                            t-esc="company.name"/>
+                </select>
+                <span>Sale Order</span>
+                <select t-on-change="(ev) => { this.state.dashDocumentId = ev.target.value; this.loadDashboard(); }">
+                    <option value="">All</option>
+                    <option t-foreach="state.orderFilters.documents" t-as="orderDoc"
+                            t-key="orderDoc.id" t-att-value="orderDoc.id"
+                            t-att-selected="orderDoc.id == state.dashDocumentId"
+                            t-esc="orderDoc.name"/>
+                </select>
+            </div>
+
+            <div class="pcs-dashboard">
+                <div class="pcs-cell" t-foreach="state.dashCells" t-as="cell" t-key="cell.id">
+                    <div class="pcs-cell-title" t-esc="cell.name"/>
+                    <div class="pcs-cell-body">
+                        <div>Work <span class="num" t-esc="cell.work"/></div>
+                        <div>Finish <span class="num" t-esc="cell.finish"/></div>
+                    </div>
+                </div>
+            </div>
+        </t>
+
+        <!-- ══════════ Priority No ══════════ -->
+        <t t-if="state.screen === 'priority'">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">Priority No</span>
+                <button class="btn btn-sm btn-secondary"
+                        t-on-click="printPriorityList">Print</button>
+            </div>
+            <table class="pcs-table">
+                <thead><tr>
+                    <th>Document</th><th>Create Date</th><th>Delv Date</th>
+                    <th class="num">Priority No</th>
+                </tr></thead>
+                <tbody>
+                    <tr t-foreach="state.priorities" t-as="row" t-key="row.id">
+                        <td t-esc="row.name"/>
+                        <td t-esc="row.create_date"/>
+                        <td t-esc="row.delv_date"/>
+                        <td class="num">
+                            <input type="number" class="pcs-num-input"
+                                   t-att-value="row.priority_no"
+                                   t-on-change="(ev) => this.savePriority(row, ev)"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </t>
+
+        <!-- ══════════ Scan Station ══════════ -->
+        <t t-if="state.screen === 'scan'">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">Scan Station</span>
+            </div>
+            <div class="pcs-scan-setup">
+                <label>Department
+                    <select t-on-change="(ev) => { this.state.scanDeptId = ev.target.value; this.focusScanInput(); }">
+                        <option value="">— select —</option>
+                        <option t-foreach="state.scanConfig.departments" t-as="dept"
+                                t-key="dept.id" t-att-value="dept.id"
+                                t-att-selected="dept.id == state.scanDeptId"
+                                t-esc="(dept.is_qc ? 'QC / ' : dept.track === 'stone' ? 'Stone / ' : 'Prod / ') + dept.name"/>
+                    </select>
+                </label>
+                <label>Worker
+                    <select t-on-change="(ev) => { this.state.scanEmployeeId = ev.target.value; this.focusScanInput(); }">
+                        <option value="">—</option>
+                        <option t-foreach="scanEmployees" t-as="employee"
+                                t-key="employee.id" t-att-value="employee.id"
+                                t-att-selected="employee.id == state.scanEmployeeId"
+                                t-esc="employee.name"/>
+                    </select>
+                </label>
+                <label t-if="scanNeeds.includes('gold')">Gold (g)
+                    <input type="number" step="0.001" t-att-value="state.scanWeight"
+                           t-on-input="(ev) => { this.state.scanWeight = ev.target.value; }"/>
+                </label>
+                <label t-if="scanNeeds.includes('stone')">Stones (ct)
+                    <input type="number" step="0.01" t-att-value="state.scanStoneWeight"
+                           t-on-input="(ev) => { this.state.scanStoneWeight = ev.target.value; }"/>
+                </label>
+                <label t-if="state.scanConfig.weight_control !== 'off' and scanNeeds.length">Note
+                    <input type="text" placeholder="stone swapped / missing / extra..."
+                           t-att-value="state.scanNote"
+                           t-on-input="(ev) => { this.state.scanNote = ev.target.value; }"/>
+                </label>
+            </div>
+            <div class="pcs-scan-input">
+                <input type="text" t-ref="scanInput"
+                       placeholder="Scan a stock card barcode…"
+                       t-on-keydown="onScanKeydown"/>
+            </div>
+            <div class="pcs-scan-pending" t-if="state.scanPending">
+                <div class="pcs-scan-pending-title">
+                    Weighing required — <t t-esc="state.scanPending.barcode"/>
+                    (<t t-esc="state.scanPending.action === 'receive' ? 'receive from' : 'issue to'"/>
+                    <t t-esc="' ' + state.scanPending.department"/>)
+                </div>
+                <div class="pcs-scan-pending-body">
+                    <span t-if="state.scanPending.missing.includes('gold')">
+                        Enter the gold weight (grams).
+                    </span>
+                    <span t-if="state.scanPending.missing.includes('stone')">
+                        Enter the stone weight (carats)<t t-if="state.scanPending.expected_stone_weight">
+                        — PDP expects <b t-esc="state.scanPending.expected_stone_weight"/> ct</t>.
+                    </span>
+                    <button class="btn btn-sm btn-primary"
+                            t-on-click="confirmPendingScan">Confirm weighing</button>
+                    <button class="btn btn-sm btn-secondary"
+                            t-on-click="cancelPendingScan">Cancel</button>
+                </div>
+            </div>
+            <div class="pcs-scan-results">
+                <div t-foreach="state.scanResults" t-as="result" t-key="result_index"
+                     t-att-class="'pcs-scan-result pcs-scan-' + result.status">
+                    <span class="pcs-scan-time" t-esc="result.time"/>
+                    <span class="pcs-scan-message" t-esc="result.message"/>
+                    <span t-if="result.design" t-esc="result.design"/>
+                </div>
+            </div>
+        </t>
+
+        <!-- ══════════ Operations Timeline ══════════ -->
+        <t t-if="state.screen === 'timeline'">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">Operations</span>
+                <span>Document</span>
+                <select t-on-change="(ev) => { this.state.timelineDocId = ev.target.value; this.loadTimeline(); }">
+                    <option value="">—</option>
+                    <option t-foreach="state.timelineDocs" t-as="doc"
+                            t-key="doc.id" t-att-value="doc.id"
+                            t-att-selected="doc.id == state.timelineDocId"
+                            t-esc="doc.name"/>
+                </select>
+                <span>Barcode</span>
+                <input type="text" t-att-value="state.timelineBarcode"
+                       t-on-input="(ev) => { this.state.timelineBarcode = ev.target.value; }"
+                       t-on-keydown="onTimelineKeydown"/>
+                <button class="btn btn-sm btn-secondary" t-on-click="loadTimeline">Refresh</button>
+                <span class="pcs-spacer"/>
+                <span class="pcs-legend">
+                    <span class="pcs-chip pcs-chip-prod pcs-chip-fin">Prod done</span>
+                    <span class="pcs-chip pcs-chip-prod pcs-chip-wip">Prod WIP</span>
+                    <span class="pcs-chip pcs-chip-stone pcs-chip-fin">Stone done</span>
+                    <span class="pcs-chip pcs-chip-stone pcs-chip-wip">Stone WIP</span>
+                    <span class="pcs-chip pcs-chip-prod pcs-chip-fin pcs-chip-qc">QC</span>
+                </span>
+            </div>
+            <div t-foreach="state.timelineBarcodes" t-as="line" t-key="line.id"
+                 class="pcs-timeline-block">
+                <div class="pcs-timeline-header">
+                    <span class="pcs-timeline-barcode" t-esc="line.barcode"/>
+                    <span t-esc="line.design"/>
+                    <span>X <t t-esc="line.qty"/></span>
+                </div>
+                <div class="pcs-timeline-chips">
+                    <t t-foreach="line.steps" t-as="step" t-key="step.id">
+                        <span t-att-class="stepChipClass(step)"
+                              t-att-title="step.dept_name + ' | ' + step.worker
+                                           + ' | ' + step.issue_date
+                                           + (step.receive_date ? ' -> ' + step.receive_date : '')"
+                              t-esc="step.dept_code"/>
+                        <span t-if="!step_last" class="pcs-chip-arrow"> </span>
+                    </t>
+                    <span t-if="!line.steps.length" class="pcs-muted">No operation yet</span>
+                </div>
+                <table class="pcs-table" t-if="line.steps.length">
+                    <thead><tr>
+                        <th>Dept</th><th>Track</th><th>Status</th><th>Worker</th>
+                        <th>Issued</th><th>Received</th>
+                        <th class="num">Gold In (g)</th><th class="num">Gold Out (g)</th>
+                        <th class="num">Stone In (ct)</th><th class="num">Stone Out (ct)</th>
+                        <th class="num">Min.</th><th>Note</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="line.steps" t-as="step" t-key="step.id">
+                            <td t-esc="step.dept_name"/>
+                            <td t-esc="step.track === 'stone' ? 'Stone' : 'Prod'"/>
+                            <td t-esc="step.status === 'wip' ? 'WIP' : 'FIN'"/>
+                            <td t-esc="step.worker"/>
+                            <td t-esc="step.issue_date"/>
+                            <td t-esc="step.receive_date"/>
+                            <td class="num" t-esc="step.issue_weight"/>
+                            <td class="num" t-esc="step.receive_weight"/>
+                            <td class="num" t-esc="step.issue_stone_weight"/>
+                            <td class="num" t-esc="step.receive_stone_weight"/>
+                            <td class="num" t-esc="step.duration_min"/>
+                            <td t-esc="step.note"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+
+        <!-- ══════════ PCS Settings ══════════ -->
+        <t t-if="state.screen === 'pcs_settings'">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">PCS Settings</span>
+            </div>
+            <h6>Weight control</h6>
+            <p class="pcs-muted">
+                Records, at each weighing department, the worker, the gold
+                weight (grams) and the stone weight (carats — 1 g = 5 ct)
+                before and after the step, plus an anomaly note. Working time
+                comes from the issue and receive scans.
+            </p>
+            <label class="pcs-check">
+                <input type="radio" name="wctl"
+                       t-att-checked="state.pcsSettings.weight_control === 'off'"
+                       t-on-change="() => this.setWeightControl('off')"/>
+                Off — legacy behaviour, no weighing fields
+            </label>
+            <label class="pcs-check">
+                <input type="radio" name="wctl"
+                       t-att-checked="state.pcsSettings.weight_control === 'optional'"
+                       t-on-change="() => this.setWeightControl('optional')"/>
+                Optional — weighing fields offered at the scan station, never blocking
+            </label>
+            <label class="pcs-check">
+                <input type="radio" name="wctl"
+                       t-att-checked="state.pcsSettings.weight_control === 'required'"
+                       t-on-change="() => this.setWeightControl('required')"/>
+                Required — the scan blocks until the department's weights are entered
+            </label>
+        </t>
+
+        <!-- ══════════ SSP Transaction ══════════ -->
+        <t t-if="state.screen === 'ssp'">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">SSP Transaction</span>
+            </div>
+            <div class="pcs-scan-setup">
+                <label>SSP
+                    <select t-on-change="(ev) => { this.state.sspForm.ssp_id = ev.target.value; }">
+                        <option value="">—</option>
+                        <option t-foreach="state.sspLookups.ssps" t-as="ssp"
+                                t-key="ssp.id" t-att-value="ssp.id"
+                                t-att-selected="ssp.id == state.sspForm.ssp_id"
+                                t-esc="ssp.name"/>
+                    </select>
+                </label>
+                <label>Dept
+                    <select t-on-change="(ev) => { this.state.sspForm.department_id = ev.target.value; }">
+                        <option value="">—</option>
+                        <option t-foreach="state.sspLookups.departments" t-as="dept"
+                                t-key="dept.id" t-att-value="dept.id"
+                                t-att-selected="dept.id == state.sspForm.department_id"
+                                t-esc="dept.name"/>
+                    </select>
+                </label>
+                <label>Employee
+                    <select t-on-change="(ev) => { this.state.sspForm.employee_id = ev.target.value; }">
+                        <option value="">—</option>
+                        <option t-foreach="state.sspLookups.employees" t-as="employee"
+                                t-key="employee.id" t-att-value="employee.id"
+                                t-att-selected="employee.id == state.sspForm.employee_id"
+                                t-esc="employee.name"/>
+                    </select>
+                </label>
+                <label>Purity
+                    <input type="text" t-att-value="state.sspForm.purity"
+                           t-on-input="(ev) => { this.state.sspForm.purity = ev.target.value; }"/>
+                </label>
+                <label>Issue
+                    <input type="number" step="0.001" t-att-value="state.sspForm.issue_weight"
+                           t-on-input="(ev) => { this.state.sspForm.issue_weight = ev.target.value; }"/>
+                </label>
+                <label>Receive
+                    <input type="number" step="0.001" t-att-value="state.sspForm.receive_weight"
+                           t-on-input="(ev) => { this.state.sspForm.receive_weight = ev.target.value; }"/>
+                </label>
+                <button class="btn btn-sm btn-primary" t-on-click="createSspTransaction">Save</button>
+            </div>
+            <table class="pcs-table">
+                <thead><tr>
+                    <th>SSP</th><th>Purity</th><th class="num">Issue</th>
+                    <th class="num">Receive</th><th>Date</th><th>By</th>
+                </tr></thead>
+                <tbody>
+                    <tr t-foreach="state.sspRows" t-as="row" t-key="row.id">
+                        <td t-esc="row.ssp"/>
+                        <td t-esc="row.purity"/>
+                        <td class="num" t-esc="row.issue"/>
+                        <td class="num" t-esc="row.receive"/>
+                        <td t-esc="row.date"/>
+                        <td t-esc="row.by"/>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pcs-toolbar">
+                <h6 style="margin: 0;">Worker month consumption</h6>
+                <button class="btn btn-sm btn-secondary"
+                        t-on-click="() => this.shiftSspMonth(-1)">Previous</button>
+                <span><t t-esc="state.sspConsumption.start"/> to
+                      <t t-esc="state.sspConsumption.end"/></span>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-disabled="state.sspMonthOffset >= 0"
+                        t-on-click="() => this.shiftSspMonth(1)">Next</button>
+            </div>
+            <table class="pcs-table">
+                <thead><tr>
+                    <th>Worker</th><th>SSP</th><th>Purity</th>
+                    <th class="num">Issued</th><th class="num">Received</th>
+                    <th class="num">Consumed</th>
+                </tr></thead>
+                <tbody>
+                    <tr t-foreach="state.sspConsumption.rows" t-as="row" t-key="row_index">
+                        <td t-esc="row.worker"/>
+                        <td t-esc="row.ssp"/>
+                        <td t-esc="row.purity"/>
+                        <td class="num" t-esc="row.issued"/>
+                        <td class="num" t-esc="row.received"/>
+                        <td class="num" t-esc="row.consumed"/>
+                    </tr>
+                    <tr t-if="!state.sspConsumption.rows.length">
+                        <td colspan="6" class="pcs-muted">No movement over this worker month.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </t>
+
+        <!-- ══════════ Clearance ══════════ -->
+        <t t-if="state.screen === 'clearance'">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">Clearance</span>
+                <button class="btn btn-sm btn-primary" t-on-click="newClearance">New</button>
+                <span class="pcs-spacer"/>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-class="state.clearanceTab === 'master' ? 'active' : ''"
+                        t-on-click="() => this.openClearanceTab('master')">Master</button>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-class="state.clearanceTab === 'prod' ? 'active' : ''"
+                        t-att-disabled="!state.clearanceId"
+                        t-on-click="() => this.openClearanceTab('prod')">Prod</button>
+                <button class="btn btn-sm btn-secondary"
+                        t-att-class="state.clearanceTab === 'ssp' ? 'active' : ''"
+                        t-att-disabled="!state.clearanceId"
+                        t-on-click="() => this.openClearanceTab('ssp')">SSP</button>
+            </div>
+            <table class="pcs-table" t-if="state.clearanceTab === 'master'">
+                <thead><tr><th>Date</th><th>Created By</th></tr></thead>
+                <tbody>
+                    <tr t-foreach="state.clearances" t-as="row" t-key="row.id"
+                        class="pcs-row-click"
+                        t-att-class="row.id === state.clearanceId ? 'pcs-selected' : ''"
+                        t-on-click="() => this.selectClearance(row.id)">
+                        <td t-esc="row.date"/>
+                        <td t-esc="row.created_by"/>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="pcs-table" t-if="state.clearanceTab === 'prod'">
+                <thead><tr>
+                    <th>Employee</th><th>Barcode</th><th>Design</th><th>Purity</th>
+                    <th class="num">Issue Wht.</th><th class="num">RM Wht.</th>
+                    <th class="num">Rcvd. Wht.</th>
+                </tr></thead>
+                <tbody>
+                    <tr t-foreach="state.clearanceLines.prod" t-as="row" t-key="row.id">
+                        <td t-esc="row.employee"/>
+                        <td t-esc="row.barcode"/>
+                        <td t-esc="row.design"/>
+                        <td t-esc="row.purity"/>
+                        <td class="num" t-esc="row.issue_weight"/>
+                        <td class="num" t-esc="row.rm_weight"/>
+                        <td class="num" t-esc="row.received_weight"/>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="pcs-table" t-if="state.clearanceTab === 'ssp'">
+                <thead><tr>
+                    <th>Employee</th><th>SSP</th><th>Purity</th>
+                    <th class="num">Issue Wht.</th><th class="num">Rcvd. Wht.</th><th>Date</th>
+                </tr></thead>
+                <tbody>
+                    <tr t-foreach="state.clearanceLines.ssp" t-as="row" t-key="row.id">
+                        <td t-esc="row.employee"/>
+                        <td t-esc="row.ssp"/>
+                        <td t-esc="row.purity"/>
+                        <td class="num" t-esc="row.issue_weight"/>
+                        <td class="num" t-esc="row.received_weight"/>
+                        <td t-esc="row.date"/>
+                    </tr>
+                </tbody>
+            </table>
+        </t>
+
+        <!-- ══════════ Reports ══════════ -->
+        <t t-if="isReportScreen">
+            <div class="pcs-toolbar">
+                <span class="pcs-title">Reports</span>
+                <button t-foreach="reportTabs" t-as="tab" t-key="tab.key"
+                        class="btn btn-sm btn-secondary"
+                        t-att-class="state.screen === tab.key ? 'active' : ''"
+                        t-on-click="() => this.openScreen(tab.key)"
+                        t-esc="tab.label"/>
+                <span class="pcs-spacer"/>
+                <button class="btn btn-sm btn-secondary"
+                        t-on-click="() => this.exportCsv(state.reportRows, state.screen + '.csv')">Export</button>
+            </div>
+
+            <!-- Multi Reports: dept + employee filters, Cutting + Filling tables -->
+            <t t-if="state.screen === 'report_multi'">
+                <div class="pcs-toolbar">
+                    <span>Dept</span>
+                    <select t-on-change="(ev) => { this.state.reportDeptId = ev.target.value; this.loadReportMulti(); }">
+                        <option value="">— select —</option>
+                        <option t-foreach="state.scanConfig.departments" t-as="dept"
+                                t-key="dept.id" t-att-value="dept.id"
+                                t-att-selected="dept.id == state.reportDeptId"
+                                t-esc="dept.name"/>
+                    </select>
+                    <span>Employee</span>
+                    <select t-on-change="(ev) => { this.state.reportEmployeeId = ev.target.value; this.loadReportMulti(); }">
+                        <option value="">All</option>
+                        <option t-foreach="state.scanConfig.employees" t-as="employee"
+                                t-key="employee.id" t-att-value="employee.id"
+                                t-att-selected="employee.id == state.reportEmployeeId"
+                                t-esc="employee.name"/>
+                    </select>
+                </div>
+                <h6>Cutting</h6>
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>Issued</th><th>Received</th><th>Order</th><th>Ref</th>
+                        <th class="num">Pcs</th>
+                        <th class="num">I/Weight</th><th class="num">R/Weight</th>
+                        <th class="num">Avg.</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.reportRows" t-as="row" t-key="row_index">
+                            <td t-esc="row.issued"/>
+                            <td t-esc="row.received"/>
+                            <td t-esc="row.order"/>
+                            <td t-esc="row.ref"/>
+                            <td class="num" t-esc="row.pcs"/>
+                            <td class="num" t-esc="row.i_weight"/>
+                            <td class="num" t-esc="row.r_weight"/>
+                            <td class="num" t-esc="row.avg"/>
+                        </tr>
+                    </tbody>
+                </table>
+                <h6>Filling</h6>
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>Order</th><th>Model</th><th>Gold</th><th>Give Time</th>
+                        <th>Recv. Time</th><th class="num">Total Min.</th>
+                        <th class="num">Given Wt.</th><th class="num">100% Wt.</th>
+                        <th class="num">Recv. Wt.</th><th class="num">100% Recv</th>
+                        <th class="num">Diff Wt.</th><th class="num">100% Diff Wt.</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.reportExtra" t-as="row" t-key="row_index">
+                            <td t-esc="row.order"/>
+                            <td t-esc="row.model"/>
+                            <td t-esc="row.gold"/>
+                            <td t-esc="row.give_time"/>
+                            <td t-esc="row.recv_time"/>
+                            <td class="num" t-esc="row.total_min"/>
+                            <td class="num" t-esc="row.given_wt"/>
+                            <td class="num" t-esc="row.given_wt_100"/>
+                            <td class="num" t-esc="row.recv_wt"/>
+                            <td class="num" t-esc="row.recv_wt_100"/>
+                            <td class="num" t-esc="row.diff_wt"/>
+                            <td class="num" t-esc="row.diff_wt_100"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- Doc Items Dept Cost -->
+            <t t-if="state.screen === 'report_dept_cost'">
+                <div class="pcs-table-scroll">
+                    <table class="pcs-table">
+                        <thead><tr>
+                            <th>row#</th><th>due_date</th><th>doc_name</th><th>design</th>
+                            <th>stone_detail</th><th>gold</th><th>kt</th><th>ref</th>
+                            <th class="num">in_casting</th>
+                            <th class="num">in_cutting</th><th class="num">cutting</th>
+                            <th class="num">in_filling</th><th class="num">filling</th>
+                            <th class="num">in_setting</th><th class="num">setting</th>
+                            <th class="num">in_assembly</th><th class="num">assembly</th>
+                            <th class="num">in_polishing</th><th class="num">polishing</th>
+                            <th class="num">in_plating</th><th class="num">plating</th>
+                            <th class="num">in_qc_final</th><th class="num">metal_weight</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr t-foreach="state.reportRows" t-as="row" t-key="row_index">
+                                <td t-esc="row_index + 1"/>
+                                <td t-esc="row.due_date"/>
+                                <td t-esc="row.doc_name"/>
+                                <td t-esc="row.design"/>
+                                <td t-esc="row.stone_detail"/>
+                                <td t-esc="row.gold"/>
+                                <td t-esc="row.kt"/>
+                                <td t-esc="row.ref"/>
+                                <td class="num" t-esc="row.in_casting"/>
+                                <td class="num" t-esc="row.in_cutting"/>
+                                <td class="num" t-esc="row.cutting"/>
+                                <td class="num" t-esc="row.in_filling"/>
+                                <td class="num" t-esc="row.filling"/>
+                                <td class="num" t-esc="row.in_setting"/>
+                                <td class="num" t-esc="row.setting"/>
+                                <td class="num" t-esc="row.in_assembly"/>
+                                <td class="num" t-esc="row.assembly"/>
+                                <td class="num" t-esc="row.in_polishing"/>
+                                <td class="num" t-esc="row.polishing"/>
+                                <td class="num" t-esc="row.in_plating"/>
+                                <td class="num" t-esc="row.plating"/>
+                                <td class="num" t-esc="row.in_qc_final"/>
+                                <td class="num" t-esc="row.metal_weight"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+
+            <!-- Doc Items Finish -->
+            <t t-if="state.screen === 'report_finish'">
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>doc_name</th><th>design</th><th>barcode</th>
+                        <th>gold_id</th><th class="num">qty</th><th>updated_date</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.reportRows" t-as="row" t-key="row_index">
+                            <td t-esc="row.doc_name"/>
+                            <td t-esc="row.design"/>
+                            <td t-esc="row.barcode"/>
+                            <td t-esc="row.gold_id"/>
+                            <td class="num" t-esc="row.qty"/>
+                            <td t-esc="row.updated_date"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- Priorities -->
+            <t t-if="state.screen === 'report_priorities'">
+                <div class="pcs-toolbar">
+                    <label class="pcs-check">
+                        <input type="radio" name="priomode"
+                               t-att-checked="state.reportPrioMode === 'assorted'"
+                               t-on-change="() => { this.state.reportPrioMode = 'assorted'; this.loadReportPriorities(); }"/>
+                        Assorted -&gt; No Cast
+                    </label>
+                    <label class="pcs-check">
+                        <input type="radio" name="priomode"
+                               t-att-checked="state.reportPrioMode === 'casted'"
+                               t-on-change="() => { this.state.reportPrioMode = 'casted'; this.loadReportPriorities(); }"/>
+                        Casted -&gt; No Shaping
+                    </label>
+                    <label class="pcs-check">
+                        <input type="radio" name="priomode"
+                               t-att-checked="state.reportPrioMode === 'all'"
+                               t-on-change="() => { this.state.reportPrioMode = 'all'; this.loadReportPriorities(); }"/>
+                        All
+                    </label>
+                </div>
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>row#</th><th>barcode</th><th>cur_dept_nam</th>
+                        <th>delv_date</th><th class="num">priority No</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.reportRows" t-as="row" t-key="row_index">
+                            <td t-esc="row_index + 1"/>
+                            <td t-esc="row.barcode"/>
+                            <td t-esc="row.cur_dept_name"/>
+                            <td t-esc="row.delv_date"/>
+                            <td class="num" t-esc="row.priority_no"/>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>row#</th><th>barcode</th><th>prod_dept</th><th>prod_status</th>
+                        <th>stone_dept</th><th>stone_status</th><th>no_cast</th><th>no_assort</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.reportExtra" t-as="row" t-key="row_index">
+                            <td t-esc="row_index + 1"/>
+                            <td t-esc="row.barcode"/>
+                            <td t-esc="row.prod_dept"/>
+                            <td t-esc="row.prod_status"/>
+                            <td t-esc="row.stone_dept"/>
+                            <td t-esc="row.stone_status"/>
+                            <td t-esc="row.no_cast ? 'Yes' : ''"/>
+                            <td t-esc="row.no_assort ? 'Yes' : ''"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- SIS Not In PCS -->
+            <t t-if="state.screen === 'report_sis_not_pcs'">
+                <table class="pcs-table">
+                    <thead><tr><th>doc_name</th><th>design</th></tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.reportRows" t-as="row" t-key="row_index">
+                            <td t-esc="row.doc_name"/>
+                            <td t-esc="row.design"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- Order Parts -->
+            <t t-if="state.screen === 'report_order_parts'">
+                <div class="pcs-toolbar">
+                    <span>Company</span>
+                    <select t-on-change="(ev) => { this.state.reportPartyId = ev.target.value; }">
+                        <option value="">All</option>
+                        <option t-foreach="state.orderFilters.companies" t-as="company"
+                                t-key="company.id" t-att-value="company.id"
+                                t-att-selected="company.id == state.reportPartyId"
+                                t-esc="company.name"/>
+                    </select>
+                    <span>Sale Order</span>
+                    <select t-on-change="(ev) => { this.state.reportOrderDocId = ev.target.value; }">
+                        <option value="">All</option>
+                        <option t-foreach="state.orderFilters.documents" t-as="orderDoc"
+                                t-key="orderDoc.id" t-att-value="orderDoc.id"
+                                t-att-selected="orderDoc.id == state.reportOrderDocId"
+                                t-esc="orderDoc.name"/>
+                    </select>
+                    <button class="btn btn-sm btn-secondary"
+                            t-on-click="loadReportOrderParts">Refresh</button>
+                </div>
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>Order</th><th>Part ID</th><th>Part</th><th class="num">Qty</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.reportRows" t-as="row" t-key="row_index">
+                            <td t-esc="row.order"/>
+                            <td t-esc="row.part_id"/>
+                            <td t-esc="row.part"/>
+                            <td class="num" t-esc="row.qty"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- Wax PDP Weight -->
+            <t t-if="state.screen === 'report_wax'">
+                <table class="pcs-table">
+                    <thead><tr>
+                        <th>Barcode</th><th class="num">Qty</th><th class="num">Pdp Weight</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.reportRows" t-as="row" t-key="row_index">
+                            <td t-esc="row.barcode"/>
+                            <td class="num" t-esc="row.qty"/>
+                            <td class="num" t-esc="row.pdp_weight"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- Dashboard Summary -->
+            <t t-if="state.screen === 'report_summary'">
+                <div class="pcs-table-scroll">
+                    <table class="pcs-table">
+                        <thead><tr>
+                            <th>Order Date</th><th class="num">Priority</th><th>Sales Order</th>
+                            <th class="num">Casting(W)</th><th class="num">Filling(W)</th>
+                            <th class="num">QC Pre Polish(W)</th><th class="num">QC Assembly(W)</th>
+                            <th class="num">Assort(W)</th><th class="num">Shape(W)</th>
+                            <th class="num">Cut(W)</th><th class="num">Stone Ready</th>
+                            <th class="num">Stone</th><th class="num">Merged</th>
+                            <th class="num">QC Set</th><th class="num">QC Polish</th>
+                            <th class="num">QC Final</th><th class="num">Total</th>
+                            <th>Delivery Date</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr t-foreach="state.reportRows" t-as="row" t-key="row_index">
+                                <td t-esc="row.order_date"/>
+                                <td class="num" t-esc="row.priority"/>
+                                <td t-esc="row.sales_order"/>
+                                <td class="num" t-esc="row.casting"/>
+                                <td class="num" t-esc="row.filling"/>
+                                <td class="num" t-esc="row.qc_pre_polish"/>
+                                <td class="num" t-esc="row.qc_assembly"/>
+                                <td class="num" t-esc="row.assort"/>
+                                <td class="num" t-esc="row.shape"/>
+                                <td class="num" t-esc="row.cut"/>
+                                <td class="num" t-esc="row.stone_ready"/>
+                                <td class="num" t-esc="row.stone"/>
+                                <td class="num" t-esc="row.merged"/>
+                                <td class="num" t-esc="row.qc_set"/>
+                                <td class="num" t-esc="row.qc_polish"/>
+                                <td class="num" t-esc="row.qc_final"/>
+                                <td class="num" t-esc="row.total"/>
+                                <td t-esc="row.delivery_date"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+
+    </div>
+</t>
+
+</templates>

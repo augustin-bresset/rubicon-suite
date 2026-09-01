@@ -44,8 +44,8 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      # Top-level modules to install (their dependencies follow). PCS modules join once committed.
-      MODULES: rubicon_env,rubicon_uom,pdp_frontend,pdp_metal_market,sis_frontend,sis_analysis,rubicon_storage,latex_pdf,rubicon_import
+      # Top-level modules to install (their dependencies follow).
+      MODULES: rubicon_env,rubicon_uom,pdp_frontend,pdp_metal_market,sis_frontend,sis_analysis,rubicon_storage,latex_pdf,rubicon_import,pcs_simulator,ps_utilities,sis_report
     steps:
       - uses: actions/checkout@v4
       - name: Install modules and run their tests

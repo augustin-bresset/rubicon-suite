@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Cost-to-minutes rates of the stock card labor stamp (THB per
+         minute), per labor type: 'Filing Min.' = model filing cost / rate,
+         'Setting Min' = sum of stone setting costs / rate. Derived from
+         the legacy reference cards. -->
+    <record id="param_labor_minute_rate_filing" model="ir.config_parameter">
+        <field name="key">pcs.labor_minute_rate_filing</field>
+        <field name="value">1.4</field>
+    </record>
+    <record id="param_labor_minute_rate_setting" model="ir.config_parameter">
+        <field name="key">pcs.labor_minute_rate_setting</field>
+        <field name="value">1.45</field>
+    </record>
+</odoo>

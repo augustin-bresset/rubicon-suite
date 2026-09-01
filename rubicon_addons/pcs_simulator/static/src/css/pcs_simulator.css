@@ -1,0 +1,134 @@
+.pcs-flow-wrap {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 8px;
+    margin-bottom: 10px;
+    overflow-x: auto;
+}
+
+.pcs-flow-svg {
+    width: 100%;
+    min-width: 900px;
+    display: block;
+}
+
+.pcs-flow-lane {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.pcs-flow-node {
+    fill: #fbfaf7;
+    stroke-width: 1.5;
+}
+
+.pcs-flow-node.pcs-flow-node-qc {
+    fill: #efefec;
+    stroke-dasharray: 4 3;
+}
+
+.pcs-sim-qc-swatch {
+    display: inline-block;
+    width: 18px;
+    height: 12px;
+    background: #efefec;
+    border: 1.5px dashed #7d7d7d;
+    border-radius: 3px;
+}
+
+.pcs-flow-code {
+    font-size: 13px;
+    font-weight: bold;
+    text-anchor: middle;
+}
+
+.pcs-flow-name {
+    font-size: 8px;
+    fill: #8a857c;
+    text-anchor: middle;
+}
+
+.pcs-flow-edge {
+    stroke: #c6c1b8;
+    stroke-width: 2;
+}
+
+.pcs-flow-edge-join {
+    stroke: #a8763e;
+    stroke-dasharray: 6 5;
+}
+
+.pcs-flow-transfer {
+    stroke: #a8544c;
+    stroke-width: 3;
+    stroke-dasharray: 9 6;
+    animation: pcs-flow-dash 0.7s linear infinite;
+}
+
+@keyframes pcs-flow-dash {
+    to { stroke-dashoffset: -15; }
+}
+
+.pcs-flow-transfer-count {
+    font-size: 11px;
+    font-weight: bold;
+    fill: #a8544c;
+    text-anchor: end;
+}
+
+.pcs-flow-wip {
+    fill: #5b7d99;
+}
+
+.pcs-flow-fin {
+    fill: #6f8f6a;
+}
+
+.pcs-flow-count {
+    font-size: 11px;
+    font-weight: bold;
+    fill: #fff;
+    text-anchor: middle;
+}
+
+.pcs-sim-counter {
+    font-size: 14px;
+}
+
+.pcs-piece-barcode img {
+    height: 30px;
+}
+
+.pcs-piece-code {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.pcs-sim-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+}
+
+.pcs-sim-badge {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    border-radius: 50%;
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    font-size: 11px;
+}
+
+.pcs-sim-badge-wip {
+    background: #5b7d99;
+}
+
+.pcs-sim-badge-fin {
+    background: #6f8f6a;
+}

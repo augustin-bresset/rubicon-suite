@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Show the workshop division and the derived QC flag in the
+         Utilities > Departments screens (base views live in ps_utilities). -->
+    <record id="view_pcs_department_list_qc" model="ir.ui.view">
+        <field name="name">pcs.department.list.division</field>
+        <field name="model">pcs.department</field>
+        <field name="inherit_id" ref="ps_utilities.view_pcs_department_list"/>
+        <field name="arch" type="xml">
+            <field name="group_id" position="after">
+                <field name="division_id"/>
+                <field name="is_qc"/>
+            </field>
+        </field>
+    </record>
+    <record id="view_pcs_department_form_qc" model="ir.ui.view">
+        <field name="name">pcs.department.form.division</field>
+        <field name="model">pcs.department</field>
+        <field name="inherit_id" ref="ps_utilities.view_pcs_department_form"/>
+        <field name="arch" type="xml">
+            <field name="group_id" position="after">
+                <field name="division_id"/>
+                <field name="is_qc"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Divisions CRUD (PCS > Utilities > Divisions) -->
+    <record id="view_pcs_division_list" model="ir.ui.view">
+        <field name="name">pcs.division.list</field>
+        <field name="model">pcs.division</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="sequence"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_pcs_division_form" model="ir.ui.view">
+        <field name="name">pcs.division.form</field>
+        <field name="model">pcs.division</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="code"/>
+                        <field name="name"/>
+                        <field name="sequence"/>
+                    </group>
+                    <field name="department_ids">
+                        <list>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="group_id"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_pcs_division" model="ir.actions.act_window">
+        <field name="name">Divisions</field>
+        <field name="res_model">pcs.division</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

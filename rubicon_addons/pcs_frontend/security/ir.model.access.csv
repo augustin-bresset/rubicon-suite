@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pcs_workspace_service_user_user,pcs.workspace.service user (user),model_pcs_workspace_service,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_workspace_service_user_editor,pcs.workspace.service user (editor),model_pcs_workspace_service,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_workspace_service_user,pcs.workspace.service user (manager),model_pcs_workspace_service,rubicon_env.group_rubicon_manager,1,1,1,1

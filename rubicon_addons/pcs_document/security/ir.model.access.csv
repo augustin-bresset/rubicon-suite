@@ -1,0 +1,25 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pcs_division_user_user,pcs.division user (user),model_pcs_division,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_division_user_editor,pcs.division user (editor),model_pcs_division,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_division_user,pcs.division user (manager),model_pcs_division,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_document_user_user,pcs.document user (user),model_pcs_document,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_document_user_editor,pcs.document user (editor),model_pcs_document,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_document_user,pcs.document user (manager),model_pcs_document,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_barcode_user_user,pcs.barcode user (user),model_pcs_barcode,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_barcode_user_editor,pcs.barcode user (editor),model_pcs_barcode,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_barcode_user,pcs.barcode user (manager),model_pcs_barcode,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_transaction_user_user,pcs.transaction user (user),model_pcs_transaction,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_transaction_user_editor,pcs.transaction user (editor),model_pcs_transaction,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_transaction_user,pcs.transaction user (manager),model_pcs_transaction,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_ssp_transaction_user_user,pcs.ssp.transaction user (user),model_pcs_ssp_transaction,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_ssp_transaction_user_editor,pcs.ssp.transaction user (editor),model_pcs_ssp_transaction,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_ssp_transaction_user,pcs.ssp.transaction user (manager),model_pcs_ssp_transaction,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_clearance_user_user,pcs.clearance user (user),model_pcs_clearance,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_clearance_user_editor,pcs.clearance user (editor),model_pcs_clearance,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_clearance_user,pcs.clearance user (manager),model_pcs_clearance,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_clearance_prod_line_user_user,pcs.clearance.prod.line user (user),model_pcs_clearance_prod_line,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_clearance_prod_line_user_editor,pcs.clearance.prod.line user (editor),model_pcs_clearance_prod_line,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_clearance_prod_line_user,pcs.clearance.prod.line user (manager),model_pcs_clearance_prod_line,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_clearance_ssp_line_user_user,pcs.clearance.ssp.line user (user),model_pcs_clearance_ssp_line,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_clearance_ssp_line_user_editor,pcs.clearance.ssp.line user (editor),model_pcs_clearance_ssp_line,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_clearance_ssp_line_user,pcs.clearance.ssp.line user (manager),model_pcs_clearance_ssp_line,rubicon_env.group_rubicon_manager,1,1,1,1

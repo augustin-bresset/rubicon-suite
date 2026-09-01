@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============ Roles ============ -->
+    <record id="view_pcs_role_list" model="ir.ui.view">
+        <field name="name">pcs.role.list</field>
+        <field name="model">pcs.role</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_pcs_role" model="ir.actions.act_window">
+        <field name="name">Roles</field>
+        <field name="res_model">pcs.role</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ============ Dept. Groups ============ -->
+    <record id="view_pcs_dept_group_list" model="ir.ui.view">
+        <field name="name">pcs.dept.group.list</field>
+        <field name="model">pcs.dept.group</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="type"/>
+                <field name="sequence"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_pcs_dept_group" model="ir.actions.act_window">
+        <field name="name">Department Groups</field>
+        <field name="res_model">pcs.dept.group</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ============ Departments ============ -->
+    <record id="view_pcs_department_list" model="ir.ui.view">
+        <field name="name">pcs.department.list</field>
+        <field name="model">pcs.department</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="group_id"/>
+                <field name="loss_pct"/>
+                <field name="sequence"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_pcs_department_form" model="ir.ui.view">
+        <field name="name">pcs.department.form</field>
+        <field name="model">pcs.department</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="group_id"/>
+                            <field name="loss_pct"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group string="Flags">
+                            <field name="transfer_stones"/>
+                            <field name="stones"/>
+                            <field name="transfer_metals"/>
+                            <field name="metals"/>
+                            <field name="transfer_parts"/>
+                            <field name="parts"/>
+                            <field name="auto_weight"/>
+                            <field name="p_loss_pct"/>
+                            <field name="clear"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_pcs_department" model="ir.actions.act_window">
+        <field name="name">Departments</field>
+        <field name="res_model">pcs.department</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ============ Users ============ -->
+    <record id="view_pcs_user_list" model="ir.ui.view">
+        <field name="name">pcs.user.list</field>
+        <field name="model">pcs.user</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="role_id"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_pcs_user" model="ir.actions.act_window">
+        <field name="name">Users</field>
+        <field name="res_model">pcs.user</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ============ Employee Types ============ -->
+    <record id="view_pcs_employee_type_list" model="ir.ui.view">
+        <field name="name">pcs.employee.type.list</field>
+        <field name="model">pcs.employee.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_pcs_employee_type" model="ir.actions.act_window">
+        <field name="name">Employee Types</field>
+        <field name="res_model">pcs.employee.type</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ============ Employees ============ -->
+    <record id="view_pcs_employee_list" model="ir.ui.view">
+        <field name="name">pcs.employee.list</field>
+        <field name="model">pcs.employee</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="type_id"/>
+                <field name="tag"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_pcs_employee_form" model="ir.ui.view">
+        <field name="name">pcs.employee.form</field>
+        <field name="model">pcs.employee</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="type_id"/>
+                            <field name="tag"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Departments">
+                            <field name="department_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="group_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_pcs_employee" model="ir.actions.act_window">
+        <field name="name">Employees</field>
+        <field name="res_model">pcs.employee</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ============ Stones (reuse pdp.stone) ============ -->
+    <record id="action_pcs_stones" model="ir.actions.act_window">
+        <field name="name">Stones</field>
+        <field name="res_model">pdp.stone</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ============ Solder / Spring / Plate ============ -->
+    <record id="view_pcs_ssp_list" model="ir.ui.view">
+        <field name="name">pcs.ssp.list</field>
+        <field name="model">pcs.ssp</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_pcs_ssp" model="ir.actions.act_window">
+        <field name="name">Solder/Spring/Plate</field>
+        <field name="res_model">pcs.ssp</field>
+        <field name="view_mode">list</field>
+    </record>
+
+</odoo>

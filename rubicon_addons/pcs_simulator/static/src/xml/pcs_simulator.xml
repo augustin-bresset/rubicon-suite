@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="pcs_simulator.PcsSimulator">
+    <div class="pcs-workspace">
+        <div class="pcs-toolbar">
+            <span class="pcs-title">Factory Simulator</span>
+            <span>Clock: <b t-esc="state.status.sim_time || '—'"/></span>
+            <span class="pcs-sim-counter">
+                <b t-esc="state.flow.done"/> / <b t-esc="state.flow.total_pieces"/> pieces done
+            </span>
+            <span class="pcs-spacer"/>
+            <label class="pcs-check" title="When detached, the PCS screens show production data only; the simulation keeps its own data.">
+                <input type="checkbox" t-att-checked="state.status.attached"
+                       t-on-change="toggleAttached"/>
+                Attached to PCS
+            </label>
+            <span>Seed</span>
+            <input type="number" class="pcs-num-input"
+                   t-att-value="state.status.seed" t-on-change="changeSeed"/>
+            <span>Orders</span>
+            <input type="number" class="pcs-num-input"
+                   t-att-value="state.ordersCount"
+                   t-on-input="(ev) => { this.state.ordersCount = ev.target.value; }"/>
+            <button class="btn btn-sm btn-primary" t-att-disabled="state.busy"
+                    t-on-click="setupSim">Setup</button>
+            <button class="btn btn-sm btn-secondary" t-att-disabled="state.busy"
+                    t-on-click="resetSim">Reset</button>
+        </div>
+
+        <div class="pcs-toolbar">
+            <button class="btn btn-sm"
+                    t-att-class="state.playing ? 'btn-danger' : 'btn-primary'"
+                    t-on-click="togglePlay"
+                    t-esc="state.playing ? 'Pause' : 'Play'"/>
+            <button class="btn btn-sm btn-primary" t-att-disabled="state.busy"
+                    t-on-click="stepOperation"
+                    title="Advance the clock until the next thing happens in the factory (a piece sent to or finished in a department)">Next event</button>
+            <button class="btn btn-sm btn-secondary" t-att-disabled="state.busy"
+                    t-on-click="() => this.advance(1)">+1h</button>
+            <button class="btn btn-sm btn-secondary" t-att-disabled="state.busy"
+                    t-on-click="() => this.advance(4)">+4h</button>
+            <button class="btn btn-sm btn-secondary" t-att-disabled="state.busy"
+                    t-on-click="() => this.advance(8)">+8h</button>
+            <button class="btn btn-sm btn-secondary" t-att-disabled="state.busy"
+                    t-on-click="() => this.advance(24)">+1 day</button>
+            <button class="btn btn-sm btn-secondary" t-att-disabled="state.busy"
+                    t-on-click="() => this.advance(168)">+1 week</button>
+            <input type="number" class="pcs-num-input" min="1"
+                   t-att-value="state.customHours"
+                   t-on-input="(ev) => { this.state.customHours = ev.target.value; }"/>
+            <button class="btn btn-sm btn-secondary" t-att-disabled="state.busy"
+                    t-on-click="advanceCustom">Advance hours</button>
+            <span class="pcs-spacer"/>
+            <span>Days</span>
+            <input type="number" class="pcs-num-input"
+                   t-att-value="state.historyDays"
+                   t-on-input="(ev) => { this.state.historyDays = ev.target.value; }"/>
+            <button class="btn btn-sm btn-secondary" t-att-disabled="state.busy"
+                    t-on-click="runHistory">Run History</button>
+            <span class="pcs-spacer"/>
+            <span class="pcs-sim-legend">
+                <span class="pcs-sim-badge pcs-sim-badge-wip">3</span> at work
+                <span class="pcs-sim-badge pcs-sim-badge-fin">2</span> finished, waiting
+                <svg width="34" height="10"><path d="M 2 5 L 32 5" class="pcs-flow-transfer"/></svg> transfer
+                <span class="pcs-sim-qc-swatch"></span> QC (Quality Controller)
+            </span>
+        </div>
+
+        <div class="pcs-flow-wrap">
+            <svg viewBox="0 0 1180 372" class="pcs-flow-svg">
+                <!-- Lane labels -->
+                <text t-foreach="laneLabels" t-as="lane" t-key="lane.label"
+                      t-att-x="lane.x" t-att-y="lane.y + 4"
+                      t-att-fill="lane.color" class="pcs-flow-lane"
+                      t-esc="lane.label"/>
+
+                <!-- Static process chain -->
+                <path t-foreach="chainEdges" t-as="edge" t-key="edge_index"
+                      t-att-d="edge.d" fill="none"
+                      t-att-class="edge.dashed ? 'pcs-flow-edge pcs-flow-edge-join' : 'pcs-flow-edge'"/>
+
+                <!-- Transfers of the current tick -->
+                <g t-foreach="flowTransfers" t-as="transfer" t-key="transfer.id">
+                    <path t-att-d="transfer.d" fill="none" class="pcs-flow-transfer"/>
+                    <text t-att-x="transfer.lx" t-att-y="transfer.ly"
+                          class="pcs-flow-transfer-count"
+                          t-esc="'+' + transfer.count"/>
+                </g>
+
+                <!-- Departments -->
+                <g t-foreach="flowNodes" t-as="node" t-key="node.code">
+                    <rect t-att-x="node.x" t-att-y="node.y" rx="6"
+                          width="104" height="44"
+                          t-att-class="node.isQc ? 'pcs-flow-node pcs-flow-node-qc' : 'pcs-flow-node'"
+                          t-att-stroke="node.color"/>
+                    <title t-esc="node.name"/>
+                    <text t-att-x="node.cx" t-att-y="node.y + 20"
+                          class="pcs-flow-code" t-esc="node.code"/>
+                    <text t-att-x="node.cx" t-att-y="node.y + 35"
+                          class="pcs-flow-name" t-esc="node.name"/>
+                    <g t-if="node.wip">
+                        <circle t-att-cx="node.x + 104" t-att-cy="node.y"
+                                r="11" class="pcs-flow-wip"/>
+                        <text t-att-x="node.x + 104" t-att-y="node.y + 4"
+                              class="pcs-flow-count" t-esc="node.wip"/>
+                    </g>
+                    <g t-if="node.fin">
+                        <circle t-att-cx="node.x + 104" t-att-cy="node.y + 44"
+                                r="11" class="pcs-flow-fin"/>
+                        <text t-att-x="node.x + 104" t-att-y="node.y + 48"
+                              class="pcs-flow-count" t-esc="node.fin"/>
+                    </g>
+                </g>
+            </svg>
+        </div>
+
+        <div class="pcs-toolbar">
+            <button class="btn btn-sm btn-secondary"
+                    t-on-click="togglePieces"
+                    t-esc="state.showPieces ? 'Hide pieces' : 'Pieces and barcodes'"/>
+            <t t-if="state.showPieces">
+                <span>Scan into</span>
+                <select t-on-change="(ev) => { this.state.scanDeptId = ev.target.value; }">
+                    <option value="">— department —</option>
+                    <option t-foreach="state.scanConfig.departments" t-as="dept"
+                            t-key="dept.id" t-att-value="dept.id"
+                            t-att-selected="dept.id == state.scanDeptId"
+                            t-esc="(dept.is_qc ? 'QC / ' : dept.track === 'stone' ? 'Stone / ' : 'Prod / ') + dept.name"/>
+                </select>
+                <select t-on-change="(ev) => { this.state.scanEmployeeId = ev.target.value; }">
+                    <option value="">— worker —</option>
+                    <option t-foreach="scanWorkers" t-as="employee"
+                            t-key="employee.id" t-att-value="employee.id"
+                            t-att-selected="employee.id == state.scanEmployeeId"
+                            t-esc="employee.name"/>
+                </select>
+            </t>
+            <span class="pcs-spacer"/>
+            <button class="btn btn-sm btn-secondary"
+                    t-on-click="() => { this.state.showEvents = !this.state.showEvents; }"
+                    t-esc="state.showEvents ? 'Hide operations log' : 'Show operations log'"/>
+        </div>
+
+        <table class="pcs-table" t-if="state.showPieces">
+            <thead><tr>
+                <th>Barcode</th><th>Design</th><th>Document</th>
+                <th>Production</th><th>Stones</th><th></th>
+            </tr></thead>
+            <tbody>
+                <tr t-foreach="state.pieces" t-as="piece" t-key="piece.id">
+                    <td class="pcs-piece-barcode">
+                        <img t-att-src="piece.barcode_url" t-att-alt="piece.barcode"/>
+                        <div class="pcs-piece-code" t-esc="piece.barcode"/>
+                    </td>
+                    <td t-esc="piece.design"/>
+                    <td t-esc="piece.document"/>
+                    <td t-esc="piece.done ? 'Finished' : piece.prod_position"/>
+                    <td t-esc="piece.stone_position"/>
+                    <td>
+                        <button class="btn btn-sm btn-primary"
+                                t-att-disabled="piece.done or !state.scanDeptId"
+                                t-on-click="() => this.scanPiece(piece)">Scan</button>
+                        <button class="btn btn-sm btn-secondary"
+                                t-on-click="() => this.printCard(piece)">Card</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="pcs-table" t-if="state.showEvents">
+            <thead><tr>
+                <th>Time</th><th>Barcode</th><th>Dept</th><th>Status</th>
+                <th>Worker</th><th class="num">Issue Wht.</th>
+                <th class="num">Rcvd. Wht.</th>
+            </tr></thead>
+            <tbody>
+                <tr t-foreach="state.status.events" t-as="event" t-key="event.id">
+                    <td t-esc="event.time"/>
+                    <td t-esc="event.barcode"/>
+                    <td t-esc="event.dept"/>
+                    <td t-esc="event.status"/>
+                    <td t-esc="event.worker"/>
+                    <td class="num" t-esc="event.issue_weight"/>
+                    <td class="num" t-esc="event.receive_weight"/>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</t>
+
+</templates>

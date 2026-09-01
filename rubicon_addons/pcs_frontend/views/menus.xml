@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- One client action per PCS screen: same component, opened on a
+         specific screen via context (same pattern as ps_utilities). -->
+    <record id="action_pcs_sales_documents" model="ir.actions.client">
+        <field name="name">Sales Documents</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'sales_docs'}</field>
+    </record>
+    <record id="action_pcs_documents" model="ir.actions.client">
+        <field name="name">Documents</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'documents'}</field>
+    </record>
+    <record id="action_pcs_dashboard" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'dashboard'}</field>
+    </record>
+    <record id="action_pcs_priority" model="ir.actions.client">
+        <field name="name">Priority No</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'priority'}</field>
+    </record>
+    <record id="action_pcs_scan" model="ir.actions.client">
+        <field name="name">Scan Station</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'scan'}</field>
+    </record>
+    <record id="action_pcs_timeline" model="ir.actions.client">
+        <field name="name">Operations</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'timeline'}</field>
+    </record>
+    <record id="action_pcs_ssp" model="ir.actions.client">
+        <field name="name">Solder/Spring/Plate</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'ssp'}</field>
+    </record>
+    <record id="action_pcs_clearance" model="ir.actions.client">
+        <field name="name">Clearance</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'clearance'}</field>
+    </record>
+    <record id="action_pcs_settings" model="ir.actions.client">
+        <field name="name">PCS Settings</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'pcs_settings'}</field>
+    </record>
+    <record id="action_pcs_reports" model="ir.actions.client">
+        <field name="name">Reports</field>
+        <field name="tag">pcs_workspace_action</field>
+        <field name="context">{'screen': 'report_multi'}</field>
+    </record>
+
+    <!-- App root -->
+    <menuitem id="menu_pcs_root"
+              name="PCS"
+              sequence="11"
+              web_icon="pcs_frontend,static/description/icon.png"/>
+
+    <!-- Activities -->
+    <menuitem id="menu_pcs_activities" name="Activities"
+              parent="menu_pcs_root" sequence="10"/>
+    <menuitem id="menu_pcs_sales_documents" name="Sales Documents"
+              parent="menu_pcs_activities" action="action_pcs_sales_documents"
+              sequence="10"/>
+    <menuitem id="menu_pcs_documents" name="Documents"
+              parent="menu_pcs_activities" action="action_pcs_documents"
+              sequence="20"/>
+    <menuitem id="menu_pcs_dashboard" name="Dashboard"
+              parent="menu_pcs_activities" action="action_pcs_dashboard"
+              sequence="30"/>
+    <menuitem id="menu_pcs_priority" name="Priority No"
+              parent="menu_pcs_activities" action="action_pcs_priority"
+              sequence="40"/>
+    <menuitem id="menu_pcs_scan" name="Scan Station"
+              parent="menu_pcs_activities" action="action_pcs_scan"
+              sequence="50"/>
+    <menuitem id="menu_pcs_timeline" name="Operations"
+              parent="menu_pcs_activities" action="action_pcs_timeline"
+              sequence="55"/>
+    <menuitem id="menu_pcs_ssp" name="Solder/Spring/Plate"
+              parent="menu_pcs_activities" action="action_pcs_ssp"
+              sequence="60"/>
+    <menuitem id="menu_pcs_clearance" name="Clearance"
+              parent="menu_pcs_activities" action="action_pcs_clearance"
+              sequence="70"/>
+
+    <!-- Reports (one entry: the reports screen has its own tabs) -->
+    <menuitem id="menu_pcs_reports" name="Reports"
+              parent="menu_pcs_root" action="action_pcs_reports"
+              sequence="20"/>
+
+    <!-- Utilities: master data managed by ps_utilities -->
+    <menuitem id="menu_pcs_utilities" name="Utilities"
+              parent="menu_pcs_root" sequence="30"/>
+    <menuitem id="menu_pcs_util_settings" name="PCS Settings"
+              parent="menu_pcs_utilities" action="action_pcs_settings"
+              sequence="5"/>
+    <menuitem id="menu_pcs_util_divisions" name="Divisions"
+              parent="menu_pcs_utilities"
+              action="pcs_document.action_pcs_division" sequence="8"/>
+    <menuitem id="menu_pcs_util_roles" name="Roles"
+              parent="menu_pcs_utilities" action="ps_utilities.action_pcs_role"
+              sequence="10"/>
+    <menuitem id="menu_pcs_util_dept_groups" name="Dept. Groups"
+              parent="menu_pcs_utilities"
+              action="ps_utilities.action_pcs_dept_group" sequence="20"/>
+    <menuitem id="menu_pcs_util_departments" name="Departments"
+              parent="menu_pcs_utilities"
+              action="ps_utilities.action_pcs_department" sequence="30"/>
+    <menuitem id="menu_pcs_util_users" name="Users"
+              parent="menu_pcs_utilities" action="ps_utilities.action_pcs_user"
+              sequence="40"/>
+    <menuitem id="menu_pcs_util_employee_types" name="Employee Types"
+              parent="menu_pcs_utilities"
+              action="ps_utilities.action_pcs_employee_type" sequence="50"/>
+    <menuitem id="menu_pcs_util_employees" name="Employees"
+              parent="menu_pcs_utilities"
+              action="ps_utilities.action_pcs_employee" sequence="60"/>
+    <menuitem id="menu_pcs_util_ssp" name="Solder/Spring/Plate"
+              parent="menu_pcs_utilities" action="ps_utilities.action_pcs_ssp"
+              sequence="70"/>
+</odoo>

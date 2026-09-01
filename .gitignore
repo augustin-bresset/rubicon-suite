@@ -105,6 +105,8 @@ meta/backups/
 # sis_document
 !rubicon_addons/sis_document/data/sis.doc.type.csv
 !rubicon_addons/sis_document/data/sis.doc.in.mode.csv
+# ps_utilities / pcs (SSP wire reference data)
+!rubicon_addons/ps_utilities/data/pcs.ssp.csv
 # sis_party
 !rubicon_addons/sis_party/data/sis.pay.term.csv
 !rubicon_addons/sis_party/data/sis.shipper.csv

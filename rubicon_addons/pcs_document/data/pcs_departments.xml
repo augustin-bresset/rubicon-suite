@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Department groups (legacy PCS Utilities > Dept. Groups) -->
+    <record id="group_prd" model="pcs.dept.group">
+        <field name="code">PRD</field>
+        <field name="name">Production</field>
+        <field name="type">Production</field>
+        <field name="sequence">1</field>
+    </record>
+    <record id="group_wax" model="pcs.dept.group">
+        <field name="code">WAX</field>
+        <field name="name">Wax</field>
+        <field name="type">Production</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="group_cst" model="pcs.dept.group">
+        <field name="code">CST</field>
+        <field name="name">Casting</field>
+        <field name="type">Production</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="group_qcc" model="pcs.dept.group">
+        <field name="code">QCC</field>
+        <field name="name">qc casting</field>
+        <field name="type">Production</field>
+        <field name="sequence">25</field>
+    </record>
+    <record id="group_fil" model="pcs.dept.group">
+        <field name="code">FIL</field>
+        <field name="name">Filing</field>
+        <field name="type">Production</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="group_ppl" model="pcs.dept.group">
+        <field name="code">PPL</field>
+        <field name="name">pre-polish</field>
+        <field name="type">Production</field>
+        <field name="sequence">32</field>
+    </record>
+    <record id="group_asm" model="pcs.dept.group">
+        <field name="code">ASM</field>
+        <field name="name">Assembly</field>
+        <field name="type">Production</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="group_mer" model="pcs.dept.group">
+        <field name="code">MER</field>
+        <field name="name">merging</field>
+        <field name="type">Prod + Stone</field>
+        <field name="sequence">45</field>
+    </record>
+    <record id="group_pmr" model="pcs.dept.group">
+        <field name="code">PMR</field>
+        <field name="name">Prod. Merge</field>
+        <field name="type">Production</field>
+        <field name="sequence">50</field>
+    </record>
+    <record id="group_set" model="pcs.dept.group">
+        <field name="code">SET</field>
+        <field name="name">Setting</field>
+        <field name="type">Production</field>
+        <field name="sequence">52</field>
+    </record>
+    <record id="group_pol" model="pcs.dept.group">
+        <field name="code">POL</field>
+        <field name="name">Polish</field>
+        <field name="type">Production</field>
+        <field name="sequence">55</field>
+    </record>
+    <record id="group_eng" model="pcs.dept.group">
+        <field name="code">ENG</field>
+        <field name="name">engrave</field>
+        <field name="type">Production</field>
+        <field name="sequence">57</field>
+    </record>
+    <record id="group_pla" model="pcs.dept.group">
+        <field name="code">PLA</field>
+        <field name="name">plate</field>
+        <field name="type">Production</field>
+        <field name="sequence">59</field>
+    </record>
+    <record id="group_plt" model="pcs.dept.group">
+        <field name="code">PLT</field>
+        <field name="name">Plating</field>
+        <field name="type">Production</field>
+        <field name="sequence">60</field>
+    </record>
+    <record id="group_fin" model="pcs.dept.group">
+        <field name="code">FIN</field>
+        <field name="name">Finish</field>
+        <field name="type">Production</field>
+        <field name="sequence">900</field>
+    </record>
+    <record id="group_ast" model="pcs.dept.group">
+        <field name="code">AST</field>
+        <field name="name">assorting</field>
+        <field name="type">Stone</field>
+        <field name="sequence">11</field>
+    </record>
+    <record id="group_shp" model="pcs.dept.group">
+        <field name="code">SHP</field>
+        <field name="name">shaping</field>
+        <field name="type">Stone</field>
+        <field name="sequence">12</field>
+    </record>
+    <record id="group_cut" model="pcs.dept.group">
+        <field name="code">CUT</field>
+        <field name="name">Cutting</field>
+        <field name="type">Stone</field>
+        <field name="sequence">13</field>
+    </record>
+    <record id="group_srd" model="pcs.dept.group">
+        <field name="code">SRD</field>
+        <field name="name">stone ready</field>
+        <field name="type">Stone</field>
+        <field name="sequence">14</field>
+    </record>
+    <record id="group_prs" model="pcs.dept.group">
+        <field name="code">PRS</field>
+        <field name="name">Prod + Stone</field>
+        <field name="type">Prod + Stone</field>
+        <field name="sequence">999</field>
+    </record>
+    <record id="group_off" model="pcs.dept.group">
+        <field name="code">OFF</field>
+        <field name="name">Office</field>
+        <field name="type">Production</field>
+        <field name="sequence">991</field>
+    </record>
+
+    <!-- Departments: sequence is the dashboard order of each track.
+         Flags mirror the legacy PCS Utilities > Departments table. -->
+    <record id="dept_wax" model="pcs.department">
+        <field name="division_id" ref="division_metal"/>
+        <field name="code">WAX</field>
+        <field name="name">Wax</field>
+        <field name="group_id" ref="group_wax"/>
+        <field name="sequence">1</field>
+    </record>
+    <record id="dept_cst" model="pcs.department">
+        <field name="division_id" ref="division_metal"/>
+        <field name="code">CST</field>
+        <field name="name">Casting</field>
+        <field name="group_id" ref="group_cst"/>
+        <field name="loss_pct">1.5</field>
+        <field name="sequence">2</field>
+        <field name="transfer_metals" eval="True"/>
+        <field name="metals" eval="True"/>
+    </record>
+    <record id="dept_qc1" model="pcs.department">
+        <field name="division_id" ref="division_qc"/>
+        <field name="code">QC1</field>
+        <field name="name">QC CAST</field>
+        <field name="group_id" ref="group_qcc"/>
+        <field name="sequence">3</field>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_fil" model="pcs.department">
+        <field name="division_id" ref="division_metal"/>
+        <field name="code">FIL</field>
+        <field name="name">Filing</field>
+        <field name="group_id" ref="group_fil"/>
+        <field name="loss_pct">3.0</field>
+        <field name="sequence">4</field>
+        <field name="p_loss_pct" eval="True"/>
+        <field name="clear" eval="True"/>
+    </record>
+    <record id="dept_qc2" model="pcs.department">
+        <field name="division_id" ref="division_qc"/>
+        <field name="code">QC2</field>
+        <field name="name">QC FILING</field>
+        <field name="group_id" ref="group_fil"/>
+        <field name="sequence">5</field>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_ppl" model="pcs.department">
+        <field name="division_id" ref="division_metal"/>
+        <field name="code">PPL</field>
+        <field name="name">Pre-polish</field>
+        <field name="group_id" ref="group_ppl"/>
+        <field name="sequence">6</field>
+        <field name="p_loss_pct" eval="True"/>
+        <field name="clear" eval="True"/>
+    </record>
+    <record id="dept_qc11" model="pcs.department">
+        <field name="division_id" ref="division_metal"/>
+        <field name="code">QC11</field>
+        <field name="name">Repair Gold</field>
+        <field name="group_id" ref="group_fil"/>
+        <field name="sequence">7</field>
+        <field name="transfer_stones" eval="True"/>
+        <field name="stones" eval="True"/>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_qc3" model="pcs.department">
+        <field name="division_id" ref="division_qc"/>
+        <field name="code">QC3</field>
+        <field name="name">QC PRE-POL</field>
+        <field name="group_id" ref="group_ppl"/>
+        <field name="sequence">8</field>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_asm" model="pcs.department">
+        <field name="division_id" ref="division_assembly"/>
+        <field name="code">ASM</field>
+        <field name="name">Assembly</field>
+        <field name="group_id" ref="group_asm"/>
+        <field name="loss_pct">2.0</field>
+        <field name="sequence">9</field>
+        <field name="transfer_parts" eval="True"/>
+        <field name="parts" eval="True"/>
+        <field name="p_loss_pct" eval="True"/>
+    </record>
+    <record id="dept_qc4" model="pcs.department">
+        <field name="division_id" ref="division_qc"/>
+        <field name="code">QC4</field>
+        <field name="name">QC ASSEMBLY</field>
+        <field name="group_id" ref="group_asm"/>
+        <field name="sequence">10</field>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_stn" model="pcs.department">
+        <field name="code">STN</field>
+        <field name="name">STONE</field>
+        <field name="group_id" ref="group_prs"/>
+        <field name="sequence">11</field>
+    </record>
+    <record id="dept_mer" model="pcs.department">
+        <field name="division_id" ref="division_assembly"/>
+        <field name="code">MER</field>
+        <field name="name">Merged</field>
+        <field name="group_id" ref="group_mer"/>
+        <field name="sequence">12</field>
+        <field name="transfer_stones" eval="True"/>
+        <field name="transfer_metals" eval="True"/>
+        <field name="transfer_parts" eval="True"/>
+    </record>
+    <record id="dept_set" model="pcs.department">
+        <field name="division_id" ref="division_assembly"/>
+        <field name="code">SET</field>
+        <field name="name">Setting</field>
+        <field name="group_id" ref="group_set"/>
+        <field name="sequence">13</field>
+    </record>
+    <record id="dept_rst" model="pcs.department">
+        <field name="division_id" ref="division_assembly"/>
+        <field name="code">RST</field>
+        <field name="name">Repair Stone</field>
+        <field name="group_id" ref="group_set"/>
+        <field name="sequence">14</field>
+        <field name="transfer_stones" eval="True"/>
+        <field name="stones" eval="True"/>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_qc5" model="pcs.department">
+        <field name="division_id" ref="division_qc"/>
+        <field name="code">QC5</field>
+        <field name="name">QC SETT</field>
+        <field name="group_id" ref="group_set"/>
+        <field name="sequence">15</field>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_pol" model="pcs.department">
+        <field name="division_id" ref="division_assembly"/>
+        <field name="code">POL</field>
+        <field name="name">Polish</field>
+        <field name="group_id" ref="group_pol"/>
+        <field name="sequence">16</field>
+        <field name="p_loss_pct" eval="True"/>
+    </record>
+    <record id="dept_qc6" model="pcs.department">
+        <field name="division_id" ref="division_qc"/>
+        <field name="code">QC6</field>
+        <field name="name">QC POLISH</field>
+        <field name="group_id" ref="group_pol"/>
+        <field name="sequence">17</field>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_eng" model="pcs.department">
+        <field name="division_id" ref="division_assembly"/>
+        <field name="code">ENG</field>
+        <field name="name">Engraving</field>
+        <field name="group_id" ref="group_eng"/>
+        <field name="sequence">18</field>
+    </record>
+    <record id="dept_qc7" model="pcs.department">
+        <field name="division_id" ref="division_qc"/>
+        <field name="code">QC7</field>
+        <field name="name">QC PLATE/ENG</field>
+        <field name="group_id" ref="group_pla"/>
+        <field name="sequence">19</field>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_plt" model="pcs.department">
+        <field name="division_id" ref="division_assembly"/>
+        <field name="code">PLT</field>
+        <field name="name">Plating</field>
+        <field name="group_id" ref="group_plt"/>
+        <field name="sequence">20</field>
+        <field name="transfer_stones" eval="True"/>
+        <field name="p_loss_pct" eval="True"/>
+    </record>
+    <record id="dept_qc8" model="pcs.department">
+        <field name="division_id" ref="division_qc"/>
+        <field name="code">QC8</field>
+        <field name="name">QC Final</field>
+        <field name="group_id" ref="group_fin"/>
+        <field name="sequence">21</field>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_fin" model="pcs.department">
+        <field name="division_id" ref="division_assembly"/>
+        <field name="code">FIN</field>
+        <field name="name">Finish</field>
+        <field name="group_id" ref="group_fin"/>
+        <field name="sequence">22</field>
+    </record>
+    <record id="dept_mlt" model="pcs.department">
+        <field name="code">MLT</field>
+        <field name="name">Melting</field>
+        <field name="group_id" ref="group_prd"/>
+        <field name="sequence">23</field>
+        <field name="transfer_stones" eval="True"/>
+        <field name="stones" eval="True"/>
+        <field name="transfer_metals" eval="True"/>
+        <field name="metals" eval="True"/>
+        <field name="transfer_parts" eval="True"/>
+        <field name="parts" eval="True"/>
+    </record>
+    <record id="dept_cnl" model="pcs.department">
+        <field name="code">CNL</field>
+        <field name="name">Cancel</field>
+        <field name="group_id" ref="group_prd"/>
+        <field name="sequence">24</field>
+    </record>
+    <record id="dept_rjc" model="pcs.department">
+        <field name="code">RJC</field>
+        <field name="name">Reject</field>
+        <field name="group_id" ref="group_prd"/>
+        <field name="sequence">25</field>
+    </record>
+    <record id="dept_ast" model="pcs.department">
+        <field name="division_id" ref="division_stone"/>
+        <field name="code">AST</field>
+        <field name="name">Assorting</field>
+        <field name="group_id" ref="group_ast"/>
+        <field name="sequence">1</field>
+        <field name="transfer_stones" eval="True"/>
+        <field name="stones" eval="True"/>
+        <field name="auto_weight" eval="True"/>
+    </record>
+    <record id="dept_shp" model="pcs.department">
+        <field name="division_id" ref="division_stone"/>
+        <field name="code">SHP</field>
+        <field name="name">Shaping</field>
+        <field name="group_id" ref="group_shp"/>
+        <field name="sequence">2</field>
+    </record>
+    <record id="dept_cut" model="pcs.department">
+        <field name="division_id" ref="division_stone"/>
+        <field name="code">CUT</field>
+        <field name="name">Cutting</field>
+        <field name="group_id" ref="group_cut"/>
+        <field name="sequence">3</field>
+        <field name="transfer_stones" eval="True"/>
+        <field name="stones" eval="True"/>
+        <field name="transfer_metals" eval="True"/>
+        <field name="auto_weight" eval="True"/>
+        <field name="clear" eval="True"/>
+    </record>
+    <record id="dept_srd" model="pcs.department">
+        <field name="division_id" ref="division_stone"/>
+        <field name="code">SRD</field>
+        <field name="name">STONE READY</field>
+        <field name="group_id" ref="group_srd"/>
+        <field name="sequence">4</field>
+    </record>
+    <record id="dept_sfn" model="pcs.department">
+        <field name="division_id" ref="division_stone"/>
+        <field name="code">SFN</field>
+        <field name="name">STONE FIN.</field>
+        <field name="group_id" ref="group_srd"/>
+        <field name="sequence">5</field>
+    </record>
+    <record id="dept_off" model="pcs.department">
+        <field name="code">OFF</field>
+        <field name="name">Office</field>
+        <field name="group_id" ref="group_off"/>
+        <field name="sequence">0</field>
+    </record>
+</odoo>

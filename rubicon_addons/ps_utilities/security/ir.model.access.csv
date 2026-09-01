@@ -1,0 +1,25 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ps_utilities_user_user,ps.utilities user (user),model_ps_utilities,rubicon_env.group_rubicon_user,1,0,0,0
+access_ps_utilities_user_editor,ps.utilities user (editor),model_ps_utilities,rubicon_env.group_rubicon_editor,1,1,1,0
+access_ps_utilities_user,ps.utilities user (manager),model_ps_utilities,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_role_user_user,pcs.role user (user),model_pcs_role,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_role_user_editor,pcs.role user (editor),model_pcs_role,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_role_user,pcs.role user (manager),model_pcs_role,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_dept_group_user_user,pcs.dept.group user (user),model_pcs_dept_group,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_dept_group_user_editor,pcs.dept.group user (editor),model_pcs_dept_group,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_dept_group_user,pcs.dept.group user (manager),model_pcs_dept_group,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_department_user_user,pcs.department user (user),model_pcs_department,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_department_user_editor,pcs.department user (editor),model_pcs_department,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_department_user,pcs.department user (manager),model_pcs_department,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_employee_type_user_user,pcs.employee.type user (user),model_pcs_employee_type,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_employee_type_user_editor,pcs.employee.type user (editor),model_pcs_employee_type,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_employee_type_user,pcs.employee.type user (manager),model_pcs_employee_type,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_employee_user_user,pcs.employee user (user),model_pcs_employee,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_employee_user_editor,pcs.employee user (editor),model_pcs_employee,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_employee_user,pcs.employee user (manager),model_pcs_employee,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_user_user_user,pcs.user user (user),model_pcs_user,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_user_user_editor,pcs.user user (editor),model_pcs_user,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_user_user,pcs.user user (manager),model_pcs_user,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pcs_ssp_user_user,pcs.ssp user (user),model_pcs_ssp,rubicon_env.group_rubicon_user,1,0,0,0
+access_pcs_ssp_user_editor,pcs.ssp user (editor),model_pcs_ssp,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pcs_ssp_user,pcs.ssp user (manager),model_pcs_ssp,rubicon_env.group_rubicon_manager,1,1,1,1

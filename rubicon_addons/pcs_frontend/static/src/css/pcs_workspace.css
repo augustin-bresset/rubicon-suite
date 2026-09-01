@@ -1,0 +1,297 @@
+.pcs-workspace {
+    padding: 12px;
+    overflow: auto;
+    height: 100%;
+    font-size: 13px;
+}
+
+.pcs-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.pcs-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 12px;
+}
+
+.pcs-total {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.pcs-spacer {
+    flex: 1;
+}
+
+.pcs-toolbar .btn.active {
+    background-color: #714b67;
+    color: #fff;
+}
+
+.pcs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+    background: #fff;
+}
+
+.pcs-table th,
+.pcs-table td {
+    border: 1px solid #d8d8d8;
+    padding: 3px 8px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.pcs-table th {
+    background: #f0f0f0;
+    position: sticky;
+    top: 0;
+}
+
+.pcs-table .num {
+    text-align: right;
+}
+
+.pcs-table-scroll {
+    overflow-x: auto;
+}
+
+.pcs-row-click {
+    cursor: pointer;
+}
+
+.pcs-row-click:hover {
+    background: #f5f0f4;
+}
+
+.pcs-selected {
+    background: #ede4eb;
+}
+
+.pcs-check {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+}
+
+.pcs-add-doc {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 10px;
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+}
+
+.pcs-num-input {
+    width: 70px;
+    text-align: right;
+}
+
+/* Dashboard */
+.pcs-dashboard {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+
+.pcs-cell {
+    border: 1px solid #bbb;
+}
+
+.pcs-cell-title {
+    background: #4f8fd0;
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    padding: 3px;
+}
+
+.pcs-cell-body {
+    padding: 4px 10px;
+}
+
+.pcs-cell-body div {
+    display: flex;
+    justify-content: space-between;
+}
+
+.pcs-cell-body .num {
+    font-weight: bold;
+}
+
+/* Simulation data switch */
+.pcs-mode-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 10px;
+    margin-bottom: 8px;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    font-size: 12px;
+}
+
+.pcs-mode-note {
+    color: #8d6e63;
+    font-style: italic;
+}
+
+/* Operations timeline */
+.pcs-timeline-block {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    margin-bottom: 12px;
+    background: #fff;
+}
+
+.pcs-timeline-header {
+    display: flex;
+    gap: 16px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.pcs-timeline-barcode {
+    font-family: "Courier New", monospace;
+}
+
+.pcs-timeline-chips {
+    margin-bottom: 8px;
+}
+
+.pcs-chip {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 10px;
+    margin: 2px 1px;
+    font-size: 11px;
+    font-weight: bold;
+    border: 1px solid transparent;
+}
+
+.pcs-chip-prod.pcs-chip-fin {
+    background: #e6eae3;
+    border-color: #6f8f6a;
+}
+
+.pcs-chip-prod.pcs-chip-wip {
+    background: #e1e7ed;
+    border-color: #5b7d99;
+}
+
+.pcs-chip-stone.pcs-chip-fin {
+    background: #efe7da;
+    border-color: #a8763e;
+}
+
+.pcs-chip-stone.pcs-chip-wip {
+    background: #f2ecdd;
+    border-color: #b8965a;
+    border-style: dashed;
+}
+
+.pcs-chip.pcs-chip-qc {
+    background: #eeedeb;
+    border-color: #7d7d7d;
+    border-style: dashed;
+}
+
+.pcs-chip-arrow {
+    color: #999;
+}
+
+.pcs-legend {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.pcs-muted {
+    color: #999;
+    font-style: italic;
+}
+
+/* Scan station */
+.pcs-scan-setup {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.pcs-scan-setup label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-weight: bold;
+}
+
+.pcs-scan-input input {
+    width: 100%;
+    font-size: 22px;
+    padding: 10px;
+    border: 2px solid #714b67;
+    margin-bottom: 12px;
+}
+
+.pcs-scan-pending {
+    border: 2px solid #b8965a;
+    background: #f7f2e6;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+}
+
+.pcs-scan-pending-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.pcs-scan-pending-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pcs-scan-result {
+    display: flex;
+    gap: 12px;
+    padding: 6px 10px;
+    border-left: 6px solid #999;
+    margin-bottom: 4px;
+    background: #f7f7f7;
+}
+
+.pcs-scan-issued {
+    border-left-color: #6f8f6a;
+    background: #edf1ec;
+}
+
+.pcs-scan-received {
+    border-left-color: #5b7d99;
+    background: #e9eef3;
+}
+
+.pcs-scan-error {
+    border-left-color: #a8544c;
+    background: #f4ebea;
+}
+
+.pcs-scan-time {
+    color: #666;
+    min-width: 70px;
+}
+
+.pcs-scan-message {
+    font-weight: bold;
+}

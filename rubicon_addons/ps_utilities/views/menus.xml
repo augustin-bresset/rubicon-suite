@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Activities client actions: same component, opened on a specific screen -->
+    <record id="action_ps_invoice_select" model="ir.actions.client">
+        <field name="name">Invoice Select</field>
+        <field name="tag">ps_utilities_action</field>
+        <field name="context">{'screen': 'invoice'}</field>
+    </record>
+    <record id="action_ps_parts_update" model="ir.actions.client">
+        <field name="name">Parts Update</field>
+        <field name="tag">ps_utilities_action</field>
+        <field name="context">{'screen': 'parts'}</field>
+    </record>
+
+    <!-- App root (apps grid) -->
+    <menuitem id="menu_ps_utilities_root"
+              name="PSUtilities"
+              sequence="12"
+              web_icon="ps_utilities,static/description/icon.png"/>
+
+    <!-- Activities submenu -->
+    <menuitem id="menu_ps_activities"
+              name="Activities"
+              parent="menu_ps_utilities_root"
+              sequence="10"/>
+    <menuitem id="menu_ps_invoice_select" name="Invoice Select"
+              parent="menu_ps_activities" action="action_ps_invoice_select" sequence="10"/>
+    <menuitem id="menu_ps_parts_update" name="Parts Update"
+              parent="menu_ps_activities" action="action_ps_parts_update" sequence="20"/>
+
+    <!-- Utilities submenu: standard CRUD master data -->
+    <menuitem id="menu_ps_utilities_sub"
+              name="Utilities"
+              parent="menu_ps_utilities_root"
+              sequence="20"/>
+
+    <menuitem id="menu_ps_roles" name="Roles"
+              parent="menu_ps_utilities_sub" action="action_pcs_role" sequence="10"/>
+    <menuitem id="menu_ps_dept_groups" name="Dept. Groups"
+              parent="menu_ps_utilities_sub" action="action_pcs_dept_group" sequence="20"/>
+    <menuitem id="menu_ps_departments" name="Departments"
+              parent="menu_ps_utilities_sub" action="action_pcs_department" sequence="30"/>
+    <menuitem id="menu_ps_users" name="Users"
+              parent="menu_ps_utilities_sub" action="action_pcs_user" sequence="40"/>
+    <menuitem id="menu_ps_employee_types" name="Employee Types"
+              parent="menu_ps_utilities_sub" action="action_pcs_employee_type" sequence="50"/>
+    <menuitem id="menu_ps_employees" name="Employees"
+              parent="menu_ps_utilities_sub" action="action_pcs_employee" sequence="60"/>
+    <menuitem id="menu_ps_stones" name="Stones"
+              parent="menu_ps_utilities_sub" action="action_pcs_stones" sequence="70"/>
+    <menuitem id="menu_ps_ssp" name="Solder/Spring/Plate"
+              parent="menu_ps_utilities_sub" action="action_pcs_ssp" sequence="80"/>
+</odoo>

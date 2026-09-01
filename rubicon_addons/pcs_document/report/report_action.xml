@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- A4 landscape, two A5-portrait cards side by side: the sheet is cut
+         in half and each card slides into a plastic envelope. -->
+    <record id="paperformat_stock_card" model="report.paperformat">
+        <field name="name">PCS Stock Card</field>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_stock_card_sis" model="ir.actions.report">
+        <field name="name">Stock Cards</field>
+        <field name="model">sis.document</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">pcs_document.report_stock_card_sis</field>
+        <field name="report_file">pcs_document.report_stock_card_sis</field>
+        <field name="print_report_name">'StockCards_' + (object.name or '').replace('/', '_')</field>
+        <field name="paperformat_id" ref="paperformat_stock_card"/>
+        <field name="binding_model_id" ref="sis_document.model_sis_document"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_stock_card" model="ir.actions.report">
+        <field name="name">Stock Card</field>
+        <field name="model">pcs.barcode</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">pcs_document.report_stock_card</field>
+        <field name="report_file">pcs_document.report_stock_card</field>
+        <field name="print_report_name">'StockCards_' + (object.document_id.name or '').replace('/', '_')</field>
+        <field name="paperformat_id" ref="paperformat_stock_card"/>
+        <field name="binding_model_id" ref="model_pcs_barcode"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

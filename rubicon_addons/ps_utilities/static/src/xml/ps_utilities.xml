@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ps_utilities.PsUtilities">
+        <div class="o_action d-flex flex-column h-100">
+
+            <!-- Invoice Select -->
+            <div t-if="state.view === 'invoice'" class="d-flex flex-column flex-grow-1 overflow-hidden">
+                <div class="d-flex align-items-center gap-2 p-2 border-bottom flex-shrink-0">
+                    <label class="mb-0 fw-semibold">Invoice</label>
+                    <select class="form-select form-select-sm" style="min-width:220px"
+                            t-on-change="onInvoiceChange">
+                        <option value="">-- select --</option>
+                        <t t-foreach="state.invoices" t-as="inv" t-key="inv.id">
+                            <option t-att-value="inv.id"
+                                    t-att-selected="inv.id === state.selectedInvoiceId"
+                                    t-esc="inv.name"/>
+                        </t>
+                    </select>
+                    <button class="btn btn-sm btn-primary"
+                            t-att-disabled="!state.selectedInvoiceId"
+                            t-on-click="onSelectDesigns">Select Designs</button>
+                </div>
+                <div class="flex-grow-1 overflow-auto p-2">
+                    <table class="table table-sm table-bordered table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Design</th>
+                                <th>PDP-Design</th>
+                                <th class="text-center" style="width:90px">Selected</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-if="state.designs.length === 0">
+                                <tr><td colspan="3" class="text-center text-muted fst-italic py-4">&lt;No data to display&gt;</td></tr>
+                            </t>
+                            <t t-foreach="state.designs" t-as="d" t-key="d_index">
+                                <tr>
+                                    <td t-esc="d.design"/>
+                                    <td t-esc="d.pdp_design"/>
+                                    <td class="text-center">
+                                        <input type="checkbox" disabled="disabled" t-att-checked="d.selected"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Parts Update -->
+            <div t-if="state.view === 'parts'" class="d-flex flex-column flex-grow-1 overflow-hidden">
+                <div class="d-flex align-items-center gap-2 p-2 border-bottom flex-shrink-0">
+                    <label class="mb-0 fw-semibold">Design</label>
+                    <input class="form-control form-control-sm w-auto"
+                           placeholder="Model (e.g. BT003)"
+                           t-att-value="state.partsModel"
+                           t-on-input="onModelInput"/>
+                    <label class="mb-0 fw-semibold ms-2">Part</label>
+                    <select class="form-select form-select-sm w-auto" t-on-change="onPartFilterChange">
+                        <option value="">-- any --</option>
+                        <t t-foreach="state.parts" t-as="p" t-key="p.id">
+                            <option t-att-value="p.id" t-esc="p.name + ' | ' + p.code"/>
+                        </t>
+                    </select>
+                    <button class="btn btn-sm btn-primary" t-on-click="onSearchParts">Search</button>
+                </div>
+
+                <div class="flex-grow-1 overflow-auto p-2">
+                    <table class="table table-sm table-bordered table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:40px"></th>
+                                <th>Design</th>
+                                <th>Part Name</th>
+                                <th>Part Id</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-if="state.partRows.length === 0">
+                                <tr><td colspan="4" class="text-center text-muted fst-italic py-4">&lt;No data to display&gt;</td></tr>
+                            </t>
+                            <t t-foreach="state.partRows" t-as="row" t-key="row.id">
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox"
+                                               t-att-checked="state.selectedRowIds[row.id]"
+                                               t-on-change="(ev) => this.toggleRow(row.id, ev)"/>
+                                    </td>
+                                    <td t-esc="row.design"/>
+                                    <td t-esc="row.part_name"/>
+                                    <td t-esc="row.part_code"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 p-2 border-top bg-light flex-shrink-0">
+                    <label class="mb-0 fw-semibold">Part</label>
+                    <select class="form-select form-select-sm w-auto" t-on-change="onTargetChange">
+                        <option value="">-- select new part --</option>
+                        <t t-foreach="state.parts" t-as="p" t-key="p.id">
+                            <option t-att-value="p.id" t-esc="p.name + ' | ' + p.code"/>
+                        </t>
+                    </select>
+                    <button class="btn btn-sm btn-warning"
+                            t-att-disabled="!state.partsTargetId || selectedRowCount === 0"
+                            t-on-click="onUpdateParts">Update</button>
+                    <span class="text-muted small" t-esc="selectedRowCount + ' row(s) ticked'"/>
+                </div>
+            </div>
+
+        </div>
+    </t>
+</templates>

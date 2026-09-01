@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Gold wire joins the legacy Solder/Spring/Plate consumables: the
+         filer receives a wire stock each worker month (the 18th) and
+         returns the leftover at month end to compute his consumption. -->
+    <record id="ssp_wire" model="pcs.ssp">
+        <field name="code">WIR</field>
+        <field name="name">Gold Wire</field>
+    </record>
+</odoo>
