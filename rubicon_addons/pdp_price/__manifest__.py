@@ -5,7 +5,7 @@
     'category': 'Product',
     'author': 'Rubicon',
     'depends': [
-        'rubicon_env', 'pdp_labor', 'pdp_margin'
+        'rubicon_env', 'pdp_labor', 'pdp_margin', 'pdp_metal_market',
         ],    
            
     'data': [

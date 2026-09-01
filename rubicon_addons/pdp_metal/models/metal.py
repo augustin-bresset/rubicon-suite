@@ -29,11 +29,6 @@ class Metal(models.Model):
         default='fixed',
         required=True
     )
-    market_metal_id = fields.Many2one(
-        'pdp.market.metal',
-        string='Market Metal'
-    )
-    
     plating          = fields.Boolean(string='Plating')
     gold             = fields.Boolean(string='Is Gold', default=True)
     is_reference     = fields.Boolean(

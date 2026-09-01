@@ -77,24 +77,6 @@ class ProductModel(models.Model):
         ])
         record.sibling_model_ids = siblings
         
-    picture_id = fields.Many2one(
-        comodel_name='pdp.picture',
-        compute='_compute_picture',
-        string='Main Picture',
-        store=False,
-    )
-    
-    def _compute_picture(self):
-        Pic = self.env['pdp.picture']
-        Product = self.env['pdp.product']
-        for rec in self:
-            products = Product.search([('model_id', '=', rec.id)])
-            pic = Pic.search(
-                [('scope', '=', 'model'), ('product_ids', 'in', products.ids)],
-                limit=1
-            ) if products else Pic.browse()
-            rec.picture_id = pic
-
     # =========================================================================
     # Domain Methods - Reusable by API, Cron, OWL, Reports
     # =========================================================================
