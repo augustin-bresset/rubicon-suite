@@ -44,11 +44,11 @@ ODOO_TEST        = docker compose exec -T odoo odoo \
   -d $(TEST_DB)
 TEST_TAGS        ?= pdp_frontend
 
-.PHONY: help reset_odoo_db init-data-modules update-data-modules update-pdp-modules \
+.PHONY: help shell reset_odoo_db init-data-modules update-data-modules update-pdp-modules \
         update-sis-modules upgrade deploy-demo logs-demo logs-prod \
-        raw_to_data_all import_all import_csv import_pictures import-pictures \
+        restore-reference-csvs raw_to_data_all import_all import_csv import_pictures import-pictures \
         raw-to-data-sis import-sis sis-all \
-        export-pictures audit_counts create_diagram \
+        restore-mssql export-pictures audit_counts create_diagram \
         stone-data stone-install stone-all backup backup-help \
         cleanup-none-all migrate-picture-scope cleanup-orphan-pictures \
         verify-picture-chain \
@@ -62,6 +62,7 @@ help:
 	@echo "Rubicon Suite — available commands"
 	@echo ""
 	@echo "  Database"
+	@echo "    make shell < script.py      Run a Python script inside odoo shell (env available)"
 	@echo "    make reset_odoo_db          Drop volumes and restart stack"
 	@echo "    make backup                 pg_dump rubicon → meta/backups/"
 	@echo "    make init-data-modules      Install core data modules from scratch"
@@ -80,8 +81,9 @@ help:
 	@echo "    make import_all             Run full CSV import (PDP)"
 	@echo "    make import_csv WHAT=...    Import a specific CSV"
 	@echo "    make raw-to-data-sis        Generate SIS CSVs from data/backup_sis/"
-	@echo "    make import-sis             Import SIS parties + documents (backs up first)"
+	@echo "    make import-sis             Import SIS parties + documents (needs RUBICON_ALLOW_SIS_WIPE=1, backs up first)"
 	@echo "    make sis-all                Full SIS pipeline: CSVs, modules, import"
+	@echo "    make restore-mssql          Restore the 3 legacy .bak files and export CSVs + pictures (ops/migration/README.md)"
 	@echo "    make export-pictures        Extract photos/drawings from Pictures.bak → data/pictures/"
 	@echo "    make import-pictures        Import data/pictures/ into Odoo (pdp.picture)"
 	@echo "    make audit_counts           Print record counts to log"
@@ -108,6 +110,9 @@ backup:
 	  find $(BACKUP_DIR) -name "*.sql" -mtime +30 -delete && \
 	  echo "→ Backup done: $$OUTFILE"; \
 	fi
+
+shell:
+	@$(ODOO_SHELL)
 
 reset_odoo_db:
 	docker compose down -v
@@ -151,12 +156,21 @@ logs-prod:
 
 # --- Data pipeline ---
 
+# The converters regenerate every CSV, including the reference data that is
+# curated by hand and tracked in git (stone catalogue, metals, margins, ...).
+# `restore-reference-csvs` puts the tracked versions back so only the
+# business data (products, models, documents, parties) comes from the export.
+restore-reference-csvs:
+	@git checkout -q -- $$(git ls-files 'rubicon_addons/*/data/*.csv') && \
+	  echo "→ tracked reference CSVs restored from git (business CSVs kept)"
+
 raw_to_data_all:
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_stone
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_metal
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_product
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_labor
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_margin
+	$(MAKE) restore-reference-csvs
 
 import_all: backup
 	@mkdir -p $(LOG_DIR)
@@ -170,43 +184,30 @@ import_csv:
 
 raw-to-data-sis:
 	$(PY) -m rubicon_import.raw_to_data.raw_to_data_sis
+	$(MAKE) restore-reference-csvs
 
+# Deletes every sis.document before reloading: the importer refuses to run
+# unless RUBICON_ALLOW_SIS_WIPE=1 is given explicitly on the make command line.
 import-sis: backup
+ifneq ($(RUBICON_ALLOW_SIS_WIPE),1)
+	$(error import-sis wipes all SIS documents of DB=$(DB) — run: make import-sis RUBICON_ALLOW_SIS_WIPE=1)
+endif
 	@mkdir -p $(LOG_DIR)
 	@echo "→ DB=$(DB)  parties → ops/migration/import/import_sis_parties.py"
 	$(ODOO_SHELL) < ops/migration/import/import_sis_parties.py   2>&1 | tee $(LOG_DIR)/import_sis_parties_$(TIMESTAMP).log
 	@echo "→ DB=$(DB)  documents → ops/migration/import/import_sis_documents.py"
-	$(ODOO_SHELL) < ops/migration/import/import_sis_documents.py 2>&1 | tee $(LOG_DIR)/import_sis_docs_$(TIMESTAMP).log
+	docker compose exec -T -e RUBICON_ALLOW_SIS_WIPE=1 odoo odoo shell \
+	  --db_host=$(DB_HOST) --db_port=$(DB_PORT) \
+	  --db_user=$(DB_USER) --db_password=$(DB_PASS) \
+	  -d $(DB) --no-http < ops/migration/import/import_sis_documents.py 2>&1 | tee $(LOG_DIR)/import_sis_docs_$(TIMESTAMP).log
 
 sis-all: raw-to-data-sis update-sis-modules import-sis
 
+restore-mssql:
+	./ops/migration/restore_mssql.sh all
+
 export-pictures:
-	@echo "→ Starting temporary SQL Server container…"
-	docker run -d --name sqlsrv_pics --rm \
-	  -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Strong@Passw0rd" \
-	  -p 1433:1433 \
-	  -v $(abspath mssql_backups):/var/opt/mssql/backup \
-	  mcr.microsoft.com/mssql/server:2019-latest
-	@echo "→ Waiting for SQL Server to be ready…"
-	sleep 20
-	@echo "→ Restoring Pictures.bak…"
-	docker exec sqlsrv_pics /opt/mssql-tools18/bin/sqlcmd \
-	  -S localhost -U SA -P 'Strong@Passw0rd' -C \
-	  -Q "RESTORE DATABASE PICTURES \
-	      FROM DISK = '/var/opt/mssql/backup/Pictures.bak' \
-	      WITH MOVE 'Pictures_Data' TO '/var/opt/mssql/data/Pictures.mdf', \
-	           MOVE 'Pictures_Log'  TO '/var/opt/mssql/data/Pictures_log.ldf', \
-	      REPLACE;"
-	@echo "→ Exporting photos and drawings to data/pictures/ …"
-	docker run --rm --network=host \
-	  -v $(abspath .):/app \
-	  -e PICTURES_OUT_DIR=/app/data/pictures \
-	  python:3.11-slim bash -c " \
-	    apt-get update -qq && apt-get install -y -qq unixodbc unixodbc-dev freetds-dev tdsodbc gcc > /dev/null 2>&1; \
-	    pip install -q pyodbc tqdm; \
-	    cd /app && python3 ops/migration/export/export_pictures_products.py"
-	docker stop sqlsrv_pics || true
-	@echo "→ Done. Run 'make import-pictures' to import into Odoo."
+	./ops/migration/restore_mssql.sh pictures
 
 import-pictures:
 	$(ODOO_SHELL) < ops/migration/import/import_pictures.py

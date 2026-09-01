@@ -52,6 +52,7 @@ def raw_to_data(
     print(f'[INFO] Import go into {dest_folder}')
 
     dest_name = os.path.join(dest_folder, f"{model_name}.csv")
+    os.makedirs(dest_folder, exist_ok=True)
     
     file_name = os.path.join(src_folder or backup_folder, csv_name)
 

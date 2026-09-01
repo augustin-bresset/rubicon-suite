@@ -33,6 +33,7 @@ def two_lines_manager(csv_name):
     """Manage files with one row on two lines."""
     dest_name = os.path.join(tmp_folder, csv_name)
     file_name = os.path.join(backup_folder, csv_name)
+    os.makedirs(os.path.dirname(dest_name), exist_ok=True)
     with open(file_name, newline='', encoding='utf-8') as src_file:
         reader = csv.reader(src_file)
         with open(dest_name, 'w', newline="", encoding='utf-8') as dst_file:
@@ -95,6 +96,9 @@ if __name__ == '__main__':
         fieldnames = ["id", "code", "name", "waste"]
         def row_to_dict(row):
             code = strip_code_space(row[0])
+            # Legacy placeholder rows ("0 None", "1 All") are not categories.
+            if code in {"", "0", "1"} or row[1] in {"None", "All"}:
+                return
             return {
                 "id": func_index(code, model_name),
                 "code": code,

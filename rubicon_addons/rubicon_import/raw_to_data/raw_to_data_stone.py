@@ -25,7 +25,9 @@ if __name__ == '__main__':
         fieldnames = ["id", "code", "name"]
         def row_to_dict_cat(row):
             code = strip_code_space(row[0])
-            if row[1] in {"ALL", "all", "1", "0"}:
+            # The legacy table holds placeholder rows (blank code "None", "All")
+            # that are not categories.
+            if not code or row[1] in {"ALL", "All", "all", "1", "0", "None"}:
                 return
             return {
                 "id" : func_index(code, model_name),

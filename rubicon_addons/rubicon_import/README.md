@@ -11,7 +11,7 @@
 - **Backup/restore**: For business data backup and restore, use `pg_dump` and `psql` instead of these import scripts.
 - **Reference data auto-loaded**: Stone catalog, labor types, and addon types are now automatically loaded via module manifests (`pdp_stone`, `pdp_labor`, etc.). No import from CSV is needed.
 
-See [data architecture documentation](../../docs/) for current data management practices.
+- **Runbook**: the complete, ordered procedure to rebuild the database from the `.bak` files is `ops/migration/README.md`.
 
 ---
 

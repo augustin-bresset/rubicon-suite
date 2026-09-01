@@ -93,6 +93,8 @@ meta/backups/
 !rubicon_addons/pdp_stone/data/pdp.stone.type.csv
 !rubicon_addons/pdp_stone/data/pdp.stone.weight.csv
 !rubicon_addons/pdp_stone/data/pdp.stone.setting.type.csv
+# pdp_product (ornament categories are reference data; the other CSVs are business data)
+!rubicon_addons/pdp_product/data/pdp.product.category.csv
 # pdp_margin
 !rubicon_addons/pdp_margin/data/pdp.margin.csv
 !rubicon_addons/pdp_margin/data/pdp.margin.part.csv
