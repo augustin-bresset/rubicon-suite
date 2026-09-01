@@ -1,34 +1,28 @@
 #!/bin/bash
-# Check the health status of the Rubicon server.
-# Usage: ./ops/healthcheck.sh [demo|prod]
-# Returns exit code 0 if all OK, 1 if a problem is detected.
+# Check the health of a Rubicon stack.
+# Usage: ./ops/healthcheck.sh <dev|demo|prod>
+# Exit code 0 if all OK, 1 if a problem is detected (warnings alone exit 0).
 # Compatible with cron, Nagios, and UptimeRobot (via HTTP if exposed).
 
-ENV="${1:-demo}"
-
+ENV="${1:-}"
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PROBLEMS=()
 WARNINGS=()
 
 # ── Environment parameters ─────────────────────────────────────────────────
-if [ "$ENV" = "demo" ]; then
-  COMPOSE_FILE="$SCRIPT_DIR/docker-compose.demo.yml"
-  ODOO_SERVICE="odoo_demo"
-  DB_SERVICE="db_demo"
-  PORT=8070
-  PREFIX="demo"
-elif [ "$ENV" = "prod" ]; then
-  COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
-  ODOO_SERVICE="odoo"
-  DB_SERVICE="db"
-  PORT=8069
-  PREFIX="prod"
-else
-  echo "Usage: $0 [demo|prod]"
-  exit 1
-fi
+case "$ENV" in
+  dev)  COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml";      ENV_FILE="$SCRIPT_DIR/.env";      ODOO_SERVICE="odoo";      DB_SERVICE="db";      PORT=8069 ;;
+  demo) COMPOSE_FILE="$SCRIPT_DIR/docker-compose.demo.yml"; ENV_FILE="$SCRIPT_DIR/.env.demo"; ODOO_SERVICE="odoo_demo"; DB_SERVICE="db_demo"; PORT=8070 ;;
+  prod) COMPOSE_FILE="$SCRIPT_DIR/docker-compose.prod.yml"; ENV_FILE="$SCRIPT_DIR/.env.prod"; ODOO_SERVICE="odoo";      DB_SERVICE="db";      PORT=8069 ;;
+  *) echo "Usage: $0 <dev|demo|prod>"; exit 1 ;;
+esac
+PREFIX="$ENV"
+# shellcheck disable=SC1090
+[ -f "$ENV_FILE" ] && source "$ENV_FILE"
+BACKUP_DIR="${BACKUP_DIR:-/opt/rubicon-backups}"
+MIN_DB_BYTES="${MIN_DB_BYTES:-200000}"
 
-BACKUP_DIR="/opt/rubicon-backups"
+running() { docker compose -f "$COMPOSE_FILE" ps --status running --services 2>/dev/null | grep -qx "$1"; }
 
 # ── 1. Odoo HTTP healthcheck ───────────────────────────────────────────────
 if curl -sf "http://localhost:$PORT/web/health" > /dev/null 2>&1; then
@@ -37,19 +31,14 @@ else
   PROBLEMS+=("Odoo not responding at http://localhost:$PORT/web/health")
 fi
 
-# ── 2. Odoo container running ─────────────────────────────────────────────
-if docker compose -f "$COMPOSE_FILE" ps "$ODOO_SERVICE" 2>/dev/null | grep -qiE "running|up"; then
-  echo "✓ Container $ODOO_SERVICE running"
-else
-  PROBLEMS+=("Container $ODOO_SERVICE is not in 'running' state")
-fi
-
-# ── 3. DB container running ───────────────────────────────────────────────
-if docker compose -f "$COMPOSE_FILE" ps "$DB_SERVICE" 2>/dev/null | grep -qiE "running|up"; then
-  echo "✓ Container $DB_SERVICE running"
-else
-  PROBLEMS+=("Container $DB_SERVICE is not in 'running' state")
-fi
+# ── 2/3. Containers ───────────────────────────────────────────────────────
+for svc in "$ODOO_SERVICE" "$DB_SERVICE"; do
+  if running "$svc"; then
+    echo "✓ Container $svc running"
+  else
+    PROBLEMS+=("Container $svc is not running")
+  fi
+done
 
 # ── 4. Disk space ─────────────────────────────────────────────────────────
 DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | tr -d '%')
@@ -61,45 +50,58 @@ else
   PROBLEMS+=("Disk space critical: ${DISK_USAGE}% used")
 fi
 
-# ── 5. Recent backup (< 25h) ──────────────────────────────────────────────
+# ── 5. Backups: recent, valid, last run status, restore test ──────────────
 if [ -d "$BACKUP_DIR" ]; then
-  RECENT_BACKUP=$(find "$BACKUP_DIR" -name "${PREFIX}_db_*.sql.gz" -mtime -1 2>/dev/null | head -1)
+  RECENT_BACKUP=$(find "$BACKUP_DIR" -name "${PREFIX}_db_*.sql.gz" -mmin -1500 2>/dev/null | sort | tail -1)
   if [ -n "$RECENT_BACKUP" ]; then
-    echo "✓ Recent backup found: $(basename "$RECENT_BACKUP")"
+    if gzip -t "$RECENT_BACKUP" 2>/dev/null && [ "$(stat -c %s "$RECENT_BACKUP")" -ge "$MIN_DB_BYTES" ]; then
+      echo "✓ Recent backup valid: $(basename "$RECENT_BACKUP") ($(du -h "$RECENT_BACKUP" | cut -f1))"
+    else
+      PROBLEMS+=("Latest backup $(basename "$RECENT_BACKUP") is corrupt or too small")
+    fi
   else
-    WARNINGS+=("No DB backup found in the last 25h in $BACKUP_DIR")
+    WARNINGS+=("No ${PREFIX} DB backup younger than 25h in $BACKUP_DIR")
+  fi
+
+  STATUS_FILE="$BACKUP_DIR/.last_status_${PREFIX}"
+  if [ -f "$STATUS_FILE" ]; then
+    case "$(cut -d' ' -f1 "$STATUS_FILE")" in
+      OK)   echo "✓ Last backup run reported OK" ;;
+      WARN) WARNINGS+=("Last backup run reported warnings: $(cat "$STATUS_FILE")") ;;
+      *)    PROBLEMS+=("Last backup run FAILED: $(cat "$STATUS_FILE")") ;;
+    esac
+  fi
+
+  VERIFY_MARKER="$BACKUP_DIR/.last_verify_ok_${ENV}"
+  if [ -f "$VERIFY_MARKER" ] && [ -n "$(find "$VERIFY_MARKER" -mtime -8 2>/dev/null)" ]; then
+    echo "✓ Restore test passed on $(date -r "$VERIFY_MARKER" '+%Y-%m-%d')"
+  else
+    WARNINGS+=("No successful restore test in the last 8 days (run ops/verify_backup.sh $ENV)")
   fi
 else
   WARNINGS+=("Backup directory $BACKUP_DIR does not exist")
 fi
 
-# ── 6. WireGuard (production only) ────────────────────────────────────────
-if [ "$ENV" = "prod" ]; then
+# ── 6. WireGuard (only where it is configured) ────────────────────────────
+if [ -f /etc/wireguard/wg0.conf ]; then
   if ip link show wg0 &>/dev/null; then
-    WG_PEERS=$(sudo wg show wg0 2>/dev/null | grep -c "^peer" || echo "0")
+    WG_PEERS=$(sudo -n wg show wg0 2>/dev/null | grep -c "^peer" || echo "?")
     echo "✓ WireGuard wg0 active ($WG_PEERS peer(s))"
   else
-    WARNINGS+=("WireGuard interface wg0 is inactive")
+    WARNINGS+=("WireGuard is configured but interface wg0 is down")
   fi
 fi
 
 # ── Summary ────────────────────────────────────────────────────────────────
 echo ""
-
 if [ ${#WARNINGS[@]} -gt 0 ]; then
   echo "⚠ WARNINGS:"
-  for w in "${WARNINGS[@]}"; do
-    echo "  - $w"
-  done
+  for w in "${WARNINGS[@]}"; do echo "  - $w"; done
 fi
-
 if [ ${#PROBLEMS[@]} -gt 0 ]; then
   echo "✗ PROBLEMS DETECTED:"
-  for p in "${PROBLEMS[@]}"; do
-    echo "  - $p"
-  done
+  for p in "${PROBLEMS[@]}"; do echo "  - $p"; done
   exit 1
-else
-  echo "✓ All checks passed (env: $ENV)"
-  exit 0
 fi
+echo "✓ All checks passed (env: $ENV)"
+exit 0

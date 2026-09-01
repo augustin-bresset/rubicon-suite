@@ -52,7 +52,7 @@ tail -50 /var/log/rubicon-health.log
 docker compose -f docker-compose.demo.yml logs -f odoo_demo
 
 # Live logs (prod)
-docker compose logs -f odoo
+docker compose -f docker-compose.prod.yml logs -f odoo
 
 # Errors only
 docker compose -f docker-compose.demo.yml logs odoo_demo 2>&1 | grep -i "error\|critical\|traceback"
@@ -63,7 +63,9 @@ docker compose -f docker-compose.demo.yml logs odoo_demo 2>&1 | grep -i "error\|
 ## Backup Logs
 
 ```bash
-tail -f /var/log/rubicon-backup.log
+tail -f /opt/rubicon-backups/backup.log     # every backup run (full detail)
+tail -f /opt/rubicon-backups/verify.log     # weekly automated restore tests
+cat /opt/rubicon-backups/.last_status_prod  # OK / WARN / FAIL of the last run
 ```
 
 ---
@@ -74,5 +76,7 @@ tail -f /var/log/rubicon-backup.log
 |--------|----------------|---------|
 | Disk space | > 80% used | `df -h /` |
 | Memory | > 90% used | `free -h` |
-| Missing backup | > 25h | see `healthcheck.sh` |
+| Missing / invalid backup | > 25h, `gzip -t` fails, too small | see `healthcheck.sh` |
+| Restore test | none passed in 8 days | `ops/verify_backup.sh prod` |
+| Off-site upload | last run WARN/FAIL | `.last_status_prod`, `backup.log` |
 | Containers down | any outage | `docker compose ps` |
