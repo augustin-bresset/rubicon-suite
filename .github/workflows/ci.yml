@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint (shell, python, compose)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck (ops/)
+        run: |
+          files=$(cd ops && find . -name '*.sh' -not -path '*/node_modules/*' | sed 's|^\./|/mnt/|')
+          docker run --rm -v "$PWD/ops:/mnt:ro" koalaman/shellcheck:stable -S warning $files
+      - name: python syntax
+        run: python3 -m compileall -q rubicon_addons ops
+      - name: compose files
+        run: |
+          cp .env.prod.example .env.prod
+          printf 'DB_NAME=rubicon\nDB_USER=odoo\nDB_PASS=odoo\n' > .env
+          docker compose -f docker-compose.prod.yml config -q
+          docker compose -f docker-compose.yml config -q
+
+  odoo-tests:
+    name: Odoo module tests
+    runs-on: ubuntu-latest
+    container:
+      image: odoo:18.0
+      # The image's default user (odoo) cannot write the runner's workspace.
+      options: --user root
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      # Top-level modules to install (their dependencies follow). PCS modules join once committed.
+      MODULES: rubicon_env,rubicon_uom,pdp_frontend,pdp_metal_market,sis_frontend,sis_analysis,rubicon_storage,latex_pdf,rubicon_import
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install modules and run their tests
+        run: |
+          # --test-tags limits the run to our modules (every one that ships a
+          # tests/ folder, dependencies included): on a fresh database
+          # --test-enable would otherwise also run Odoo's own base/web suites.
+          tags=$(for d in rubicon_addons/*/tests; do printf '/%s,' "$(basename "$(dirname "$d")")"; done)
+          tags=${tags%,}
+          odoo --db_host=db --db_port=5432 --db_user=odoo --db_password=odoo \
+            --addons-path="$GITHUB_WORKSPACE/rubicon_addons,/usr/lib/python3/dist-packages/odoo/addons" \
+            --data-dir=/tmp/odoo-data \
+            -d ci -i "$MODULES" --without-demo=all \
+            --test-enable --test-tags "$tags" \
+            --stop-after-init --workers=0 --max-cron-threads=0 \
+            --log-level=warn 2>&1 | tee odoo-test.log
+          # Odoo exits 0 even when tests fail; judge from the log.
+          grep -E "odoo.tests.stats" odoo-test.log || true
+          if grep -qE " (ERROR|CRITICAL) | At least one test failed" odoo-test.log; then
+            echo "::error::Odoo reported errors or failing tests (see log above)"; exit 1
+          fi
