@@ -1,9 +1,21 @@
 #!/usr/bin/env python3
-"""Reset admin password, set company logo, and clear asset cache."""
+"""Reset admin password, set company logo, and clear asset cache.
+
+DEV-ONLY. This resets the admin password to a well-known value. Running it on
+a production database removes admin authentication. It is gated behind an
+explicit environment flag so it cannot be run by accident.
+"""
 import base64
+import os
 import sys
 import odoo
 from odoo import api, SUPERUSER_ID
+
+if os.environ.get('RUBICON_ALLOW_DEV_RESET') != '1':
+    sys.exit(
+        "Refusing to run: this script resets the admin password to 'admin'.\n"
+        "Set RUBICON_ALLOW_DEV_RESET=1 to confirm you are on a dev database."
+    )
 
 # Initialize Odoo
 odoo.tools.config.parse_config(['-c', '/etc/odoo/odoo.conf', '-d', 'rubicon', '--no-http'])

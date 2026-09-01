@@ -14,9 +14,20 @@ Steps:
 
 Replaces import_sis_odoo + migrate_documents + build_child_docs.
 """
+import os
+import sys
 from collections import defaultdict
 
 from odoo.addons.rubicon_import.import_scripts.generic import import_csv
+
+# This script deletes EVERY sis.document and sis.document.item before reloading
+# from CSV. Gate it behind an explicit flag so it cannot wipe a live database by
+# accident (it runs against whatever DB the odoo shell is attached to).
+if os.environ.get('RUBICON_ALLOW_SIS_WIPE') != '1':
+    sys.exit(
+        "Refusing to run: this deletes ALL sis.document / sis.document.item rows.\n"
+        "Set RUBICON_ALLOW_SIS_WIPE=1 to confirm this is the intended database."
+    )
 
 Doc = env['sis.document']
 Item = env['sis.document.item']
