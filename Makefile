@@ -147,7 +147,7 @@ logs-demo:
 	docker compose -f docker-compose.demo.yml logs -f odoo_demo
 
 logs-prod:
-	docker compose logs -f odoo
+	docker compose -f docker-compose.prod.yml logs -f odoo
 
 
 # --- Data pipeline ---

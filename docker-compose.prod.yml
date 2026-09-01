@@ -1,0 +1,106 @@
+# Production stack for Rubicon Suite.
+#
+# Differences vs docker-compose.yml (dev):
+#   - No `--dev=assets` (assets are compiled once at module install/upgrade).
+#   - Ports bound to 127.0.0.1 only: 8069 (HTTP) and 8072 (websocket, required
+#     as soon as workers > 0). Odoo is never directly reachable from the
+#     network: front it with nginx + TLS (ops/nginx_prod.conf) or a named
+#     Cloudflare tunnel. Binding to 127.0.0.1 also closes the Docker/UFW bypass
+#     (published ports insert NAT rules ahead of the UFW INPUT chain).
+#   - Images pinned by digest so an upgrade is a deliberate change. To bump:
+#       docker buildx imagetools inspect odoo:18.0 | grep Digest
+#     edit the digest below, then
+#       docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d
+#   - restart policy, container healthchecks and memory limits. The odoo limit
+#     must stay >= (workers + max_cron_threads + 1) x limit_memory_hard from
+#     odoo.prod.conf, otherwise the kernel OOM-kills the whole container
+#     instead of Odoo recycling a single worker.
+#   - Source code mounted read-only.
+#   - Odoo logs to stdout (no `logfile` in odoo.prod.conf) so `docker compose
+#     logs` works and the json-file rotation below applies.
+#   - PostgreSQL 16 (13 is EOL since Nov 2025). Start a fresh prod DB on 16, or
+#     migrate an existing one via ops/backup.sh + ops/restore.sh.
+#
+# Bring up:
+#   cp .env.prod.example .env.prod && chmod 600 .env.prod            # fill in strong secrets
+#   cp odoo_conf/odoo.conf.prod.example odoo_conf/odoo.prod.conf     # then edit
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Never install `rubicon_demo` on this stack: its pre_init_hook deletes every
+# product model, SIS document and SIS partner of the database it is installed on.
+
+services:
+  db:
+    image: postgres:16@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
+    # POSTGRES_DB / POSTGRES_USER / POSTGRES_PASSWORD are read from .env.prod
+    # through env_file. Do NOT switch to ${VAR} interpolation: compose resolves
+    # that from the shell or ./.env (the DEV file) and would silently start
+    # production with development credentials.
+    env_file: .env.prod
+    shm_size: 256m
+    volumes:
+      - prod_db_data:/var/lib/postgresql/data
+    # Never publish 5432. The odoo service reaches it over the internal network.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    stop_grace_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  odoo:
+    image: odoo:18.0@sha256:259fa933bf3ee7f3e375bd74d1e0bc28bd75955159723be477359e0fdb8acf67
+    depends_on:
+      db:
+        condition: service_healthy
+    # Odoo reads db_host/db_user/db_password from odoo.prod.conf. .env.prod is
+    # loaded for the application secrets it carries (API_KEY_METAL_MARKET); the
+    # POSTGRES_* variables it also contains are ignored by the Odoo entrypoint.
+    env_file: .env.prod
+    command: odoo
+    ports:
+      # Loopback only. The reverse proxy terminates TLS and forwards to
+      # 127.0.0.1:8069 (HTTP) and 127.0.0.1:8072 (/websocket).
+      - "127.0.0.1:8069:8069"
+      - "127.0.0.1:8072:8072"
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - prod_odoo_data:/var/lib/odoo/.local/share/Odoo
+      - ./rubicon_addons:/mnt/extra-addons:ro
+      - ./data/pictures:/mnt/extra-addons/pictures:ro
+      - ./external_addons:/mnt/external-addons:ro
+      - ./odoo_conf/odoo.prod.conf:/etc/odoo/odoo.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8069/web/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    # Let in-flight requests (limit_time_real = 120s) finish on stop/restart.
+    stop_grace_period: 130s
+    deploy:
+      resources:
+        limits:
+          # 4 processes (2 workers + 1 cron + 1 gevent) x 1 GiB limit_memory_hard
+          memory: 4g
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+volumes:
+  prod_db_data:
+  prod_odoo_data:

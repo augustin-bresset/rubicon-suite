@@ -1,39 +1,60 @@
 [options]
-; Template de configuration pour le SERVEUR DE PRODUCTION (réseau local entreprise).
-; Copier vers odoo.conf et adapter les valeurs.
-; NE PAS commiter ce fichier une fois rempli avec de vrais credentials.
+; Configuration template for the PRODUCTION server.
+; Copy to odoo_conf/odoo.prod.conf and fill in real values.
+; The real file is git-ignored and must NEVER be committed with credentials.
 
-; Chemins d'addons (sans oca_currency si non installé)
-addons_path = /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+; Addon paths (drop oca_currency if not installed)
+addons_path = /mnt/extra-addons,/mnt/external-addons/oca_currency,/usr/lib/python3/dist-packages/odoo/addons
 
-; Base de données
+; Database — must match POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB in .env.prod
 db_host = db
 db_port = 5432
-db_user = CHANGER_MOI
-db_password = CHANGER_MOI
+db_user = CHANGE_ME
+db_password = CHANGE_ME
+; Default database for the CLI (odoo shell, odoo -u ...) and the only one the
+; cron worker processes. Restore-test copies (rubicon_verify) are therefore
+; never picked up by crons.
+db_name = rubicon
 
-; Réseau — écoute sur tout le réseau local (accessible depuis l'interne et le VPN)
+; Network — Odoo is fronted by a reverse proxy (nginx/Cloudflare), which is the
+; only thing that should reach these ports. docker-compose.prod.yml binds the
+; published ports (8069 HTTP, 8072 websocket) to 127.0.0.1.
 http_interface = 0.0.0.0
+http_port = 8069
+gevent_port = 8072
 
-; Filtrer la base de données exposée
+; Only expose the production database over HTTP, hide every other one.
 dbfilter = ^rubicon$
 
-; Sécurité — Protège /web/database/manager
-; Générer avec : python3 -c "import secrets; print(secrets.token_hex(24))"
-admin_passwd = CHANGER_MOI
+; Security — protects /web/database/manager.
+; Generate with: python3 -c "import secrets; print(secrets.token_hex(24))"
+admin_passwd = CHANGE_ME
 
-; Masquer la liste et l'accès aux bases de données
+; Hide the database list and the database manager entirely.
 list_db = False
 
-; Performance — activer le mode multi-process
-workers = 4
-max_cron_threads = 2
+; Trust X-Forwarded-* headers from the reverse proxy (required for correct
+; redirects/HTTPS detection behind nginx or Cloudflare). Only enable when a
+; trusted proxy actually sits in front of Odoo.
+proxy_mode = True
 
-; Limites de sécurité
+; Performance — multi-process mode. Rule of thumb: workers = (2 * CPU) + 1,
+; capped by memory: (workers + max_cron_threads + 1 gevent process) x
+; limit_memory_hard must fit in the container memory limit set in
+; docker-compose.prod.yml (4g there: 4 processes x 1 GiB).
+workers = 2
+max_cron_threads = 1
+
+; Request limits (DoS protection / worker recycling)
 limit_time_cpu = 60
 limit_time_real = 120
-limit_memory_hard = 2684354560
+limit_time_real_cron = 300
+limit_request = 8192
+; 768 MiB soft (worker recycled after the request), 1 GiB hard (request killed)
+limit_memory_soft = 805306368
+limit_memory_hard = 1073741824
 
-; Logging
-logfile = /var/log/odoo/odoo.log
+; Logging — no `logfile` on purpose: Odoo writes to stdout, Docker captures and
+; rotates it (logging section of docker-compose.prod.yml). A log file inside
+; the container would be lost on every recreate and never rotated.
 log_level = warn

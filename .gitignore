@@ -120,7 +120,9 @@ migrations/versions/*.pyc
 external_addons/*
 .worktrees
 .env.demo
+.env.prod
 odoo_conf/odoo_demo.conf
+odoo_conf/odoo.prod.conf
 .demo_secrets
 ops/TUNNEL_URL.txt
 
