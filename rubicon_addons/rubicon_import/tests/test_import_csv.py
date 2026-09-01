@@ -25,7 +25,7 @@ class TestCSVImport(TransactionCase):
 
         with open(self.csv_path, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(['xml_id', 'code', 'name', 'density', 'category_code'])
+            writer.writerow(['xml_id', 'code', 'name', 'density', 'category_id'])
             writer.writerow(['TEST_1_xml_id', 'TES1', 'Test 1', '1.23', 'CAT1'])
 
 
@@ -39,11 +39,10 @@ class TestCSVImport(TransactionCase):
             verbose=False,
             register_xml_id=True
         )
-        print(logs)
         stone = self.env.ref('pdp_stone.TEST_1_xml_id', raise_if_not_found=False)
         self.assertTrue(stone)
         self.assertEqual(stone.name, 'Test 1')
-        self.assertEqual(stone.category_code.name, 'TestCat')
+        self.assertEqual(stone.category_id.name, 'TestCat')
         self.assertEqual(logs['created'], 1)
         self.assertEqual(logs['skipped'], 0)
 

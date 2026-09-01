@@ -1,5 +1,13 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_sis_pay_term,sis.pay.term,model_sis_pay_term,base.group_user,1,1,1,1
-access_sis_shipper,sis.shipper,model_sis_shipper,base.group_user,1,1,1,1
-access_sis_trade_fair,sis.trade.fair,model_sis_trade_fair,base.group_user,1,1,1,1
-access_res_partner_phone,res.partner.phone,model_res_partner_phone,base.group_user,1,1,1,1
+access_sis_pay_term_user,sis.pay.term (user),model_sis_pay_term,rubicon_env.group_rubicon_user,1,0,0,0
+access_sis_pay_term_editor,sis.pay.term (editor),model_sis_pay_term,rubicon_env.group_rubicon_editor,1,1,1,0
+access_sis_pay_term,sis.pay.term (manager),model_sis_pay_term,rubicon_env.group_rubicon_manager,1,1,1,1
+access_sis_shipper_user,sis.shipper (user),model_sis_shipper,rubicon_env.group_rubicon_user,1,0,0,0
+access_sis_shipper_editor,sis.shipper (editor),model_sis_shipper,rubicon_env.group_rubicon_editor,1,1,1,0
+access_sis_shipper,sis.shipper (manager),model_sis_shipper,rubicon_env.group_rubicon_manager,1,1,1,1
+access_sis_trade_fair_user,sis.trade.fair (user),model_sis_trade_fair,rubicon_env.group_rubicon_user,1,0,0,0
+access_sis_trade_fair_editor,sis.trade.fair (editor),model_sis_trade_fair,rubicon_env.group_rubicon_editor,1,1,1,0
+access_sis_trade_fair,sis.trade.fair (manager),model_sis_trade_fair,rubicon_env.group_rubicon_manager,1,1,1,1
+access_res_partner_phone_user,res.partner.phone (user),model_res_partner_phone,rubicon_env.group_rubicon_user,1,0,0,0
+access_res_partner_phone_editor,res.partner.phone (editor),model_res_partner_phone,rubicon_env.group_rubicon_editor,1,1,1,0
+access_res_partner_phone,res.partner.phone (manager),model_res_partner_phone,rubicon_env.group_rubicon_manager,1,1,1,1

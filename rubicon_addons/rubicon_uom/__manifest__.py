@@ -4,7 +4,7 @@
     'license': 'LGPL-3',
     'summary': 'Reusable unit-of-measure registry with ratio-based conversion and per-user preferences',
     'author': 'Rubicon',
-    'depends': ['base'],
+    'depends': ['base', 'rubicon_env'],
     'data': [
         'security/ir.model.access.csv',
         'data/rubicon_uom_data.xml',

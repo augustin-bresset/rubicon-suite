@@ -1,7 +1,19 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-pdp_margin.access_pdp_margin,access_pdp_margin,pdp_margin.model_pdp_margin,base.group_user,1,1,1,1
-pdp_margin.access_pdp_margin_addon,access_pdp_margin_addon,pdp_margin.model_pdp_margin_addon,base.group_user,1,1,1,1
-pdp_margin.access_pdp_margin_stone,access_pdp_margin_stone,pdp_margin.model_pdp_margin_stone,base.group_user,1,1,1,1
-pdp_margin.access_pdp_margin_metal,access_pdp_margin_metal,pdp_margin.model_pdp_margin_metal,base.group_user,1,1,1,1
-pdp_margin.access_pdp_margin_part,access_pdp_margin_part,pdp_margin.model_pdp_margin_part,base.group_user,1,1,1,1
-pdp_margin.access_pdp_margin_stone_conditional,access_pdp_margin_stone_conditional,pdp_margin.model_pdp_margin_stone_conditional,base.group_user,1,1,1,1
+pdp_margin.access_pdp_margin_user,access_pdp_margin (user),pdp_margin.model_pdp_margin,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_margin.access_pdp_margin_editor,access_pdp_margin (editor),pdp_margin.model_pdp_margin,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_margin.access_pdp_margin,access_pdp_margin (manager),pdp_margin.model_pdp_margin,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_margin.access_pdp_margin_addon_user,access_pdp_margin_addon (user),pdp_margin.model_pdp_margin_addon,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_margin.access_pdp_margin_addon_editor,access_pdp_margin_addon (editor),pdp_margin.model_pdp_margin_addon,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_margin.access_pdp_margin_addon,access_pdp_margin_addon (manager),pdp_margin.model_pdp_margin_addon,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_margin.access_pdp_margin_stone_user,access_pdp_margin_stone (user),pdp_margin.model_pdp_margin_stone,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_margin.access_pdp_margin_stone_editor,access_pdp_margin_stone (editor),pdp_margin.model_pdp_margin_stone,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_margin.access_pdp_margin_stone,access_pdp_margin_stone (manager),pdp_margin.model_pdp_margin_stone,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_margin.access_pdp_margin_metal_user,access_pdp_margin_metal (user),pdp_margin.model_pdp_margin_metal,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_margin.access_pdp_margin_metal_editor,access_pdp_margin_metal (editor),pdp_margin.model_pdp_margin_metal,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_margin.access_pdp_margin_metal,access_pdp_margin_metal (manager),pdp_margin.model_pdp_margin_metal,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_margin.access_pdp_margin_part_user,access_pdp_margin_part (user),pdp_margin.model_pdp_margin_part,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_margin.access_pdp_margin_part_editor,access_pdp_margin_part (editor),pdp_margin.model_pdp_margin_part,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_margin.access_pdp_margin_part,access_pdp_margin_part (manager),pdp_margin.model_pdp_margin_part,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_margin.access_pdp_margin_stone_conditional_user,access_pdp_margin_stone_conditional (user),pdp_margin.model_pdp_margin_stone_conditional,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_margin.access_pdp_margin_stone_conditional_editor,access_pdp_margin_stone_conditional (editor),pdp_margin.model_pdp_margin_stone_conditional,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_margin.access_pdp_margin_stone_conditional,access_pdp_margin_stone_conditional (manager),pdp_margin.model_pdp_margin_stone_conditional,rubicon_env.group_rubicon_manager,1,1,1,1

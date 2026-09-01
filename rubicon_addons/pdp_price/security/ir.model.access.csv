@@ -1,11 +1,34 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-pdp_price.access_pdp_price_component,access_pdp_price_component,pdp_price.model_pdp_price_component,base.group_user,1,1,1,1
-pdp_price.access_pdp_price_addon,access_pdp_price_addon,pdp_price.model_pdp_price_addon,base.group_user,1,1,1,1
-pdp_price.access_pdp_price_stone,access_pdp_price_stone,pdp_price.model_pdp_price_stone,base.group_user,1,1,1,1
-pdp_price.access_pdp_price_metal,access_pdp_price_metal,pdp_price.model_pdp_price_metal,base.group_user,1,1,1,1
-pdp_price.access_pdp_price_conv,access_pdp_price_conv,pdp_price.model_pdp_price_conv,base.group_user,1,1,1,1
-pdp_price.access_pdp_price_labor,access_pdp_price_labor,pdp_price.model_pdp_price_labor,base.group_user,1,1,1,1
-pdp_price.access_pdp_price_part,access_pdp_price_part,pdp_price.model_pdp_price_part,base.group_user,1,1,1,1
-pdp_price.access_pdp_price_recutting,access_pdp_price_recutting,pdp_price.model_pdp_price_recutting,base.group_user,1,1,1,1
-pdp_price.access_pdp_price_preview,access_pdp_price_preview,pdp_price.model_pdp_price_preview,base.group_user,1,1,1,1
-pdp_price.access_pdp_price_preview_line,access_pdp_price_preview_line,pdp_price.model_pdp_price_preview_line,base.group_user,1,1,1,1
+pdp_price.access_pdp_price_component_user,access_pdp_price_component (user),pdp_price.model_pdp_price_component,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_component_editor,access_pdp_price_component (editor),pdp_price.model_pdp_price_component,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_component,access_pdp_price_component (manager),pdp_price.model_pdp_price_component,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_addon_user,access_pdp_price_addon (user),pdp_price.model_pdp_price_addon,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_addon_editor,access_pdp_price_addon (editor),pdp_price.model_pdp_price_addon,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_addon,access_pdp_price_addon (manager),pdp_price.model_pdp_price_addon,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_stone_user,access_pdp_price_stone (user),pdp_price.model_pdp_price_stone,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_stone_editor,access_pdp_price_stone (editor),pdp_price.model_pdp_price_stone,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_stone,access_pdp_price_stone (manager),pdp_price.model_pdp_price_stone,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_metal_user,access_pdp_price_metal (user),pdp_price.model_pdp_price_metal,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_metal_editor,access_pdp_price_metal (editor),pdp_price.model_pdp_price_metal,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_metal,access_pdp_price_metal (manager),pdp_price.model_pdp_price_metal,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_conv_user,access_pdp_price_conv (user),pdp_price.model_pdp_price_conv,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_conv_editor,access_pdp_price_conv (editor),pdp_price.model_pdp_price_conv,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_conv,access_pdp_price_conv (manager),pdp_price.model_pdp_price_conv,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_labor_user,access_pdp_price_labor (user),pdp_price.model_pdp_price_labor,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_labor_editor,access_pdp_price_labor (editor),pdp_price.model_pdp_price_labor,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_labor,access_pdp_price_labor (manager),pdp_price.model_pdp_price_labor,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_part_user,access_pdp_price_part (user),pdp_price.model_pdp_price_part,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_part_editor,access_pdp_price_part (editor),pdp_price.model_pdp_price_part,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_part,access_pdp_price_part (manager),pdp_price.model_pdp_price_part,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_recutting_user,access_pdp_price_recutting (user),pdp_price.model_pdp_price_recutting,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_recutting_editor,access_pdp_price_recutting (editor),pdp_price.model_pdp_price_recutting,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_recutting,access_pdp_price_recutting (manager),pdp_price.model_pdp_price_recutting,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_preview_user,access_pdp_price_preview (user),pdp_price.model_pdp_price_preview,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_preview_editor,access_pdp_price_preview (editor),pdp_price.model_pdp_price_preview,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_preview,access_pdp_price_preview (manager),pdp_price.model_pdp_price_preview,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_preview_line_user,access_pdp_price_preview_line (user),pdp_price.model_pdp_price_preview_line,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_preview_line_editor,access_pdp_price_preview_line (editor),pdp_price.model_pdp_price_preview_line,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_preview_line,access_pdp_price_preview_line (manager),pdp_price.model_pdp_price_preview_line,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_price.access_pdp_price_product_user,access_pdp_price_product (user),pdp_price.model_pdp_price_product,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_price.access_pdp_price_product_editor,access_pdp_price_product (editor),pdp_price.model_pdp_price_product,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_price.access_pdp_price_product,access_pdp_price_product (manager),pdp_price.model_pdp_price_product,rubicon_env.group_rubicon_manager,1,1,1,1

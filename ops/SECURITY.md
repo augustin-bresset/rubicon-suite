@@ -55,9 +55,11 @@ must be added to a group to write:
 | Rubicon / Editor | read, create, write | designers, officers, buyers, stock |
 | Rubicon / Manager | read, create, write, **delete** | director, manager, administrators |
 
-The role groups (Director, Manager, Officer, Product Designer, Stone Buyer,
-Metal Buyer, Stock Manager, Accountant, Quality Controller, Lapidary
-Supervisor) imply one of the three levels; assign the role, not the level.
+The role groups (Director, Team Manager, Officer, Product Designer, Stone
+Buyer, Metal Buyer, Stock Manager, Accountant, Quality Controller, Lapidary
+Supervisor — table in `meta/security.md`) imply one of the three levels;
+assign the role, not the level. Upgrading to `rubicon_env` 18.0.1.1 grants
+Editor to every existing internal user so nobody is locked out at deploy time.
 Configuration models (`pdp.config`, units of measure, roles) stay
 administrator-only.
 

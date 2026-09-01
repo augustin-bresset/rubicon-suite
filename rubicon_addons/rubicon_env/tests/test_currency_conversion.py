@@ -54,29 +54,24 @@ class TestCurrencyConversion(TransactionCase):
 
     def test_02_conversion_differs_by_currency(self):
         """Conversion must differ when changing the target currency."""
-
-        # Ensure we have THB in the system (create it if missing)
-        thb = self.env["res.currency"].search([("name", "=", "THB")], limit=1)
+        thb = self.env["res.currency"].with_context(active_test=False).search([("name", "=", "THB")], limit=1)
         if not thb:
-            thb = self.env["res.currency"].create({
-                "name": "THB",
-                "symbol": "฿",
-                "rounding": 0.01,
-            })
+            thb = self.env["res.currency"].create({"name": "THB", "symbol": "฿", "rounding": 0.01})
+        thb.active = True
+
+        # Rates are created here: a freshly installed database has none, and
+        # the test must not depend on a currency provider having run.
+        date = fields.Date.today()
+        Rate = self.env["res.currency.rate"]
+        Rate.create({"currency_id": self.eur.id, "name": date, "company_id": self.company.id, "rate": 0.92})
+        Rate.create({"currency_id": thb.id, "name": date, "company_id": self.company.id, "rate": 35.0})
 
         amount = 100.0
-        date = fields.Date.today()
-
-        # Convert 100 USD to EUR and THB on the same date
         val_eur = self.usd._convert(amount, self.eur, self.company, date)
         val_thb = self.usd._convert(amount, thb, self.company, date)
-
-        # Results must differ unless the EUR and THB rates are identical (very unlikely)
         self.assertNotEqual(val_eur, val_thb)
 
-        # Double-check using Odoo's internal conversion rate function
         r_eur = self.env["res.currency"]._get_conversion_rate(self.usd, self.eur, self.company, date)
         r_thb = self.env["res.currency"]._get_conversion_rate(self.usd, thb, self.company, date)
-
-        self.assertAlmostEqual(val_eur, amount * r_eur, places=1)
-        self.assertAlmostEqual(val_thb, amount * r_thb, places=1)
+        self.assertAlmostEqual(val_eur, amount * r_eur, places=6)
+        self.assertAlmostEqual(val_thb, amount * r_thb, places=6)

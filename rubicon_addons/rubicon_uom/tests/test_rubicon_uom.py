@@ -15,9 +15,10 @@ class TestRubiconUomCategory(TransactionCase):
         # _rec_name='code' means display_name == code value
         self.assertEqual(cat.display_name, 'test_weight')
 
+    @mute_logger('odoo.sql_db')
     def test_code_unique(self):
         self.env['rubicon.uom.category'].create({'name': 'A', 'code': 'unique_test'})
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError), self.cr.savepoint():
             self.env['rubicon.uom.category'].create({'name': 'B', 'code': 'unique_test'})
 
 
@@ -27,10 +28,10 @@ class TestRubiconUomConversion(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.cat = cls.env['rubicon.uom.category'].create({
-            'name': 'Metal Weight', 'code': 'metal_weight',
+            'name': 'Test Metal Weight', 'code': 'test_metal_weight',
         })
         cls.cat2 = cls.env['rubicon.uom.category'].create({
-            'name': 'Stone Weight', 'code': 'stone_weight',
+            'name': 'Test Stone Weight', 'code': 'test_stone_weight',
         })
         cls.gram = cls.env['rubicon.uom'].create({
             'name': 'Gramme', 'symbol': 'g',
@@ -101,7 +102,11 @@ class TestRubiconUomUserPref(TransactionCase):
             'name': 'Carat', 'symbol': 'ct', 'category_id': cls.cat2.id,
             'ratio': 1.0, 'is_reference': True, 'is_global_default': True,
         })
-        cls.user = cls.env.ref('base.user_demo')
+        # A dedicated user: demo data (base.user_demo) is not installed in production or CI.
+        cls.user = cls.env['res.users'].with_context(no_reset_password=True).create({
+            'name': 'UoM pref test', 'login': 'uom_pref_test',
+            'groups_id': [(6, 0, [cls.env.ref('base.group_user').id])],
+        })
 
     def test_get_user_uom_returns_user_pref(self):
         self.env['rubicon.uom.user.pref'].create({

@@ -1,6 +1,16 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_market_metal_user,access_market_metal_user,model_pdp_market_metal,base.group_user,1,1,1,1
-access_market_price_user,access_market_price_user,model_pdp_market_price,base.group_user,1,1,1,1
-access_market_source_user,access_market_source_user,model_pdp_market_source,base.group_user,1,1,1,1
-access_metal_alloy_user,access_metal_alloy_user,model_pdp_metal_alloy,base.group_user,1,1,1,1
-access_metal_alloy_line_user,access_metal_alloy_line_user,model_pdp_metal_alloy_line,base.group_user,1,1,1,1
+access_market_metal_user_user,access_market_metal_user (user),model_pdp_market_metal,rubicon_env.group_rubicon_user,1,0,0,0
+access_market_metal_user_editor,access_market_metal_user (editor),model_pdp_market_metal,rubicon_env.group_rubicon_editor,1,1,1,0
+access_market_metal_user,access_market_metal_user (manager),model_pdp_market_metal,rubicon_env.group_rubicon_manager,1,1,1,1
+access_market_price_user_user,access_market_price_user (user),model_pdp_market_price,rubicon_env.group_rubicon_user,1,0,0,0
+access_market_price_user_editor,access_market_price_user (editor),model_pdp_market_price,rubicon_env.group_rubicon_editor,1,1,1,0
+access_market_price_user,access_market_price_user (manager),model_pdp_market_price,rubicon_env.group_rubicon_manager,1,1,1,1
+access_market_source_user_user,access_market_source_user (user),model_pdp_market_source,rubicon_env.group_rubicon_user,1,0,0,0
+access_market_source_user_editor,access_market_source_user (editor),model_pdp_market_source,rubicon_env.group_rubicon_editor,1,1,1,0
+access_market_source_user,access_market_source_user (manager),model_pdp_market_source,rubicon_env.group_rubicon_manager,1,1,1,1
+access_metal_alloy_user_user,access_metal_alloy_user (user),model_pdp_metal_alloy,rubicon_env.group_rubicon_user,1,0,0,0
+access_metal_alloy_user_editor,access_metal_alloy_user (editor),model_pdp_metal_alloy,rubicon_env.group_rubicon_editor,1,1,1,0
+access_metal_alloy_user,access_metal_alloy_user (manager),model_pdp_metal_alloy,rubicon_env.group_rubicon_manager,1,1,1,1
+access_metal_alloy_line_user_user,access_metal_alloy_line_user (user),model_pdp_metal_alloy_line,rubicon_env.group_rubicon_user,1,0,0,0
+access_metal_alloy_line_user_editor,access_metal_alloy_line_user (editor),model_pdp_metal_alloy_line,rubicon_env.group_rubicon_editor,1,1,1,0
+access_metal_alloy_line_user,access_metal_alloy_line_user (manager),model_pdp_metal_alloy_line,rubicon_env.group_rubicon_manager,1,1,1,1

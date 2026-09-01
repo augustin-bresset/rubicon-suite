@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-pdf_generator.access_pdfg_template,access_pdfg_template,pdf_generator.model_pdfg_template,base.group_user,1,1,1,1
+latex_pdf.access_pdfg_template_user,access_pdfg_template (user),latex_pdf.model_pdfg_template,rubicon_env.group_rubicon_user,1,0,0,0
+latex_pdf.access_pdfg_template_editor,access_pdfg_template (editor),latex_pdf.model_pdfg_template,rubicon_env.group_rubicon_editor,1,1,1,0
+latex_pdf.access_pdfg_template,access_pdfg_template (manager),latex_pdf.model_pdfg_template,rubicon_env.group_rubicon_manager,1,1,1,1

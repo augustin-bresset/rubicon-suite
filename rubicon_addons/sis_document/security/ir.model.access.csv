@@ -1,5 +1,13 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_sis_doc_type,sis.doc.type,model_sis_doc_type,base.group_user,1,1,1,1
-access_sis_doc_in_mode,sis.doc.in.mode,model_sis_doc_in_mode,base.group_user,1,1,1,1
-access_sis_document,sis.document,model_sis_document,base.group_user,1,1,1,1
-access_sis_document_item,sis.document.item,model_sis_document_item,base.group_user,1,1,1,1
+access_sis_doc_type_user,sis.doc.type (user),model_sis_doc_type,rubicon_env.group_rubicon_user,1,0,0,0
+access_sis_doc_type_editor,sis.doc.type (editor),model_sis_doc_type,rubicon_env.group_rubicon_editor,1,1,1,0
+access_sis_doc_type,sis.doc.type (manager),model_sis_doc_type,rubicon_env.group_rubicon_manager,1,1,1,1
+access_sis_doc_in_mode_user,sis.doc.in.mode (user),model_sis_doc_in_mode,rubicon_env.group_rubicon_user,1,0,0,0
+access_sis_doc_in_mode_editor,sis.doc.in.mode (editor),model_sis_doc_in_mode,rubicon_env.group_rubicon_editor,1,1,1,0
+access_sis_doc_in_mode,sis.doc.in.mode (manager),model_sis_doc_in_mode,rubicon_env.group_rubicon_manager,1,1,1,1
+access_sis_document_user,sis.document (user),model_sis_document,rubicon_env.group_rubicon_user,1,0,0,0
+access_sis_document_editor,sis.document (editor),model_sis_document,rubicon_env.group_rubicon_editor,1,1,1,0
+access_sis_document,sis.document (manager),model_sis_document,rubicon_env.group_rubicon_manager,1,1,1,1
+access_sis_document_item_user,sis.document.item (user),model_sis_document_item,rubicon_env.group_rubicon_user,1,0,0,0
+access_sis_document_item_editor,sis.document.item (editor),model_sis_document_item,rubicon_env.group_rubicon_editor,1,1,1,0
+access_sis_document_item,sis.document.item (manager),model_sis_document_item,rubicon_env.group_rubicon_manager,1,1,1,1

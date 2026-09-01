@@ -1,21 +1,34 @@
 # Security
 
-## Permission Groups (Odoo)
+## Access levels and roles (Odoo)
 
-Defined in `rubicon_addons/rubicon_env/security/security.xml`:
+Defined in `rubicon_addons/rubicon_env/security/security.xml` and applied by every
+module's `security/ir.model.access.csv` (three rows per model).
 
-| Group ID | Name | Purpose |
-|----------|------|---------|
-| `group_rubicon_director` | Director | Full validation and oversight |
-| `group_rubicon_manager` | Manager | Team leader, validation rights |
-| `group_rubicon_stone_buyer` | Stone Buyer | Stone procurement |
-| `group_rubicon_metal_buyer` | Metal Buyer | Metal procurement |
-| `group_rubicon_quality_controller` | Quality Controller | QC and traceability |
-| `group_rubicon_product_designer` | Product Designer | 3D modeling and design |
-| `group_rubicon_officer` | Officer | Sales Order management |
-| `group_rubicon_accountant` | Accountant | Financial operations |
-| `group_rubicon_stock_manager` | Stock Manager | Inventory operations |
-| `group_rubicon_lapidary_supervisor` | Lapidary Supervisor | Production supervision |
+| Level ID | Name | Rights on Rubicon models |
+|----------|------|--------------------------|
+| `group_rubicon_user` | Rubicon / User | read — implied by *Internal User*, so every login has it |
+| `group_rubicon_editor` | Rubicon / Editor | read, create, write |
+| `group_rubicon_manager` | Rubicon / Manager | read, create, write, delete — implied by *Settings* (administrators) |
+
+Configuration models (`pdp.config`, `rubicon.uom*`, `pdp.role`, `pdp.permission`,
+import logs) stay read-only for everyone but administrators.
+
+| Role ID | Name | Implies | Purpose |
+|---------|------|---------|---------|
+| `group_rubicon_director` | Director | Manager | Full validation and oversight |
+| `group_rubicon_manager_role` | Team Manager | Manager | Team leader, validation rights |
+| `group_rubicon_officer` | Officer | Editor | Sales Order management |
+| `group_rubicon_product_designer` | Product Designer | Editor | 3D modeling and design |
+| `group_rubicon_stone_buyer` | Stone Buyer | Editor | Stone procurement |
+| `group_rubicon_metal_buyer` | Metal Buyer | Editor | Metal procurement |
+| `group_rubicon_stock_manager` | Stock Manager | Editor | Inventory operations |
+| `group_rubicon_accountant` | Accountant | User | Financial operations |
+| `group_rubicon_quality_controller` | Quality Controller | User | QC and traceability |
+| `group_rubicon_lapidary_supervisor` | Lapidary Supervisor | User | Production supervision |
+
+Upgrading to `rubicon_env` 18.0.1.1 grants Editor to every existing internal
+user (nobody loses write access at deploy time); narrow it by assigning roles.
 
 ## PDP Roles
 

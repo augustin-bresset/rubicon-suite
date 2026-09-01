@@ -1,6 +1,7 @@
 {
     'name': 'Rubicon - Environment Init',
-    'summary': 'Environment initilizer: currencies, rates, cron, etc.',
+    'summary': 'Environment initializer: currencies, company, access levels and roles',
+    'version': '18.0.1.1',
     'license': 'LGPL-3',
 
     'depends': [

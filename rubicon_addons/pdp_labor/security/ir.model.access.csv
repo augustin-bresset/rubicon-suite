@@ -1,6 +1,16 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-pdp_labor.access_pdp_labor_type,access_pdp_labor_type,pdp_labor.model_pdp_labor_type,base.group_user,1,1,1,1
-pdp_labor.access_pdp_labor_cost_model,access_pdp_labor_cost_model,pdp_labor.model_pdp_labor_cost_model,base.group_user,1,1,1,1
-pdp_labor.access_pdp_labor_cost_product,access_pdp_labor_cost_product,pdp_labor.model_pdp_labor_cost_product,base.group_user,1,1,1,1
-pdp_labor.access_pdp_addon_type,access_pdp_addon_type,pdp_labor.model_pdp_addon_type,base.group_user,1,1,1,1
-pdp_labor.access_pdp_addon_cost,access_pdp_addon_cost,pdp_labor.model_pdp_addon_cost,base.group_user,1,1,1,1
+pdp_labor.access_pdp_labor_type_user,access_pdp_labor_type (user),pdp_labor.model_pdp_labor_type,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_labor.access_pdp_labor_type_editor,access_pdp_labor_type (editor),pdp_labor.model_pdp_labor_type,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_labor.access_pdp_labor_type,access_pdp_labor_type (manager),pdp_labor.model_pdp_labor_type,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_labor.access_pdp_labor_cost_model_user,access_pdp_labor_cost_model (user),pdp_labor.model_pdp_labor_cost_model,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_labor.access_pdp_labor_cost_model_editor,access_pdp_labor_cost_model (editor),pdp_labor.model_pdp_labor_cost_model,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_labor.access_pdp_labor_cost_model,access_pdp_labor_cost_model (manager),pdp_labor.model_pdp_labor_cost_model,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_labor.access_pdp_labor_cost_product_user,access_pdp_labor_cost_product (user),pdp_labor.model_pdp_labor_cost_product,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_labor.access_pdp_labor_cost_product_editor,access_pdp_labor_cost_product (editor),pdp_labor.model_pdp_labor_cost_product,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_labor.access_pdp_labor_cost_product,access_pdp_labor_cost_product (manager),pdp_labor.model_pdp_labor_cost_product,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_labor.access_pdp_addon_type_user,access_pdp_addon_type (user),pdp_labor.model_pdp_addon_type,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_labor.access_pdp_addon_type_editor,access_pdp_addon_type (editor),pdp_labor.model_pdp_addon_type,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_labor.access_pdp_addon_type,access_pdp_addon_type (manager),pdp_labor.model_pdp_addon_type,rubicon_env.group_rubicon_manager,1,1,1,1
+pdp_labor.access_pdp_addon_cost_user,access_pdp_addon_cost (user),pdp_labor.model_pdp_addon_cost,rubicon_env.group_rubicon_user,1,0,0,0
+pdp_labor.access_pdp_addon_cost_editor,access_pdp_addon_cost (editor),pdp_labor.model_pdp_addon_cost,rubicon_env.group_rubicon_editor,1,1,1,0
+pdp_labor.access_pdp_addon_cost,access_pdp_addon_cost (manager),pdp_labor.model_pdp_addon_cost,rubicon_env.group_rubicon_manager,1,1,1,1

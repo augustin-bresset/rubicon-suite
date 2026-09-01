@@ -1,6 +1,6 @@
 <odoo>
-  <!-- Enable the THB currency shipped by base -->
-  <record id="base.THB" model="res.currency">
-    <field name="active">True</field>
-  </record>
+  <!-- Currencies used by the suite. Done through a method call rather than
+       <record id="base.THB"> because base ships its currencies as noupdate
+       data, which a record override only touches at first install. -->
+  <function model="res.currency" name="_rubicon_ensure_active" eval="[['THB', 'USD', 'EUR']]"/>
 </odoo>

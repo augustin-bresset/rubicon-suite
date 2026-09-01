@@ -4,10 +4,9 @@
     'license': 'LGPL-3',
     'category': 'Product',
     'author': 'Augustin Bresset',
-    'depends': ['base'],           
+    'depends': ['base', 'rubicon_env'],
     'data': [
-        # Security
-        
+        'security/ir.model.access.csv',
         # Views
         # 'views/pdfg_views.xml',
         'views/pdfg_menus.xml',

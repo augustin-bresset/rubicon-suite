@@ -1,6 +1,16 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_pdp_metal_metal,pdp.metal.metal,model_pdp_metal,base.group_user,1,1,1,1
-access_pdp_metal_purity,pdp.metal.purity,model_pdp_metal_purity,base.group_user,1,1,1,1
-access_pdp_metal_parameter,pdp.metal.parameter,model_pdp_metal_parameter,base.group_user,1,1,1,1
-access_pdp_part,pdp.part,model_pdp_part,base.group_user,1,1,1,1
-access_pdp_part_cost,pdp.part.cost,model_pdp_part_cost,base.group_user,1,1,1,1
+access_pdp_metal_metal_user,pdp.metal.metal (user),model_pdp_metal,rubicon_env.group_rubicon_user,1,0,0,0
+access_pdp_metal_metal_editor,pdp.metal.metal (editor),model_pdp_metal,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pdp_metal_metal,pdp.metal.metal (manager),model_pdp_metal,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pdp_metal_purity_user,pdp.metal.purity (user),model_pdp_metal_purity,rubicon_env.group_rubicon_user,1,0,0,0
+access_pdp_metal_purity_editor,pdp.metal.purity (editor),model_pdp_metal_purity,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pdp_metal_purity,pdp.metal.purity (manager),model_pdp_metal_purity,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pdp_metal_parameter_user,pdp.metal.parameter (user),model_pdp_metal_parameter,rubicon_env.group_rubicon_user,1,0,0,0
+access_pdp_metal_parameter_editor,pdp.metal.parameter (editor),model_pdp_metal_parameter,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pdp_metal_parameter,pdp.metal.parameter (manager),model_pdp_metal_parameter,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pdp_part_user,pdp.part (user),model_pdp_part,rubicon_env.group_rubicon_user,1,0,0,0
+access_pdp_part_editor,pdp.part (editor),model_pdp_part,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pdp_part,pdp.part (manager),model_pdp_part,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pdp_part_cost_user,pdp.part.cost (user),model_pdp_part_cost,rubicon_env.group_rubicon_user,1,0,0,0
+access_pdp_part_cost_editor,pdp.part.cost (editor),model_pdp_part_cost,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pdp_part_cost,pdp.part.cost (manager),model_pdp_part_cost,rubicon_env.group_rubicon_manager,1,1,1,1

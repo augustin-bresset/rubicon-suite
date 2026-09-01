@@ -1,3 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_pdp_picture,access_pdp_picture,model_pdp_picture,base.group_user,1,1,1,1
-access_pdp_picture_test_wizard,pdp.picture.test.wizard,model_pdp_picture_test_wizard,base.group_user,1,1,1,1
+access_pdp_picture_user,access_pdp_picture (user),model_pdp_picture,rubicon_env.group_rubicon_user,1,0,0,0
+access_pdp_picture_editor,access_pdp_picture (editor),model_pdp_picture,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pdp_picture,access_pdp_picture (manager),model_pdp_picture,rubicon_env.group_rubicon_manager,1,1,1,1
+access_pdp_picture_test_wizard_user,pdp.picture.test.wizard (user),model_pdp_picture_test_wizard,rubicon_env.group_rubicon_user,1,0,0,0
+access_pdp_picture_test_wizard_editor,pdp.picture.test.wizard (editor),model_pdp_picture_test_wizard,rubicon_env.group_rubicon_editor,1,1,1,0
+access_pdp_picture_test_wizard,pdp.picture.test.wizard (manager),model_pdp_picture_test_wizard,rubicon_env.group_rubicon_manager,1,1,1,1
