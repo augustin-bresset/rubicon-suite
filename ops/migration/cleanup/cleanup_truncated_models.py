@@ -49,7 +49,7 @@ for model in Model.search([]):
         c != model.code and c.startswith(model.code) for c in all_codes)
     if is_source or is_prefix_artifact:
         deleted.append(model.code)
-        model.unlink()
+        model.with_context(rubicon_force_delete=True).unlink()
 
 print('Relinked %d products:' % len(relinked))
 for code, old, new in relinked:

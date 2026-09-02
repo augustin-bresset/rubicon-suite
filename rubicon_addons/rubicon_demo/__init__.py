@@ -1,6 +1,6 @@
 def pre_init_hook(env):
     # Remove all PDP product models (cascade removes products, metal weights, model-level labor costs)
-    env['pdp.product.model'].search([]).unlink()
+    env['pdp.product.model'].with_context(rubicon_force_delete=True).search([]).unlink()
 
     # Remove all SIS documents (cascade removes document line items)
     env['sis.document'].search([]).unlink()

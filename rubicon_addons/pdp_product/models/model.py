@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 
 class ProductModel(models.Model):
     _name = 'pdp.product.model'
@@ -80,6 +81,26 @@ class ProductModel(models.Model):
     # =========================================================================
     # Domain Methods - Reusable by API, Cron, OWL, Reports
     # =========================================================================
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_models_with_products(self):
+        """Deleting a model leaves its products orphaned (model_id set null).
+
+        The web client's generic "delete records?" dialog does not say that,
+        so refuse until the products are gone. Migration tooling that wipes
+        on purpose (rubicon_demo, cleanup scripts) passes the
+        `rubicon_force_delete` context key.
+        """
+        if self.env.context.get('rubicon_force_delete'):
+            return
+        Product = self.env['pdp.product'].with_context(active_test=False)
+        for model in self:
+            count = Product.search_count([('model_id', '=', model.id)])
+            if count:
+                raise UserError(self.env._(
+                    "Model %(code)s still has %(count)s product(s). Delete or move "
+                    "them first: deleting the model would leave them without a model.",
+                    code=model.code, count=count))
 
     def to_dict(self):
         """Return model data as JSON-serializable dict."""
