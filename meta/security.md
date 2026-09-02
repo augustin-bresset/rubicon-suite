@@ -8,6 +8,7 @@ module's `security/ir.model.access.csv` (three rows per model).
 | Level ID | Name | Rights on Rubicon models |
 |----------|------|--------------------------|
 | `group_rubicon_user` | Rubicon / User | read — implied by *Internal User*, so every login has it |
+| `group_rubicon_production` | Rubicon / Production Operator | read + write the production floor records: `pcs.transaction`, `pcs.ssp.transaction`, the clearances, barcode tags (no delete, no master data) |
 | `group_rubicon_editor` | Rubicon / Editor | read, create, write |
 | `group_rubicon_manager` | Rubicon / Manager | read, create, write, delete — implied by *Settings* (administrators) |
 
@@ -23,12 +24,17 @@ import logs) stay read-only for everyone but administrators.
 | `group_rubicon_stone_buyer` | Stone Buyer | Editor | Stone procurement |
 | `group_rubicon_metal_buyer` | Metal Buyer | Editor | Metal procurement |
 | `group_rubicon_stock_manager` | Stock Manager | Editor | Inventory operations |
-| `group_rubicon_accountant` | Accountant | User | Financial operations |
-| `group_rubicon_quality_controller` | Quality Controller | User | QC and traceability |
-| `group_rubicon_lapidary_supervisor` | Lapidary Supervisor | User | Production supervision |
+| `group_rubicon_accountant` | Accountant | User | Financial operations (records vouchers in the external accounting system, reads prices) |
+| `group_rubicon_quality_controller` | Quality Controller | Production Operator | records QC checks and collects sign-offs at every production stage (audit §2.3) |
+| `group_rubicon_lapidary_supervisor` | Lapidary Supervisor | Production Operator | processes the order through production (audit §2.3) |
 
 Upgrading to `rubicon_env` 18.0.1.1 grants Editor to every existing internal
 user (nobody loses write access at deploy time); narrow it by assigning roles.
+
+The audit (`meta/audit.pdf` §2.3) also describes a *Metal Manager* job (3D
+model, mold, wax frame): covered by the Product Designer role. The *Metal
+Purchaser* process is still marked TODO in the audit and should be completed
+there before refining the Metal Buyer role.
 
 ## PDP Roles
 

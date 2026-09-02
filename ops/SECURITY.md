@@ -52,12 +52,14 @@ must be added to a group to write:
 | Group | Rights on PDP / SIS / PCS models | Typical people |
 |-------|----------------------------------|----------------|
 | Rubicon / User (implied by *Internal user*) | read | everyone with a login |
+| Rubicon / Production Operator | read everywhere + write the production floor records (PCS transactions, SSP, clearances, barcode tags) | quality controllers, lapidary supervisors, workshop |
 | Rubicon / Editor | read, create, write | designers, officers, buyers, stock |
 | Rubicon / Manager | read, create, write, **delete** | director, manager, administrators |
 
 The role groups (Director, Team Manager, Officer, Product Designer, Stone
 Buyer, Metal Buyer, Stock Manager, Accountant, Quality Controller, Lapidary
-Supervisor — table in `meta/security.md`) imply one of the three levels;
+Supervisor — table in `meta/security.md`, matching the job descriptions of
+`meta/audit.pdf` §2.3) imply one of the levels;
 assign the role, not the level. Upgrading to `rubicon_env` 18.0.1.1 grants
 Editor to every existing internal user so nobody is locked out at deploy time.
 Configuration models (`pdp.config`, units of measure, roles) stay

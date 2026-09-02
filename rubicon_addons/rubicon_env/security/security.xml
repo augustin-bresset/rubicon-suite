@@ -36,6 +36,16 @@
         <field name="comment">Editor rights plus deletion.</field>
     </record>
 
+    <!-- Production floor: writes the PCS production records (transactions,
+         SSP, clearances, barcode tags) but no master data. The models that
+         accept this group are listed in pcs_document/security. -->
+    <record id="group_rubicon_production" model="res.groups">
+        <field name="name">Production Operator</field>
+        <field name="category_id" ref="module_category_rubicon"/>
+        <field name="implied_ids" eval="[(4, ref('group_rubicon_user'))]"/>
+        <field name="comment">Record scans, weighings, SSP transactions and clearances on the production floor. No edition of products, prices or documents.</field>
+    </record>
+
     <!-- Every internal user can read; administrators are managers. -->
     <record id="base.group_user" model="res.groups">
         <field name="implied_ids" eval="[(4, ref('group_rubicon_user'))]"/>
@@ -114,14 +124,14 @@
     <record id="group_rubicon_quality_controller" model="res.groups">
         <field name="name">Quality Controller</field>
         <field name="category_id" ref="module_category_rubicon_roles"/>
-        <field name="implied_ids" eval="[(4, ref('group_rubicon_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('group_rubicon_production'))]"/>
     </record>
 
     <!-- Lapidary Supervisor: Production supervision -->
     <record id="group_rubicon_lapidary_supervisor" model="res.groups">
         <field name="name">Lapidary Supervisor</field>
         <field name="category_id" ref="module_category_rubicon_roles"/>
-        <field name="implied_ids" eval="[(4, ref('group_rubicon_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('group_rubicon_production'))]"/>
     </record>
 
 </odoo>
