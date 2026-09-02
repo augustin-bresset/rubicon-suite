@@ -1,0 +1,202 @@
+id,code,name,french_name,type_id:id,shade_id:id
+stone_AG,AG,Agate,Agate,pdp_stone.type_AGA,
+stone_W_AG,W.AG,White Agate,Agate Blanche,pdp_stone.type_AGA,pdp_stone.shade_WH
+stone_BK_AG,BK.AG,Black Agate,Agate Noire,pdp_stone.type_AGA,pdp_stone.shade_BK
+stone_PK_AG,PK.AG,Pink Agate,Agate Rose,pdp_stone.type_AGA,pdp_stone.shade_PK
+stone_R_AG,R.AG,Red Agate,Agate Rouge,pdp_stone.type_AGA,pdp_stone.shade_RED
+stone_AQ,AQ,Aquamarine,Aigue-Marine,pdp_stone.type_AQ,
+stone_AQ2A,AQ2A,Dark Aquamarine,Aigue-Marine Foncée,pdp_stone.type_AQ,pdp_stone.shade_AAA
+stone_AQ_MK,AQ.MK,Milky Aquamarine,Aigue-Marine Lactée,pdp_stone.type_AQ,pdp_stone.shade_ML
+stone_AQ3A,AQ3A,Very Dark Aquamarine,Aigue-Marine trés Foncée,pdp_stone.type_AQ,pdp_stone.shade_AAAA
+stone_AMZ,AMZ,Amazonite,Amazonite,pdp_stone.type_AMZ,
+stone_AM1A,AM1A,Amethyst,Améthyste,pdp_stone.type_AME,
+stone_LAM,LAM,Light Amethyst,Améthyste Claire,pdp_stone.type_AME,pdp_stone.shade_A
+stone_AM_C,AM.C,Cloudy Amethyst,Améthyste Cloudy,pdp_stone.type_AME,pdp_stone.shade_CDY
+stone_AM2A,AM2A,Dark Amethyst,Améthyste Foncée,pdp_stone.type_AME,pdp_stone.shade_AAA
+stone_AM_MK,AM.MK,Milky Amethyst,Améthyste Lactée,pdp_stone.type_AME,pdp_stone.shade_ML
+stone_RDF,RDF,Rose de France Amethyst,Améthyste Rose de France,pdp_stone.type_RDF,
+stone_AM3A,AM3A,Very Dark Amethyst,Améthyste très Foncée,pdp_stone.type_AME,pdp_stone.shade_AAAA
+stone_APA,APA,Apatite,Apatite,pdp_stone.type_AP,
+stone_AVE,AVE,Aventurine,Aventurine,pdp_stone.type_AVT,
+stone_G_AVE,G.AVE,Green Aventurine,Aventurine Verte,pdp_stone.type_AVT,pdp_stone.shade_GR
+stone_HE2A,HE2A,Golden Beryl/ Heliodor,Beryl Doré / Héliodor,pdp_stone.type_BRL,
+stone_HE1A,HE1A,Yellow Beryl / Light Heliodor,Beryl Jaune / Héliodor Clair,pdp_stone.type_BRL,pdp_stone.shade_YL
+stone_G_BE,G.BE,Beryl Green,Beryl Vert,pdp_stone.type_BRL,pdp_stone.shade_GR
+stone_CH,CH,Chalcedony,Calcédoine,pdp_stone.type_CHA,
+stone_VI_CH,VI.CH,Purple Chaceldony,Calcédoine Violette,pdp_stone.type_CHA,pdp_stone.shade_PURP
+stone_B_CH,B.CH,Chalcedony Blue,Calcédoine Bleue,pdp_stone.type_CHA,pdp_stone.shade_BL
+stone_DB_CH,DB.CH,Chalcedony Dark Blue,Calcédoine Bleue Foncée,pdp_stone.type_CHA,pdp_stone.shade_BL
+stone_PK_CH,PK.CH,Chalcedony Pink,Calcédoine Rose,pdp_stone.type_CHA,pdp_stone.shade_PK
+stone_CALC,CALC,Calcite,Calcite,pdp_stone.type_CAC,
+stone_G_CHRY,G.CHRY,Chrysoberyl Green,Chrysoberyl Vert,pdp_stone.type_CHR,pdp_stone.shade_GR
+stone_CHRY,CHRY,Chrysoberyl,Chrysoberyl,pdp_stone.type_CHR,
+stone_CPZ,CPZ,Chrysoprase,Chrysoprase/Prasiolite/Prase,pdp_stone.type_CHRP,
+stone_CT1A,CT1A,Citrine,Citrine,pdp_stone.type_CIT,
+stone_CT3A,CT3A,Citrine Orange,Citrine Orange,pdp_stone.type_CIT,pdp_stone.shade_OR
+stone_CT4A,CT4A,Citrine Orange Dark,Citrine Orange Foncée,pdp_stone.type_CIT,pdp_stone.shade_OR
+stone_CT2A,CT2A,Citrine Orangée,Citrine Orangée,pdp_stone.type_CIT,
+stone_COR,COR,Corail,Corail,pdp_stone.type_CORAL,
+stone_OR_CO,OR.CO,Corail Orange,Corail Orange,pdp_stone.type_CORAL,pdp_stone.shade_OR
+stone_COR_REC,COR.REC,Corail Reconstitué,Corail Reconstitué,pdp_stone.type_CORAL,pdp_stone.shade_REC
+stone_R_COR,R.COR,Corail Red,Corail Rouge,pdp_stone.type_CORAL,pdp_stone.shade_RED
+stone_CARN,CARN,Carnelian,Cornaline,pdp_stone.type_CAR,
+stone_KYA,KYA,Kyanite,Cyanite,pdp_stone.type_KYA,
+stone_DTS,DTS,Diamant,Diamant,pdp_stone.type_DTS,
+stone_W_DT,W.DT,White Diamant,Diamant Blanc,pdp_stone.type_DTS,pdp_stone.shade_WH
+stone_TTLB,TTLB,Diamonds TT,Diamants TT,pdp_stone.type_DTS,pdp_stone.shade_T2
+stone_BR_DT,BR.DT,Brown Diamant,Diamant Brun,pdp_stone.type_DTS,pdp_stone.shade_BR
+stone_CHA_DT,CHA.DT,Champagne Diamant,Diamant Champagne,pdp_stone.type_DTS,pdp_stone.shade_CHP
+stone_CHO_DT,CHO.DT,Chocolat Diamant,Diamant Chocolat,pdp_stone.type_DTS,pdp_stone.shade_BR
+stone_CO_DT,CO.DT,Diamant Cognac,Diamant Cognac,pdp_stone.type_COG,
+stone_GY_DT,GY.DT,Grey Diamant,Diamant Gris,pdp_stone.type_DTS,pdp_stone.shade_GY
+stone_Y_DT,Y.DT,Yellow Diamant,Diamant Jaune,pdp_stone.type_DTS,pdp_stone.shade_YL
+stone_BK_DT,BK.DT,Black Diamant,Diamant Noir,pdp_stone.type_DTS,pdp_stone.shade_BK
+stone_DIO,DIO,Diopside,Diopside,pdp_stone.type_DIO,
+stone_G_DIO,G.DIO,Green Diopside,Diopside Vert,pdp_stone.type_DIO,pdp_stone.shade_GR
+stone_BK_DIO,BK.DIO,Black Diopside,Diopside Noir,pdp_stone.type_BDI,
+stone_EBO,EBO,Ebony,Ebène,,
+stone_EM,EM,Emeraude,Emeraude,pdp_stone.type_EM,
+stone_EM2A,EM2A,Dark Emeraude,Emeraude Foncée,pdp_stone.type_EM,pdp_stone.shade_AAA
+stone_GA,GA,Garnet,Grenat,pdp_stone.type_GA,
+stone_Y_GA,Y.GA,Garnet Yellow,Grenat Jaune,pdp_stone.type_GA,pdp_stone.shade_YL
+stone_PK_GA,PK.GA,Pink Garnet,Grenat Rose,pdp_stone.type_GA,pdp_stone.shade_PK
+stone_VI_GA,VI.GA,Garnet Pink-Violet,Grenat Rose-Violet,pdp_stone.type_GA,
+stone_CA_GA,CA.GA,Cassis Garnet,Grenat Violet-Rouge/Cassis,pdp_stone.type_GA,
+stone_IOL,IOL,Iolite,Iolite,pdp_stone.type_IOL,
+stone_LIO,LIO,Iolite Light,Iolite Claire,pdp_stone.type_IOL,pdp_stone.shade_A
+stone_IO2A,IO2A,Iolite Dark,Iolite Foncée,pdp_stone.type_IOL,pdp_stone.shade_AAA
+stone_JAD,JAD,Jade,Jade,pdp_stone.type_JAD,
+stone_LAV_JAD,LAV.JAD,Lavander Jade,Jade Lavande,pdp_stone.type_JAD,pdp_stone.shade_LAV
+stone_R_JAD,R.JAD,Red Jade,Jade Rouge,pdp_stone.type_JAD,pdp_stone.shade_RED
+stone_G_JAD,G.JAD,Green Jade,Jade Verte,pdp_stone.type_JAD,pdp_stone.shade_GR
+stone_R_JAS,R.JAS,Red Jasper,Jaspe Rouge,pdp_stone.type_JSP,pdp_stone.shade_RED
+stone_BLO_JAS,BLO.JAS,Jasper Bloody,Jaspe Sanguin,pdp_stone.type_JSP,
+stone_KUN,KUN,Kunzite,Kunzite,pdp_stone.type_KUN,
+stone_LAB,LAB,Labradorite,Labradorite,pdp_stone.type_LAB,
+stone_LAP,LAP,Lapis lazuli,Lapis lazuli,pdp_stone.type_LAP,
+stone_LQ,LQ,Lemon Quartz,Lemon Quartz,pdp_stone.type_LAQ,
+stone_MALA,MALA,Malachite,Malachite,pdp_stone.type_MLK,
+stone_METE,METE,Météorite,Météorite,,
+stone_MOR,MOR,Morganite,Morganite,pdp_stone.type_MOR,
+stone_MOP,MOP,Mother of Pearl,Nacre,pdp_stone.type_MOP,
+stone_W_MOP,W.MOP,Nacre White,Nacre Blanche,pdp_stone.type_MOP,pdp_stone.shade_WH
+stone_GY_MOP,GY.MOP,Nacre Grise,Nacre Grise,pdp_stone.type_MOP,
+stone_BK_MOP,BK.MOP,Nacre Black,Nacre Noire,pdp_stone.type_MOP,pdp_stone.shade_BK
+stone_PK_MOP,PK.MOP,Nacre Pink,Nacre Rose,pdp_stone.type_MOP,pdp_stone.shade_PK
+stone_T_EYE,T.EYE,Tiger's Eye,Oeil de Tigre,pdp_stone.type_TIG,
+stone_F_EYE,F.EYE,Falcon's Eye,Oeil de Faucon,,
+stone_B_EYE,B.EYE,Bull's Eye,Oeil de Taureau,,
+stone_B_T_EYE,B.T.EYE,Blue Tiger's Eye,Oeil de Tigre bleu,pdp_stone.type_TIG,pdp_stone.shade_BL
+stone_ONYX,ONYX,Onyx,Onyx,pdp_stone.type_ONY,
+stone_W_ONYX,W.ONYX,Blanc Onyx,Onyx Blanc,pdp_stone.type_ONY,
+stone_OPA,OPA,Opal,Opale,pdp_stone.type_OP,
+stone_W_OP,W.OP,White Opale,Opale Blanche,pdp_stone.type_OP,pdp_stone.shade_WH
+stone_B_OP,B.OP,Blue Opale,Opale bleue,pdp_stone.type_OP,pdp_stone.shade_BL
+stone_F_OP,F.OP,Opale de Feu,Opale de Feu,pdp_stone.type_OP,
+stone_BK_OP,BK.OP,Black Opale,Opale Noire,pdp_stone.type_OP,pdp_stone.shade_BK
+stone_PK_OP,PK.OP,Pink Opale,Opale Rose,pdp_stone.type_OP,pdp_stone.shade_PK
+stone_PER,PER,Peridot,Peridot,pdp_stone.type_PER,
+stone_PRL,PRL,Pearl,Perle,pdp_stone.type_PRL,
+stone_BA_PRL,BA.PRL,Barok Pearl,Perle Baroque,pdp_stone.type_PRL,
+stone_W_PRL,W.PRL,White Pearl,Perle Blanche,pdp_stone.type_PRL,pdp_stone.shade_WH
+stone_WBA_PRL,WBA.PRL,White Barok Pearl,Perle Blanche Baroque,pdp_stone.type_PRL,pdp_stone.shade_WH
+stone_WDRO_PRL,WDRO.PRL,White Drop Pearl,Perle Blanche Goutte,pdp_stone.type_PRL,pdp_stone.shade_WH
+stone_CHA_PRL,CHA.PRL,Champagne Pearl,Perle Champagne,pdp_stone.type_PRL,pdp_stone.shade_CHP
+stone_TAHI_P,TAHI.P,Pearl of Tahiti,Perle de Tahiti,pdp_stone.type_THP,
+stone_PRL_GLA,PRL.GLA,Glass Pearl,Perle de Verre,pdp_stone.type_PRL,
+stone_GY_PRL,GY.PRL,Grey Pearl,Perle Grise,pdp_stone.type_PRL,pdp_stone.shade_GY
+stone_PK_PRL,PK.PRL,Pink Pearl,Perle Rose,pdp_stone.type_PRL,pdp_stone.shade_PK
+stone_MS,MS,Moonstone,Pierre de Lune,pdp_stone.type_MON,
+stone_RMS,RMS,Rainbow Moonstone,Pierre de Lune Arc-en-ciel,pdp_stone.type_MON,pdp_stone.shade_RB
+stone_W_MS,W.MS,White Moonstone,Pierre de Lune Blanche,pdp_stone.type_MON,pdp_stone.shade_WH
+stone_B_MS,B.MS,Blue Moonstone,Pierre de Lune Bleue,pdp_stone.type_MON,pdp_stone.shade_BL
+stone_GY_MS,GY.MS,Grise Moonstone,Pierre de Lune Grise,pdp_stone.type_MON,
+stone_LGY_MS,LGY.MS,Light Grey Moonstone,Pierre de Lune Grise Claire,pdp_stone.type_MON,pdp_stone.shade_A
+stone_BR_MS,BR.MS,Brown Moonstone,Pierre de Lune Marron,pdp_stone.type_MON,pdp_stone.shade_BR
+stone_OR_MS,OR.MS,Orange Moonstone,Pierre de Lune Orange,pdp_stone.type_MON,pdp_stone.shade_OR
+stone_RE_MS,RE.MS,Red Moonstone,Pierre de Lune Rouge,pdp_stone.type_MON,pdp_stone.shade_RED
+stone_GRE_MS,GRE.MS,Green Moonstone,Pierre de Lune Verte,pdp_stone.type_MON,pdp_stone.shade_GR
+stone_PYR,PYR,Pyrite,Pyrite,,
+stone_PRE,PRE,Prehnite,Préhnite,pdp_stone.type_PREH,
+stone_LPRE,LPRE,Light Prehnite,Préhnite Claire,pdp_stone.type_PREH,pdp_stone.shade_A
+stone_Y_PRE,Y.PRE,Yellow Prehnite,Préhnite Jaune,pdp_stone.type_PREH,pdp_stone.shade_YL
+stone_MK_PRE,MK.PRE,Milky Prehnite,Préhnite Lactée,pdp_stone.type_PREH,pdp_stone.shade_ML
+stone_GE_PRE,GE.PRE,Green Prehnite,Préhnite Verte,pdp_stone.type_PREH,pdp_stone.shade_GR
+stone_W_Q,W.Q,White Quartz,Quartz Blanc,pdp_stone.type_WQA,
+stone_CHA_Q,CHA.Q,Champagne Quartz,Quartz Champagne,pdp_stone.type_CHP,pdp_stone.shade_CHP
+stone_COG_Q,COG.Q,Cognac Quartz,Quartz Cognac,pdp_stone.type_COG,
+stone_SMQ,SMQ,Smoky Quartz,Quartz Fumé,pdp_stone.type_SMQ,pdp_stone.shade_SMO
+stone_LSMQ,LSMQ,Light Smoky Quartz,Quartz Fumé Clair,pdp_stone.type_SMQ,pdp_stone.shade_A
+stone_OLI_Q,OLI.Q,Quartz Olivine,Quartz Olivine,pdp_stone.type_OLQ,
+stone_PQ,PQ,Rose Quartz,Quartz Rose,pdp_stone.type_PQA,
+stone_PQ_CL,PQ.CL,Cloudy Pink Quartz,Quartz Rose Brumeux,pdp_stone.type_PQA,pdp_stone.shade_CDY
+stone_PQ_MK,PQ.MK,Milky Pink Quartz,Quartz Rose Lacté,pdp_stone.type_PQA,pdp_stone.shade_ML
+stone_GQ,GQ,Green Quartz,Quartz Vert,pdp_stone.type_GQ,
+stone_RHO,RHO,Rhodolite,Rhodolite,pdp_stone.type_RHO,
+stone_RUBE,RUBE,Rubellite,Rubellite,pdp_stone.type_RUBE,
+stone_RU,RU,Ruby,Rubis,pdp_stone.type_RU,
+stone_RU2,RU2,Deep Ruby,Rubis Intense,pdp_stone.type_RU,
+stone_G_RUT,G.RUT,Green Rutile in Onyx,Rutile Verte dans Onyx,pdp_stone.type_RUT,pdp_stone.shade_GR
+stone_SAPP,SAPP,Sapphire,Saphir,pdp_stone.type_SA,
+stone_W_SA,W.SA,White Sapphire,Saphir Blanc,pdp_stone.type_SA,pdp_stone.shade_WH
+stone_B_SA,B.SA,Blue Sapphire,Saphir Bleu,pdp_stone.type_SA,pdp_stone.shade_BL
+stone_SAOC,SAOC,Open Blue Sapphire,Saphir Bleu (open color),pdp_stone.type_SA,pdp_stone.shade_BL
+stone_SALC,SALC,Light Blue Sapphire,Saphir Bleu Clair,pdp_stone.type_SA,pdp_stone.shade_A
+stone_SAICE,SAICE,Glacier Blue Sapphire,Saphir Bleu Glacial,pdp_stone.type_SA,pdp_stone.shade_BL
+stone_SA,SA,Medium Blue Sapphire,Saphir Bleu Moyen,pdp_stone.type_SA,pdp_stone.shade_BL
+stone_SAY,SAY,Yellow Sapphire,Saphir Jaune,pdp_stone.type_SA,pdp_stone.shade_YL
+stone_SAYL,SAYL,Light Yellow Sapphire,Saphir Jaune Clair,pdp_stone.type_SA,pdp_stone.shade_YL
+stone_SAYM,SAYM,Medium Yellow Sapphire,Saphir Jaune Moyen,pdp_stone.type_SA,pdp_stone.shade_YL
+stone_BK_SA,BK.SA,Black Sapphire,Saphir Noir,pdp_stone.type_SA,pdp_stone.shade_BK
+stone_SAOR,SAOR,Orange Sapphire,Saphir Orange,pdp_stone.type_SA,pdp_stone.shade_OR
+stone_LSAOR,LSAOR,Light Orange Sapphire,Saphir Orange Clair,pdp_stone.type_SA,pdp_stone.shade_OR
+stone_PAD_SA,PAD.SA,Sapphire Padparadscha,Saphir Padparadscha,pdp_stone.type_SA,pdp_stone.shade_PAD
+stone_SAP,SAP,Pink Sapphire,Saphir Rose,pdp_stone.type_SA,pdp_stone.shade_PK
+stone_SAPL,SAPL,Light Pink Sapphire,Saphir Rose Clair,pdp_stone.type_SA,pdp_stone.shade_A
+stone_SAPF,SAPF,Dark Pink Sapphire,Saphir Rose Foncé,pdp_stone.type_SA,pdp_stone.shade_PK
+stone_SAPM,SAPM,Medium Pink Sapphire,Saphir Rose Moyen,pdp_stone.type_SA,pdp_stone.shade_PK
+stone_UMBA,UMBA,Umba Sapphire,Saphir Umba,pdp_stone.type_SA,
+stone_SAGE,SAGE,Green Sapphire,Saphir Vert,pdp_stone.type_SA,pdp_stone.shade_GR
+stone_SAVIO,SAVIO,Violet Sapphire,Saphir Violet,pdp_stone.type_SA,pdp_stone.shade_VIO
+stone_SAGY,SAGY,Grey Sapphire,Saphir Gris,pdp_stone.type_SA,pdp_stone.shade_GY
+stone_SPES,SPES,Spessartite,Spessartite,pdp_stone.type_SPE,
+stone_SPHE,SPHE,Sphene,Sphene,,
+stone_SPI,SPI,Spinel,Spinelle,pdp_stone.type_SPI,
+stone_BK_SPI,BK.SPI,Spinel Black,Spinelle Noire,pdp_stone.type_SPI,pdp_stone.shade_BK
+stone_R_SPI,R.SPI,Spinel Red,Spinelle Rouge,pdp_stone.type_SPI,pdp_stone.shade_RED
+stone_PK_SPI,PK.SPI,Pink Spinel,Spinelle Rose,pdp_stone.type_SPI,pdp_stone.shade_PK
+stone_TAN,TAN,Tanzanite,Tanzanite,pdp_stone.type_TAN,
+stone_TAN2A,TAN2A,Tanzanite Dark,Tanzanite Foncée,pdp_stone.type_TAN,pdp_stone.shade_AAA
+stone_TAN3A,TAN3A,Tanzanite Very Dark,Tanzanite trés Foncée,pdp_stone.type_TAN,pdp_stone.shade_AAAA
+stone_W_TOP,W.TOP,Topaz White,Topaze Blanche,pdp_stone.type_WT,
+stone_TOP,TOP,Topaz,Topaze,pdp_stone.type_TOP,
+stone_BTA,BTA,Topaz Blue,Topaze Bleue,pdp_stone.type_BT,
+stone_NBTOP,NBTOP,Noble Topaze,Topaze Noble,pdp_stone.type_TOP,
+stone_Y_TOP,Y.TOP,Topaz Yellow,Topaze Jaune,pdp_stone.type_TOP,pdp_stone.shade_YL
+stone_BT3A,BT3A,Topaz London Blue,Topaze London Blue,pdp_stone.type_BT,
+stone_BT2A,BT2A,Topaz Swiss Blue,Topaze Swiss Blue,pdp_stone.type_BT,
+stone_TO,TO,Tourmaline,Tourmaline,pdp_stone.type_TOU,
+stone_BL_TO,BL.TO,Tourmaline Blue,Tourmaline Bleue,pdp_stone.type_TOU,pdp_stone.shade_BL
+stone_INDI_TO,INDI.TO,Tourmaline Indigolite,Tourmaline Indigolite,pdp_stone.type_TOU,
+stone_Y_TO,Y.TO,Tourmaline Yellow,Tourmaline Jaune,pdp_stone.type_TOU,pdp_stone.shade_YL
+stone_MEL_TO,MEL.TO,Watermelon Tourmaline,Tourmaline Melon,pdp_stone.type_FYTOU,
+stone_OR_TO,OR.TO,Tourmaline Orange,Tourmaline Orange,pdp_stone.type_TOU,pdp_stone.shade_OR
+stone_PARA_TO,PARA.TO,Tourmaline Paraiba,Tourmaline Paraiba,pdp_stone.type_TOU,pdp_stone.shade_PARA
+stone_PTO,PTO,Tourmaline Pink,Tourmaline Rose,pdp_stone.type_TOU,pdp_stone.shade_PK
+stone_LPTO,LPTO,Tourmaline Pink Light,Tourmaline Rose Claire,pdp_stone.type_TOU,pdp_stone.shade_A
+stone_PTO_FANCY,PTO.FANCY,Tourmaline Pink Fancy,Tourmaline Rose Fancy,pdp_stone.type_TOU,pdp_stone.shade_PK
+stone_GTO,GTO,Tourmaline Green,Tourmaline Verte,pdp_stone.type_TOU,pdp_stone.shade_GR
+stone_LGTO,LGTO,Tourmaline Green Light,Tourmaline Verte Claire,pdp_stone.type_TOU,pdp_stone.shade_GR
+stone_GTO_FANCY,GTO.FANCY,Tourmaline Green Fancy,Tourmaline Verte Fancy,pdp_stone.type_TOU,pdp_stone.shade_GR
+stone_TSA,TSA,Tsavorite,Tsavorite,pdp_stone.type_TSAV,
+stone_LTSA,LTSA,Tsavorite Light,Tsavorite Claire,pdp_stone.type_TSAV,pdp_stone.shade_A
+stone_TSA2A,TSA2A,Tsavorite Dark,Tsavorite Foncée,pdp_stone.type_TSAV,pdp_stone.shade_AAA
+stone_TSA3A,TSA3A,Tsavorite Very Dark,Tsavorite trés Foncée,pdp_stone.type_TSAV,pdp_stone.shade_AAAA
+stone_TUR,TUR,Turquoise,Turquoise,pdp_stone.type_TURQ,
+stone_B_TUR,B.TUR,Turquoise Blue,Turquoise Bleue,pdp_stone.type_TURQ,pdp_stone.shade_BL
+stone_TUR_REC,TUR REC,Turquoise Reconstituée,Turquoise Reconstituée,pdp_stone.type_TURQ,pdp_stone.shade_REC
+stone_GE_TUR,GE.TUR,Turquoise Green,Turquoise Verte,pdp_stone.type_TURQ,pdp_stone.shade_GR
+stone_ZIR,ZIR,Zircon,Zircon,pdp_stone.type_ZC,
+stone_B_ZIR,B.ZIR,Zircon Blue,Zircon Bleu,pdp_stone.type_ZC,pdp_stone.shade_BL
+stone_Y_ZIR,Y.ZIR,Zircon Yellow,Zircon Jaune,pdp_stone.type_ZC,pdp_stone.shade_YL
+stone_PK_ZIR,PK.ZIR,Zircon Pink,Zircon Rose,pdp_stone.type_ZC,pdp_stone.shade_PK

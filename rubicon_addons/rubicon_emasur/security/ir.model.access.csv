@@ -1,0 +1,16 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_emasur_stone_user,emasur.stone (user),model_emasur_stone,rubicon_env.group_rubicon_user,1,0,0,0
+access_emasur_stone_editor,emasur.stone (editor),model_emasur_stone,rubicon_env.group_rubicon_editor,1,1,1,0
+access_emasur_stone,emasur.stone (manager),model_emasur_stone,rubicon_env.group_rubicon_manager,1,1,1,1
+access_emasur_shape_user,emasur.shape (user),model_emasur_shape,rubicon_env.group_rubicon_user,1,0,0,0
+access_emasur_shape_editor,emasur.shape (editor),model_emasur_shape,rubicon_env.group_rubicon_editor,1,1,1,0
+access_emasur_shape,emasur.shape (manager),model_emasur_shape,rubicon_env.group_rubicon_manager,1,1,1,1
+access_emasur_cut_user,emasur.cut (user),model_emasur_cut,rubicon_env.group_rubicon_user,1,0,0,0
+access_emasur_cut_editor,emasur.cut (editor),model_emasur_cut,rubicon_env.group_rubicon_editor,1,1,1,0
+access_emasur_cut,emasur.cut (manager),model_emasur_cut,rubicon_env.group_rubicon_manager,1,1,1,1
+access_emasur_shape_map_user,emasur.shape.map (user),model_emasur_shape_map,rubicon_env.group_rubicon_user,1,0,0,0
+access_emasur_shape_map_editor,emasur.shape.map (editor),model_emasur_shape_map,rubicon_env.group_rubicon_editor,1,1,1,0
+access_emasur_shape_map,emasur.shape.map (manager),model_emasur_shape_map,rubicon_env.group_rubicon_manager,1,1,1,1
+access_emasur_token_alias_user,emasur.token.alias (user),model_emasur_token_alias,rubicon_env.group_rubicon_user,1,0,0,0
+access_emasur_token_alias_editor,emasur.token.alias (editor),model_emasur_token_alias,rubicon_env.group_rubicon_editor,1,1,1,0
+access_emasur_token_alias,emasur.token.alias (manager),model_emasur_token_alias,rubicon_env.group_rubicon_manager,1,1,1,1

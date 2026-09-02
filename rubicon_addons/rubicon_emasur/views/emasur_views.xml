@@ -1,0 +1,124 @@
+<odoo>
+    <record id="view_emasur_convert_wizard_form" model="ir.ui.view">
+        <field name="name">emasur.convert.wizard.form</field>
+        <field name="model">emasur.convert.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Emasur Converter">
+                <group>
+                    <field name="direction" widget="radio"/>
+                    <field name="kind" widget="radio"/>
+                    <field name="input_code" placeholder="R132-CIT+GA/W or AGAWH-OVCAB-10X8"/>
+                    <field name="result"/>
+                    <field name="details"/>
+                </group>
+                <footer>
+                    <button string="Convert" name="action_convert" type="object" class="btn-primary"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_emasur_convert_wizard" model="ir.actions.act_window">
+        <field name="name">Emasur Converter</field>
+        <field name="res_model">emasur.convert.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_emasur_stone_list" model="ir.ui.view">
+        <field name="name">emasur.stone.list</field>
+        <field name="model">emasur.stone</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="french_name"/>
+                <field name="type_id"/>
+                <field name="shade_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_emasur_stone_search" model="ir.ui.view">
+        <field name="name">emasur.stone.search</field>
+        <field name="model">emasur.stone</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="type_id"/>
+                <filter string="Not mapped yet" name="unmapped" domain="[('type_id', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_emasur_stone" model="ir.actions.act_window">
+        <field name="name">Emasur Stones</field>
+        <field name="res_model">emasur.stone</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_emasur_shape_map_list" model="ir.ui.view">
+        <field name="name">emasur.shape.map.list</field>
+        <field name="model">emasur.shape.map</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="rubicon_shape_id"/>
+                <field name="shape_id"/>
+                <field name="cut_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_emasur_shape_map" model="ir.actions.act_window">
+        <field name="name">Shape Mapping</field>
+        <field name="res_model">emasur.shape.map</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_emasur_token_alias_list" model="ir.ui.view">
+        <field name="name">emasur.token.alias.list</field>
+        <field name="model">emasur.token.alias</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="token"/>
+                <field name="type_id"/>
+                <field name="shade_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_emasur_token_alias" model="ir.actions.act_window">
+        <field name="name">Legacy Token Aliases</field>
+        <field name="res_model">emasur.token.alias</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="action_emasur_shape" model="ir.actions.act_window">
+        <field name="name">Emasur Shapes</field>
+        <field name="res_model">emasur.shape</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="action_emasur_cut" model="ir.actions.act_window">
+        <field name="name">Emasur Cuts</field>
+        <field name="res_model">emasur.cut</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <menuitem id="menu_emasur_root" name="Emasur" sequence="97"
+              groups="rubicon_env.group_rubicon_user"/>
+    <menuitem id="menu_emasur_converter" name="Converter" parent="menu_emasur_root"
+              action="action_emasur_convert_wizard" sequence="10"/>
+    <menuitem id="menu_emasur_stones" name="Stones" parent="menu_emasur_root"
+              action="action_emasur_stone" sequence="20"/>
+    <menuitem id="menu_emasur_shape_map" name="Shape Mapping" parent="menu_emasur_root"
+              action="action_emasur_shape_map" sequence="30"/>
+    <menuitem id="menu_emasur_aliases" name="Legacy Token Aliases" parent="menu_emasur_root"
+              action="action_emasur_token_alias" sequence="35"/>
+    <menuitem id="menu_emasur_shapes" name="Shapes" parent="menu_emasur_root"
+              action="action_emasur_shape" sequence="40"/>
+    <menuitem id="menu_emasur_cuts" name="Cuts" parent="menu_emasur_root"
+              action="action_emasur_cut" sequence="50"/>
+</odoo>

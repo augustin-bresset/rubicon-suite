@@ -102,6 +102,12 @@ meta/backups/
 !rubicon_addons/pdp_margin/data/pdp.margin.stone.csv
 !rubicon_addons/pdp_margin/data/pdp.margin.addon.csv
 !rubicon_addons/pdp_margin/data/pdp.margin.stone.conditional.csv
+# rubicon_emasur (Emasur notation mapping — reference data)
+!rubicon_addons/rubicon_emasur/data/emasur.stone.csv
+!rubicon_addons/rubicon_emasur/data/emasur.shape.csv
+!rubicon_addons/rubicon_emasur/data/emasur.cut.csv
+!rubicon_addons/rubicon_emasur/data/emasur.shape.map.csv
+!rubicon_addons/rubicon_emasur/data/emasur.token.alias.csv
 # sis_document
 !rubicon_addons/sis_document/data/sis.doc.type.csv
 !rubicon_addons/sis_document/data/sis.doc.in.mode.csv

@@ -1,0 +1,15 @@
+id,code,name,french_name
+shape_CUSH,CUSH,Cushion,Coussin
+shape_SQU,SQU,Square,Carré
+shape_TRI,TRI,Trillion,Troïdia
+shape_TRIAN,TRIAN,Triangle,Triangle
+shape_OVAL,OVAL,Oval,Oval
+shape_RD,RD,Round,Rond
+shape_PEAR,PEAR,Pear,Poire
+shape_MARQ,MARQ,Marquise,Navette/Marquise
+shape_HRT,HRT,Heart,Coeur
+shape_BAG,BAG,Baguette,Baguette
+shape_DROP,DROP,Drop,Goutte
+shape_BEAD,BEAD,Beads,Beads
+shape_RECT,RECT,Rectangle,Rectangle
+shape_DIV,DIV,Diverse,Divers

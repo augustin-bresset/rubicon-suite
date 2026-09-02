@@ -1,0 +1,15 @@
+id,code,name,french_name,description
+cut_FACE,FACE,Faceted,facette,
+cut_BRI,BRI,Briolette,briolette,
+cut_RAD,RAD,Radiant,radiant,Marche pour les rectangles et les carrés
+cut_EMCU,EMCU,Emerald cut,pan coupé/taille émeraude,rectangle pan coupé
+cut_ASS,ASS,Asscher Cut,pan coupé à degré,un carré pan coupé
+cut_CAB,CAB,Cabochon,cabochon,
+cut_BUFF,BUFF,Buff top,suiffé,
+cut_SMOO,SMOO,Smooth,lisse,
+cut_FLAT,FLAT,Flat,flat,
+cut_ROSE,ROSE,Rose Cut,taille rose,
+cut_OLDC,OLDC,Old Cut,taille ancienne,
+cut_SUG,SUG,Sugar Loaf,cabochon pain de sucre,
+cut_PRINC,PRINC,Princess Cut,Taille Princesse,Carré bord saillant brillant
+cut_BRUS,BRUS,Brushed,Brossé,
