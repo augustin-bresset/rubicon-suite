@@ -1,0 +1,49 @@
+<odoo>
+    <record id="view_rubicon_audit_log_list" model="ir.ui.view">
+        <field name="name">rubicon.audit.log.list</field>
+        <field name="model">rubicon.audit.log</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false" editable="bottom">
+                <field name="date"/>
+                <field name="user_id"/>
+                <field name="model_label"/>
+                <field name="record_display"/>
+                <field name="operation"/>
+                <field name="field_label"/>
+                <field name="old_value"/>
+                <field name="new_value"/>
+                <field name="note"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rubicon_audit_log_search" model="ir.ui.view">
+        <field name="name">rubicon.audit.log.search</field>
+        <field name="model">rubicon.audit.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="record_display"/>
+                <field name="user_id"/>
+                <field name="model_label"/>
+                <filter string="Modifications" name="writes" domain="[('operation', '=', 'write')]"/>
+                <filter string="Deletions" name="unlinks" domain="[('operation', '=', 'unlink')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Document" name="by_model" context="{'group_by': 'model_label'}"/>
+                    <filter string="User" name="by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Day" name="by_day" context="{'group_by': 'date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_rubicon_audit_log" model="ir.actions.act_window">
+        <field name="name">Change History</field>
+        <field name="res_model">rubicon.audit.log</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_rubicon_audit_log_search"/>
+    </record>
+
+    <menuitem id="menu_rubicon_audit_root" name="Change History"
+              action="action_rubicon_audit_log" sequence="95"
+              groups="rubicon_env.group_rubicon_manager"/>
+</odoo>
