@@ -45,5 +45,5 @@
 
     <menuitem id="menu_rubicon_audit_root" name="Change History"
               action="action_rubicon_audit_log" sequence="95"
-              groups="rubicon_env.group_rubicon_manager"/>
+              groups="rubicon_env.group_rubicon_director,base.group_system"/>
 </odoo>

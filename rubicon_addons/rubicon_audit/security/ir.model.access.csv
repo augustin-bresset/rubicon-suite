@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_rubicon_audit_log_manager,rubicon.audit.log manager,model_rubicon_audit_log,rubicon_env.group_rubicon_manager,1,1,0,0
+access_rubicon_audit_log_director,rubicon.audit.log director,model_rubicon_audit_log,rubicon_env.group_rubicon_director,1,1,0,0
+access_rubicon_audit_log_admin,rubicon.audit.log admin,model_rubicon_audit_log,base.group_system,1,1,0,0

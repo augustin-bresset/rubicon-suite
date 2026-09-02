@@ -19,6 +19,11 @@ class TestAuditLog(TransactionCase):
             'currency_id': cls.usd.id,
         })
         Users = env['res.users'].with_context(no_reset_password=True)
+        cls.director = Users.create({
+            'name': 'audit director', 'login': 'audit_director',
+            'groups_id': [(6, 0, [env.ref('base.group_user').id,
+                                  env.ref('rubicon_env.group_rubicon_director').id])],
+        })
         cls.manager = Users.create({
             'name': 'audit manager', 'login': 'audit_manager',
             'groups_id': [(6, 0, [env.ref('base.group_user').id,
@@ -34,7 +39,7 @@ class TestAuditLog(TransactionCase):
                                 ('res_id', '=', record.id)])
 
     def test_write_is_journaled_with_old_and_new(self):
-        self.stone.with_user(self.manager).write({'cost': 12.5})
+        self.stone.with_user(self.manager).write({'cost': 12.5})  # any editor's change is journaled
         log = self._logs(self.stone).filtered(lambda l: l.operation == 'write')
         self.assertEqual(len(log), 1)
         self.assertEqual(log.field_name, 'cost')
@@ -77,14 +82,18 @@ class TestAuditLog(TransactionCase):
         self.assertEqual(len(self._logs(self.stone)), count)
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
-    def test_journal_is_immutable_and_manager_only(self):
+    def test_journal_is_immutable_and_director_only(self):
         self.stone.write({'cost': 20.0})
         log = self._logs(self.stone).filtered(lambda l: l.operation == 'write')[:1]
-        log.with_user(self.manager).write({'note': 'yearly price revision'})
+        log.with_user(self.director).write({'note': 'yearly price revision'})
         self.assertEqual(log.note, 'yearly price revision')
         with self.assertRaises(UserError):
-            log.with_user(self.manager).write({'new_value': '9999'})
+            log.with_user(self.director).write({'new_value': '9999'})
         with self.assertRaises(UserError):
             log.unlink()
+        # A Manager-level user without the Director role sees nothing,
+        # and so does a plain internal user.
+        with self.assertRaises(AccessError):
+            self.Log.with_user(self.manager).search([])
         with self.assertRaises(AccessError):
             self.Log.with_user(self.reader).search([])

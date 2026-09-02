@@ -5,9 +5,10 @@ from odoo.exceptions import UserError
 class RubiconAuditLog(models.Model):
     """Immutable change journal for the sensitive business values.
 
-    Rows are created by rubicon.audit.mixin (with sudo). Managers can read
-    them and fill in the `note` (the "why"); nothing else is ever editable
-    and rows cannot be deleted, administrators included.
+    Rows are created by rubicon.audit.mixin (with sudo). Only the Director
+    role and administrators can read them and fill in the `note` (the
+    "why"); nothing else is ever editable and rows cannot be deleted,
+    administrators included.
     """
     _name = 'rubicon.audit.log'
     _description = 'Rubicon change history'
