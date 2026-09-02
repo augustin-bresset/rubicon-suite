@@ -1,0 +1,43 @@
+<odoo>
+    <record id="view_rubicon_alert_list" model="ir.ui.view">
+        <field name="name">rubicon.alert.list</field>
+        <field name="model">rubicon.alert</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false" edit="false">
+                <field name="alert_type"/>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="days"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_rubicon_alert_search" model="ir.ui.view">
+        <field name="name">rubicon.alert.search</field>
+        <field name="model">rubicon.alert</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter string="Orders past due" name="overdue" domain="[('alert_type', '=', 'overdue_document')]"/>
+                <filter string="Stuck WIP" name="wip" domain="[('alert_type', '=', 'stuck_wip')]"/>
+                <filter string="Never scanned" name="unscanned" domain="[('alert_type', '=', 'never_scanned')]"/>
+                <filter string="Stale rates" name="rates" domain="[('alert_type', '=', 'stale_rate')]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Type" name="by_type" context="{'group_by': 'alert_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_rubicon_alert" model="ir.actions.act_window">
+        <field name="name">Alerts</field>
+        <field name="res_model">rubicon.alert</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_rubicon_alert_search"/>
+        <field name="context">{'search_default_by_type': 1}</field>
+    </record>
+
+    <menuitem id="menu_rubicon_alert_root" name="Alerts"
+              action="action_rubicon_alert" sequence="96"
+              groups="rubicon_env.group_rubicon_editor"/>
+</odoo>
