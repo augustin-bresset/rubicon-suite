@@ -1,3 +1,7 @@
+.*/
+!.gitignore
+!.github/
+
 data/*
 mssql_backups*
 documents*
@@ -12,12 +16,12 @@ exported_pictures_v2/
 random/
 
 # Meta data
-analysis
-pcs
-sis
-sis_report
-rubicon_storage
-psutilities
+meta/analysis/
+meta/pcs/
+meta/sis/
+meta/sis_report/
+meta/rubicon_storage/
+meta/psutilities/
 
 # Security
 .env
