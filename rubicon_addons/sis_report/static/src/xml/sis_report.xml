@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="sis_report.SisReport">
+    <div class="sr-workspace">
+        <h4 class="sr-title">SIS Report</h4>
+        <fieldset class="sr-box">
+            <legend>Document</legend>
+            <div class="sr-row">
+                <label>Year</label>
+                <select t-on-change="onYearChange">
+                    <option t-foreach="state.years" t-as="year" t-key="year"
+                            t-att-value="year"
+                            t-att-selected="year == state.year"
+                            t-esc="year"/>
+                </select>
+                <label>Ref</label>
+                <select class="sr-ref"
+                        t-on-change="(ev) => { this.state.orderId = ev.target.value; }">
+                    <option value="">—</option>
+                    <option t-foreach="state.orders" t-as="order" t-key="order.id"
+                            t-att-value="order.id"
+                            t-att-selected="order.id == state.orderId"
+                            t-esc="order.name"/>
+                </select>
+                <button class="btn btn-sm btn-primary"
+                        t-att-disabled="!state.orderId"
+                        t-on-click="print">Print</button>
+            </div>
+        </fieldset>
+
+        <button class="btn btn-sm btn-secondary sr-setting-btn"
+                t-on-click="toggleSettings"
+                t-esc="state.showSettings ? 'Close Setting' : 'Setting'"/>
+
+        <fieldset class="sr-box" t-if="state.showSettings">
+            <legend>System Setting</legend>
+            <div class="sr-row">
+                <label>Setting Min</label>
+                <input type="number" step="0.01" class="sr-rate"
+                       t-att-value="state.rates.setting"
+                       t-on-input="(ev) => { this.state.rates.setting = ev.target.value; }"/>
+                <label>Filling Min</label>
+                <input type="number" step="0.01" class="sr-rate"
+                       t-att-value="state.rates.filling"
+                       t-on-input="(ev) => { this.state.rates.filling = ev.target.value; }"/>
+                <button class="btn btn-sm btn-primary"
+                        t-on-click="saveSettings">Save</button>
+            </div>
+            <p class="sr-note">
+                Baht per minute of labor: the stock card prints
+                'Filing Min.' = filing cost / Filling Min and
+                'Setting Min' = stone setting costs / Setting Min.
+            </p>
+        </fieldset>
+
+        <p class="sr-note">
+            Generates the stock cards of the selected sales order, two per
+            sheet. Cards printed before the order joins production carry the
+            same barcodes and scan directly once it is added to PCS.
+        </p>
+    </div>
+</t>
+
+</templates>

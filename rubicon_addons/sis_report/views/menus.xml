@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_sis_report" model="ir.actions.client">
+        <field name="name">SIS Report</field>
+        <field name="tag">sis_report_action</field>
+    </record>
+
+    <!-- Standalone app, same level as SIS / PCS / PDP / PSUtilities,
+         like the legacy software suite. -->
+    <menuitem id="menu_sis_report_root"
+              name="SIS Report"
+              action="action_sis_report"
+              sequence="13"
+              web_icon="sis_report,static/description/icon.png"/>
+</odoo>
