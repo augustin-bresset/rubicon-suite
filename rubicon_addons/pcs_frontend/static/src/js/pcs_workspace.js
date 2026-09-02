@@ -228,6 +228,13 @@ export class PcsWorkspace extends Component {
         if (!this.state.docId) {
             return;
         }
+        const doc = this.state.documents.find((d) => d.id === this.state.docId);
+        const name = doc ? doc.name : "";
+        // pcs.document cascades to its barcodes and their transactions:
+        // deleting a document erases its whole scan history.
+        if (!confirm(`Delete document "${name}" with all its barcodes and scan history?`)) {
+            return;
+        }
         await this.call("delete_document", [this.state.docId]);
         this.state.docId = null;
         this.state.docTab = "docs";
