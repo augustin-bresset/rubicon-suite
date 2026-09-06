@@ -7,7 +7,7 @@ class EmasurCodeMixin(models.AbstractModel):
     """Dual notation: the record keeps its Rubicon code and carries the
     Emasur one next to it — nothing is ever renamed in place.
 
-    - `emasur_code` stays empty until the new system is delivered; it is
+    - `alt_code` stays empty until the new system is delivered; it is
       loaded then (import or script), never invented by the converter.
     - Searching by name finds the record through either code
       (`_rec_names_search` on the concrete models).
@@ -26,10 +26,33 @@ class EmasurCodeMixin(models.AbstractModel):
     # code table to join through.
     NOTATION_SYSTEMS = {
         'rubicon': ('Rubicon (legacy codes)', 'code'),
-        'emasur': ('Emasur (new codes, fallback to legacy when empty)', 'emasur_code'),
+        'alternative': ('Alternative (new system, fallback to legacy when empty)', 'alt_code'),
     }
 
-    emasur_code = fields.Char(string='Emasur Code', index=True, copy=False)
+    # The OFFICIAL alternative code: empty until the new system is delivered,
+    # then loaded — never invented. The only field the display may use.
+    alt_code = fields.Char(string='Alternative Code', index=True, copy=False)
+    # The converter's PREcomputed reading: searchable like the historical
+    # code, never displayed as official. Models with a conversion rule
+    # override _alt_code_suggestion(); complete conversions only.
+    alt_code_computed = fields.Char(
+        string='Alternative Code (computed)', index=True, copy=False)
+
+    def _alt_code_suggestion(self):
+        self.ensure_one()
+        return False
+
+    def _refresh_alt_code_computed(self):
+        for record in self:
+            record.alt_code_computed = record._alt_code_suggestion()
+
+    @api.model
+    def action_backfill_alt_code_computed(self):
+        """(Re)compute the searchable precomputed codes of every record;
+        rerunnable after each round of mapping curation."""
+        records = self.search([])
+        records._refresh_alt_code_computed()
+        return len(records.filtered('alt_code_computed')), len(records)
 
     @api.model
     def emasur_active_system(self):
@@ -50,25 +73,45 @@ class EmasurCodeMixin(models.AbstractModel):
 class PdpProduct(models.Model):
     _name = 'pdp.product'
     _inherit = ['pdp.product', 'emasur.code.mixin']
-    _rec_names_search = ['code', 'emasur_code']
+    _rec_names_search = ['code', 'alt_code', 'alt_code_computed']
+
+    def _alt_code_suggestion(self):
+        self.ensure_one()
+        if not self.code:
+            return False
+        outcome = self.env['emasur.converter'].design_to_emasur(self.code)
+        code = outcome.get('code')
+        return code if code and not outcome.get('unknown') else False
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        products = super().create(vals_list)
+        products._refresh_alt_code_computed()
+        return products
+
+    def write(self, vals):
+        result = super().write(vals)
+        if 'code' in vals:
+            self._refresh_alt_code_computed()
+        return result
 
 
 class PdpProductModel(models.Model):
     _name = 'pdp.product.model'
     _inherit = ['pdp.product.model', 'emasur.code.mixin']
-    _rec_names_search = ['code', 'emasur_code']
+    _rec_names_search = ['code', 'alt_code']
 
 
 class PdpStone(models.Model):
     _name = 'pdp.stone'
     _inherit = ['pdp.stone', 'emasur.code.mixin']
-    _rec_names_search = ['code', 'emasur_code']
+    _rec_names_search = ['code', 'alt_code']
 
 
 class PdpMetal(models.Model):
     _name = 'pdp.metal'
     _inherit = ['pdp.metal', 'emasur.code.mixin']
-    _rec_names_search = ['code', 'emasur_code']
+    _rec_names_search = ['code', 'alt_code']
 
 
 class SisDocumentItem(models.Model):
@@ -76,35 +119,35 @@ class SisDocumentItem(models.Model):
     converter's reading of each design is stored next to it, so the
     history answers searches in both systems. Only complete conversions
     are stored — a design with an unmapped token keeps an empty
-    `design_emasur` rather than a half-translated string."""
+    `alt_design` rather than a half-translated string."""
     _name = 'sis.document.item'
     _inherit = 'sis.document.item'
-    _rec_names_search = ['design', 'design_emasur']
+    _rec_names_search = ['design', 'alt_design']
 
-    design_emasur = fields.Char(string='Design (Emasur)', index=True, copy=False)
+    alt_design = fields.Char(string='Design (alternative notation)', index=True, copy=False)
 
-    def _refresh_design_emasur(self):
+    def _refresh_alt_design(self):
         convert = self.env['emasur.converter']
         for item in self:
             outcome = convert.design_to_emasur(item.design) if item.design else {}
             code = outcome.get('code')
-            item.design_emasur = code if code and not outcome.get('unknown') else False
+            item.alt_design = code if code and not outcome.get('unknown') else False
 
     @api.model_create_multi
     def create(self, vals_list):
         items = super().create(vals_list)
-        items.filtered('design')._refresh_design_emasur()
+        items.filtered('design')._refresh_alt_design()
         return items
 
     def write(self, vals):
         result = super().write(vals)
         if 'design' in vals:
-            self._refresh_design_emasur()
+            self._refresh_alt_design()
         return result
 
     @api.model
-    def action_backfill_design_emasur(self, batch_size=5000):
-        """Fill design_emasur over the whole history, set-based.
+    def action_backfill_alt_design(self, batch_size=5000):
+        """Fill alt_design over the whole history, set-based.
 
         Distinct designs are converted once each (the token map is warmed by
         the converter's own caches through repetition), then written back by
@@ -126,13 +169,13 @@ class SisDocumentItem(models.Model):
                 filled += freq
         self.env.flush_all()
         self.env.cr.execute(
-            "UPDATE sis_document_item SET design_emasur = NULL WHERE design_emasur IS NOT NULL")
+            "UPDATE sis_document_item SET alt_design = NULL WHERE alt_design IS NOT NULL")
         for start in range(0, len(mapping), batch_size):
             chunk = mapping[start:start + batch_size]
             args = ','.join(
                 self.env.cr.mogrify('(%s, %s)', pair).decode() for pair in chunk)
             self.env.cr.execute(
-                "UPDATE sis_document_item i SET design_emasur = m.emasur "
+                "UPDATE sis_document_item i SET alt_design = m.emasur "
                 "FROM (VALUES %s) AS m(design, emasur) WHERE i.design = m.design" % args)
         self.env.invalidate_all()
         total = sum(freq for _design, freq in rows)
