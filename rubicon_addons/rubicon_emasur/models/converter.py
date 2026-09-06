@@ -13,6 +13,23 @@ class EmasurConverter(models.AbstractModel):
     _name = 'emasur.converter'
     _description = 'Rubicon/Emasur notation converter'
 
+    # ── Maintenance ────────────────────────────────────────────────────────
+    RECOMPUTED_MODELS = ('pdp.product', 'pdp.product.model', 'pdp.stone', 'pdp.metal')
+
+    @api.model
+    def action_recompute_all(self):
+        """Recompute every derived alternative code after a round of mapping
+        curation: the dual-code models, then the order history. Official
+        codes are never touched. Deliberately a dev-side tool — run it with
+        `make recompute-alt-codes`; returns the counts per model."""
+        results = {}
+        for model in self.RECOMPUTED_MODELS:
+            filled, total = self.env[model].action_recompute_alt_codes()
+            results[model] = {'filled': filled, 'total': total}
+        filled, distinct, total = self.env['sis.document.item'].action_backfill_alt_design()
+        results['sis.document.item'] = {'filled': filled, 'total': total}
+        return results
+
     # ── Stone level ────────────────────────────────────────────────────────
     @api.model
     def _emasur_entry(self, type_id, shade_id):

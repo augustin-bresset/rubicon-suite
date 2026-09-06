@@ -51,9 +51,11 @@ class EmasurCodeMixin(models.AbstractModel):
         for record in self:
             if record.alt_code_source == 'official':
                 continue
-            suggestion = record._alt_code_suggestion()
+            suggestion = record._alt_code_suggestion() or False
+            if suggestion == (record.alt_code or False):
+                continue
             super(EmasurCodeMixin, record).write({
-                'alt_code': suggestion or False,
+                'alt_code': suggestion,
                 'alt_code_source': 'computed' if suggestion else False,
             })
 

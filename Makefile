@@ -44,7 +44,7 @@ ODOO_TEST        = docker compose exec -T odoo odoo \
   -d $(TEST_DB)
 TEST_TAGS        ?= pdp_frontend
 
-.PHONY: help shell reset_odoo_db init-data-modules update-data-modules update-pdp-modules \
+.PHONY: help shell recompute-alt-codes reset_odoo_db init-data-modules update-data-modules update-pdp-modules \
         update-sis-modules upgrade deploy-demo logs-demo logs-prod \
         restore-reference-csvs raw_to_data_all import_all import_csv import_pictures import-pictures \
         raw-to-data-sis import-sis sis-all \
@@ -86,6 +86,7 @@ help:
 	@echo "    make restore-mssql          Restore the 3 legacy .bak files and export CSVs + pictures (ops/migration/README.md)"
 	@echo "    make export-pictures        Extract photos/drawings from Pictures.bak → data/pictures/"
 	@echo "    make import-pictures        Import data/pictures/ into Odoo (pdp.picture)"
+	@echo "    make recompute-alt-codes    Refresh the derived alternative codes after mapping curation"
 	@echo "    make audit_counts           Print record counts to log"
 	@echo ""
 	@echo "  Stone pipeline"
@@ -160,6 +161,11 @@ logs-prod:
 # curated by hand and tracked in git (stone catalogue, metals, margins, ...).
 # `restore-reference-csvs` puts the tracked versions back so only the
 # business data (products, models, documents, parties) comes from the export.
+# Rerun after curating the Emasur mappings/aliases: refreshes the derived
+# alternative codes (products, history...); official codes are never touched.
+recompute-alt-codes:
+	@printf 'import pprint\npprint.pprint(env["emasur.converter"].action_recompute_all())\nenv.cr.commit()\n' | $(ODOO_SHELL)
+
 restore-reference-csvs:
 	@git checkout -q -- $$(git ls-files 'rubicon_addons/*/data/*.csv') && \
 	  echo "→ tracked reference CSVs restored from git (business CSVs kept)"

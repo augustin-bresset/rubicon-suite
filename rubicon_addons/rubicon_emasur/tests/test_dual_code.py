@@ -203,3 +203,14 @@ class TestUserNotationPreference(TransactionCase):
         self.assertIn(ui['active'], ('rubicon', 'alternative'))
         as_user = self.Mixin.with_user(self.user)
         self.assertEqual(as_user.set_user_notation('martian'), 'rubicon')
+
+
+class TestRecomputeAll(TransactionCase):
+
+    def test_one_entry_point_covers_models_and_history(self):
+        results = self.env['emasur.converter'].action_recompute_all()
+        expected = {'pdp.product', 'pdp.product.model', 'pdp.stone',
+                    'pdp.metal', 'sis.document.item'}
+        self.assertEqual(set(results), expected)
+        for counts in results.values():
+            self.assertLessEqual(counts['filled'], counts['total'])

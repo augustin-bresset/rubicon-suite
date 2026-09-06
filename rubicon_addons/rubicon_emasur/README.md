@@ -16,7 +16,9 @@ history stays searchable under both systems.
 3. Reindex the history: run `action_backfill_alt_design()` on
    `sis.document.item` (set-wise, seconds, rerunnable after every curation
    round). Only complete conversions are stored.
-3bis. Recompute the composed codes: `action_recompute_alt_codes()` on
+3bis. Recompute the composed codes — `make recompute-alt-codes` (a dev-side
+   command running `emasur.converter.action_recompute_all()`; on purpose
+   not exposed in the application):
    `pdp.product` derives each product's alternative code from the new
    dictionary (source `computed`). Loading or writing a code by hand marks
    it `official`, and a recompute never overwrites an official value —
