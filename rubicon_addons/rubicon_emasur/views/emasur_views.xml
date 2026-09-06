@@ -26,6 +26,29 @@
         <field name="target">new</field>
     </record>
 
+    <record id="view_emasur_system_wizard_form" model="ir.ui.view">
+        <field name="name">emasur.system.wizard.form</field>
+        <field name="model">emasur.system.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Notation System">
+                <group>
+                    <field name="system" widget="radio"/>
+                </group>
+                <footer>
+                    <button string="Apply" name="action_apply" type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_emasur_system_wizard" model="ir.actions.act_window">
+        <field name="name">Notation System</field>
+        <field name="res_model">emasur.system.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
     <record id="view_emasur_stone_list" model="ir.ui.view">
         <field name="name">emasur.stone.list</field>
         <field name="model">emasur.stone</field>
@@ -111,6 +134,9 @@
               groups="rubicon_env.group_rubicon_user"/>
     <menuitem id="menu_emasur_converter" name="Converter" parent="menu_emasur_root"
               action="action_emasur_convert_wizard" sequence="10"/>
+    <menuitem id="menu_emasur_system" name="Notation System" parent="menu_emasur_root"
+              action="action_emasur_system_wizard" sequence="15"
+              groups="rubicon_env.group_rubicon_manager"/>
     <menuitem id="menu_emasur_stones" name="Stones" parent="menu_emasur_root"
               action="action_emasur_stone" sequence="20"/>
     <menuitem id="menu_emasur_shape_map" name="Shape Mapping" parent="menu_emasur_root"

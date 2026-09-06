@@ -3,7 +3,7 @@
     'summary': 'Convert stone and design codes between the Rubicon and Emasur notation systems',
     'version': '18.0.1.0',
     'license': 'LGPL-3',
-    'depends': ['pdp_stone'],
+    'depends': ['pdp_product', 'sis_document'],
     'data': [
         'security/ir.model.access.csv',
         'data/emasur.shape.csv',
