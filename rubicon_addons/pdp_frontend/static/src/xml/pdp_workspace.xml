@@ -8,13 +8,23 @@
                 <div class="fw-bold fs-5 text-primary">PDP</div>
                 <div class="d-flex align-items-center gap-2">
                     <label class="fw-bold mb-0">Model</label>
-                    <select class="form-select form-select-sm" style="width: 200px;" t-on-change="(ev) => this.onModelSelectChange(ev)">
-                        <t t-foreach="filteredModels" t-as="model" t-key="model.id">
-                            <option t-att-value="model.id" t-att-selected="model.id === state.selectedModelId">
-                                <t t-esc="model.code"/>
-                            </option>
+                    <div class="position-relative">
+                        <input type="text" class="form-control form-control-sm" style="width: 200px;"
+                               placeholder="Model code..."
+                               t-att-value="state.modelSearch"
+                               t-on-input="(ev) => this.onModelSearchInput(ev)"
+                               t-on-keydown="(ev) => this.onModelSearchKeydown(ev)"/>
+                        <t t-if="state.modelSearchResults.length > 0">
+                            <div class="position-absolute bg-white border rounded shadow-sm" style="top: 100%; left: 0; z-index: 1000; min-width: 200px; max-height: 260px; overflow-y: auto;">
+                                <t t-foreach="state.modelSearchResults" t-as="mr" t-key="mr.id">
+                                    <div class="px-2 py-1 border-bottom" style="cursor: pointer; font-size: 12px;"
+                                         t-on-mousedown="() => this.selectModelFromSearch(mr)">
+                                        <t t-esc="mr.code"/>
+                                    </div>
+                                </t>
+                            </div>
                         </t>
-                    </select>
+                    </div>
                     <button class="btn btn-sm btn-outline-secondary" t-on-click="() => this.openModelList()">List</button>
                     <div class="position-relative">
                         <input type="text" class="form-control form-control-sm" placeholder="Filter products..." style="width: 150px;"
@@ -263,6 +273,13 @@
                                         </t>
                                         <t t-if="filteredModelList.length === 0">
                                             <tr><td colspan="3" class="text-center text-muted p-2">No models match.</td></tr>
+                                        </t>
+                                        <t t-if="modelListMatchCount > filteredModelList.length">
+                                            <tr><td colspan="3" class="text-center text-muted p-2">
+                                                Showing <t t-esc="filteredModelList.length"/> of
+                                                <t t-esc="modelListMatchCount"/> models — refine the
+                                                filters (Enter to apply) to narrow down.
+                                            </td></tr>
                                         </t>
                                     </tbody>
                                 </table>

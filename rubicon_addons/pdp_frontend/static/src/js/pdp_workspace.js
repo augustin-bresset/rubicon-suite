@@ -77,6 +77,8 @@ export class PdpWorkspace extends Component {
             // Topbar
             showModelList: false,
             modelListFilter: { code: '', drawing: '', quotation: '' },
+            modelSearch: "",
+            modelSearchResults: [],
             productSearch: "",
             productSearchResults: [],
             productFilter: "",
@@ -268,17 +270,26 @@ export class PdpWorkspace extends Component {
     // Computed
     // ==========================================
 
-    get filteredModels() {
-        return this.state.models;
-    }
+    // Rendering caps: the catalog holds >13k models; pushing them all into
+    // the DOM (options or table rows) is what made the workspace slow.
+    MODEL_LIST_RENDER_CAP = 200;
 
-    get filteredModelList() {
-        const { code, drawing, quotation } = this.state.modelListFilter;
+    _matchingModelsFor(filters) {
+        const { code, drawing, quotation } = filters;
         return this.state.models.filter(m =>
             (!code      || (m.code      || '').toLowerCase().includes(code.toLowerCase())) &&
             (!drawing   || (m.drawing   || '').toLowerCase().includes(drawing.toLowerCase())) &&
             (!quotation || (m.quotation || '').toLowerCase().includes(quotation.toLowerCase()))
         );
+    }
+
+    get modelListMatchCount() {
+        return this._matchingModelsFor(this.state.modelListFilter).length;
+    }
+
+    get filteredModelList() {
+        return this._matchingModelsFor(this.state.modelListFilter)
+            .slice(0, this.MODEL_LIST_RENDER_CAP);
     }
 
     get filteredProducts() {
@@ -544,9 +555,41 @@ export class PdpWorkspace extends Component {
         this.selectModel(modelId);
     }
 
-    async onModelSelectChange(ev) {
-        const modelId = parseInt(ev.target.value);
-        if (modelId) await this.selectModel(modelId);
+    // ── Model typeahead (replaces a 13k-option select) ──────────────────
+
+    onModelSearchInput(ev) {
+        const q = (ev.target.value || "").trim();
+        this.state.modelSearch = ev.target.value;
+        if (!q) {
+            this.state.modelSearchResults = [];
+            return;
+        }
+        const ql = q.toLowerCase();
+        this.state.modelSearchResults = this.state.models
+            .filter(m => (m.code || "").toLowerCase().includes(ql))
+            .slice(0, 50);
+    }
+
+    async onModelSearchKeydown(ev) {
+        if (ev.key === "Enter") {
+            const q = (this.state.modelSearch || "").trim().toLowerCase();
+            const exact = this.state.models.find(
+                m => (m.code || "").toLowerCase() === q);
+            const pick = exact || this.state.modelSearchResults[0];
+            if (pick) {
+                await this.selectModelFromSearch(pick);
+            }
+        } else if (ev.key === "Escape") {
+            this.state.modelSearchResults = [];
+            const active = this.activeModel;
+            this.state.modelSearch = active ? active.code : "";
+        }
+    }
+
+    async selectModelFromSearch(model) {
+        this.state.modelSearch = model.code;
+        this.state.modelSearchResults = [];
+        await this.selectModel(model.id);
     }
 
     setImageMode(mode) {
@@ -620,6 +663,9 @@ export class PdpWorkspace extends Component {
 
     async selectModel(modelId) {
         this.state.selectedModelId = parseInt(modelId);
+        const active = this.state.models.find(m => m.id === this.state.selectedModelId);
+        this.state.modelSearch = active ? active.code : '';
+        this.state.modelSearchResults = [];
         this.state.productSearch = '';
         this.state.productSearchResults = [];
         this.state.productFilter = '';
@@ -1027,10 +1073,13 @@ export class PdpWorkspace extends Component {
                 this.state.metalWeights.map(m => this.m2oId(m.metal_id)).filter(Boolean)
             )];
             if (!metalIds.length) { this.state.whereUsedModels = []; return; }
+            // Common metals (W, Y...) are used by almost every model: an
+            // unbounded query returned >10k rows on each model selection.
             const usages = await this.orm.searchRead(
                 "pdp.product.model.metal",
                 [["metal_id", "in", metalIds], ["model_id", "!=", this.state.selectedModelId]],
-                ["model_id"]
+                ["model_id"],
+                { limit: 800 }
             );
             const seen = new Set();
             this.state.whereUsedModels = usages.reduce((acc, u) => {
