@@ -56,9 +56,29 @@ class EmasurCodeMixin(models.AbstractModel):
 
     @api.model
     def emasur_active_system(self):
-        system = self.env['ir.config_parameter'].sudo().get_param(
-            SYSTEM_PARAM, 'rubicon')
+        """The user's own preference wins; the global parameter (set from
+        the Notation System wizard) is the company default."""
+        system = self.env.user.notation_system or \
+            self.env['ir.config_parameter'].sudo().get_param(SYSTEM_PARAM, 'rubicon')
         return system if system in self.NOTATION_SYSTEMS else 'rubicon'
+
+    @api.model
+    def get_notation_ui(self):
+        """What a workspace needs to render and switch codes."""
+        return {
+            'active': self.emasur_active_system(),
+            'systems': [[key, label] for key, (label, _field)
+                        in self.NOTATION_SYSTEMS.items()],
+        }
+
+    @api.model
+    def set_user_notation(self, system):
+        """Store the current user's own display preference; falsy means
+        follow the company default again."""
+        if system and system not in self.NOTATION_SYSTEMS:
+            return self.emasur_active_system()
+        self.env.user.write({'notation_system': system or False})
+        return self.emasur_active_system()
 
     def _compute_display_name(self):
         super()._compute_display_name()
@@ -199,3 +219,23 @@ class EmasurSystemWizard(models.TransientModel):
         self.ensure_one()
         self.env['ir.config_parameter'].sudo().set_param(SYSTEM_PARAM, self.system)
         return {'type': 'ir.actions.client', 'tag': 'reload'}
+
+
+class ResUsers(models.Model):
+    _inherit = 'res.users'
+
+    notation_system = fields.Selection(
+        selection=lambda self: [
+            (key, label) for key, (label, _field)
+            in self.env['emasur.code.mixin'].NOTATION_SYSTEMS.items()],
+        string='Displayed Code System',
+        help='Personal display preference; empty follows the company default '
+             'set in the Emasur > Notation System wizard.')
+
+    @property
+    def SELF_READABLE_FIELDS(self):
+        return super().SELF_READABLE_FIELDS + ['notation_system']
+
+    @property
+    def SELF_WRITEABLE_FIELDS(self):
+        return super().SELF_WRITEABLE_FIELDS + ['notation_system']

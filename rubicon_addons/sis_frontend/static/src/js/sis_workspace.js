@@ -678,7 +678,7 @@ export class SisWorkspace extends Component {
             ['id', 'sequence', 'design', 'purity', 'qty', 'qty_shipped', 'qty_balance',
              'unit_price', 'amount', 'description', 'unit_cost',
              'item_group', 'special_instruction', 'size_remarks',
-             'diamond_weight', 'stone_weight', 'diverse_weight', 'metal_weight'],
+             'diamond_weight', 'stone_weight', 'diverse_weight', 'metal_weight', 'alt_design'],
             { order: 'sequence' }
         );
     }
@@ -704,7 +704,9 @@ export class SisWorkspace extends Component {
     get filteredCopyItems() {
         let items = this.state.copyItems;
         const f = (this.state.copySerialFilter || '').toLowerCase();
-        if (f) items = items.filter(it => (it.design || '').toLowerCase().includes(f));
+        if (f) items = items.filter(it =>
+            (it.design || '').toLowerCase().includes(f) ||
+            (it.alt_design || '').toLowerCase().includes(f));
         const vis = this.state.copyItemsVisibility;
         if (vis === 'open') {
             items = items.filter(it => (parseFloat(it.qty_balance) || 0) > 0 || (parseFloat(it.qty_shipped) || 0) === 0);

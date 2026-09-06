@@ -79,6 +79,7 @@ export class PdpWorkspace extends Component {
             modelListFilter: { code: '', drawing: '', quotation: '' },
             modelSearch: "",
             modelSearchResults: [],
+            notation: { active: "rubicon", systems: [] },
             productSearch: "",
             productSearchResults: [],
             productFilter: "",
@@ -153,6 +154,7 @@ export class PdpWorkspace extends Component {
         });
 
         onWillStart(async () => {
+            this.state.notation = await this.orm.call("emasur.code.mixin", "get_notation_ui");
             await this.uomService.load();
             await this.loadInitialData();
         });
@@ -165,7 +167,7 @@ export class PdpWorkspace extends Component {
     async loadInitialData() {
         try {
             const [models, margins, laborTypes, allMetals, purities, allParts, addonTypes, stoneShapes, stoneSizes, stoneShades, stoneCategories, stoneTypes, settingTypes] = await Promise.all([
-                this.orm.searchRead("pdp.product.model", [], ["id", "code", "drawing", "quotation", "category_id"], { order: "code ASC" }),
+                this.orm.searchRead("pdp.product.model", [], ["id", "code", "alt_code", "drawing", "quotation", "category_id"], { order: "code ASC" }),
                 this.orm.searchRead("pdp.margin", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.labor.type", [], ["id", "code", "name"]),
                 this.orm.searchRead("pdp.metal", [], ["id", "code", "name", "purity_system", "is_reference"]),
@@ -274,10 +276,43 @@ export class PdpWorkspace extends Component {
     // the DOM (options or table rows) is what made the workspace slow.
     MODEL_LIST_RENDER_CAP = 200;
 
+    // ── Dual notation ───────────────────────────────────────────────────
+    // Display: the official code of the active system (never the computed
+    // suggestion). Search: always matches every code, whatever is displayed.
+    codeOf(rec) {
+        if (this.state.notation.active !== "rubicon") {
+            return rec.alt_code || rec.code;
+        }
+        return rec.code;
+    }
+
+    matchesCode(rec, needle) {
+        const ql = (needle || "").toLowerCase();
+        if (!ql) return true;
+        return ["code", "alt_code", "alt_code_computed"].some(
+            (f) => (rec[f] || "").toLowerCase().includes(ql));
+    }
+
+    get notationLabel() {
+        const entry = this.state.notation.systems.find(
+            ([key]) => key === this.state.notation.active);
+        return entry ? entry[1].split(" ")[0] : "Rubicon";
+    }
+
+    async toggleNotation() {
+        const keys = this.state.notation.systems.map(([key]) => key);
+        if (!keys.length) return;
+        const next = keys[(keys.indexOf(this.state.notation.active) + 1) % keys.length];
+        this.state.notation.active = await this.orm.call(
+            "emasur.code.mixin", "set_user_notation", [next]);
+        const active = this.activeModel;
+        if (active) this.state.modelSearch = this.codeOf(active);
+    }
+
     _matchingModelsFor(filters) {
         const { code, drawing, quotation } = filters;
         return this.state.models.filter(m =>
-            (!code      || (m.code      || '').toLowerCase().includes(code.toLowerCase())) &&
+            (!code      || this.matchesCode(m, code)) &&
             (!drawing   || (m.drawing   || '').toLowerCase().includes(drawing.toLowerCase())) &&
             (!quotation || (m.quotation || '').toLowerCase().includes(quotation.toLowerCase()))
         );
@@ -295,7 +330,7 @@ export class PdpWorkspace extends Component {
     get filteredProducts() {
         if (!this.state.productFilter) return this.state.products;
         const q = this.state.productFilter.toLowerCase();
-        return this.state.products.filter(p => p.code.toLowerCase().includes(q));
+        return this.state.products.filter(p => this.matchesCode(p, q));
     }
 
     get activeModel() {
@@ -513,8 +548,7 @@ export class PdpWorkspace extends Component {
         }
         const ql = q.toLowerCase();
         this.state.productSearchResults = this.state.products.filter(
-            p => p.code.toLowerCase().includes(ql)
-        );
+            p => this.matchesCode(p, q)).slice(0, 50);
     }
 
     onProductSearchKeydown(ev) {
@@ -566,7 +600,7 @@ export class PdpWorkspace extends Component {
         }
         const ql = q.toLowerCase();
         this.state.modelSearchResults = this.state.models
-            .filter(m => (m.code || "").toLowerCase().includes(ql))
+            .filter(m => this.matchesCode(m, ql))
             .slice(0, 50);
     }
 
@@ -574,7 +608,8 @@ export class PdpWorkspace extends Component {
         if (ev.key === "Enter") {
             const q = (this.state.modelSearch || "").trim().toLowerCase();
             const exact = this.state.models.find(
-                m => (m.code || "").toLowerCase() === q);
+                m => (m.code || "").toLowerCase() === q ||
+                     (m.alt_code || "").toLowerCase() === q);
             const pick = exact || this.state.modelSearchResults[0];
             if (pick) {
                 await this.selectModelFromSearch(pick);
@@ -582,12 +617,12 @@ export class PdpWorkspace extends Component {
         } else if (ev.key === "Escape") {
             this.state.modelSearchResults = [];
             const active = this.activeModel;
-            this.state.modelSearch = active ? active.code : "";
+            this.state.modelSearch = active ? this.codeOf(active) : "";
         }
     }
 
     async selectModelFromSearch(model) {
-        this.state.modelSearch = model.code;
+        this.state.modelSearch = this.codeOf(model);
         this.state.modelSearchResults = [];
         await this.selectModel(model.id);
     }
@@ -664,7 +699,7 @@ export class PdpWorkspace extends Component {
     async selectModel(modelId) {
         this.state.selectedModelId = parseInt(modelId);
         const active = this.state.models.find(m => m.id === this.state.selectedModelId);
-        this.state.modelSearch = active ? active.code : '';
+        this.state.modelSearch = active ? this.codeOf(active) : '';
         this.state.modelSearchResults = [];
         this.state.productSearch = '';
         this.state.productSearchResults = [];
@@ -675,7 +710,7 @@ export class PdpWorkspace extends Component {
             this.state.products = await this.orm.searchRead(
                 "pdp.product",
                 [["model_id", "=", this.state.selectedModelId]],
-                ["id", "code", "create_date", "in_collection", "category_id", "metal", "active", "remark"]
+                ["id", "code", "create_date", "in_collection", "category_id", "metal", "active", "remark", "alt_code", "alt_code_computed"]
             );
 
             await Promise.all([

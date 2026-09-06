@@ -19,13 +19,15 @@
                                 <t t-foreach="state.modelSearchResults" t-as="mr" t-key="mr.id">
                                     <div class="px-2 py-1 border-bottom" style="cursor: pointer; font-size: 12px;"
                                          t-on-mousedown="() => this.selectModelFromSearch(mr)">
-                                        <t t-esc="mr.code"/>
+                                        <t t-esc="codeOf(mr)"/>
                                     </div>
                                 </t>
                             </div>
                         </t>
                     </div>
                     <button class="btn btn-sm btn-outline-secondary" t-on-click="() => this.openModelList()">List</button>
+                    <button class="btn btn-sm btn-outline-secondary" t-att-title="'Displayed code system — searching always matches every code'"
+                            t-on-click="() => this.toggleNotation()"><t t-esc="notationLabel"/></button>
                     <div class="position-relative">
                         <input type="text" class="form-control form-control-sm" placeholder="Filter products..." style="width: 150px;"
                                t-att-value="state.productSearch"
@@ -36,7 +38,7 @@
                                 <t t-foreach="state.productSearchResults" t-as="pr" t-key="pr.id">
                                     <div class="px-2 py-1 border-bottom" style="cursor: pointer; font-size: 12px;"
                                          t-on-mousedown="() => this.selectProductFromSearch(pr)">
-                                        <t t-esc="pr.code"/>
+                                        <t t-esc="codeOf(pr)"/>
                                     </div>
                                 </t>
                             </div>
@@ -76,7 +78,7 @@
                                 <tr style="cursor: pointer;"
                                     t-attf-class="{{ state.selectedProductId === product.id ? 'table-primary fw-bold' : '' }}"
                                     t-on-click="() => this.selectProduct(product.id)">
-                                    <td><t t-esc="product.code"/></td>
+                                    <td><t t-esc="codeOf(product)"/></td>
                                     <td><t t-esc="product.metal || 'W'"/></td>
                                     <td class="text-muted small"><t t-esc="product.create_date"/></td>
                                     <td class="text-center" t-on-click.stop="() => this.toggleActive(product.id)">
@@ -107,7 +109,7 @@
                            t-on-change="ev => this.onImageFileSelected(ev, 'drawing_1920', 'model')"/>
 
                     <div class="d-flex justify-content-between align-items-center p-1 border-bottom bg-light">
-                        <small class="fw-bold text-truncate px-1" t-if="activeProduct"><t t-esc="activeProduct.code"/></small>
+                        <small class="fw-bold text-truncate px-1" t-if="activeProduct"><t t-esc="codeOf(activeProduct)"/></small>
                         <div class="d-flex gap-1 align-items-center">
                             <button t-if="state.selectedModelId" type="button" class="btn btn-sm btn-outline-secondary"
                                     title="Manage photos" t-on-click="() => this.state.showPictureManager = true">
@@ -176,7 +178,7 @@
                             <div class="position-absolute top-0 start-0 m-2 p-2 bg-white border shadow-sm" style="opacity: 0.95; z-index: 2; font-size: 11px; width: 250px;">
                                 <div class="row g-0 mb-1">
                                     <div class="col-4 fw-bold text-muted">Model:</div>
-                                    <div class="col-8 fw-bold text-dark"><t t-esc="activeModel ? activeModel.code : ''"/></div>
+                                    <div class="col-8 fw-bold text-dark"><t t-esc="activeModel ? codeOf(activeModel) : ''"/></div>
                                 </div>
                                 <div class="row g-0 mb-1">
                                     <div class="col-4 text-muted">Drawing#:</div>
@@ -266,7 +268,7 @@
                                             <tr style="cursor: pointer;"
                                                 t-attf-class="{{ m.id === state.selectedModelId ? 'table-primary fw-bold' : '' }}"
                                                 t-on-click="() => this.selectModelFromList(m.id)">
-                                                <td><t t-esc="m.code"/></td>
+                                                <td><t t-esc="codeOf(m)"/></td>
                                                 <td class="text-muted"><t t-esc="m.drawing || ''"/></td>
                                                 <td class="text-muted"><t t-esc="m.quotation || ''"/></td>
                                             </tr>

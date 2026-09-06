@@ -156,3 +156,33 @@ class TestPrecomputedAlternativeCode(TransactionCase):
         filled, total = self.env['pdp.product'].action_backfill_alt_code_computed()
         self.assertGreaterEqual(total, filled)
         self.assertGreaterEqual(filled, 1)
+
+
+class TestUserNotationPreference(TransactionCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = cls.env['res.users'].with_context(no_reset_password=True).create({
+            'name': 'notation user', 'login': 'notation_user',
+            'groups_id': [(6, 0, [cls.env.ref('base.group_user').id])],
+        })
+        cls.Mixin = cls.env['emasur.code.mixin']
+
+    def test_user_preference_overrides_the_company_default(self):
+        self.env['ir.config_parameter'].sudo().set_param(
+            'rubicon_notation.system', 'rubicon')
+        as_user = self.Mixin.with_user(self.user)
+        self.assertEqual(as_user.emasur_active_system(), 'rubicon')
+        as_user.set_user_notation('alternative')     # a plain user sets their own
+        self.assertEqual(as_user.emasur_active_system(), 'alternative')
+        self.assertEqual(self.Mixin.emasur_active_system(), 'rubicon')  # others untouched
+        as_user.set_user_notation(False)             # back to the company default
+        self.assertEqual(as_user.emasur_active_system(), 'rubicon')
+
+    def test_ui_payload_and_invalid_values(self):
+        ui = self.Mixin.get_notation_ui()
+        self.assertEqual([k for k, _l in ui['systems']], ['rubicon', 'alternative'])
+        self.assertIn(ui['active'], ('rubicon', 'alternative'))
+        as_user = self.Mixin.with_user(self.user)
+        self.assertEqual(as_user.set_user_notation('martian'), 'rubicon')
