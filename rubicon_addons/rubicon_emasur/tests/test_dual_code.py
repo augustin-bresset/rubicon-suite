@@ -59,3 +59,67 @@ class TestDualNotation(TransactionCase):
         wizard = self.env['emasur.system.wizard'].create({'system': 'emasur'})
         wizard.action_apply()
         self.assertEqual(self.env['emasur.code.mixin'].emasur_active_system(), 'emasur')
+
+
+class TestSwitchDressRehearsal(TransactionCase):
+    """Day-one dress rehearsal with an invented code system.
+
+    Plays the whole switch on synthetic codes (no Emasur data involved):
+    load alternative codes, search by both systems, flip the display, keep
+    the history searchable — proving the machinery does not depend on what
+    the real delivered codes will look like.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        env = cls.env
+        cls.model = env['pdp.product.model'].create({'code': 'ZZR900'})
+        cls.ring_a = env['pdp.product'].create({
+            'code': 'ZZR900-CIT+GA/W', 'model_id': cls.model.id,
+            'metal': 'W', 'active': True})
+        cls.ring_b = env['pdp.product'].create({
+            'code': 'ZZR900-GA/P', 'model_id': cls.model.id,
+            'metal': 'P', 'active': True})
+        # The invented system: model codes gain a series prefix, product
+        # codes are rebuilt on the model's new code ("pas radical").
+        cls.model.emasur_code = 'NR-R900'
+        cls.ring_a.emasur_code = 'NR-R900.1'
+        cls.ring_b.emasur_code = 'NR-R900.2'
+
+    def _set_system(self, system):
+        self.env['ir.config_parameter'].sudo().set_param('rubicon_notation.system', system)
+        self.env.invalidate_all()
+
+    def test_search_hits_old_and_new_regardless_of_the_active_system(self):
+        Product = self.env['pdp.product']
+        for system in ('rubicon', 'emasur'):
+            self._set_system(system)
+            for term, expected in [('ZZR900-CIT', self.ring_a),
+                                   ('NR-R900.1', self.ring_a),
+                                   ('NR-R900.2', self.ring_b)]:
+                hits = [rid for rid, _n in Product.name_search(term)]
+                self.assertIn(expected.id, hits, (system, term))
+        hits = [rid for rid, _n in self.env['pdp.product.model'].name_search('NR-R900')]
+        self.assertIn(self.model.id, hits)
+
+    def test_display_flips_and_falls_back(self):
+        orphan = self.env['pdp.product'].create({
+            'code': 'ZZR900-PER/Y', 'model_id': self.model.id,
+            'metal': 'Y', 'active': True})   # no new code loaded yet
+        self._set_system('emasur')
+        self.assertEqual(self.ring_a.display_name, 'NR-R900.1')
+        self.assertEqual(self.model.display_name, 'NR-R900')
+        self.assertEqual(orphan.display_name, 'ZZR900-PER/Y')
+        self._set_system('rubicon')
+        self.assertEqual(self.ring_a.display_name, 'ZZR900-CIT+GA/W')
+
+    def test_wizard_offers_every_registered_system(self):
+        wizard = self.env['emasur.convert.wizard']  # unrelated model untouched
+        selection = self.env['emasur.system.wizard']._system_selection()
+        self.assertEqual([key for key, _label in selection], ['rubicon', 'emasur'])
+
+    def test_unknown_system_parameter_falls_back_to_rubicon(self):
+        self._set_system('martian')
+        self.assertEqual(self.env['emasur.code.mixin'].emasur_active_system(), 'rubicon')
+        self.assertEqual(self.ring_a.display_name, 'ZZR900-CIT+GA/W')

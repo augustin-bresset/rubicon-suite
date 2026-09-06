@@ -18,19 +18,33 @@ class EmasurCodeMixin(models.AbstractModel):
     _name = 'emasur.code.mixin'
     _description = 'Dual Rubicon/Emasur code'
 
+    # Registry of the known notation systems: key -> (label, code field).
+    # 'rubicon' is the native `code` field. Adding a system means adding a
+    # Char field through this mixin's inheritors and one entry here — the
+    # display, the search and the switch wizard follow from the registry.
+    # One column per system on purpose: indexed, importable, no generic
+    # code table to join through.
+    NOTATION_SYSTEMS = {
+        'rubicon': ('Rubicon (legacy codes)', 'code'),
+        'emasur': ('Emasur (new codes, fallback to legacy when empty)', 'emasur_code'),
+    }
+
     emasur_code = fields.Char(string='Emasur Code', index=True, copy=False)
 
     @api.model
     def emasur_active_system(self):
-        return self.env['ir.config_parameter'].sudo().get_param(
+        system = self.env['ir.config_parameter'].sudo().get_param(
             SYSTEM_PARAM, 'rubicon')
+        return system if system in self.NOTATION_SYSTEMS else 'rubicon'
 
     def _compute_display_name(self):
         super()._compute_display_name()
-        if self.emasur_active_system() == 'emasur':
+        system = self.emasur_active_system()
+        field_name = self.NOTATION_SYSTEMS[system][1]
+        if field_name != 'code':
             for record in self:
-                if record.emasur_code:
-                    record.display_name = record.emasur_code
+                if record[field_name]:
+                    record.display_name = record[field_name]
 
 
 class PdpProduct(models.Model):
@@ -130,10 +144,13 @@ class EmasurSystemWizard(models.TransientModel):
     _name = 'emasur.system.wizard'
     _description = 'Active notation system'
 
-    system = fields.Selection([
-        ('rubicon', 'Rubicon (legacy codes)'),
-        ('emasur', 'Emasur (new codes, fallback to legacy when empty)'),
-    ], required=True, default=lambda self: self.env['emasur.code.mixin'].emasur_active_system())
+    def _system_selection(self):
+        return [(key, label) for key, (label, _field)
+                in self.env['emasur.code.mixin'].NOTATION_SYSTEMS.items()]
+
+    system = fields.Selection(
+        selection=_system_selection, required=True,
+        default=lambda self: self.env['emasur.code.mixin'].emasur_active_system())
 
     def action_apply(self):
         self.ensure_one()
