@@ -125,9 +125,10 @@ class TestSwitchDressRehearsal(TransactionCase):
         self.assertEqual(self.ring_a.display_name, 'ZZR900-CIT+GA/W')
 
 
-class TestPrecomputedAlternativeCode(TransactionCase):
-    """The precomputed code is searchable like the historical one; the
-    display only ever uses the official alternative code."""
+class TestAlternativeCodeProvenance(TransactionCase):
+    """One alternative code, its source telling assigned from computed:
+    composed codes are derived by the converter, official ones are loaded
+    and never overwritten by a recompute."""
 
     @classmethod
     def setUpClass(cls):
@@ -137,25 +138,41 @@ class TestPrecomputedAlternativeCode(TransactionCase):
             'code': 'ZZPC9-CIT+GA/W', 'model_id': cls.model.id,
             'metal': 'W', 'active': True})
 
-    def test_precomputed_on_create_and_searchable(self):
-        self.assertEqual(self.product.alt_code_computed, 'ZZPC9-CT1A+GA/W')
+    def test_composed_code_is_computed_on_create_and_searchable(self):
+        self.assertEqual(self.product.alt_code, 'ZZPC9-CT1A+GA/W')
+        self.assertEqual(self.product.alt_code_source, 'computed')
         hits = [rid for rid, _n in self.env['pdp.product'].name_search('ZZPC9-CT1A')]
         self.assertIn(self.product.id, hits)
 
-    def test_incomplete_conversion_stores_nothing(self):
-        self.product.write({'code': 'ZZPC9-XXX9/W'})
-        self.assertFalse(self.product.alt_code_computed)
+    def test_manual_or_imported_code_is_official_and_protected(self):
+        self.product.write({'alt_code': 'NEW-OFFICIAL-1'})
+        self.assertEqual(self.product.alt_code_source, 'official')
+        self.product.write({'code': 'ZZPC9-GA/W'})       # recompute triggered...
+        self.assertEqual(self.product.alt_code, 'NEW-OFFICIAL-1')  # ...but protected
+        filled, total = self.env['pdp.product'].action_recompute_alt_codes()
+        self.assertEqual(self.product.alt_code, 'NEW-OFFICIAL-1')
 
-    def test_display_never_uses_the_precomputed_code(self):
+    def test_incomplete_conversion_clears_the_computed_code(self):
+        self.product.write({'code': 'ZZPC9-XXX9/W'})
+        self.assertFalse(self.product.alt_code)
+        self.assertFalse(self.product.alt_code_source)
+
+    def test_display_shows_the_computed_code_internally(self):
         self.env['ir.config_parameter'].sudo().set_param(
             'rubicon_notation.system', 'alternative')
         self.env.invalidate_all()
-        self.assertEqual(self.product.display_name, 'ZZPC9-CIT+GA/W')
+        self.assertEqual(self.product.display_name, 'ZZPC9-CT1A+GA/W')
 
-    def test_backfill_returns_counts(self):
-        filled, total = self.env['pdp.product'].action_backfill_alt_code_computed()
-        self.assertGreaterEqual(total, filled)
-        self.assertGreaterEqual(filled, 1)
+    def test_setwise_recompute_counts_and_respects_official(self):
+        other = self.env['pdp.product'].create({
+            'code': 'ZZPC9-GA+PER/Y', 'model_id': self.model.id,
+            'metal': 'Y', 'active': True})
+        self.product.write({'alt_code': 'NEW-OFFICIAL-2'})
+        filled, total = self.env['pdp.product'].action_recompute_alt_codes()
+        self.assertGreaterEqual(total, 2)
+        self.assertEqual(other.alt_code, 'ZZPC9-GA+PER/Y')
+        self.assertEqual(other.alt_code_source, 'computed')
+        self.assertEqual(self.product.alt_code, 'NEW-OFFICIAL-2')
 
 
 class TestUserNotationPreference(TransactionCase):

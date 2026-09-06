@@ -1,7 +1,7 @@
 {
     'name': 'Rubicon / Emasur Notation',
     'summary': 'Convert stone and design codes between the Rubicon and Emasur notation systems',
-    'version': '18.0.1.1',
+    'version': '18.0.1.2',
     'license': 'LGPL-3',
     'depends': ['pdp_product', 'sis_document'],
     'data': [

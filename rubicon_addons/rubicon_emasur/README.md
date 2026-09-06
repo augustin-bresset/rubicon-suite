@@ -16,10 +16,11 @@ history stays searchable under both systems.
 3. Reindex the history: run `action_backfill_alt_design()` on
    `sis.document.item` (set-wise, seconds, rerunnable after every curation
    round). Only complete conversions are stored.
-3bis. Precompute the searchable readings: `action_backfill_alt_code_computed()`
-   on `pdp.product` fills `alt_code_computed` — the converter's complete
-   reading of each product code, searchable like the historical code but
-   never displayed as official.
+3bis. Recompute the composed codes: `action_recompute_alt_codes()` on
+   `pdp.product` derives each product's alternative code from the new
+   dictionary (source `computed`). Loading or writing a code by hand marks
+   it `official`, and a recompute never overwrites an official value —
+   raw elements get assigned codes, composed codes stay derived.
 4. Flip the display: Emasur menu > Notation System (managers). Records with
    no alternative code keep showing their Rubicon code, so a partial load is
    safe. Searching finds records by either code throughout.
