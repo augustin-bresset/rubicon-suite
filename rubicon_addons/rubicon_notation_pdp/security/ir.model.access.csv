@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_notation_shade_map_user,rubicon.notation.shade.map (user),model_rubicon_notation_shade_map,rubicon_env.group_rubicon_user,1,0,0,0
+access_notation_shade_map_editor,rubicon.notation.shade.map (editor),model_rubicon_notation_shade_map,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_shade_map,rubicon.notation.shade.map (manager),model_rubicon_notation_shade_map,rubicon_env.group_rubicon_manager,1,1,1,1
