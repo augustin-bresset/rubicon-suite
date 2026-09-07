@@ -58,10 +58,15 @@
     <field name="absolute_factor">1.0</field>
   </record>
 
-  <!-- Stone Density units -->
+  <!-- Stone Density units.
+       The reference of the legacy relative scale is iolite (~2.61 g/cm³), not
+       quartz: iolite is the only faceted stone whose legacy "Wgt x n" is
+       exactly 1.00, every quartz carries 1.10. The record id below keeps its
+       historical name so existing external references stay valid, and the
+       g/cm³ ratio still uses 1/2.65 pending confirmation. -->
   <record id="uom_rel_quartz" model="rubicon.uom">
-    <field name="name">Relative to Quartz</field>
-    <field name="symbol">×SiO₂</field>
+    <field name="name">Relative to Iolite</field>
+    <field name="symbol">×IOL</field>
     <field name="category_id" ref="uom_cat_stone_density"/>
     <field name="ratio">1.0</field>
     <field name="is_reference" eval="True"/>

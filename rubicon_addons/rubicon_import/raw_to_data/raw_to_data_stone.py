@@ -44,6 +44,10 @@ if __name__ == '__main__':
         fieldnames = ["id", "code", "name", "density", "category_id"]
         def row_to_dict(row):
             if row[4] == "": row[4] = 0.0
+            # row[4] is the legacy "Wgt x n" multiplier, relative to iolite
+            # (~2.61 g/cm3, the only faceted stone at exactly 1.00 - every
+            # quartz is at 1.10). The 2.65 factor below is quartz's density
+            # and is kept as-is pending confirmation.
             density = float(row[4]) * 2.65
             code = strip_code_space(row[0])
             category_id = no_all_one_zero_value(strip_code_space(row[3]))

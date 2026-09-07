@@ -17,7 +17,7 @@ This document contains the different changing from the actual version.
 
 
 * Stone density 
-    Before the density is relative to the quartz used as a reference. Now we prefere having the real density in g/cm3. (Quartz ~2.65g/cm3 +- 0.005)
+    Before the density is relative to the iolite used as a reference. Now we prefere having the real density in g/cm3. (Iolite ~2.61g/cm3; quartz, often mistaken for the reference, is ~2.65g/cm3 and carries a legacy factor of 1.10, not 1.00)
     
 Not sure yet     
 * Product/Model -> Product/Template 

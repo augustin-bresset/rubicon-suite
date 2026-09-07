@@ -191,7 +191,7 @@ The table at the bottom depends of the category selected.
 It display the `Type` of stones with the fields :
 * `TypeID` (a unique field) 
 * `Name` 
-* `Wgt x n` (density in function of a reference)
+* `Wgt x n` (density in function of a reference stone, iolite ~2.61 g/cm3)
 
 Remarks : 
 * `Wgt x n` will surely be changed 
@@ -448,7 +448,7 @@ You need to create a new reference from an existing model `AAXXXB`.
 * Click on `+` 
 * Fill the field `TypeID` with a unique identifier code
 * Fill the field `Name`
-* Fill the field `Wgt x n` with the density in function of a reference
+* Fill the field `Wgt x n` with the density in function of the reference stone (iolite ~2.61 g/cm3)
 * Click on `Save`
 * If not unique PDP send an error ![errornotuniquestonekey](./images/pdp_add_stone_error.png)
     * Correct the error or delete the stone (PDP do not do it himself)
