@@ -13,3 +13,5 @@ class PcsDeptGroup(models.Model):
     name = fields.Char(string='Dept. Group', required=True)
     type = fields.Char(string='Type')
     sequence = fields.Integer(string='Seq', default=10)
+    department_ids = fields.One2many('pcs.department', 'group_id',
+                                     string='Departments')

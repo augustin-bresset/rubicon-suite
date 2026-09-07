@@ -16,6 +16,7 @@ export class PsUtilities extends Component {
 
             // Invoice Select
             invoices: [],
+            invoiceSearch: "",
             selectedInvoiceId: null,
             designs: [],
 
@@ -38,10 +39,47 @@ export class PsUtilities extends Component {
     }
 
     // ── Invoice Select ─────────────────────────────────────────────────────
-    onInvoiceChange(ev) {
-        const v = parseInt(ev.target.value);
-        this.state.selectedInvoiceId = isNaN(v) ? null : v;
-        this.state.designs = [];
+    // A visible search input backed by a datalist: the user sees what they
+    // type; an exact name (or a text matching a single invoice) resolves it.
+
+    get filteredInvoices() {
+        const q = (this.state.invoiceSearch || "").trim().toLowerCase();
+        const list = q
+            ? this.state.invoices.filter((i) => i.name.toLowerCase().includes(q))
+            : this.state.invoices;
+        return list.slice(0, 300);
+    }
+
+    _resolveInvoice(text) {
+        const q = (text || "").trim().toLowerCase();
+        if (!q) return null;
+        const exact = this.state.invoices.find((i) => i.name.toLowerCase() === q);
+        if (exact) return exact.id;
+        const hits = this.state.invoices.filter((i) => i.name.toLowerCase().includes(q));
+        return hits.length === 1 ? hits[0].id : null;
+    }
+
+    onInvoiceSearchInput(ev) {
+        this.state.invoiceSearch = ev.target.value;
+        const resolved = this._resolveInvoice(ev.target.value);
+        if (resolved !== this.state.selectedInvoiceId) {
+            this.state.selectedInvoiceId = resolved;
+            this.state.designs = [];
+        }
+    }
+
+    async onInvoiceSearchChange(ev) {
+        // Fires on a datalist pick (and on blur): load right away when resolved.
+        this.onInvoiceSearchInput(ev);
+        if (this.state.selectedInvoiceId && !this.state.designs.length) {
+            await this.onSelectDesigns();
+        }
+    }
+
+    onInvoiceKeydown(ev) {
+        if (ev.key === "Enter" && this.state.selectedInvoiceId) {
+            this.onSelectDesigns();
+        }
     }
 
     async onSelectDesigns() {

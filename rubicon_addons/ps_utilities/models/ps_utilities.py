@@ -42,7 +42,9 @@ class PsUtilities(models.TransientModel):
         """pdp.product.part rows filtered by model code and/or part."""
         domain = []
         if model_code:
-            domain.append(('product_id.model_id.code', '=', model_code.strip()))
+            # Case-insensitive: the legacy exact match made lowercase input
+            # (or a stray space) silently return an empty list.
+            domain.append(('product_id.model_id.code', '=ilike', model_code.strip()))
         if part_id:
             domain.append(('part_id', '=', int(part_id)))
         recs = self.env['pdp.product.part'].search(domain, limit=limit, order='id')

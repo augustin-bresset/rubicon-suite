@@ -7,18 +7,22 @@
             <div t-if="state.view === 'invoice'" class="d-flex flex-column flex-grow-1 overflow-hidden">
                 <div class="d-flex align-items-center gap-2 p-2 border-bottom flex-shrink-0">
                     <label class="mb-0 fw-semibold">Invoice</label>
-                    <select class="form-select form-select-sm" style="min-width:220px"
-                            t-on-change="onInvoiceChange">
-                        <option value="">-- select --</option>
-                        <t t-foreach="state.invoices" t-as="inv" t-key="inv.id">
-                            <option t-att-value="inv.id"
-                                    t-att-selected="inv.id === state.selectedInvoiceId"
-                                    t-esc="inv.name"/>
-                        </t>
-                    </select>
+                    <input class="form-control form-control-sm" style="min-width:240px"
+                           list="psuInvoiceList" placeholder="Search... (e.g. SI-EMA-25001)"
+                           t-att-value="state.invoiceSearch"
+                           t-on-input="onInvoiceSearchInput"
+                           t-on-change="onInvoiceSearchChange"
+                           t-on-keydown="onInvoiceKeydown"/>
+                    <datalist id="psuInvoiceList">
+                        <option t-foreach="filteredInvoices" t-as="inv" t-key="inv.id"
+                                t-att-value="inv.name"/>
+                    </datalist>
                     <button class="btn btn-sm btn-primary"
                             t-att-disabled="!state.selectedInvoiceId"
                             t-on-click="onSelectDesigns">Select Designs</button>
+                    <span class="text-muted small" t-if="state.invoiceSearch and !state.selectedInvoiceId">
+                        No matching invoice
+                    </span>
                 </div>
                 <div class="flex-grow-1 overflow-auto p-2">
                     <table class="table table-sm table-bordered table-hover mb-0">
@@ -63,6 +67,8 @@
                         </t>
                     </select>
                     <button class="btn btn-sm btn-primary" t-on-click="onSearchParts">Search</button>
+                    <span class="text-muted small" t-if="state.partRows.length"
+                          t-esc="state.partRows.length + ' result(s)'"/>
                 </div>
 
                 <div class="flex-grow-1 overflow-auto p-2">
