@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_notation_stone_list" model="ir.ui.view">
+        <field name="name">pdp.notation.stone.list</field>
+        <field name="model">pdp.notation.stone</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="type_id"/>
+                <field name="implied_hue_id"/>
+                <field name="default_shade_id"/>
+                <field name="default_shape_id"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_notation_stone" model="ir.actions.act_window">
+        <field name="name">Articles</field>
+        <field name="res_model">pdp.notation.stone</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_notation_grade_list" model="ir.ui.view">
+        <field name="name">pdp.notation.grade.list</field>
+        <field name="model">pdp.notation.grade</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_notation_grade" model="ir.actions.act_window">
+        <field name="name">Grades</field>
+        <field name="res_model">pdp.notation.grade</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_notation_hue_list" model="ir.ui.view">
+        <field name="name">pdp.notation.hue.list</field>
+        <field name="model">pdp.notation.hue</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_notation_hue" model="ir.actions.act_window">
+        <field name="name">Hues</field>
+        <field name="res_model">pdp.notation.hue</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_notation_shape_list" model="ir.ui.view">
+        <field name="name">pdp.notation.shape.list</field>
+        <field name="model">pdp.notation.shape</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="shape_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_notation_shape" model="ir.actions.act_window">
+        <field name="name">Shapes</field>
+        <field name="res_model">pdp.notation.shape</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_notation_shade_map_list" model="ir.ui.view">
+        <field name="name">pdp.notation.shade.map.list</field>
+        <field name="model">pdp.notation.shade.map</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="shade_id"/>
+                <field name="grade_id"/>
+                <field name="hue_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_notation_shade_map" model="ir.actions.act_window">
+        <field name="name">Shade Mappings</field>
+        <field name="res_model">pdp.notation.shade.map</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_notation_wizard_form" model="ir.ui.view">
+        <field name="name">pdp.notation.wizard.form</field>
+        <field name="model">pdp.notation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Transcribe &amp; Verify">
+                <group>
+                    <field name="mode" widget="radio"/>
+                    <field name="code"/>
+                    <field name="product_id" invisible="mode != 'product'"/>
+                    <field name="result"/>
+                </group>
+                <footer>
+                    <button name="action_run" string="Run" type="object"
+                            class="btn-primary"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_notation_wizard" model="ir.actions.act_window">
+        <field name="name">Transcribe &amp; Verify</field>
+        <field name="res_model">pdp.notation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

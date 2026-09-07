@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_notation_stone_user,pdp.notation.stone (user),model_pdp_notation_stone,rubicon_env.group_rubicon_user,1,0,0,0
+access_notation_stone_editor,pdp.notation.stone (editor),model_pdp_notation_stone,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_stone,pdp.notation.stone (manager),model_pdp_notation_stone,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_grade_user,pdp.notation.grade (user),model_pdp_notation_grade,rubicon_env.group_rubicon_user,1,0,0,0
+access_notation_grade_editor,pdp.notation.grade (editor),model_pdp_notation_grade,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_grade,pdp.notation.grade (manager),model_pdp_notation_grade,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_hue_user,pdp.notation.hue (user),model_pdp_notation_hue,rubicon_env.group_rubicon_user,1,0,0,0
+access_notation_hue_editor,pdp.notation.hue (editor),model_pdp_notation_hue,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_hue,pdp.notation.hue (manager),model_pdp_notation_hue,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_shape_user,pdp.notation.shape (user),model_pdp_notation_shape,rubicon_env.group_rubicon_user,1,0,0,0
+access_notation_shape_editor,pdp.notation.shape (editor),model_pdp_notation_shape,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_shape,pdp.notation.shape (manager),model_pdp_notation_shape,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_shade_map_user,pdp.notation.shade.map (user),model_pdp_notation_shade_map,rubicon_env.group_rubicon_user,1,0,0,0
+access_notation_shade_map_editor,pdp.notation.shade.map (editor),model_pdp_notation_shade_map,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_shade_map,pdp.notation.shade.map (manager),model_pdp_notation_shade_map,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_wizard,pdp.notation.wizard (user),model_pdp_notation_wizard,rubicon_env.group_rubicon_user,1,1,1,0

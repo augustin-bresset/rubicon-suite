@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_notation_root" name="Notation"
+              parent="pdp_metal.menu_pdp_root" sequence="80"/>
+    <menuitem id="menu_notation_wizard" name="Transcribe &amp; Verify"
+              parent="menu_notation_root" action="action_notation_wizard"
+              sequence="10"/>
+    <menuitem id="menu_notation_stone" name="Articles"
+              parent="menu_notation_root" action="action_notation_stone"
+              sequence="20"/>
+    <menuitem id="menu_notation_grade" name="Grades"
+              parent="menu_notation_root" action="action_notation_grade"
+              sequence="30"/>
+    <menuitem id="menu_notation_hue" name="Hues"
+              parent="menu_notation_root" action="action_notation_hue"
+              sequence="40"/>
+    <menuitem id="menu_notation_shape" name="Shapes"
+              parent="menu_notation_root" action="action_notation_shape"
+              sequence="50"/>
+    <menuitem id="menu_notation_shade_map" name="Shade Mappings"
+              parent="menu_notation_root" action="action_notation_shade_map"
+              sequence="60"/>
+</odoo>
