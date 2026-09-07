@@ -2,7 +2,8 @@
     padding: 12px;
     overflow: auto;
     height: 100%;
-    font-size: 13px;
+    font-size: var(--rbn-font-ws, 13px);
+    background: var(--rbn-ws-bg, transparent);
 }
 
 .pcs-toolbar {

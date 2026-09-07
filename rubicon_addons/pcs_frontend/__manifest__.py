@@ -4,7 +4,7 @@
     'license': 'LGPL-3',
     'category': 'Manufacturing',
     'summary': 'PCS — Production Control System workspace: documents, barcode scanning, dashboard and reports',
-    'depends': ['web', 'pcs_document'],
+    'depends': ['web', 'pcs_document', 'rubicon_frontend'],
     'data': [
         'security/ir.model.access.csv',
         'views/menus.xml',

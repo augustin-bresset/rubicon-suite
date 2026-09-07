@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="ps_utilities.PsUtilities">
-        <div class="o_action d-flex flex-column h-100">
+        <div class="o_action rbn-workspace d-flex flex-column h-100">
 
             <!-- Invoice Select -->
             <div t-if="state.view === 'invoice'" class="d-flex flex-column flex-grow-1 overflow-hidden">

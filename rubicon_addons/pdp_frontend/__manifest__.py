@@ -9,6 +9,7 @@
         "pdp_price",
         "pdp_picture",
         "rubicon_uom",
+        "rubicon_frontend",
     ],
     "data": [
         "security/ir.model.access.csv",

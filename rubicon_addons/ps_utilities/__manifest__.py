@@ -4,7 +4,7 @@
     'license': 'LGPL-3',
     'category': 'Tools',
     'summary': 'PSUtilities — invoice design selection, product part updates, and Utilities master data',
-    'depends': ['web', 'pdp_product', 'pdp_stone', 'sis_document'],
+    'depends': ['web', 'pdp_product', 'pdp_stone', 'sis_document', 'rubicon_frontend'],
     'data': [
         'security/ir.model.access.csv',
         'data/pcs.ssp.csv',
