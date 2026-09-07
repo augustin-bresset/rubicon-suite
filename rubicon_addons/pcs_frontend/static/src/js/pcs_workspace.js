@@ -2,7 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, useState, useRef, onWillStart } from "@odoo/owl";
+import { Component, useState, useRef, onWillStart, onWillDestroy } from "@odoo/owl";
 
 const SERVICE = "pcs.workspace.service";
 
@@ -34,6 +34,7 @@ export class PcsWorkspace extends Component {
 
             // Sales Documents
             salesDocs: [],
+            salesSearch: "",
             salesDocId: null,
             salesTab: "docs",           // docs | items
             salesItems: [],
@@ -53,6 +54,7 @@ export class PcsWorkspace extends Component {
             dashMode: "depts",          // depts | orders
             dashBarcode: "",
             dashDocumentId: "",
+            dashDocumentText: "",
             dashPartyId: "",
             dashCells: [],
             dashTotal: 0,
@@ -91,6 +93,7 @@ export class PcsWorkspace extends Component {
             // Operations timeline
             timelineDocs: [],
             timelineDocId: "",
+            timelineDocText: "",
             timelineBarcode: "",
             timelineBarcodes: [],
 
@@ -101,13 +104,17 @@ export class PcsWorkspace extends Component {
             reportEmployeeId: "",
             reportPrioMode: "assorted",
             reportOrderDocId: "",
+            reportOrderDocText: "",
             reportPartyId: "",
         });
+
+        this.dashPollId = null;
 
         onWillStart(async () => {
             this.state.simMode = await this.call("get_sim_mode");
             await this.openScreen(screen);
         });
+        onWillDestroy(() => this.stopDashPolling());
     }
 
     async toggleSimMode(ev) {
@@ -152,12 +159,48 @@ export class PcsWorkspace extends Component {
         if (loaders[screen]) {
             await loaders[screen]();
         }
+        if (screen === "dashboard") {
+            this.startDashPolling();
+        } else {
+            this.stopDashPolling();
+        }
+    }
+
+    // ── Searchable document pickers (shared helpers) ────────────────────
+    // Options are offered through a datalist so the typed text stays
+    // visible; the text resolves to an id on an exact name match, or when
+    // it matches a single entry.
+
+    filterByName(list, text, cap = 300) {
+        const q = (text || "").trim().toLowerCase();
+        const hits = q
+            ? list.filter((r) => (r.name || "").toLowerCase().includes(q))
+            : list;
+        return hits.slice(0, cap);
+    }
+
+    resolveByName(list, text) {
+        const q = (text || "").trim().toLowerCase();
+        if (!q) return "";
+        const exact = list.find((r) => (r.name || "").toLowerCase() === q);
+        if (exact) return String(exact.id);
+        const hits = list.filter((r) => (r.name || "").toLowerCase().includes(q));
+        return hits.length === 1 ? String(hits[0].id) : "";
     }
 
     // ── Sales Documents ─────────────────────────────────────────────────
 
     async loadSalesDocs() {
         this.state.salesDocs = await this.call("get_sales_docs");
+    }
+
+    get filteredSalesDocs() {
+        const q = (this.state.salesSearch || "").trim().toLowerCase();
+        const docs = q
+            ? this.state.salesDocs.filter((d) =>
+                  (d.name || "").toLowerCase().includes(q))
+            : this.state.salesDocs;
+        return docs.slice(0, 300);
     }
 
     async openSalesItems(docId) {
@@ -287,6 +330,37 @@ export class PcsWorkspace extends Component {
         ]);
         this.state.dashCells = result.cells;
         this.state.dashTotal = result.total_pieces;
+    }
+
+    // The dashboard reflects the workshop live: refresh it every 15s while
+    // it is on screen (skipped when the browser tab is hidden).
+    startDashPolling() {
+        if (this.dashPollId) {
+            return;
+        }
+        this.dashPollId = setInterval(() => {
+            if (this.state.screen !== "dashboard" || document.hidden) {
+                return;
+            }
+            this.loadDashboard().catch(() => {});
+        }, 15000);
+    }
+
+    stopDashPolling() {
+        if (this.dashPollId) {
+            clearInterval(this.dashPollId);
+            this.dashPollId = null;
+        }
+    }
+
+    async onDashDocInput(ev) {
+        this.state.dashDocumentText = ev.target.value;
+        const resolved = this.resolveByName(
+            this.state.orderFilters.documents, ev.target.value);
+        if (resolved !== this.state.dashDocumentId) {
+            this.state.dashDocumentId = resolved;
+            await this.loadDashboard();
+        }
     }
 
     async setDashPanel(panel) {
@@ -456,6 +530,16 @@ export class PcsWorkspace extends Component {
         }
     }
 
+    async onTimelineDocInput(ev) {
+        this.state.timelineDocText = ev.target.value;
+        const resolved = this.resolveByName(
+            this.state.timelineDocs, ev.target.value);
+        if (resolved !== this.state.timelineDocId) {
+            this.state.timelineDocId = resolved;
+            await this.loadTimeline();
+        }
+    }
+
     stepChipClass(step) {
         let cls = "pcs-chip";
         cls += step.track === "stone" ? " pcs-chip-stone" : " pcs-chip-prod";
@@ -559,6 +643,12 @@ export class PcsWorkspace extends Component {
             "report_priorities", [this.state.reportPrioMode]);
         this.state.reportRows = result.top;
         this.state.reportExtra = result.bottom;
+    }
+
+    onReportOrderDocInput(ev) {
+        this.state.reportOrderDocText = ev.target.value;
+        this.state.reportOrderDocId = this.resolveByName(
+            this.state.orderFilters.documents, ev.target.value);
     }
 
     async loadReportOrderParts() {

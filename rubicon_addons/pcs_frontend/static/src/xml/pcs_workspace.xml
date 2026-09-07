@@ -28,6 +28,16 @@
                         t-att-class="state.salesTab === 'items' ? 'active' : ''"
                         t-att-disabled="!state.salesDocId"
                         t-on-click="() => { this.state.salesTab = 'items'; }">Doc Items</button>
+                <span class="pcs-spacer"/>
+                <t t-if="state.salesTab === 'docs'">
+                    <span>Search</span>
+                    <input type="text" placeholder="Doc name..."
+                           t-att-value="state.salesSearch"
+                           t-on-input="(ev) => { this.state.salesSearch = ev.target.value; }"/>
+                    <span class="text-muted small">
+                        <t t-esc="filteredSalesDocs.length"/> / <t t-esc="state.salesDocs.length"/>
+                    </span>
+                </t>
             </div>
             <table class="pcs-table" t-if="state.salesTab === 'docs'">
                 <thead><tr>
@@ -35,7 +45,7 @@
                     <th class="num">Total Qty</th>
                 </tr></thead>
                 <tbody>
-                    <tr t-foreach="state.salesDocs" t-as="doc" t-key="doc.id"
+                    <tr t-foreach="filteredSalesDocs" t-as="doc" t-key="doc.id"
                         class="pcs-row-click"
                         t-on-click="() => this.openSalesItems(doc.id)">
                         <td t-esc="doc.name"/>
@@ -215,13 +225,13 @@
                             t-esc="company.name"/>
                 </select>
                 <span>Sale Order</span>
-                <select t-on-change="(ev) => { this.state.dashDocumentId = ev.target.value; this.loadDashboard(); }">
-                    <option value="">All</option>
-                    <option t-foreach="state.orderFilters.documents" t-as="orderDoc"
-                            t-key="orderDoc.id" t-att-value="orderDoc.id"
-                            t-att-selected="orderDoc.id == state.dashDocumentId"
-                            t-esc="orderDoc.name"/>
-                </select>
+                <input type="text" list="pcsDashDocList" placeholder="All"
+                       t-att-value="state.dashDocumentText"
+                       t-on-input="onDashDocInput"/>
+                <datalist id="pcsDashDocList">
+                    <option t-foreach="filterByName(state.orderFilters.documents, state.dashDocumentText)"
+                            t-as="orderDoc" t-key="orderDoc.id" t-att-value="orderDoc.name"/>
+                </datalist>
             </div>
 
             <div class="pcs-dashboard">
@@ -340,13 +350,13 @@
             <div class="pcs-toolbar">
                 <span class="pcs-title">Operations</span>
                 <span>Document</span>
-                <select t-on-change="(ev) => { this.state.timelineDocId = ev.target.value; this.loadTimeline(); }">
-                    <option value="">—</option>
-                    <option t-foreach="state.timelineDocs" t-as="doc"
-                            t-key="doc.id" t-att-value="doc.id"
-                            t-att-selected="doc.id == state.timelineDocId"
-                            t-esc="doc.name"/>
-                </select>
+                <input type="text" list="pcsTimelineDocList" placeholder="Search..."
+                       t-att-value="state.timelineDocText"
+                       t-on-input="onTimelineDocInput"/>
+                <datalist id="pcsTimelineDocList">
+                    <option t-foreach="filterByName(state.timelineDocs, state.timelineDocText)"
+                            t-as="doc" t-key="doc.id" t-att-value="doc.name"/>
+                </datalist>
                 <span>Barcode</span>
                 <input type="text" t-att-value="state.timelineBarcode"
                        t-on-input="(ev) => { this.state.timelineBarcode = ev.target.value; }"
@@ -832,13 +842,13 @@
                                 t-esc="company.name"/>
                     </select>
                     <span>Sale Order</span>
-                    <select t-on-change="(ev) => { this.state.reportOrderDocId = ev.target.value; }">
-                        <option value="">All</option>
-                        <option t-foreach="state.orderFilters.documents" t-as="orderDoc"
-                                t-key="orderDoc.id" t-att-value="orderDoc.id"
-                                t-att-selected="orderDoc.id == state.reportOrderDocId"
-                                t-esc="orderDoc.name"/>
-                    </select>
+                    <input type="text" list="pcsReportOrderDocList" placeholder="All"
+                           t-att-value="state.reportOrderDocText"
+                           t-on-input="onReportOrderDocInput"/>
+                    <datalist id="pcsReportOrderDocList">
+                        <option t-foreach="filterByName(state.orderFilters.documents, state.reportOrderDocText)"
+                                t-as="orderDoc" t-key="orderDoc.id" t-att-value="orderDoc.name"/>
+                    </datalist>
                     <button class="btn btn-sm btn-secondary"
                             t-on-click="loadReportOrderParts">Refresh</button>
                 </div>

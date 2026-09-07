@@ -91,7 +91,8 @@ class PcsWorkspaceService(models.TransientModel):
     @api.model
     def get_sales_docs(self):
         docs = self.env['sis.document'].search(
-            [('doc_type_code', '=', 'SO')], order='name desc')
+            [('doc_type_code', '=', 'SO')],
+            order='date_created desc, name desc')
         return [{
             'id': d.id,
             'name': d.name,
