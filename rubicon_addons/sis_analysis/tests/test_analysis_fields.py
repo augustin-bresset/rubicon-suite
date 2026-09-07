@@ -25,11 +25,12 @@ class TestSisDocumentAnalysisFields(common.TransactionCase):
 
     def test_analysis_year_extracted_from_date(self):
         doc = self._make_doc(date_created=date(2023, 6, 15))
-        self.assertEqual(doc.analysis_year, 2023)
+        # Char on purpose: an integer year would render as "2,023"
+        self.assertEqual(doc.analysis_year, '2023')
 
-    def test_analysis_year_is_zero_when_no_date(self):
+    def test_analysis_year_empty_when_no_date(self):
         doc = self._make_doc()
-        self.assertEqual(doc.analysis_year, 0)
+        self.assertFalse(doc.analysis_year)
 
     def test_analysis_region_id_from_first_country_group(self):
         doc = self._make_doc(date_created=date(2024, 1, 1), party_id=self.partner.id)

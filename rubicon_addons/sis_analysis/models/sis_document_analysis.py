@@ -4,7 +4,8 @@ from odoo import models, fields, api
 class SisDocumentAnalysis(models.Model):
     _inherit = 'sis.document'
 
-    analysis_year = fields.Integer(
+    # Char, not Integer: an integer year renders as "2,025" in list views.
+    analysis_year = fields.Char(
         string='Year',
         compute='_compute_analysis_year',
         store=True,
@@ -25,7 +26,7 @@ class SisDocumentAnalysis(models.Model):
     @api.depends('date_created')
     def _compute_analysis_year(self):
         for rec in self:
-            rec.analysis_year = rec.date_created.year if rec.date_created else 0
+            rec.analysis_year = str(rec.date_created.year) if rec.date_created else False
 
     @api.depends('party_id.country_id.country_group_ids')
     def _compute_analysis_region(self):
