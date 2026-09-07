@@ -59,26 +59,27 @@
   </record>
 
   <!-- Stone Density units.
-       The reference of the legacy relative scale is iolite (~2.61 g/cm³), not
-       quartz: iolite is the only faceted stone whose legacy "Wgt x n" is
-       exactly 1.00, every quartz carries 1.10. The record id below keeps its
-       historical name so existing external references stay valid, and the
-       g/cm³ ratio still uses 1/2.65 pending confirmation. -->
+       g/cm³ is the reference and default: pdp.stone.type stores curated real
+       densities in g/cm³. The legacy relative scale ("Wgt x n") is anchored
+       on iolite (~2.61 g/cm³) — NOT quartz: iolite is the only faceted stone
+       whose legacy factor is exactly 1.00, every quartz carries 1.10. The
+       record id below keeps its historical name so existing external
+       references stay valid. -->
   <record id="uom_rel_quartz" model="rubicon.uom">
     <field name="name">Relative to Iolite</field>
     <field name="symbol">×IOL</field>
     <field name="category_id" ref="uom_cat_stone_density"/>
-    <field name="ratio">1.0</field>
-    <field name="is_reference" eval="True"/>
-    <field name="is_global_default" eval="True"/>
+    <field name="ratio">2.61</field>
+    <field name="is_reference" eval="False"/>
+    <field name="is_global_default" eval="False"/>
   </record>
   <record id="uom_gcm3" model="rubicon.uom">
     <field name="name">Gramme per cm³</field>
     <field name="symbol">g/cm³</field>
     <field name="category_id" ref="uom_cat_stone_density"/>
-    <field name="ratio">0.377358</field>
-    <field name="is_reference" eval="False"/>
-    <field name="is_global_default" eval="False"/>
+    <field name="ratio">1.0</field>
+    <field name="is_reference" eval="True"/>
+    <field name="is_global_default" eval="True"/>
   </record>
 
   <!-- Stone Size units -->
