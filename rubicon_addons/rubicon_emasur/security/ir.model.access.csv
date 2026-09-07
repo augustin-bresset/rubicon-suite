@@ -14,3 +14,5 @@ access_emasur_shape_map,emasur.shape.map (manager),model_emasur_shape_map,rubico
 access_emasur_token_alias_user,emasur.token.alias (user),model_emasur_token_alias,rubicon_env.group_rubicon_user,1,0,0,0
 access_emasur_token_alias_editor,emasur.token.alias (editor),model_emasur_token_alias,rubicon_env.group_rubicon_editor,1,1,1,0
 access_emasur_token_alias,emasur.token.alias (manager),model_emasur_token_alias,rubicon_env.group_rubicon_manager,1,1,1,1
+access_emasur_convert_wizard,emasur.convert.wizard (user),model_emasur_convert_wizard,rubicon_env.group_rubicon_user,1,1,1,0
+access_emasur_system_wizard,emasur.system.wizard (manager),model_emasur_system_wizard,rubicon_env.group_rubicon_manager,1,1,1,0
