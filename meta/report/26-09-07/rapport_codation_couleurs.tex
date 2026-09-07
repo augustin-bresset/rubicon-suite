@@ -1,0 +1,460 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{Étude de la nouvelle codation des couleurs\\[2pt]
+\large Simulation des méthodes sur les données réelles Rubicon}
+\author{Suite Rubicon}
+\date{7 septembre 2026}
+
+\begin{document}
+\maketitle
+
+\section{Contexte et objet de l'étude}
+
+Chaque produit du catalogue porte un code de la forme
+\code{\{MODÈLE\}-\{COULEURS\}/\{MÉTAL\}}, par exemple
+\code{B012-AM+PER/W}~: le modèle \code{B012}, monté en or blanc
+(\code{W}), serti d'améthyste et de péridot. Le segment COULEURS juxtapose
+les codes des pierres, joints par \code{+}, la pierre centrale d'abord puis
+les autres par poids décroissant.
+
+Ce segment n'obéit aujourd'hui à aucune règle stricte~: la nuance de la
+pierre (sa \emph{shade}~—- \code{AA}, \code{PL Pink Light}\ldots) y est
+tantôt écrite, tantôt omise, et la forme de taille (\emph{shape}~—- ronde,
+poire\ldots) n'y figure jamais. Il en résulte des codes hétérogènes et un
+risque de collision~: deux produits aux pierres différentes peuvent porter
+le même code. L'objectif d'une nouvelle codation est double et
+contradictoire~—- des codes \emph{les plus courts et lisibles possible},
+mais \emph{sans perte d'information ni collision}. Plusieurs grammaires
+candidates ont été proposées~; cette étude les simule sur l'usage réel pour
+les départager. Elle traite aussi deux questions connexes~: le codage des
+boucles d'oreilles vendues à l'unité, et l'existence éventuelle d'un
+standard de place.
+
+Contrainte de continuité posée d'emblée~: quelle que soit la codation
+retenue, les codes historiques ne seront jamais réécrits~—- ils restent
+consultables et cherchables, avec une table de correspondance entre ancien
+et nouveau système (voir §\ref{sec:continuite}).
+
+\section{Données de l'étude}
+
+L'étude porte sur l'usage réel des pierres dans les compositions de produits~:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Lignes de composition (occurrences pondérantes) & 247\,898 \\
+Triplets distincts (type, shade, forme) utilisés & 2\,062 \\
+Types de pierre au dictionnaire & 112 \\
+Shades au dictionnaire & 115 \\
+Formes au dictionnaire & 178 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Les occurrences sont extraites des \emph{compositions r\'eelles}~:
+chaque ligne de pierre pos\'ee sur un produit compte, pond\'er\'ee par sa
+fr\'equence. Les \emph{shades} disposent bien d'un code au dictionnaire
+(115 codes, longueur moyenne 2,5, maximum 5~: \code{A}, \code{AA},
+\code{AAA}, \code{W1}, \code{PL}, \code{LC}, \code{T2}\ldots)~; la
+dysharmonie actuelle vient donc de leur \emph{usage} dans les codes
+produits (tant\^ot \'ecrits, tant\^ot omis, sans r\`egle), pas d'une absence
+de codes. Les m\'ethodes B et C sont simul\'ees avec ces codes r\'eels.
+
+Les statistiques sont pondérées par le nombre d'occurrences~: un code porté
+par 30\,000 lignes pèse 30\,000 fois plus qu'un code rare. Les valeurs par
+défaut (shade et forme) sont calculées \emph{par type}~: la shade par défaut
+du diamant est \code{White1~=~Si-P1}, sa forme par défaut \code{RDWFC},
+celle des pierres de couleur \code{RD}.
+
+\section{Grammaires candidates simulées}
+
+\begin{description}
+\item[A — type seul] Le jeton est le code du type~; shade et forme
+  disparaissent du code.
+\item[B — \code{TYPE.SHADE}] La shade n'est écrite que si elle diffère de la
+  shade par défaut du type.
+\item[C — \code{TYPE.SHADE.SHAPE}] Comme B, plus la forme si elle diffère de
+  la forme par défaut (\code{..} quand la shade est par défaut mais pas la
+  forme).
+\item[D — \code{PPSSHH}] Recodage de tout le dictionnaire en 2 caractères
+  (types, shades, formes), valeurs par défaut omises. Trois variantes pour
+  le cas « forme sans shade » (\code{PPHH})~: alphabets disjoints
+  (aucun séparateur), point de remplacement (\code{PP.HH}), ou shade
+  obligatoire dès que la forme est écrite (\code{PPSSHH}).
+\item[E — suffixe \code{[\,]}] Non exclusif~: un discriminant optionnel
+  ajouté seulement en cas de collision résiduelle, quelle que soit la
+  méthode porteuse.
+\end{description}
+
+\section{Résultats}
+
+\begin{center}
+\begin{tabular}{l r r r r l}
+\toprule
+Méthode & Moy. & Max & Variance & Écart-type & Information perdue \\
+\midrule
+A — type seul            & 2,85 &  5 & 0,58 & 0,76 & shade~: 97,6\,\% des occurrences ambiguës \\
+B — \code{TYPE.SHADE}    & 4,03 &  9 & 2,17 & 1,47 & forme (comme aujourd'hui) \\
+C — \code{TYPE.SHADE.SHAPE} & 5,04 & 15 & 5,44 & 2,33 & aucune \\
+D — disjoint             & \textbf{3,21} & \textbf{6} & 1,53 & 1,24 & aucune \\
+D — point                & 3,36 &  6 & 1,89 & 1,38 & aucune \\
+D — shade obligatoire    & 3,50 &  6 & 2,50 & 1,58 & aucune \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Chiffres utiles à la lecture~:
+38,7\,\% des occurrences portent une shade non-défaut (donc écrite)~;
+21,9\,\% une forme non-défaut~;
+le cas \code{PPHH} (forme écrite, shade par défaut) représente
+\textbf{14,6\,\%} des occurrences — c'est lui que les trois variantes de D
+départagent. La distribution actuelle des longueurs de codes de type~:
+32\,\% en 2 caractères, 55\,\% en 3, 12\,\% en 4--5.
+
+\subsection{Deux niveaux de lecture~: jeton pierre et code produit}
+
+Les ambiguïtés du tableau ci-dessus se lisent au niveau du \emph{jeton
+pierre}~: 97,6\,\% signifie qu'en lisant un jeton de la méthode A on ne
+peut pas, dans 97,6\,\% des occurrences, retrouver la shade de la pierre.
+C'est une mesure de perte d'information, pas un taux de doublons.
+
+La question pratique est ailleurs~: deux \emph{produits} du même modèle et
+du même métal peuvent-ils porter le même code~? Mesuré sur les
+45\,895 produits disposant d'une composition de pierres, en groupant par
+(modèle, métal, segment couleurs)~:
+
+\begin{center}
+\begin{tabular}{l r r}
+\toprule
+Grammaire & Produits en collision & Groupes \\
+\midrule
+A — type seul (vs shade)         & 13\,907 (30,3\,\%) & 4\,989 \\
+A — type seul (vs shade+forme)   & 14\,780 (32,2\,\%) & 5\,373 \\
+B — type+shade (vs forme)        &  1\,846 (4,0\,\%)  &   799 \\
+C / D — triplet complet          & 0 & — \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La médiane des modèles n'a qu'\emph{un seul} code couleurs (moyenne 3,0,
+maximum 79)~: l'intuition «~un modèle donné collisionne rarement~» est
+vraie pour le modèle médian, mais les modèles multi-variantes concentrent
+la masse~—- \textbf{30\,\% des produits} partageraient leur code avec un
+frère de shades différentes sous la méthode A. La méthode B ramène ce
+taux à 4\,\% (variantes de forme seule), C et D à zéro.
+
+Reste un dernier chiffre, indépendant de la grammaire~: \textbf{12,3\,\%}
+des produits (5\,661, en 2\,489 groupes) ont un frère aux pierres
+\emph{identiques} à shade et forme près~—- ils ne diffèrent que par le
+nombre, la taille ou la disposition des pierres, qu'aucun code couleurs
+n'encode. C'est précisément le domaine du suffixe \code{[\,]}
+(§\ref{sec:collisions})~: il n'est pas anecdotique et devra être
+spécifié.
+
+\subsection{Exemples concrets}
+
+Shades codées en exemple~: \code{1C} = Light Ceylon. \code{..} marque la
+shade par défaut omise en C.
+
+\begin{center}
+\small
+\begin{tabular}{l l l l l l}
+\toprule
+Pierre réelle & A & B & C & D-disjoint & D-point \\
+\midrule
+Diamant blanc défaut (RDWFC)      & \code{DTS}   & \code{DTS}    & \code{DTS}      & \code{DI}   & \code{DI} \\
+Saphir Light Ceylon, RD           & \code{SA}    & \code{SA.LC}  & \code{SA.LC}    & \code{SA1C} & \code{SA1C} \\
+Améthyste défaut, poire (PS)      & \code{AME}   & \code{AME}    & \code{AME..PS}  & \code{AMPS} & \code{AM.PS} \\
+Tourmaline rose défaut, RD        & \code{PTOUR} & \code{PTOUR}  & \code{PTOUR}    & \code{PT}   & \code{PT} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+En A, le saphir Light Ceylon et le saphir rose s'écrivent tous deux
+\code{SA}~: c'est la collision type~—~le saphir compte 32 shades utilisées,
+le diamant 23.
+
+\section{Fréquences et attribution des codes courts}
+
+Top 20 des types par usage, avec une \emph{proposition} d'allocation
+2~caractères (à valider~—- aucun doublon dans la proposition)~:
+
+\begin{center}
+\small
+\begin{tabular}{l l r r r l}
+\toprule
+Code actuel & Type & Occurrences & Part & Shades utilisées & Proposition \\
+\midrule
+DTS   & Diamond          & 56\,261 & 22,7\,\% & 23 & \code{DI} \\
+SA    & Sapphire         & 48\,746 & 19,7\,\% & 32 & \code{SA} \\
+BT    & Blue Topaz       & 16\,894 &  6,8\,\% &  4 & \code{BT} \\
+TSAV  & Tsavorite        & 14\,938 &  6,0\,\% &  4 & \code{TS} \\
+AME   & Amethyst         & 13\,158 &  5,3\,\% &  6 & \code{AM} \\
+CIT   & Citrine          & 10\,371 &  4,2\,\% &  4 & \code{CI} \\
+IOL   & Iolite           & 10\,051 &  4,1\,\% &  3 & \code{IO} \\
+PTOUR & Pink Tourmaline  &  9\,656 &  3,9\,\% &  2 & \code{PT} \\
+PER   & Peridot          &  9\,402 &  3,8\,\% &  3 & \code{PE} \\
+RHO   & Rhodolite        &  9\,224 &  3,7\,\% &  1 & \code{RH} \\
+MON   & Moon Stone       &  4\,723 &  1,9\,\% & 10 & \code{MO} \\
+RDF   & Rose de France   &  4\,428 &  1,8\,\% &  0 & \code{RF} \\
+GA    & Garnet           &  3\,827 &  1,5\,\% &  3 & \code{GA} \\
+PRL   & Pearl            &  3\,653 &  1,5\,\% & 12 & \code{PL} \\
+GQ    & Green Quartz     &  3\,136 &  1,3\,\% &  1 & \code{GQ} \\
+GTOUR & Green Tourmaline &  2\,865 &  1,2\,\% &  4 & \code{GT} \\
+PQA   & Pink Quartz      &  2\,375 &  1,0\,\% &  6 & \code{PQ} \\
+SMQ   & Smokey Quartz    &  2\,325 &  0,9\,\% &  3 & \code{SQ} \\
+RU    & Ruby             &  2\,104 &  0,8\,\% &  6 & \code{RU} \\
+LAQ   & Lemon Quartz     &  1\,774 &  0,7\,\% &  1 & \code{LQ} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Ces 20 types couvrent 92\,\% des occurrences~; les 92 types restants se
+partagent les 8\,\% et peuvent recevoir des codes moins mnémoniques sans
+douleur. Un outil d'allocation automatique par fréquence (avec veto manuel)
+est facile à fournir.
+
+\section{Un préalable~: les types porteurs de couleur}
+
+Le dictionnaire des types mélange trois familles~: les \emph{espèces pures}
+(\code{SA} Sapphire, \code{TOU} Tourmaline, \code{TOP} Topaz), les
+\emph{noms de variété} consacrés par la gemmologie (\code{AME} Amethyst,
+\code{CIT} Citrine, \code{RHO} Rhodolite, \code{TSAV} Tsavorite~—- pas un
+problème~: personne ne dit «~quartz violet~»), et \textbf{14 composés
+ad hoc couleur+espèce}~: \code{BT} Blue Topaz, \code{PTOUR} Pink
+Tourmaline, \code{GTOUR}, \code{GQ} Green Quartz, \code{PQA}, \code{SMQ},
+\code{LAQ}, \code{WT}, \code{WQA}, \code{CHP}, \code{RUT}, \code{OLQ},
+\code{BKTOU}, \code{BTOUR}. Ces composés portent \textbf{40\,184
+occurrences (16\,\% de l'usage)}, alors que les espèces de base
+coexistent, quasi inutilisées (\code{TOU}~: 14 occurrences, \code{TOP}~:
+19). Le même concept est donc encodé sur deux axes différents~: le saphir
+rose s'écrit \code{SA}+shade \code{PL}, la tourmaline rose s'écrit
+\code{PTOUR} tout court.
+
+Le cumul redouté «~type-couleur + shade~» existe~: \textbf{19\,402
+lignes}. Mais 98,6\,\% d'entre elles portent une shade de \emph{grade}
+(\code{BT}+\code{AA} = topaze bleue, ton moyen~—- 16\,891 lignes pour la
+seule topaze bleue, 2\,169 pour le quartz fumé)~: sémantiquement cohérent,
+structurellement impur. Les vraies redondances couleur-sur-couleur sont
+marginales et à nettoyer~: 3 lignes \code{PQA}+\code{PK} («~quartz rose~»
+rose). L'axe shade mélange d'ailleurs lui-même trois notions~: la
+\emph{teinte} (\code{PK}, \code{CD} chrome), le \emph{grade}
+(\code{A}/\code{AA}/\code{AAA}/\code{2}/\code{3}/\code{C}) et le
+\emph{phénomène} (\code{CDY} Cloudy, \code{ML} Milky, \code{SR} Star).
+
+La question de fond est donc~: \emph{sur quel axe la couleur doit-elle
+vivre~?} Deux architectures s'opposent~:
+
+\begin{enumerate}
+\item \textbf{Tout en article}~: chaque couple espèce+couleur devient un
+  type à part entière (généraliser ce que \code{BT} et \code{PTOUR} font
+  déjà), avec au besoin une convention de lettres pour les couleurs dans
+  les codes de types.
+\item \textbf{Tout en shade éclatée}~: la couleur reste dans l'axe shade,
+  mais celui-ci se scinde en trois sous-axes~—- teinte, grade,
+  phénomène~—- chacun avec un code d'un caractère.
+\end{enumerate}
+
+\subsection{Arbitrage recommandé~: l'article porte la couleur, la qualité
+s'éclate}
+\label{sec:axes}
+
+Les données tranchent~: les deux options règlent chacune une moitié du
+problème et se combinent.
+
+Côté shade, les 115 codes se répartissent en \textbf{7 grades, 9
+phénomènes et 99 «~couleurs et autres~»}~—- et ces 99 sont pour beaucoup
+des fusions teinte$\times$ton (\code{PL}~= Pink \emph{Light}, \code{PM}~=
+Pink \emph{Medium}, \code{LC}/\code{OC}~= ceylon \emph{light/open})~: la
+liste des teintes pures est courte ($\sim$15--25), une lettre y suffit.
+Côté type, généraliser l'article espèce+couleur porte le dictionnaire de
+112 à \textbf{277 entrées} en usage réel (gros contributeurs~: diamants
+\code{DTS+W1}/\code{T2}, saphirs \code{PL}/\code{LC}/\code{OC}/\code{PM})
+~—- confortable dans un espace 2 caractères (676 combinaisons).
+
+L'hybride retenu~:
+\begin{itemize}
+\item \textbf{l'identité dans le type}~: la couleur monte dans le type,
+  qui devient l'\emph{article commercial} (Pink Sapphire, Blue Topaz,
+  White Diamond SI)~—- ce que le métier nomme et price, et le modèle
+  même d'Emasur~; l'asymétrie \code{SA}+\code{PL} / \code{PTOUR}
+  disparaît~;
+\item \textbf{la qualité dans la shade, scindée}~: grade sur un
+  caractère (chiffre~—- 7 valeurs) et phénomène sur une lettre (9
+  valeurs)~; plus aucune teinte dans la shade \emph{par construction},
+  la redondance couleur-sur-couleur devient impossible~;
+\item la grammaire D devient \code{PP}~(article) + \code{G}~(grade,
+  chiffre) + \code{P}~(phénomène, lettre) + \code{HH}~(forme)~—-
+  alphabets disjoints par construction, codes encore plus courts
+  puisque la teinte a disparu dans \code{PP}~;
+\item la convention de lettres-couleurs dans les codes d'articles reste
+  une \emph{préférence} de l'outil d'allocation (systématisable en
+  3 caractères, trop à l'étroit en 2 pour 277 articles).
+\end{itemize}
+
+Coût assumé~: le dictionnaire d'articles est vivant (une nouvelle couleur
+de quartz = une nouvelle ligne)~—- d'où l'écran de curation et l'outil
+d'allocation par fréquence. En échange, la saisie garde deux axes
+principaux (article, qualité) au lieu de quatre menus. En attendant le
+nouveau système, un garde-fou reste possible sur l'ancien~: interdire une
+shade de teinte sur un type déjà porteur de couleur (les 3 lignes
+\code{PQA}+\code{PK} sont à nettoyer).
+
+\subsection{Exemple fil rouge~: une même bague sous chaque grammaire}
+
+Bague \code{B012} en or blanc~—- centre \textbf{saphir ceylon clair
+taillé poire}, entourage \textbf{topaze bleue grade AA ronde}, pavage
+\textbf{diamants blancs baguette}. Codes d'exemple pour les schémas
+recodés~: \code{LC}$\to$\code{1C}, \code{W1}$\to$\code{1W}, grade
+\code{AA}$\to$\code{2}, articles \code{SC}~Ceylon Sapphire,
+\code{BT}~Blue Topaz, \code{DI}~White Diamond. Défauts~: shade
+\code{PL} et forme \code{RD} pour le saphir, shade \code{A} et forme
+\code{RD} pour la topaze, shade \code{W1} et forme \code{RDWFC} pour le
+diamant.
+
+\begin{center}
+\small
+\begin{tabular}{l l r l}
+\toprule
+Grammaire & Segment couleurs & Long. & Information perdue \\
+\midrule
+Aujourd'hui (sans règle) & \code{SA+BTAA+D} \emph{ou} \code{SALC+BT+DTS}\ldots & — & variable, non prédictible \\
+A — type seul            & \code{SA+BT+DTS}            &  9 & teintes, grades, formes \\
+B — \code{TYPE.SHADE}    & \code{SA.LC+BT.AA+DTS}      & 15 & formes \\
+C — complet              & \code{SA.LC.PS+BT.AA+DTS..BG} & 22 & aucune \\
+D — disjoint             & \code{SA1CPS+BT2A+DIBG}     & 16 & aucune \\
+D — point                & \code{SA1CPS+BT2A+DI.BG}    & 17 & aucune \\
+D — shade obligatoire    & \code{SA1CPS+BT2A+DI1WBG}   & 18 & aucune \\
+\textbf{Hybride (retenu)} & \code{SC1PS+BT2+DIBG}     & \textbf{14} & aucune \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Lecture de l'hybride~: \code{SC1PS} = article saphir ceylon, grade
+1~(light), forme poire~; \code{BT2} = topaze bleue, grade 2~(AA), forme
+par défaut~; \code{DIBG} = diamant blanc, grade par défaut, baguette. La
+teinte ayant rejoint l'article, c'est le segment le plus court qui ne
+perde \emph{aucune} information~—- et chaque bloc se découpe sans
+séparateur (article~= lettres, grade~= chiffre, forme~= lettres).
+
+\section{La question \code{PPHH} et la variante recommandée}
+
+Le cas « forme écrite, shade par défaut » touche 14,6\,\% des
+occurrences. Les trois options~:
+
+\begin{enumerate}
+\item \textbf{Alphabets disjoints (recommandée)}~: les codes de shade
+  commencent par un \emph{chiffre} (ex.~\code{1C}, \code{2A}), les codes de
+  forme par une \emph{lettre}. $10 \times 36 = 360$ combinaisons pour 115
+  shades, largement suffisant. Les codes de shade actuels \'etant
+  surtout alphab\'etiques (\code{A}, \code{PL}, \code{GYAAA}\ldots, avec
+  d\'ej\`a \code{2} et \code{3} num\'eriques), D implique de recoder les 115
+  shades~—- table de correspondance triviale. Le code \code{SA1CPS} se découpe alors sans
+  ambiguïté ni séparateur~: moyenne 3,21, maximum 6.
+\item \textbf{Point de remplacement} (\code{AM.PS})~: lisible, +0,15 de
+  moyenne, réintroduit un séparateur dans 14,6\,\% des codes.
+\item \textbf{Shade obligatoire avec la forme}~: grammaire la plus simple
+  mais la plus longue (+0,29) et oblige à écrire une information par
+  défaut.
+\end{enumerate}
+
+\section{Collisions résiduelles et suffixe \code{[\,]}}
+\label{sec:collisions}
+
+Avec D (ou C), le triplet complet est encodé~: il n'y a plus de collision
+\emph{de pierre}. Le suffixe \code{[\,]} reste utile à un autre niveau~: deux
+\emph{produits} du même modèle portant les mêmes pierres en composition
+différente (nombre, disposition). Mesuré sur les données~: 12,3\,\% des produits sont dans ce cas. Il doit rester optionnel~;
+l'unicité du code produit est déjà contrôlée par le logiciel (contrainte
+d'unicité + suggestion de code calculée).
+
+\section{Recommandation}
+
+\textbf{Méthode D, variante alphabets disjoints.} C'est la seule qui soit à
+la fois courte (3,21 en moyenne, jamais plus de 6), complète (shade et forme
+encodées quand elles s'écartent du défaut), bornée (largeur fixe par bloc,
+lisible par machine sans séparateur) et harmonieuse (une seule règle pour
+tout le dictionnaire). Combinée à l'arbitrage des axes (§\ref{sec:axes})~—- l'article porte
+la couleur, la qualité s'éclate en grade et phénomène~—- elle donne la
+grammaire cible \code{PP\,G\,P\,HH}. Son coût~: recoder les dictionnaires
+et assumer une table de correspondance — coût déjà
+provisionné, voir §\ref{sec:continuite}. Si ce recodage devait être refusé,
+la méthode B (\code{TYPE.SHADE} avec défauts) est le meilleur compromis sans
+recodage~: elle règle l'incohérence d'usage des shades (le problème réellement
+vécu) pour +1,2 caractère en moyenne (4,03, maximum 9), en restant sans
+la forme, comme aujourd'hui.
+
+\section{Existe-t-il d\'ej\`a un standard de codes~?}
+
+Pour les \textbf{diamants}, oui~: les 4C du GIA (couleur \code{D--Z},
+puret\'e \code{FL--I3}) sont le standard de fait mondial — la shade
+\code{W1 = Si-P1} du dictionnaire s'y r\'ef\`ere d\'ej\`a. Pour les
+\textbf{pierres de couleur}, non~: il n'existe aucun standard international
+de codes. Le GIA propose une \emph{description} teinte/ton/saturation
+(ex.~\code{vB 6/5}) — trop verbeuse pour servir de code d'identit\'e — et
+l'\'echelle commerciale \code{AAA/AA/A}, que nos codes refl\`etent d\'ej\`a,
+varie d'un n\'egociant \`a l'autre sans organisme normalisateur (le CIBJO ne
+normalise que la nomenclature et la divulgation des traitements). Conclusion~:
+rien \`a adopter tel quel~; notre dictionnaire reste propri\'etaire, en
+gardant l'ancrage GIA pour le vocabulaire des shades de diamants.
+
+\section{Boucles d'oreilles~: \code{EL} / \code{ER}}
+
+Les boucles d'oreilles sont aujourd'hui référencées uniquement par paire
+(catégorie \code{E}). Le besoin nouveau~: distinguer une boucle vendue à
+l'unité, oreille gauche ou droite. Deux notations sont en présence~: celle
+proposée par Emasur, \code{EXXX*OG} / \code{EXXX*OD} (\emph{oreille
+gauche/droite}), et l'alternative \code{EL} / \code{ER} (\emph{earring
+left/right}), \code{E} restant la paire. La première mélange français et
+anglais dans un dictionnaire jusqu'ici anglophone et introduit un
+séparateur inédit (\code{*})~; la seconde s'insère dans la grammaire
+existante sans rien ajouter. Recommandation~: \code{EL}/\code{ER}.
+Vérification faite en base~: les codes de catégorie \code{EL} et \code{ER}
+sont \emph{libres} (l'existant a \code{E} Earring, \code{EB} Earrings
+Bottom, \code{BO} Earrings Top) et le mécanisme qui déduit la catégorie du
+préfixe alphabétique du code produit les reconnaîtra sans modification.
+11\,282 produits commencent par \code{E} aujourd'hui~; rien à migrer, les
+codes \code{EL}/\code{ER} ne concernent que les nouvelles références vendues
+à l'unité.
+
+\section{Continuité avec l'ancien système}
+\label{sec:continuite}
+
+L'exigence~: ne rien écraser, garder l'ancien code consultable, disposer
+d'une table de correspondance entre les deux systèmes. \textbf{L'infrastructure existe déjà}~:
+chaque produit, modèle, pierre et métal porte un champ \emph{code alternatif}
+(avec sa provenance officielle/calculée), l'historique des commandes est
+indexé sous les deux notations, la recherche trouve toujours les deux, et
+l'affichage se bascule par utilisateur. Les tables de correspondance
+(pierre~$\leftrightarrow$~code externe, alias de tokens hérités) sont en
+place avec leurs écrans de curation. La nouvelle codation couleur viendra
+s'y loger comme un système de notation supplémentaire~: l'ancien code n'est
+jamais réécrit (quand un code structuré est appliqué à un produit, l'ancien
+est conservé et reste cherchable).
+
+\section{Prochaines étapes}
+
+\begin{enumerate}
+\item Valider l'architecture des axes (article porteur de couleur,
+  qualité scindée grade/phénomène, §\ref{sec:axes}) et la grammaire
+  \code{PP\,G\,P\,HH} (D-disjoint).
+\item Attribuer les codes 2 caractères~: outil de proposition automatique
+  par fréquence, veto manuel, puis gel du dictionnaire.
+\item Fixer la règle d'écriture des shades dans le code produit (les
+  codes existent déjà au dictionnaire)~; pour D, les recoder en
+  2~caractères à initiale chiffrée.
+\item Module de transcription/vérification~: recherche code~$\to$~pierre et
+  pierre~$\to$~code (idem shade, forme)~; le contrôle de cohérence d'une
+  commande (ordre des pierres~: centre d'abord, puis poids décroissant)
+  existe déjà et sera étendu à la nouvelle grammaire.
+\item Documentation des calculs~: la règle d'ordre est documentée dans le
+  dépôt (\code{rubicon\_addons/pdp\_product/README.md}).
+\end{enumerate}
+
+\end{document}
