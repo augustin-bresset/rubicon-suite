@@ -370,15 +370,22 @@
                         <td class="text-right">
                             <span t-esc="int(line.qty) if line.qty == int(line.qty) else line.qty"/>
                         </td>
-                        <!-- Weight columns inserted between Qty and Unit Price -->
+                        <!-- Weight columns inserted between Qty and Unit Price.
+                             The legacy source stores unweighed metal as a negative
+                             remainder (gross weight missing): a negative weight is
+                             never printed and counts for zero in the line total. -->
                         <t t-if="show_weights">
-                            <td class="text-right"><span t-esc="'%.4f' % (line.diamond_weight or 0)"/></td>
-                            <td class="text-right"><span t-esc="'%.4f' % (line.stone_weight or 0)"/></td>
-                            <td class="text-right"><span t-esc="'%.4f' % (line.diverse_weight or 0)"/></td>
-                            <td class="text-right"><span t-esc="'%.4f' % (line.metal_weight or 0)"/></td>
+                            <t t-set="_w_dia"   t-value="max(line.diamond_weight or 0, 0)"/>
+                            <t t-set="_w_stone" t-value="max(line.stone_weight or 0, 0)"/>
+                            <t t-set="_w_div"   t-value="max(line.diverse_weight or 0, 0)"/>
+                            <t t-set="_w_metal" t-value="max(line.metal_weight or 0, 0)"/>
+                            <td class="text-right"><span t-esc="'%.4f' % _w_dia if (line.diamond_weight or 0) &gt;= 0 else ''"/></td>
+                            <td class="text-right"><span t-esc="'%.4f' % _w_stone if (line.stone_weight or 0) &gt;= 0 else ''"/></td>
+                            <td class="text-right"><span t-esc="'%.4f' % _w_div if (line.diverse_weight or 0) &gt;= 0 else ''"/></td>
+                            <td class="text-right"><span t-esc="'%.4f' % _w_metal if (line.metal_weight or 0) &gt;= 0 else ''"/></td>
                             <td class="text-right">
                                 <!-- add_as via absolute_factor: no hardcoded conversion -->
-                                <t t-set="_tw_abs" t-value="((line.diamond_weight or 0) + (line.stone_weight or 0) + (line.diverse_weight or 0)) * _stone_abs + (line.metal_weight or 0) * _metal_abs"/>
+                                <t t-set="_tw_abs" t-value="(_w_dia + _w_stone + _w_div) * _stone_abs + _w_metal * _metal_abs"/>
                                 <span t-esc="'%.4f' % (_tw_abs / _target_abs)"/>
                             </td>
                         </t>

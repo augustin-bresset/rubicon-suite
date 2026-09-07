@@ -60,6 +60,16 @@ class TestDualNotation(TransactionCase):
             item.with_context(print_notation='alternative').report_design_lines(),
             ['ZZDN1-XXX9/W'])
 
+    def test_printed_design_converts_on_the_fly_when_not_stored(self):
+        doc = self.env['sis.document'].create({'name': 'SO-ZZD-25004', 'doc_type_code': 'SO'})
+        item = self.env['sis.document.item'].create({
+            'document_id': doc.id, 'design': 'ZZDN1-CIT+GA/W', 'sequence': 1})
+        # Simulate a line written before the mapping existed
+        item.alt_design = False
+        self.assertEqual(
+            item.with_context(print_notation='both').report_design_lines(),
+            ['ZZDN1-CIT+GA/W', 'ZZDN1-CT1A+GA/W'])
+
     def test_backfill_is_setwise_and_rerunnable(self):
         doc = self.env['sis.document'].create({'name': 'SO-ZZD-25002', 'doc_type_code': 'SO'})
         ok = self.env['sis.document.item'].create({

@@ -234,6 +234,13 @@ class SisDocumentItem(models.Model):
         lines = super().report_design_lines()
         notation = self.env.context.get('print_notation') or 'legacy'
         alt = self.alt_design or ''
+        if not alt and notation in ('alternative', 'both') and self.design:
+            # A line written before the latest mapping curation may not have
+            # its conversion stored yet: try again at print time (still only
+            # complete conversions — never half-translated codes).
+            outcome = self.env['emasur.converter'].design_to_emasur(self.design)
+            if outcome.get('code') and not outcome.get('unknown'):
+                alt = outcome['code']
         if notation == 'alternative':
             return [alt] if alt else lines
         if notation == 'both' and alt and alt not in lines:
