@@ -13,6 +13,7 @@
         # sis.document and sis.document.item are business data — loaded via ops/migration/import/import_sis_documents.py
         'report/report_action.xml',
         'report/report_sis_document.xml',
+        'wizard/print_wizard_views.xml',
         'views/document_views.xml',
         'views/doc_type_views.xml',
         'views/menus.xml',

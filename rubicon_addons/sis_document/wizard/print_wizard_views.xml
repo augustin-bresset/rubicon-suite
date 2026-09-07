@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sis_document_print_wizard" model="ir.ui.view">
+        <field name="name">sis.document.print.wizard.form</field>
+        <field name="model">sis.document.print.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print Document">
+                <group>
+                    <field name="document_ids" widget="many2many_tags" readonly="1"/>
+                    <field name="print_type"/>
+                    <field name="print_markup"/>
+                    <field name="print_notation"/>
+                    <field name="print_pictures"/>
+                </group>
+                <footer>
+                    <button name="action_print" string="Print" type="object"
+                            class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" class="btn-secondary"
+                            special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Shown in the Print menu of the list and form views; replaces the
+         direct report binding so the options are always offered. -->
+    <record id="action_sis_document_print_wizard" model="ir.actions.act_window">
+        <field name="name">SIS Document</field>
+        <field name="res_model">sis.document.print.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_sis_document"/>
+        <field name="binding_type">report</field>
+        <field name="binding_view_types">list,form</field>
+    </record>
+</odoo>

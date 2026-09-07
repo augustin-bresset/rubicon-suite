@@ -11,3 +11,4 @@ access_sis_document,sis.document (manager),model_sis_document,rubicon_env.group_
 access_sis_document_item_user,sis.document.item (user),model_sis_document_item,rubicon_env.group_rubicon_user,1,0,0,0
 access_sis_document_item_editor,sis.document.item (editor),model_sis_document_item,rubicon_env.group_rubicon_editor,1,1,1,0
 access_sis_document_item,sis.document.item (manager),model_sis_document_item,rubicon_env.group_rubicon_manager,1,1,1,1
+access_sis_document_print_wizard,sis.document.print.wizard (user),model_sis_document_print_wizard,rubicon_env.group_rubicon_user,1,1,1,0

@@ -30,6 +30,18 @@ class TestReportHelpers(TransactionCase):
     def test_picture_absent_without_a_product(self):
         self.assertFalse(self.item.report_picture())
 
+    def test_print_wizard_carries_the_options_to_the_report(self):
+        wizard = self.env['sis.document.print.wizard'].with_context(
+            active_model='sis.document', active_ids=self.doc.ids,
+        ).create({'print_type': 'normal', 'print_notation': 'both',
+                  'print_pictures': True, 'print_markup': 2.5})
+        self.assertEqual(wizard.document_ids, self.doc)
+        action = wizard.action_print()
+        self.assertEqual(action['report_name'], 'sis_document.report_sis_document')
+        for key, value in [('print_type', 'normal'), ('print_notation', 'both'),
+                           ('print_pictures', True), ('print_markup', 2.5)]:
+            self.assertEqual(action['context'].get(key), value)
+
     def test_picture_resolves_through_the_linked_product(self):
         # pdp_picture is a soft dependency of the report; only testable when
         # it is installed (always the case in the combined CI database).
