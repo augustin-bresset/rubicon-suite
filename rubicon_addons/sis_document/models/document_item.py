@@ -1,4 +1,7 @@
+import base64
+
 from odoo import models, fields, api
+from odoo.tools import image_process
 
 
 class SisDocumentItem(models.Model):
@@ -168,3 +171,37 @@ class SisDocumentItem(models.Model):
             return ''
         cat = self.env['pdp.product.category'].sudo().search([('code', '=', prefix)], limit=1)
         return cat.name if cat else ''
+
+    # =========================================================================
+    # Printed document helpers (called from the QWeb report)
+    # =========================================================================
+
+    def report_design_lines(self):
+        """Design reference lines to print for this item, first line prominent.
+
+        Base behaviour: the historical design snapshot only. Notation modules
+        extend this to honour the ``print_notation`` context key.
+        """
+        self.ensure_one()
+        return [self.design or '']
+
+    def report_picture(self, size=256):
+        """Picture (base64) to print next to this line, or False.
+
+        Sourced from pdp.picture through the linked product. pdp_picture is
+        optional, so its model is looked up at runtime rather than through a
+        manifest dependency. A product-scoped picture wins over the shared
+        model thumbnail; the image is downscaled so long documents stay
+        printable.
+        """
+        self.ensure_one()
+        if 'pdp.picture' not in self.env or not self.product_id:
+            return False
+        picture = self.env['pdp.picture'].search(
+            [('product_ids', 'in', self.product_id.id)],
+            order='scope desc, id', limit=1,
+        )
+        if not picture.image_1920:
+            return False
+        raw = image_process(base64.b64decode(picture.image_1920), size=(size, size))
+        return base64.b64encode(raw) if raw else False

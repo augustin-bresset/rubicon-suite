@@ -74,6 +74,8 @@ export class SisWorkspace extends Component {
             showPrintModal: false,
             printType: 'with_weights',
             printMarkup: 0.0,
+            printNotation: 'legacy',
+            printPictures: false,
 
             // ── Prices modal (PDP suggestion) ───────────────────
             showPricesModal: false,
@@ -1091,6 +1093,8 @@ export class SisWorkspace extends Component {
                 active_model: "sis.document",
                 print_type: this.state.printType,
                 print_markup: this.state.printMarkup,
+                print_notation: this.state.printNotation,
+                print_pictures: this.state.printPictures,
             }
         });
     }

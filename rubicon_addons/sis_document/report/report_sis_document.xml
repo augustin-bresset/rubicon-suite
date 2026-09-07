@@ -31,6 +31,7 @@
         <t t-set="markup_factor" t-value="1.0 + markup_pct / 100.0"/>
         <t t-set="show_weights"  t-value="print_type in ('with_weights', 'compressed')"/>
         <t t-set="is_compressed" t-value="print_type == 'compressed'"/>
+        <t t-set="show_pictures" t-value="bool(env.context.get('print_pictures'))"/>
 
 
 
@@ -350,9 +351,17 @@
                         <td class="text-center"><span t-esc="line_no"/></td>
                         <!-- Description column: product type from design prefix → pdp.product.category -->
                         <td><span t-esc="line.get_category_name()"/></td>
-                        <!-- Design column: code prominent, description small below -->
+                        <!-- Design column: code prominent (per requested notation),
+                             optional picture above, description small below -->
                         <td>
-                            <div style="font-weight:bold; font-size:11px; line-height:1.2;"><span t-esc="line.design or ''"/></div>
+                            <t t-set="line_picture" t-value="show_pictures and line.report_picture()"/>
+                            <img t-if="line_picture" t-att-src="image_data_uri(line_picture)"
+                                 style="max-height:52px; max-width:80px; display:block; margin-bottom:2px;"/>
+                            <t t-foreach="line.report_design_lines()" t-as="design_line">
+                                <div t-att-style="'font-weight:bold; font-size:11px; line-height:1.2;' if design_line_index == 0 else 'font-size:9px; color:#555; line-height:1.2;'">
+                                    <span t-esc="design_line"/>
+                                </div>
+                            </t>
                             <t t-if="not is_compressed and line.description">
                                 <div style="font-size:7px; color:#777; margin-top:1px;"><span t-esc="line.description"/></div>
                             </t>

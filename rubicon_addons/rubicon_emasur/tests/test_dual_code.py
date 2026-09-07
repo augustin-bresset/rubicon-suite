@@ -43,6 +43,23 @@ class TestDualNotation(TransactionCase):
         item.write({'design': 'ZZDN1-XXX9/W'})
         self.assertFalse(item.alt_design)
 
+    def test_printed_design_follows_the_requested_notation(self):
+        doc = self.env['sis.document'].create({'name': 'SO-ZZD-25003', 'doc_type_code': 'SO'})
+        item = self.env['sis.document.item'].create({
+            'document_id': doc.id, 'design': 'ZZDN1-CIT+GA/W', 'sequence': 1})
+        self.assertEqual(item.report_design_lines(), ['ZZDN1-CIT+GA/W'])
+        self.assertEqual(
+            item.with_context(print_notation='alternative').report_design_lines(),
+            ['ZZDN1-CT1A+GA/W'])
+        self.assertEqual(
+            item.with_context(print_notation='both').report_design_lines(),
+            ['ZZDN1-CIT+GA/W', 'ZZDN1-CT1A+GA/W'])
+        # A line with no alternative code prints the legacy design either way
+        item.write({'design': 'ZZDN1-XXX9/W'})
+        self.assertEqual(
+            item.with_context(print_notation='alternative').report_design_lines(),
+            ['ZZDN1-XXX9/W'])
+
     def test_backfill_is_setwise_and_rerunnable(self):
         doc = self.env['sis.document'].create({'name': 'SO-ZZD-25002', 'doc_type_code': 'SO'})
         ok = self.env['sis.document.item'].create({

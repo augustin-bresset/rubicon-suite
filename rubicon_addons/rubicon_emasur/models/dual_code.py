@@ -119,7 +119,7 @@ class EmasurCodeMixin(models.AbstractModel):
 class PdpProduct(models.Model):
     _name = 'pdp.product'
     _inherit = ['pdp.product', 'emasur.code.mixin']
-    _rec_names_search = ['code', 'alt_code']
+    _rec_names_search = ['code', 'alt_code', 'legacy_code']
 
     def _alt_code_suggestion(self):
         self.ensure_one()
@@ -221,6 +221,24 @@ class SisDocumentItem(models.Model):
             outcome = convert.design_to_emasur(item.design) if item.design else {}
             code = outcome.get('code')
             item.alt_design = code if code and not outcome.get('unknown') else False
+
+    def report_design_lines(self):
+        """Print the design in the notation asked by ``print_notation``.
+
+        'legacy' (default) keeps the historical snapshot, 'alternative'
+        prints the alternative code (falling back to the legacy one on a
+        line that has none yet), and 'both' prints the legacy code with
+        the alternative one under it.
+        """
+        self.ensure_one()
+        lines = super().report_design_lines()
+        notation = self.env.context.get('print_notation') or 'legacy'
+        alt = self.alt_design or ''
+        if notation == 'alternative':
+            return [alt] if alt else lines
+        if notation == 'both' and alt and alt not in lines:
+            return lines + [alt]
+        return lines
 
     @api.model_create_multi
     def create(self, vals_list):
