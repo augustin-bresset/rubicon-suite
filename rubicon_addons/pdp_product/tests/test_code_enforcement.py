@@ -52,6 +52,11 @@ class TestCodeEnforcement(TransactionCase):
         self.assertEqual(product.code, 'ZENF1-ZENFA+ZENFB/W')
         self.assertEqual(product.legacy_code, 'TMP-APPLY-1')
         self.assertEqual(product.stone_composition_id.code, 'ZENF1-ZENFA+ZENFB')
+        # The historical reference must still find the renamed product
+        # (active_test off: this fixture product is archived by default)
+        hits = self.env['pdp.product'].with_context(
+            active_test=False).name_search('TMP-APPLY-1')
+        self.assertIn(product.id, [h[0] for h in hits])
 
     def test_apply_is_noop_when_already_matching(self):
         comp = self._comp_with('ZENF1-ZENFA', [(self.s_a, 1.0)])

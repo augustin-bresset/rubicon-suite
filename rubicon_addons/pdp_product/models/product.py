@@ -6,7 +6,9 @@ class Product(models.Model):
     _description = 'Product is defined by his model and a specific composition of stones'
 
     _rec_name='code'
-    
+    # A renamed product must stay findable under its historical reference.
+    _rec_names_search = ['code', 'legacy_code']
+
     code = fields.Char(
         string='Design reference code',
         required=True,

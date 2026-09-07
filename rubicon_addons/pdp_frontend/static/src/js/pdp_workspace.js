@@ -289,7 +289,7 @@ export class PdpWorkspace extends Component {
     matchesCode(rec, needle) {
         const ql = (needle || "").toLowerCase();
         if (!ql) return true;
-        return ["code", "alt_code"].some(
+        return ["code", "alt_code", "legacy_code"].some(
             (f) => (rec[f] || "").toLowerCase().includes(ql));
     }
 
@@ -710,7 +710,7 @@ export class PdpWorkspace extends Component {
             this.state.products = await this.orm.searchRead(
                 "pdp.product",
                 [["model_id", "=", this.state.selectedModelId]],
-                ["id", "code", "create_date", "in_collection", "category_id", "metal", "active", "remark", "alt_code"]
+                ["id", "code", "create_date", "in_collection", "category_id", "metal", "active", "remark", "alt_code", "legacy_code"]
             );
 
             await Promise.all([
