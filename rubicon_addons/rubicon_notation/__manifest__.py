@@ -16,7 +16,9 @@ defaults and every token parses without separators. The optional wiring
 to the PDP stone data (transcription of real compositions, order
 verification, proposals from usage) lives in rubicon_notation_pdp.
 """,
-    'depends': ['rubicon_env'],
+    # 'base' only: the module must install on a bare Odoo, outside this
+    # suite. The suite's 3-level access policy is layered on by the bridge.
+    'depends': ['base'],
     'data': [
         'security/ir.model.access.csv',
         'views/notation_views.xml',

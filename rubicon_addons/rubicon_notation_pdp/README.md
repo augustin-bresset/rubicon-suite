@@ -13,7 +13,15 @@ notation automatically).
   center first then heaviest), `verify_product` (is a written colour
   code coherent with the stones and their order?).
 - The wizard gains the **Verify a product** mode.
-- `make propose-notation` prefills empty dictionaries from actual usage
-  (most-used stones grab the natural letters, defaults from usage,
-  grades from the known legacy quality shades). Hues and fused-shade
-  mappings are left to human curation. Dev-side and idempotent.
+- `make propose-notation` prefills the dictionaries from actual usage so
+  that EVERY legacy record has a correspondence: stones and shapes get
+  2-letter codes (most-used first), grades map the known quality shades,
+  every remaining shade is decomposed into hue and/or grade (fused
+  labels like *Pink Light* split on the tone word), hues get
+  digit+initial codes (Pink → 1P), colour-bearing type names propose the
+  article's implied hue, and each article's defaults follow its usage.
+  Proposals, not truth — review them in the dictionary screens.
+  Dev-side and idempotent.
+- The suite's 3-level access policy on the core dictionaries is layered
+  on here (the core alone ships read-for-all / admin-full, so it stays
+  installable on a bare Odoo).

@@ -105,18 +105,30 @@ class NotationServicePdp(models.AbstractModel):
 
     # --------------------------------------- dev-side code proposal (bulk)
 
+    TONE_WORDS = ('light', 'medium', 'dark', 'darker', 'good', 'bad')
+    COLOUR_WORDS = ('blue', 'pink', 'green', 'black', 'brown', 'white',
+                    'grey', 'gray', 'olive', 'lemon', 'smokey', 'smoky',
+                    'champaign', 'champagne', 'yellow', 'red', 'orange',
+                    'purple', 'violet')
+
     @api.model
     def action_propose_codes(self):
-        """Prefill empty dictionaries with frequency-based proposals.
+        """Prefill the dictionaries with frequency-based proposals so that
+        EVERY legacy record has a correspondence.
 
         Dev-side tool (Makefile / shell), never exposed in the UI. Stones
         and shapes get 2-letter codes mnemonic where possible, most-used
         first so frequent entries grab the natural letters; grades map the
-        known legacy grade shades to digits; each article's default shape
-        follows its usage. Hues and fused-shade mappings are left to human
-        curation. Idempotent: existing rows are kept.
+        known legacy grade shades to digits; every remaining legacy shade
+        is decomposed into hue and/or grade (fused labels like 'Pink
+        Light' split, the tone word matching a grade); hues get digit+
+        initial codes (Pink -> 1P); colour-bearing type names propose the
+        article's implied hue; and each article's defaults (shape, grade,
+        hue) follow its actual usage. Proposals, not truth: review them in
+        the dictionary screens. Idempotent: existing rows are kept.
         """
-        counts = {'stones': 0, 'shapes': 0, 'grades': 0}
+        counts = {'stones': 0, 'shapes': 0, 'grades': 0,
+                  'hues': 0, 'shade_maps': 0, 'implied': 0, 'defaults': 0}
         Stone = self.env['rubicon.notation.stone']
         Shape = self.env['rubicon.notation.shape']
         Grade = self.env['rubicon.notation.grade']
@@ -180,7 +192,81 @@ class NotationServicePdp(models.AbstractModel):
                     Map.create({'shade_id': shade.id, 'grade_id': grade.id})
                 counts['grades'] += 1
                 digit += 1
+
+        # Every remaining shade gets a correspondence: hue, grade, or both.
+        grades = Grade.search([])
+
+        def grade_for_tone(word):
+            candidates = grades.filtered(lambda g: word in g.name.lower())
+            # prefer the letter quality scale (A/AA/...) over the numeric one
+            letter = candidates.filtered(lambda g: g.name[:1].isalpha())
+            return (letter or candidates)[:1]
+
+        mapped_shades = set(Map.search([]).mapped('shade_id').ids)
+        for shade in self.env['pdp.stone.shade'].search([]):
+            if shade.id in mapped_shades:
+                continue
+            tokens = (shade.shade or shade.code or '').split()
+            if tokens and tokens[0].upper() == (shade.code or '').upper():
+                tokens = tokens[1:]     # drop the leading pseudo-code word
+            tone = next((t.lower() for t in tokens
+                         if t.lower() in self.TONE_WORDS
+                         and grade_for_tone(t.lower())), None)
+            grade = grade_for_tone(tone) if tone and len(tokens) > 1 else Grade
+            hue_words = [t for t in tokens
+                         if t.lower() not in ('color', 'colour')
+                         and not (grade and t.lower() in self.TONE_WORDS)]
+            hue_name = ' '.join(hue_words) or (shade.shade or shade.code)
+            hue = self._find_or_create_hue(hue_name, counts)
+            Map.create({'shade_id': shade.id,
+                        'grade_id': grade.id if grade else False,
+                        'hue_id': hue.id})
+            counts['shade_maps'] += 1
+
+        # Colour-bearing type names propose the article's implied hue.
+        for article in Stone.search([('implied_hue_id', '=', False),
+                                     ('type_id', '!=', False)]):
+            words = (article.name or '').split()
+            if len(words) >= 2 and words[0].lower() in self.COLOUR_WORDS:
+                article.implied_hue_id = self._find_or_create_hue(
+                    words[0].title(), counts)
+                counts['implied'] += 1
+
+        # Article defaults follow the most-used shade of the type.
+        for article in Stone.search([('type_id', '!=', False)]):
+            shade_id = stats.get(article.type_id.id, (None, None))[0]
+            if not shade_id:
+                continue
+            mapping = Map.search([('shade_id', '=', shade_id)], limit=1)
+            updates = {}
+            if mapping.grade_id and not article.default_grade_id:
+                updates['default_grade_id'] = mapping.grade_id.id
+            if (mapping.hue_id and not article.default_hue_id
+                    and mapping.hue_id != article.implied_hue_id):
+                updates['default_hue_id'] = mapping.hue_id.id
+            if updates:
+                article.write(updates)
+                counts['defaults'] += 1
         return counts
+
+    @api.model
+    def _find_or_create_hue(self, name, counts):
+        """Existing hue by name (case-insensitive), else create one with a
+        digit + initial code (Pink -> 1P, Purple -> 2P...)."""
+        Hue = self.env['rubicon.notation.hue']
+        hue = Hue.search([('name', '=ilike', name)], limit=1)
+        if hue:
+            return hue
+        initial = next((c for c in name.upper() if c.isalpha()), 'X')
+        taken = set(Hue.search([]).mapped('code'))
+        code = next((f"{d}{initial}" for d in '123456789'
+                     if f"{d}{initial}" not in taken), None)
+        if not code:
+            code = next(f"{d}{chr(letter)}" for d in '123456789'
+                        for letter in range(65, 91)
+                        if f"{d}{chr(letter)}" not in taken)
+        counts['hues'] += 1
+        return Hue.create({'code': code, 'name': name})
 
     @api.model
     def _propose_two_letters(self, name, taken):

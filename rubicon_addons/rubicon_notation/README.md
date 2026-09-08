@@ -8,10 +8,13 @@ structured colour codation decided in the 2026-09-07 notation study
 (`meta/report/26-09-07/`).
 
 It is **not a translation layer**: the Rubicon-Emasur code conversion is
-`rubicon_emasur`'s job. This module depends on no company data, so
-either company runs it as-is; the optional wiring to the PDP stone data
-(transcription of real compositions, order verification, usage-based
-proposals) lives in `rubicon_notation_pdp`.
+`rubicon_emasur`'s job. The module depends on `base` only and installs
+on a bare Odoo, without any other addon of this repository — someone
+who downloads just this directory gets the full referential. The
+optional wiring to the PDP stone data (transcription of real
+compositions, order verification, usage-based proposals) lives in
+`rubicon_notation_pdp`, which also layers the suite's access policy on
+top of the core's read-for-all / admin-full defaults.
 
 ## The token grammar: `PP[G][BB][EE]`
 

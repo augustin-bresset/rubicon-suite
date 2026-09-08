@@ -108,6 +108,34 @@ class TestBridge(TransactionCase):
         self.assertEqual(result['code'], 'ZA79ZZP+ZB+ZA7')
         self.assertFalse(result['problems'])
 
+    def test_proposals_give_everything_a_correspondence(self):
+        blue_type = self.env['pdp.stone.type'].create(
+            {'code': 'ZNBD', 'name': 'Blue Znbthing'})
+        # some usage so the defaults phase has statistics
+        stone = self._stone(self.t_plain, self.sh_grade)
+        self._product_with([(stone, 1.0, False)])
+        self.service.action_propose_codes()
+        # every legacy shade is mapped — none left behind
+        self.env.cr.execute("""
+            SELECT count(*) FROM pdp_stone_shade sh
+            WHERE NOT EXISTS (SELECT 1 FROM rubicon_notation_shade_map m
+                              WHERE m.shade_id = sh.id)""")
+        self.assertEqual(self.env.cr.fetchall()[0][0], 0)
+        # the unmapped fixture shade became a hue mapping
+        mapping = self.env['rubicon.notation.shade.map'].search(
+            [('shade_id', '=', self.sh_unmapped.id)])
+        self.assertTrue(mapping.hue_id)
+        # a colour-bearing type name proposes the implied hue
+        article = self.env['rubicon.notation.stone'].search(
+            [('type_id', '=', blue_type.id)])
+        self.assertEqual(article.implied_hue_id.name, 'Blue')
+        # defaults follow usage: t_plain's modal shade is a grade
+        self.assertEqual(self.art.default_grade_id, self.grade)
+        # idempotent: a second run adds nothing
+        again = self.service.action_propose_codes()
+        for key in ('stones', 'shapes', 'hues', 'shade_maps', 'implied'):
+            self.assertEqual(again[key], 0, key)
+
     def test_verify_verdicts(self):
         a = self._stone(self.t_plain, self.sh_grade)
         b = self._stone(self.t_colour)
