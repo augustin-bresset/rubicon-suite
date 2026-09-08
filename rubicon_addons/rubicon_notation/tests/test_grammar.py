@@ -85,6 +85,19 @@ class TestGrammar(TransactionCase):
         self.assertEqual(result['code'], 'ZA9ZZP+ZB+ZA7')
         self.assertFalse(result['problems'])
 
+    def test_wizard_compose_mode(self):
+        wizard = self.env['rubicon.notation.wizard'].create({
+            'mode': 'compose', 'article_id': self.art.id,
+            'grade_id': self.grade.id, 'shape_id': self.shape.id,
+        })
+        wizard.action_run()
+        self.assertIn('Code: ZA7ZP', wizard.result)
+        # a default shape is omitted from the code and said so
+        wizard.shape_id = self.shape_rd
+        wizard.action_run()
+        self.assertIn('Code: ZA7\n', wizard.result + '\n')
+        self.assertIn('Omitted', wizard.result)
+
     def test_lookup_both_directions(self):
         found = self.service.lookup('Znt Plain')
         self.assertIn(('ZA', 'Znt Plain'), found['stones'])

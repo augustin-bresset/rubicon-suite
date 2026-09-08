@@ -1,11 +1,17 @@
 # Rubicon Notation
 
-Company-neutral core of the structured colour codation decided in the
-2026-09-07 notation study (`meta/report/26-09-07/`). It serves both
-Rubicon and Emasur: the dictionaries and the grammar stand alone, with no
-dependency on the PDP data models. Everything Rubicon-specific
-(transcription of real compositions, verification against orders,
-usage-based proposals) lives in `rubicon_notation_pdp`.
+An **independent stone referential** — think of it as a standalone
+counterpart of `pdp_stone`: its own catalogue of stone identities,
+grades, hues and shapes, where selecting a stone's components gives its
+code and a code reads back into its components. It implements the
+structured colour codation decided in the 2026-09-07 notation study
+(`meta/report/26-09-07/`).
+
+It is **not a translation layer**: the Rubicon-Emasur code conversion is
+`rubicon_emasur`'s job. This module depends on no company data, so
+either company runs it as-is; the optional wiring to the PDP stone data
+(transcription of real compositions, order verification, usage-based
+proposals) lives in `rubicon_notation_pdp`.
 
 ## The token grammar: `PP[G][BB][EE]`
 

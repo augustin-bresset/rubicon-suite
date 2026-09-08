@@ -76,7 +76,11 @@
             <form string="Transcribe &amp; Verify">
                 <group>
                     <field name="mode" widget="radio"/>
-                    <field name="code"/>
+                    <field name="code" invisible="mode == 'compose'"/>
+                    <field name="article_id" invisible="mode != 'compose'"/>
+                    <field name="grade_id" invisible="mode != 'compose'"/>
+                    <field name="hue_id" invisible="mode != 'compose'"/>
+                    <field name="shape_id" invisible="mode != 'compose'"/>
                     <field name="result"/>
                 </group>
                 <footer>
