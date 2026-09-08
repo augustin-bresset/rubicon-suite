@@ -19,7 +19,7 @@ class NotationStone(models.Model):
     Defaults are notation-level: a grade/hue/shape equal to the article's
     default is omitted from the token.
     """
-    _name = 'rubicon.notation.stone'
+    _name = 'gem.notation.stone'
     _description = 'Notation Article (stone)'
     _rec_name = 'code'
     _rec_names_search = ['code', 'name']
@@ -32,15 +32,15 @@ class NotationStone(models.Model):
     code = fields.Char(required=True, index=True)
     name = fields.Char(required=True)
     implied_hue_id = fields.Many2one(
-        'rubicon.notation.hue', string='Implied Hue',
+        'gem.notation.hue', string='Implied Hue',
         help="Hue carried by the identity itself (e.g. Blue Topaz). "
              "Writing another hue on this article is refused as a double "
              "colour.")
-    default_grade_id = fields.Many2one('rubicon.notation.grade',
+    default_grade_id = fields.Many2one('gem.notation.grade',
                                        string='Default Grade')
-    default_hue_id = fields.Many2one('rubicon.notation.hue',
+    default_hue_id = fields.Many2one('gem.notation.hue',
                                      string='Default Hue')
-    default_shape_id = fields.Many2one('rubicon.notation.shape',
+    default_shape_id = fields.Many2one('gem.notation.shape',
                                        string='Default Shape')
     active = fields.Boolean(default=True)
 
@@ -59,7 +59,7 @@ class NotationStone(models.Model):
 
 class NotationGrade(models.Model):
     """Quality grade: the G block (1 digit)."""
-    _name = 'rubicon.notation.grade'
+    _name = 'gem.notation.grade'
     _description = 'Notation Grade'
     _rec_name = 'code'
     _rec_names_search = ['code', 'name']
@@ -87,7 +87,7 @@ class NotationGrade(models.Model):
 class NotationHue(models.Model):
     """Hue: the BB block (digit + letter), so it always starts with a digit
     and every token parses without separators."""
-    _name = 'rubicon.notation.hue'
+    _name = 'gem.notation.hue'
     _description = 'Notation Hue'
     _rec_name = 'code'
     _rec_names_search = ['code', 'name']
@@ -115,7 +115,7 @@ class NotationHue(models.Model):
 
 class NotationShape(models.Model):
     """Shape: the EE block (2 letters)."""
-    _name = 'rubicon.notation.shape'
+    _name = 'gem.notation.shape'
     _description = 'Notation Shape'
     _rec_name = 'code'
     _rec_names_search = ['code', 'name']

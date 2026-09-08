@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_notation_shade_map_user,gem.notation.shade.map (user),model_gem_notation_shade_map,rubicon_env.group_rubicon_user,1,0,0,0
+access_notation_shade_map_editor,gem.notation.shade.map (editor),model_gem_notation_shade_map,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_shade_map,gem.notation.shade.map (manager),model_gem_notation_shade_map,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_stone_editor,gem.notation.stone (editor),gem_notation.model_gem_notation_stone,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_stone_manager,gem.notation.stone (manager),gem_notation.model_gem_notation_stone,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_grade_editor,gem.notation.grade (editor),gem_notation.model_gem_notation_grade,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_grade_manager,gem.notation.grade (manager),gem_notation.model_gem_notation_grade,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_hue_editor,gem.notation.hue (editor),gem_notation.model_gem_notation_hue,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_hue_manager,gem.notation.hue (manager),gem_notation.model_gem_notation_hue,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_shape_editor,gem.notation.shape (editor),gem_notation.model_gem_notation_shape,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_shape_manager,gem.notation.shape (manager),gem_notation.model_gem_notation_shape,rubicon_env.group_rubicon_manager,1,1,1,1

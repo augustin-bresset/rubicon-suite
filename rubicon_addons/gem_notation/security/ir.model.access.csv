@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_notation_stone_user,gem.notation.stone (user),model_gem_notation_stone,base.group_user,1,0,0,0
+access_notation_stone_admin,gem.notation.stone (admin),model_gem_notation_stone,base.group_system,1,1,1,1
+access_notation_grade_user,gem.notation.grade (user),model_gem_notation_grade,base.group_user,1,0,0,0
+access_notation_grade_admin,gem.notation.grade (admin),model_gem_notation_grade,base.group_system,1,1,1,1
+access_notation_hue_user,gem.notation.hue (user),model_gem_notation_hue,base.group_user,1,0,0,0
+access_notation_hue_admin,gem.notation.hue (admin),model_gem_notation_hue,base.group_system,1,1,1,1
+access_notation_shape_user,gem.notation.shape (user),model_gem_notation_shape,base.group_user,1,0,0,0
+access_notation_shape_admin,gem.notation.shape (admin),model_gem_notation_shape,base.group_system,1,1,1,1
+access_notation_wizard,gem.notation.wizard (user),model_gem_notation_wizard,base.group_user,1,1,1,0

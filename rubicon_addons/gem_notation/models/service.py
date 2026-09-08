@@ -21,9 +21,9 @@ class NotationService(models.AbstractModel):
     center stone first, then heaviest single stone descending (ties by
     token). This core works purely on notation records; translating a
     company's own product data into notation components is the job of a
-    bridge module (rubicon_notation_pdp for the Rubicon PDP).
+    bridge module (gem_notation_pdp for the Rubicon PDP).
     """
-    _name = 'rubicon.notation'
+    _name = 'gem.notation'
     _description = 'Notation Service'
 
     # ------------------------------------------------------------- parsing
@@ -58,10 +58,10 @@ class NotationService(models.AbstractModel):
         """
         result = {
             'token': (token or '').strip().upper(),
-            'article': self.env['rubicon.notation.stone'],
-            'grade': self.env['rubicon.notation.grade'],
-            'hue': self.env['rubicon.notation.hue'],
-            'shape': self.env['rubicon.notation.shape'],
+            'article': self.env['gem.notation.stone'],
+            'grade': self.env['gem.notation.grade'],
+            'hue': self.env['gem.notation.hue'],
+            'shape': self.env['gem.notation.shape'],
             'problems': [],
         }
         token = result['token']
@@ -76,19 +76,19 @@ class NotationService(models.AbstractModel):
             return result
         grade_code, hue_code, shape_code = splits[0]
 
-        article = self.env['rubicon.notation.stone'].search(
+        article = self.env['gem.notation.stone'].search(
             [('code', '=', token[:2])], limit=1)
         if not article:
             result['problems'].append(f"unknown article '{token[:2]}'")
         result['article'] = article
 
         if grade_code:
-            result['grade'] = self.env['rubicon.notation.grade'].search(
+            result['grade'] = self.env['gem.notation.grade'].search(
                 [('code', '=', grade_code)], limit=1)
             if not result['grade']:
                 result['problems'].append(f"unknown grade '{grade_code}'")
         if hue_code:
-            result['hue'] = self.env['rubicon.notation.hue'].search(
+            result['hue'] = self.env['gem.notation.hue'].search(
                 [('code', '=', hue_code)], limit=1)
             if not result['hue']:
                 result['problems'].append(f"unknown hue '{hue_code}'")
@@ -97,7 +97,7 @@ class NotationService(models.AbstractModel):
                     f"'{token}': article {article.code} already implies hue "
                     f"{article.implied_hue_id.code} — double colour")
         if shape_code:
-            result['shape'] = self.env['rubicon.notation.shape'].search(
+            result['shape'] = self.env['gem.notation.shape'].search(
                 [('code', '=', shape_code)], limit=1)
             if not result['shape']:
                 result['problems'].append(f"unknown shape '{shape_code}'")
@@ -113,12 +113,12 @@ class NotationService(models.AbstractModel):
         implied or default hue is omitted; a different one is a double
         colour when the article implies a hue.
         """
-        Stone = self.env['rubicon.notation.stone']
+        Stone = self.env['gem.notation.stone']
         article = article if isinstance(article, models.BaseModel) \
             else Stone.browse(article)
-        grade = self._as_record('rubicon.notation.grade', grade)
-        hue = self._as_record('rubicon.notation.hue', hue)
-        shape = self._as_record('rubicon.notation.shape', shape)
+        grade = self._as_record('gem.notation.grade', grade)
+        hue = self._as_record('gem.notation.hue', hue)
+        shape = self._as_record('gem.notation.shape', shape)
         problems = []
         parts = [article.code]
         if grade and grade != article.default_grade_id:
@@ -194,15 +194,15 @@ class NotationService(models.AbstractModel):
         domain = ['|', ('code', 'ilike', text), ('name', 'ilike', text)]
         return {
             'stones': [(s.code, s.name)
-                       for s in self.env['rubicon.notation.stone'].search(
+                       for s in self.env['gem.notation.stone'].search(
                            domain, limit=10)],
             'grades': [(g.code, g.name)
-                       for g in self.env['rubicon.notation.grade'].search(
+                       for g in self.env['gem.notation.grade'].search(
                            domain, limit=10)],
             'hues': [(h.code, h.name)
-                     for h in self.env['rubicon.notation.hue'].search(
+                     for h in self.env['gem.notation.hue'].search(
                          domain, limit=10)],
             'shapes': [(s.code, s.name)
-                       for s in self.env['rubicon.notation.shape'].search(
+                       for s in self.env['gem.notation.shape'].search(
                            domain, limit=10)],
         }

@@ -2,9 +2,9 @@
 <odoo>
     <!-- Show the PDP links in the core dictionary screens -->
     <record id="view_notation_stone_list_pdp" model="ir.ui.view">
-        <field name="name">rubicon.notation.stone.list.pdp</field>
-        <field name="model">rubicon.notation.stone</field>
-        <field name="inherit_id" ref="rubicon_notation.view_notation_stone_list"/>
+        <field name="name">gem.notation.stone.list.pdp</field>
+        <field name="model">gem.notation.stone</field>
+        <field name="inherit_id" ref="gem_notation.view_notation_stone_list"/>
         <field name="arch" type="xml">
             <field name="name" position="after">
                 <field name="type_id"/>
@@ -13,9 +13,9 @@
     </record>
 
     <record id="view_notation_shape_list_pdp" model="ir.ui.view">
-        <field name="name">rubicon.notation.shape.list.pdp</field>
-        <field name="model">rubicon.notation.shape</field>
-        <field name="inherit_id" ref="rubicon_notation.view_notation_shape_list"/>
+        <field name="name">gem.notation.shape.list.pdp</field>
+        <field name="model">gem.notation.shape</field>
+        <field name="inherit_id" ref="gem_notation.view_notation_shape_list"/>
         <field name="arch" type="xml">
             <field name="name" position="after">
                 <field name="shape_id"/>
@@ -24,9 +24,9 @@
     </record>
 
     <record id="view_notation_wizard_form_pdp" model="ir.ui.view">
-        <field name="name">rubicon.notation.wizard.form.pdp</field>
-        <field name="model">rubicon.notation.wizard</field>
-        <field name="inherit_id" ref="rubicon_notation.view_notation_wizard_form"/>
+        <field name="name">gem.notation.wizard.form.pdp</field>
+        <field name="model">gem.notation.wizard</field>
+        <field name="inherit_id" ref="gem_notation.view_notation_wizard_form"/>
         <field name="arch" type="xml">
             <field name="code" position="after">
                 <field name="product_id" invisible="mode != 'product'"/>
@@ -35,8 +35,8 @@
     </record>
 
     <record id="view_notation_shade_map_list" model="ir.ui.view">
-        <field name="name">rubicon.notation.shade.map.list</field>
-        <field name="model">rubicon.notation.shade.map</field>
+        <field name="name">gem.notation.shade.map.list</field>
+        <field name="model">gem.notation.shade.map</field>
         <field name="arch" type="xml">
             <list editable="bottom">
                 <field name="shade_id"/>
@@ -47,10 +47,10 @@
     </record>
     <record id="action_notation_shade_map" model="ir.actions.act_window">
         <field name="name">Shade Mappings</field>
-        <field name="res_model">rubicon.notation.shade.map</field>
+        <field name="res_model">gem.notation.shade.map</field>
         <field name="view_mode">list</field>
     </record>
     <menuitem id="menu_notation_shade_map" name="Shade Mappings"
-              parent="rubicon_notation.menu_notation_root"
+              parent="gem_notation.menu_notation_root"
               action="action_notation_shade_map" sequence="60"/>
 </odoo>

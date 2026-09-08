@@ -1,5 +1,5 @@
 {
-    'name': 'Rubicon Notation - PDP Bridge',
+    'name': 'Gemstone Notation - PDP Bridge',
     'version': '18.0.1.0.0',
     'license': 'LGPL-3',
     'category': 'Technical',
@@ -12,7 +12,7 @@ the new colour code, verifies a written colour code against it, and
 proposes dictionary codes from actual usage. Emasur runs the core module
 alone; everything PDP-specific lives here.
 """,
-    'depends': ['rubicon_notation', 'pdp_stone', 'pdp_product'],
+    'depends': ['gem_notation', 'pdp_stone', 'pdp_product'],
     'data': [
         'security/ir.model.access.csv',
         'views/bridge_views.xml',

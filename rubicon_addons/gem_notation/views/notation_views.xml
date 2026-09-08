@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_notation_stone_list" model="ir.ui.view">
-        <field name="name">rubicon.notation.stone.list</field>
-        <field name="model">rubicon.notation.stone</field>
+        <field name="name">gem.notation.stone.list</field>
+        <field name="model">gem.notation.stone</field>
         <field name="arch" type="xml">
             <list editable="bottom">
                 <field name="code"/>
@@ -17,13 +17,13 @@
     </record>
     <record id="action_notation_stone" model="ir.actions.act_window">
         <field name="name">Articles</field>
-        <field name="res_model">rubicon.notation.stone</field>
+        <field name="res_model">gem.notation.stone</field>
         <field name="view_mode">list</field>
     </record>
 
     <record id="view_notation_grade_list" model="ir.ui.view">
-        <field name="name">rubicon.notation.grade.list</field>
-        <field name="model">rubicon.notation.grade</field>
+        <field name="name">gem.notation.grade.list</field>
+        <field name="model">gem.notation.grade</field>
         <field name="arch" type="xml">
             <list editable="bottom">
                 <field name="code"/>
@@ -33,13 +33,13 @@
     </record>
     <record id="action_notation_grade" model="ir.actions.act_window">
         <field name="name">Grades</field>
-        <field name="res_model">rubicon.notation.grade</field>
+        <field name="res_model">gem.notation.grade</field>
         <field name="view_mode">list</field>
     </record>
 
     <record id="view_notation_hue_list" model="ir.ui.view">
-        <field name="name">rubicon.notation.hue.list</field>
-        <field name="model">rubicon.notation.hue</field>
+        <field name="name">gem.notation.hue.list</field>
+        <field name="model">gem.notation.hue</field>
         <field name="arch" type="xml">
             <list editable="bottom">
                 <field name="code"/>
@@ -49,13 +49,13 @@
     </record>
     <record id="action_notation_hue" model="ir.actions.act_window">
         <field name="name">Hues</field>
-        <field name="res_model">rubicon.notation.hue</field>
+        <field name="res_model">gem.notation.hue</field>
         <field name="view_mode">list</field>
     </record>
 
     <record id="view_notation_shape_list" model="ir.ui.view">
-        <field name="name">rubicon.notation.shape.list</field>
-        <field name="model">rubicon.notation.shape</field>
+        <field name="name">gem.notation.shape.list</field>
+        <field name="model">gem.notation.shape</field>
         <field name="arch" type="xml">
             <list editable="bottom">
                 <field name="code"/>
@@ -65,13 +65,13 @@
     </record>
     <record id="action_notation_shape" model="ir.actions.act_window">
         <field name="name">Shapes</field>
-        <field name="res_model">rubicon.notation.shape</field>
+        <field name="res_model">gem.notation.shape</field>
         <field name="view_mode">list</field>
     </record>
 
     <record id="view_notation_wizard_form" model="ir.ui.view">
-        <field name="name">rubicon.notation.wizard.form</field>
-        <field name="model">rubicon.notation.wizard</field>
+        <field name="name">gem.notation.wizard.form</field>
+        <field name="model">gem.notation.wizard</field>
         <field name="arch" type="xml">
             <form string="Transcribe &amp; Verify">
                 <group>
@@ -93,7 +93,7 @@
     </record>
     <record id="action_notation_wizard" model="ir.actions.act_window">
         <field name="name">Transcribe &amp; Verify</field>
-        <field name="res_model">rubicon.notation.wizard</field>
+        <field name="res_model">gem.notation.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>

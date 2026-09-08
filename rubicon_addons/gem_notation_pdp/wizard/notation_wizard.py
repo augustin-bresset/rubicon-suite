@@ -3,7 +3,7 @@ from odoo import models, fields
 
 class NotationWizard(models.TransientModel):
     """Add the product-verification mode to the notation wizard."""
-    _inherit = 'rubicon.notation.wizard'
+    _inherit = 'gem.notation.wizard'
 
     mode = fields.Selection(selection_add=[('product', 'Verify a product')],
                             ondelete={'product': 'set default'})
@@ -14,7 +14,7 @@ class NotationWizard(models.TransientModel):
             return super()._run_lines()
         if not self.product_id:
             return ['Pick a product first.']
-        verdict = self.env['rubicon.notation'].verify_product(
+        verdict = self.env['gem.notation'].verify_product(
             self.product_id.id, self.code or '')
         lines = [f"Expected: {verdict['expected'] or '(none)'}",
                  f"Given:    {verdict['given'] or '(none)'}",

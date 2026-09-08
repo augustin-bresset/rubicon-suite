@@ -3,7 +3,7 @@ from odoo import models, api
 
 class NotationServicePdp(models.AbstractModel):
     """PDP-side services: legacy records to notation components and back."""
-    _inherit = 'rubicon.notation'
+    _inherit = 'gem.notation'
 
     # ----------------------------------------------- legacy -> components
 
@@ -15,25 +15,25 @@ class NotationServicePdp(models.AbstractModel):
         notation records (empty recordsets when absent or unmapped).
         """
         problems = []
-        article = self.env['rubicon.notation.stone'].search(
+        article = self.env['gem.notation.stone'].search(
             [('type_id', '=', type_id)], limit=1)
         if not article:
             type_rec = self.env['pdp.stone.type'].browse(type_id)
             problems.append(
                 f"no article for stone type '{type_rec.code or type_id}'")
-        grade = self.env['rubicon.notation.grade']
-        hue = self.env['rubicon.notation.hue']
+        grade = self.env['gem.notation.grade']
+        hue = self.env['gem.notation.hue']
         if shade_id:
-            mapping = self.env['rubicon.notation.shade.map'].search(
+            mapping = self.env['gem.notation.shade.map'].search(
                 [('shade_id', '=', shade_id)], limit=1)
             if mapping:
                 grade, hue = mapping.grade_id, mapping.hue_id
             else:
                 shade = self.env['pdp.stone.shade'].browse(shade_id)
                 problems.append(f"shade '{shade.code}' is not mapped")
-        shape = self.env['rubicon.notation.shape']
+        shape = self.env['gem.notation.shape']
         if shape_id:
-            shape = self.env['rubicon.notation.shape'].search(
+            shape = self.env['gem.notation.shape'].search(
                 [('shape_id', '=', shape_id)], limit=1)
             if not shape:
                 shape_rec = self.env['pdp.stone.shape'].browse(shape_id)
@@ -129,10 +129,10 @@ class NotationServicePdp(models.AbstractModel):
         """
         counts = {'stones': 0, 'shapes': 0, 'grades': 0,
                   'hues': 0, 'shade_maps': 0, 'implied': 0, 'defaults': 0}
-        Stone = self.env['rubicon.notation.stone']
-        Shape = self.env['rubicon.notation.shape']
-        Grade = self.env['rubicon.notation.grade']
-        Map = self.env['rubicon.notation.shade.map']
+        Stone = self.env['gem.notation.stone']
+        Shape = self.env['gem.notation.shape']
+        Grade = self.env['gem.notation.grade']
+        Map = self.env['gem.notation.shade.map']
 
         self.env.cr.execute("""
             SELECT s.type_id, count(*) AS n,
@@ -253,7 +253,7 @@ class NotationServicePdp(models.AbstractModel):
     def _find_or_create_hue(self, name, counts):
         """Existing hue by name (case-insensitive), else create one with a
         digit + initial code (Pink -> 1P, Purple -> 2P...)."""
-        Hue = self.env['rubicon.notation.hue']
+        Hue = self.env['gem.notation.hue']
         hue = Hue.search([('name', '=ilike', name)], limit=1)
         if hue:
             return hue

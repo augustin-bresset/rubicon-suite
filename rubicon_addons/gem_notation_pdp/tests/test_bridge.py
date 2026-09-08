@@ -24,31 +24,31 @@ class TestBridge(TransactionCase):
         cls.t_colour = env['pdp.stone.type'].create(
             {'code': 'ZNBB', 'name': 'Znb Blue Something'})
 
-        cls.grade = env['rubicon.notation.grade'].create(
+        cls.grade = env['gem.notation.grade'].create(
             {'code': '7', 'name': 'Znb Light'})
-        cls.hue = env['rubicon.notation.hue'].create(
+        cls.hue = env['gem.notation.hue'].create(
             {'code': '9Z', 'name': 'Znb Pink'})
-        cls.hue_blue = env['rubicon.notation.hue'].create(
+        cls.hue_blue = env['gem.notation.hue'].create(
             {'code': '8Z', 'name': 'Znb Blue'})
-        cls.nshape_rd = env['rubicon.notation.shape'].create(
+        cls.nshape_rd = env['gem.notation.shape'].create(
             {'code': 'ZR', 'name': 'Znb Round', 'shape_id': cls.shape_rd.id})
-        cls.nshape_ps = env['rubicon.notation.shape'].create(
+        cls.nshape_ps = env['gem.notation.shape'].create(
             {'code': 'ZP', 'name': 'Znb Pear', 'shape_id': cls.shape_ps.id})
-        cls.art = env['rubicon.notation.stone'].create({
+        cls.art = env['gem.notation.stone'].create({
             'code': 'ZA', 'name': 'Znb Plain', 'type_id': cls.t_plain.id,
             'default_shape_id': cls.nshape_rd.id,
         })
-        cls.art_colour = env['rubicon.notation.stone'].create({
+        cls.art_colour = env['gem.notation.stone'].create({
             'code': 'ZB', 'name': 'Znb Blue Something',
             'type_id': cls.t_colour.id,
             'implied_hue_id': cls.hue_blue.id,
             'default_shape_id': cls.nshape_rd.id,
         })
-        Map = env['rubicon.notation.shade.map']
+        Map = env['gem.notation.shade.map']
         Map.create({'shade_id': cls.sh_grade.id, 'grade_id': cls.grade.id})
         Map.create({'shade_id': cls.sh_fused.id,
                     'grade_id': cls.grade.id, 'hue_id': cls.hue.id})
-        cls.service = env['rubicon.notation']
+        cls.service = env['gem.notation']
 
     def _stone(self, type_rec, shade=None, shape=None):
         return self.env['pdp.stone'].create({
@@ -118,15 +118,15 @@ class TestBridge(TransactionCase):
         # every legacy shade is mapped — none left behind
         self.env.cr.execute("""
             SELECT count(*) FROM pdp_stone_shade sh
-            WHERE NOT EXISTS (SELECT 1 FROM rubicon_notation_shade_map m
+            WHERE NOT EXISTS (SELECT 1 FROM gem_notation_shade_map m
                               WHERE m.shade_id = sh.id)""")
         self.assertEqual(self.env.cr.fetchall()[0][0], 0)
         # the unmapped fixture shade became a hue mapping
-        mapping = self.env['rubicon.notation.shade.map'].search(
+        mapping = self.env['gem.notation.shade.map'].search(
             [('shade_id', '=', self.sh_unmapped.id)])
         self.assertTrue(mapping.hue_id)
         # a colour-bearing type name proposes the implied hue
-        article = self.env['rubicon.notation.stone'].search(
+        article = self.env['gem.notation.stone'].search(
             [('type_id', '=', blue_type.id)])
         self.assertEqual(article.implied_hue_id.name, 'Blue')
         # defaults follow usage: t_plain's modal shade is a grade

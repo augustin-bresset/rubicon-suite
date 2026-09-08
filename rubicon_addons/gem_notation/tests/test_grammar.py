@@ -8,26 +8,26 @@ class TestGrammar(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         env = cls.env
-        cls.grade = env['rubicon.notation.grade'].create(
+        cls.grade = env['gem.notation.grade'].create(
             {'code': '7', 'name': 'Znt Light'})
-        cls.hue = env['rubicon.notation.hue'].create(
+        cls.hue = env['gem.notation.hue'].create(
             {'code': '9Z', 'name': 'Znt Pink'})
-        cls.hue_blue = env['rubicon.notation.hue'].create(
+        cls.hue_blue = env['gem.notation.hue'].create(
             {'code': '8Z', 'name': 'Znt Blue'})
-        cls.shape = env['rubicon.notation.shape'].create(
+        cls.shape = env['gem.notation.shape'].create(
             {'code': 'ZP', 'name': 'Znt Pear'})
-        cls.shape_rd = env['rubicon.notation.shape'].create(
+        cls.shape_rd = env['gem.notation.shape'].create(
             {'code': 'ZR', 'name': 'Znt Round'})
-        cls.art = env['rubicon.notation.stone'].create({
+        cls.art = env['gem.notation.stone'].create({
             'code': 'ZA', 'name': 'Znt Plain',
             'default_shape_id': cls.shape_rd.id,
         })
-        cls.art_colour = env['rubicon.notation.stone'].create({
+        cls.art_colour = env['gem.notation.stone'].create({
             'code': 'ZB', 'name': 'Znt Blue Something',
             'implied_hue_id': cls.hue_blue.id,
             'default_shape_id': cls.shape_rd.id,
         })
-        cls.service = env['rubicon.notation']
+        cls.service = env['gem.notation']
 
     def test_build_every_block_combination(self):
         cases = [
@@ -86,7 +86,7 @@ class TestGrammar(TransactionCase):
         self.assertFalse(result['problems'])
 
     def test_wizard_compose_mode(self):
-        wizard = self.env['rubicon.notation.wizard'].create({
+        wizard = self.env['gem.notation.wizard'].create({
             'mode': 'compose', 'article_id': self.art.id,
             'grade_id': self.grade.id, 'shape_id': self.shape.id,
         })

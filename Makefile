@@ -168,7 +168,7 @@ recompute-alt-codes:
 	@printf 'import pprint\npprint.pprint(env["emasur.converter"].action_recompute_all())\nenv.cr.commit()\n' | $(ODOO_SHELL)
 
 propose-notation:
-	@printf 'import pprint\npprint.pprint(env["rubicon.notation"].action_propose_codes())\nenv.cr.commit()\n' | $(ODOO_SHELL)
+	@printf 'import pprint\npprint.pprint(env["gem.notation"].action_propose_codes())\nenv.cr.commit()\n' | $(ODOO_SHELL)
 
 restore-reference-csvs:
 	@git checkout -q -- $$(git ls-files 'rubicon_addons/*/data/*.csv') && \

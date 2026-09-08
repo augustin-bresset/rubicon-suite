@@ -8,7 +8,7 @@ class NotationWizard(models.TransientModel):
     Bridge modules extend it with company-data modes (e.g. verifying a
     PDP product's colour code).
     """
-    _name = 'rubicon.notation.wizard'
+    _name = 'gem.notation.wizard'
     _description = 'Notation Transcribe & Verify'
 
     mode = fields.Selection([
@@ -17,10 +17,10 @@ class NotationWizard(models.TransientModel):
         ('lookup', 'Look up a name or code'),
     ], default='compose', required=True)
     code = fields.Char(string='Colour Code / Text')
-    article_id = fields.Many2one('rubicon.notation.stone', string='Stone')
-    grade_id = fields.Many2one('rubicon.notation.grade', string='Grade')
-    hue_id = fields.Many2one('rubicon.notation.hue', string='Hue')
-    shape_id = fields.Many2one('rubicon.notation.shape', string='Shape')
+    article_id = fields.Many2one('gem.notation.stone', string='Stone')
+    grade_id = fields.Many2one('gem.notation.grade', string='Grade')
+    hue_id = fields.Many2one('gem.notation.hue', string='Hue')
+    shape_id = fields.Many2one('gem.notation.shape', string='Shape')
     result = fields.Text(readonly=True)
 
     @api.onchange('mode', 'article_id', 'grade_id', 'hue_id', 'shape_id')
@@ -41,7 +41,7 @@ class NotationWizard(models.TransientModel):
         }
 
     def _compose_lines(self):
-        service = self.env['rubicon.notation']
+        service = self.env['gem.notation']
         built = service.build_token(self.article_id, self.grade_id,
                                     self.hue_id, self.shape_id)
         lines = [f"Code: {built['token']}"]
@@ -59,7 +59,7 @@ class NotationWizard(models.TransientModel):
         return lines
 
     def _run_lines(self):
-        service = self.env['rubicon.notation']
+        service = self.env['gem.notation']
         lines = []
         if self.mode == 'compose':
             if not self.article_id:
