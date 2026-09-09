@@ -10,3 +10,5 @@ access_notation_hue_editor,gem.notation.hue (editor),gem_notation.model_gem_nota
 access_notation_hue_manager,gem.notation.hue (manager),gem_notation.model_gem_notation_hue,rubicon_env.group_rubicon_manager,1,1,1,1
 access_notation_shape_editor,gem.notation.shape (editor),gem_notation.model_gem_notation_shape,rubicon_env.group_rubicon_editor,1,1,1,0
 access_notation_shape_manager,gem.notation.shape (manager),gem_notation.model_gem_notation_shape,rubicon_env.group_rubicon_manager,1,1,1,1
+access_notation_category_editor,gem.notation.category (editor),gem_notation.model_gem_notation_category,rubicon_env.group_rubicon_editor,1,1,1,0
+access_notation_category_manager,gem.notation.category (manager),gem_notation.model_gem_notation_category,rubicon_env.group_rubicon_manager,1,1,1,1

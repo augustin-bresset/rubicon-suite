@@ -9,6 +9,21 @@ HUE_RE = re.compile(r'^[0-9][A-Z]$')
 SHAPE_RE = re.compile(r'^[A-Z]{2}$')
 
 
+class NotationCategory(models.Model):
+    """Stone family (Diamond, Precious, Semi Precious...)."""
+    _name = 'gem.notation.category'
+    _description = 'Notation Stone Category'
+    _rec_name = 'name'
+    _order = 'code'
+
+    _sql_constraints = [
+        ('code_uniq', 'unique(code)', 'The category code must be unique.'),
+    ]
+
+    code = fields.Char(required=True, index=True)
+    name = fields.Char(required=True)
+
+
 class NotationStone(models.Model):
     """Article: the identity block PP (2 letters).
 
@@ -31,6 +46,7 @@ class NotationStone(models.Model):
 
     code = fields.Char(required=True, index=True)
     name = fields.Char(required=True)
+    category_id = fields.Many2one('gem.notation.category', string='Category')
     implied_hue_id = fields.Many2one(
         'gem.notation.hue', string='Implied Hue',
         help="Hue carried by the identity itself (e.g. Blue Topaz). "

@@ -127,12 +127,39 @@ class NotationServicePdp(models.AbstractModel):
         hue) follow its actual usage. Proposals, not truth: review them in
         the dictionary screens. Idempotent: existing rows are kept.
         """
-        counts = {'stones': 0, 'shapes': 0, 'grades': 0,
-                  'hues': 0, 'shade_maps': 0, 'implied': 0, 'defaults': 0}
+        counts = {'stones': 0, 'shapes': 0, 'grades': 0, 'hues': 0,
+                  'shade_maps': 0, 'implied': 0, 'defaults': 0,
+                  'relinked': 0}
         Stone = self.env['gem.notation.stone']
         Shape = self.env['gem.notation.shape']
         Grade = self.env['gem.notation.grade']
         Map = self.env['gem.notation.shade.map']
+
+        # Phase 0 — relink: entries shipped as module data carry no PDP
+        # link; match them by name before anything else, so they are
+        # completed instead of duplicated.
+        linked_types = set(Stone.search([('type_id', '!=', False)])
+                           .mapped('type_id').ids)
+        for stone in Stone.with_context(active_test=False).search(
+                [('type_id', '=', False)]):
+            type_rec = self.env['pdp.stone.type'].search(
+                [('name', '=ilike', stone.name)], limit=1)
+            if type_rec and type_rec.id not in linked_types:
+                stone.type_id = type_rec
+                linked_types.add(type_rec.id)
+                if not stone.category_id and type_rec.category_id:
+                    stone.category_id = self._category_for(type_rec)
+                counts['relinked'] += 1
+        linked_shapes = set(Shape.search([('shape_id', '!=', False)])
+                            .mapped('shape_id').ids)
+        for shape in Shape.search([('shape_id', '=', False)]):
+            shape_rec = self.env['pdp.stone.shape'].search(
+                ['|', ('shape', '=ilike', shape.name),
+                 ('code', '=ilike', shape.name)], limit=1)
+            if shape_rec and shape_rec.id not in linked_shapes:
+                shape.shape_id = shape_rec
+                linked_shapes.add(shape_rec.id)
+                counts['relinked'] += 1
 
         self.env.cr.execute("""
             SELECT s.type_id, count(*) AS n,
@@ -178,6 +205,7 @@ class NotationServicePdp(models.AbstractModel):
                 [('shape_id', '=', shape_id)], limit=1) if shape_id else Shape
             Stone.create({'code': code, 'name': type_rec.name or type_rec.code,
                           'type_id': type_rec.id,
+                          'category_id': self._category_for(type_rec).id,
                           'default_shape_id': default_shape.id})
             counts['stones'] += 1
 
@@ -248,6 +276,17 @@ class NotationServicePdp(models.AbstractModel):
                 article.write(updates)
                 counts['defaults'] += 1
         return counts
+
+    @api.model
+    def _category_for(self, type_rec):
+        Category = self.env['gem.notation.category']
+        if not type_rec.category_id:
+            return Category
+        category = Category.search(
+            [('name', '=ilike', type_rec.category_id.name)], limit=1)
+        return category or Category.create(
+            {'code': type_rec.category_id.code,
+             'name': type_rec.category_id.name})
 
     @api.model
     def _find_or_create_hue(self, name, counts):

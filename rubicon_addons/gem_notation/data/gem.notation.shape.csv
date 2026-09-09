@@ -1,0 +1,179 @@
+id,code,name
+shape_AA,AA,A120
+shape_AB,AB,A122
+shape_AC,AC,A123
+shape_AD,AD,A124
+shape_AE,AE,A129
+shape_AF,AF,A13
+shape_AG,AG,A14
+shape_AH,AH,A145
+shape_AI,AI,A177
+shape_AJ,AJ,A184
+shape_AK,AK,A185
+shape_AL,AL,A187
+shape_AM,AM,A315
+shape_AN,AN,A390
+shape_AO,AO,A45
+shape_AP,AP,A653
+shape_AQ,AQ,A71
+shape_AR,AR,A72
+shape_AS,AS,A69S
+shape_AT,AT,A73
+shape_AU,AU,Disk
+shape_AX,AX,A118
+shape_BA,BA,Ball Facetted
+shape_BB,BB,Bagguete
+shape_BC,BC,Bagguete Bri
+shape_BD,BD,Bead Facet
+shape_BE,BE,Bead Smooth
+shape_BF,BF,Cabochon Bg
+shape_BG,BG,Bag Fancy
+shape_BH,BH,Brio Rd
+shape_BI,BI,Button Round
+shape_BJ,BJ,Bullet
+shape_BK,BK,Button
+shape_BL,BL,Ball
+shape_BQ,BQ,Baroque
+shape_BR,BR,BARRE
+shape_BT,BT,Bagguet bufftop
+shape_BU,BU,Buf Top
+shape_CA,CA,Cabochon Cushion
+shape_CB,CB,Cushion Bufftop
+shape_CC,CC,Cabochon Cus Bri
+shape_CH,CH,Cabochon Half Moon
+shape_CI,CI,CIR
+shape_CO,CO,Concave
+shape_CS,CS,Cushion
+shape_CT,CT,Octagon Concave
+shape_CU,CU,Cushion Briolette
+shape_CV,CV,Curve
+shape_DA,DA,Double Cab Cushion
+shape_DB,DB,Double Briolette Cus
+shape_DC,DC,Double Cushion Facet
+shape_DD,DD,Double Cab Diamond
+shape_DE,DE,Double Cab Drop
+shape_DF,DF,Double Cab Oval
+shape_DG,DG,Double Cab Round
+shape_DH,DH,Double Flat Bri
+shape_DI,DI,Double Facet Ps
+shape_DJ,DJ,Double Flat Smooth
+shape_DK,DK,Disk Flat
+shape_DL,DL,Disk Smooth
+shape_DM,DM,Double Cab Marquise
+shape_DN,DN,Donut
+shape_DO,DO,Double Briolette Ov
+shape_DP,DP,Drop Barok Pearl
+shape_DQ,DQ,Donut Oval
+shape_DR,DR,Drop Briolet
+shape_DS,DS,Double Cab Pear
+shape_DT,DT,Double Facet
+shape_DU,DU,Drop for Pearl
+shape_DV,DV,Double Facet Oval
+shape_DW,DW,Drop Speacial
+shape_DX,DX,Drop Long
+shape_DY,DY,Drop Polished
+shape_DZ,DZ,Drop Small
+shape_FA,FA,Fan
+shape_FB,FB,Franch Pear Shape
+shape_FC,FC,Flat Cushion
+shape_FD,FD,Flat Round
+shape_FE,FE,Flat Taper
+shape_FF,FF,Flat Trillion
+shape_FG,FG,Flat Baguette
+shape_FK,FK,Flat Kite
+shape_FM,FM,Flat Marquise
+shape_FO,FO,Flat Oval
+shape_FP,FP,Flat Pear Shape
+shape_FQ,FQ,Flat Square
+shape_FR,FR,French Baguette
+shape_FS,FS,French square
+shape_FT,FT,French Tapper
+shape_HA,HA,HALF MOON
+shape_HB,HB,Heart Shape Briolet
+shape_HC,HC,Heart Shape Bead
+shape_HD,HD,Cabochon Heart
+shape_HE,HE,Hexagon
+shape_HF,HF,Heart Shape Flat
+shape_HG,HG,Heart Shape Smooth
+shape_HL,HL,Half Cab/Facet
+shape_HM,HM,Half Moon Bri
+shape_HS,HS,Heart Shape
+shape_HT,HT,HEART SHAPE BUFFTOP
+shape_KI,KI,KITE
+shape_LB,LB,LEAF BRIOLET
+shape_LF,LF,LEAF
+shape_LG,LG,LONG
+shape_LK,LK,LING
+shape_LO,LO,LOTUS BRIO
+shape_LZ,LZ,LOZENGE
+shape_MA,MA,Cabochon MQ Bri
+shape_MB,MB,Marquise Buf Top
+shape_MC,MC,Cabochon Marquise
+shape_MD,MD,Cabochon Mix
+shape_MI,MI,MIS
+shape_MQ,MQ,Marquise
+shape_MR,MR,Marquise Briolette
+shape_MX,MX,MIX
+shape_NT,NT,Necklace Twist Mesh
+shape_OA,OA,Oval Rose Cut
+shape_OB,OB,Octagon Buff Top
+shape_OC,OC,Octagon Briolet
+shape_OD,OD,Cabochon Oct
+shape_OE,OE,Cabochon Ov Bri
+shape_OF,OF,Oval Bufftop
+shape_OG,OG,Cabochon Oval
+shape_OH,OH,Carving Oval
+shape_OI,OI,Oval Briolet
+shape_OJ,OJ,Oval Tumbled
+shape_OR,OR,Octagone Rose Cut
+shape_OT,OT,Octagone
+shape_OV,OV,Oval
+shape_PA,PA,Carving Pear
+shape_PB,PB,Cabochon Ps Bri
+shape_PC,PC,Cabochon Pear
+shape_PD,PD,Pear Shape Smooth
+shape_PF,PF,Pear Shape Flat
+shape_PI,PI,Pear Shape Briolet
+shape_PR,PR,Princess Square
+shape_PS,PS,Pear Shape
+shape_PT,PT,Pear shape Buf
+shape_PU,PU,Pumkin
+shape_RA,RA,Radiant Cut
+shape_RB,RB,Cabochon Rd Bri
+shape_RC,RC,Cabochon Round
+shape_RD,RD,Round
+shape_RE,RE,Rond Tumbled
+shape_RF,RF,Rondel Facet
+shape_RG,RG,Rectangular
+shape_RH,RH,Row Facet
+shape_RI,RI,Rose Cut Trillion
+shape_RJ,RJ,Rough Strand
+shape_RM,RM,Rond Machine Cut
+shape_RO,RO,Rose
+shape_RP,RP,Rose Cut PS
+shape_RR,RR,Rose Cut RD
+shape_RS,RS,Round Single Cut
+shape_RT,RT,Round Bufftop
+shape_RV,RV,Rose Cut OV
+shape_RW,RW,Round Full Cut
+shape_SB,SB,Square Bufftop
+shape_SC,SC,Cabochon Square
+shape_SF,SF,Square French cut
+shape_SQ,SQ,Square
+shape_SR,SR,Square Briolet
+shape_SS,SS,Square Shape Smooth
+shape_ST,ST,Star
+shape_TA,TA,Trillion Briolet
+shape_TB,TB,Tapper bufftop
+shape_TC,TC,Cabochon Tap
+shape_TD,TD,Cabochon Trillion
+shape_TE,TE,Cabpchon Trllion Bri
+shape_TF,TF,Tumble Facet
+shape_TG,TG,Triangle
+shape_TH,TH,Twisted N
+shape_TI,TI,Twisted B
+shape_TP,TP,Tapper
+shape_TR,TR,Trillion
+shape_TT,TT,Trilion bufftop
+shape_TU,TU,Tumble
+shape_TW,TW,Twisted Ring

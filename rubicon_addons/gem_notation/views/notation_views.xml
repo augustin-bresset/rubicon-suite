@@ -7,6 +7,7 @@
             <list editable="bottom">
                 <field name="code"/>
                 <field name="name"/>
+                <field name="category_id"/>
                 <field name="implied_hue_id"/>
                 <field name="default_grade_id"/>
                 <field name="default_hue_id"/>
@@ -91,6 +92,22 @@
             </form>
         </field>
     </record>
+    <record id="view_notation_category_list" model="ir.ui.view">
+        <field name="name">gem.notation.category.list</field>
+        <field name="model">gem.notation.category</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_notation_category" model="ir.actions.act_window">
+        <field name="name">Categories</field>
+        <field name="res_model">gem.notation.category</field>
+        <field name="view_mode">list</field>
+    </record>
+
     <record id="action_notation_workspace" model="ir.actions.client">
         <field name="name">Gemstone Notation</field>
         <field name="tag">gem_notation_workspace</field>

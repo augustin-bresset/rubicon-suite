@@ -27,6 +27,11 @@ separate bridge modules.
     'depends': ['web'],
     'data': [
         'security/ir.model.access.csv',
+        'data/gem.notation.category.csv',
+        'data/gem.notation.grade.csv',
+        'data/gem.notation.hue.csv',
+        'data/gem.notation.shape.csv',
+        'data/gem.notation.stone.csv',
         'views/notation_views.xml',
         'views/menus.xml',
     ],

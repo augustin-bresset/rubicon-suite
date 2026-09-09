@@ -9,7 +9,7 @@ class TestGrammar(TransactionCase):
         super().setUpClass()
         env = cls.env
         cls.grade = env['gem.notation.grade'].create(
-            {'code': '7', 'name': 'Znt Light'})
+            {'code': '9', 'name': 'Znt Light'})
         cls.hue = env['gem.notation.hue'].create(
             {'code': '9Z', 'name': 'Znt Pink'})
         cls.hue_blue = env['gem.notation.hue'].create(
@@ -32,13 +32,13 @@ class TestGrammar(TransactionCase):
     def test_build_every_block_combination(self):
         cases = [
             (None, None, None, 'ZA'),
-            (self.grade, None, None, 'ZA7'),
+            (self.grade, None, None, 'ZA9'),
             (None, self.hue, None, 'ZA9Z'),
-            (self.grade, self.hue, None, 'ZA79Z'),
+            (self.grade, self.hue, None, 'ZA99Z'),
             (None, None, self.shape, 'ZAZP'),
-            (self.grade, None, self.shape, 'ZA7ZP'),
+            (self.grade, None, self.shape, 'ZA9ZP'),
             (None, self.hue, self.shape, 'ZA9ZZP'),
-            (self.grade, self.hue, self.shape, 'ZA79ZZP'),
+            (self.grade, self.hue, self.shape, 'ZA99ZZP'),
         ]
         for grade, hue, shape, expected in cases:
             built = self.service.build_token(self.art, grade, hue, shape)
@@ -57,14 +57,14 @@ class TestGrammar(TransactionCase):
         self.assertTrue(any('double colour' in p for p in built['problems']))
 
     def test_parse_round_trip(self):
-        for token in ('ZA', 'ZA7', 'ZA9Z', 'ZA79Z', 'ZAZP', 'ZA7ZP',
-                      'ZA9ZZP', 'ZA79ZZP'):
+        for token in ('ZA', 'ZA9', 'ZA9Z', 'ZA99Z', 'ZAZP', 'ZA9ZP',
+                      'ZA9ZZP', 'ZA99ZZP'):
             parsed = self.service.parse_token(token)
             self.assertFalse(parsed['problems'], token)
             self.assertEqual(parsed['article'], self.art, token)
 
     def test_parse_rejects_bad_structures(self):
-        for bad in ('Z', 'ZAABC', 'ZA123', 'ZA7Z9'):
+        for bad in ('Z', 'ZAABC', 'ZA123', 'ZA9Z9'):
             self.assertTrue(self.service.parse_token(bad)['problems'], bad)
 
     def test_parse_flags_unknowns_and_double_colour(self):
@@ -82,7 +82,7 @@ class TestGrammar(TransactionCase):
         ]
         result = self.service.transcribe(components)
         # center first, then heaviest single stone descending
-        self.assertEqual(result['code'], 'ZA9ZZP+ZB+ZA7')
+        self.assertEqual(result['code'], 'ZA9ZZP+ZB+ZA9')
         self.assertFalse(result['problems'])
 
     def test_wizard_compose_mode(self):
@@ -91,11 +91,11 @@ class TestGrammar(TransactionCase):
             'grade_id': self.grade.id, 'shape_id': self.shape.id,
         })
         wizard.action_run()
-        self.assertIn('Code: ZA7ZP', wizard.result)
+        self.assertIn('Code: ZA9ZP', wizard.result)
         # a default shape is omitted from the code and said so
         wizard.shape_id = self.shape_rd
         wizard.action_run()
-        self.assertIn('Code: ZA7\n', wizard.result + '\n')
+        self.assertIn('Code: ZA9\n', wizard.result + '\n')
         self.assertIn('Omitted', wizard.result)
 
     def test_ui_endpoints_are_json_safe(self):
@@ -103,7 +103,7 @@ class TestGrammar(TransactionCase):
         self.assertTrue(any(s['code'] == 'ZA' for s in boot['stones']))
         stone_row = next(s for s in boot['stones'] if s['code'] == 'ZB')
         self.assertEqual(stone_row['implied_hue_id'], self.hue_blue.id)
-        read = self.service.ui_read('ZA7ZP+ZB9Z')
+        read = self.service.ui_read('ZA9ZP+ZB9Z')
         self.assertEqual(read['tokens'][0]['stone'], 'Znt Plain')
         self.assertEqual(read['tokens'][0]['grade'], 'Znt Light')
         self.assertEqual(read['tokens'][0]['shape'], 'Znt Pear')

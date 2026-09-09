@@ -25,7 +25,7 @@ class TestBridge(TransactionCase):
             {'code': 'ZNBB', 'name': 'Znb Blue Something'})
 
         cls.grade = env['gem.notation.grade'].create(
-            {'code': '7', 'name': 'Znb Light'})
+            {'code': '9', 'name': 'Znb Light'})
         cls.hue = env['gem.notation.hue'].create(
             {'code': '9Z', 'name': 'Znb Pink'})
         cls.hue_blue = env['gem.notation.hue'].create(
@@ -78,7 +78,7 @@ class TestBridge(TransactionCase):
     def test_legacy_build_maps_and_omits_defaults(self):
         built = self.service.build_token_legacy(
             self.t_plain.id, self.sh_fused.id, self.shape_rd.id)
-        self.assertEqual(built['token'], 'ZA79Z')  # default shape omitted
+        self.assertEqual(built['token'], 'ZA99Z')  # default shape omitted
         self.assertFalse(built['problems'])
         built = self.service.build_token_legacy(
             self.t_plain.id, None, self.shape_ps.id)
@@ -105,7 +105,7 @@ class TestBridge(TransactionCase):
         product = self._product_with(
             [(light, 2.0, False), (heavy, 5.0, False), (center, 0.5, True)])
         result = self.service.transcribe_product(product.id)
-        self.assertEqual(result['code'], 'ZA79ZZP+ZB+ZA7')
+        self.assertEqual(result['code'], 'ZA99ZZP+ZB+ZA9')
         self.assertFalse(result['problems'])
 
     def test_proposals_give_everything_a_correspondence(self):
@@ -140,12 +140,12 @@ class TestBridge(TransactionCase):
         a = self._stone(self.t_plain, self.sh_grade)
         b = self._stone(self.t_colour)
         product = self._product_with([(a, 5.0, False), (b, 1.0, False)])
-        good = self.service.verify_product(product.id, 'ZA7+ZB')
+        good = self.service.verify_product(product.id, 'ZA9+ZB')
         self.assertTrue(good['ok'], good['problems'])
-        wrong_order = self.service.verify_product(product.id, 'ZB+ZA7')
+        wrong_order = self.service.verify_product(product.id, 'ZB+ZA9')
         self.assertFalse(wrong_order['ok'])
         self.assertTrue(any('order' in p for p in wrong_order['problems']))
-        wrong_stone = self.service.verify_product(product.id, 'ZA7+ZA9Z')
+        wrong_stone = self.service.verify_product(product.id, 'ZA9+ZA9Z')
         self.assertFalse(wrong_stone['ok'])
         self.assertTrue(any('do not match' in p
                             for p in wrong_stone['problems']))
