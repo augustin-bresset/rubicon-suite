@@ -21,14 +21,21 @@ to an existing product database (transcription of real compositions,
 verification of written codes, usage-based proposals) is the job of
 separate bridge modules.
 """,
-    # 'base' only: the module must install on a bare Odoo, on its own.
-    # A deployment-specific bridge may layer stricter access rules on top.
-    'depends': ['base'],
+    # 'web' only (shipped with every Odoo): the module must install on a
+    # bare Odoo, on its own. A deployment-specific bridge may layer
+    # stricter access rules on top.
+    'depends': ['web'],
     'data': [
         'security/ir.model.access.csv',
         'views/notation_views.xml',
         'views/menus.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'gem_notation/static/src/js/notation_workspace.js',
+            'gem_notation/static/src/xml/notation_workspace.xml',
+        ],
+    },
     'installable': True,
     'application': False,
 }

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="gem_notation.Workspace">
+        <div class="o_action d-flex flex-column h-100 overflow-auto"
+             style="background:#f4f4f4;">
+
+            <!-- Header -->
+            <div class="d-flex align-items-center gap-3 px-4 py-2 bg-white border-bottom">
+                <h4 class="mb-0">Gemstone Notation</h4>
+                <span class="text-muted small">PP [G] [BB] [EE] — stone, grade, hue, shape; defaults omitted</span>
+                <span class="flex-grow-1"/>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-light border" t-on-click="() => this.openDictionary('gem_notation.action_notation_stone')">Stones</button>
+                    <button class="btn btn-light border" t-on-click="() => this.openDictionary('gem_notation.action_notation_grade')">Grades</button>
+                    <button class="btn btn-light border" t-on-click="() => this.openDictionary('gem_notation.action_notation_hue')">Hues</button>
+                    <button class="btn btn-light border" t-on-click="() => this.openDictionary('gem_notation.action_notation_shape')">Shapes</button>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-4 p-4 align-items-start">
+
+                <!-- ═══ Compose ═══ -->
+                <div class="bg-white border rounded shadow-sm p-4" style="flex:1; min-width:340px; max-width:520px;">
+                    <h5 class="mb-3">Compose a code</h5>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold mb-1">Stone</label>
+                        <select class="form-select" t-on-change="(ev) => this.onComponentChange('stoneId', ev)">
+                            <option value="">— pick a stone —</option>
+                            <t t-foreach="state.dicts.stones" t-as="s" t-key="s.id">
+                                <option t-att-value="s.id" t-att-selected="s.id === state.stoneId">
+                                    <t t-esc="s.code"/> — <t t-esc="s.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <label class="form-label small fw-semibold mb-1">Grade</label>
+                            <select class="form-select form-select-sm" t-on-change="(ev) => this.onComponentChange('gradeId', ev)">
+                                <option value="">—</option>
+                                <t t-foreach="state.dicts.grades" t-as="g" t-key="g.id">
+                                    <option t-att-value="g.id" t-att-selected="g.id === state.gradeId">
+                                        <t t-esc="g.code"/> <t t-esc="g.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small fw-semibold mb-1">Hue</label>
+                            <select class="form-select form-select-sm" t-on-change="(ev) => this.onComponentChange('hueId', ev)">
+                                <option value="">—</option>
+                                <t t-foreach="state.dicts.hues" t-as="h" t-key="h.id">
+                                    <option t-att-value="h.id" t-att-selected="h.id === state.hueId">
+                                        <t t-esc="h.code"/> <t t-esc="h.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small fw-semibold mb-1">Shape</label>
+                            <select class="form-select form-select-sm" t-on-change="(ev) => this.onComponentChange('shapeId', ev)">
+                                <option value="">—</option>
+                                <t t-foreach="state.dicts.shapes" t-as="f" t-key="f.id">
+                                    <option t-att-value="f.id" t-att-selected="f.id === state.shapeId">
+                                        <t t-esc="f.code"/> <t t-esc="f.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div t-if="state.token" class="text-center border rounded py-3 mb-2"
+                         t-att-class="state.problems.length ? 'border-danger bg-danger-subtle' : 'bg-light'">
+                        <div class="fw-bold" style="font-size:2.2rem; letter-spacing:2px; font-family:monospace;">
+                            <t t-esc="state.token"/>
+                        </div>
+                    </div>
+                    <div t-if="state.omitted.length" class="text-muted small">
+                        Omitted: <t t-esc="state.omitted.join(', ')"/>
+                    </div>
+                    <div t-foreach="state.problems" t-as="p" t-key="p_index" class="text-danger small">
+                        <t t-esc="p"/>
+                    </div>
+                    <div t-if="!state.stoneId" class="text-muted small fst-italic">
+                        Pick a stone: the code appears here and updates live.
+                    </div>
+                </div>
+
+                <!-- ═══ Read / Look up ═══ -->
+                <div class="bg-white border rounded shadow-sm p-4" style="flex:1.2; min-width:380px;">
+                    <h5 class="mb-3">Read a code or look up a name</h5>
+                    <div class="d-flex gap-2 mb-3">
+                        <input type="text" class="form-control"
+                               placeholder="A colour code (SA21CPS+DI) or a name (Sapphire, Pink...)"
+                               t-att-value="state.query"
+                               t-on-input="(ev) => { this.state.query = ev.target.value; }"
+                               t-on-keydown="onQueryKeydown"/>
+                        <button class="btn btn-primary" t-on-click="runQuery">Read</button>
+                    </div>
+
+                    <t t-if="state.read">
+                        <div t-foreach="state.read.tokens" t-as="tok" t-key="tok_index"
+                             class="border rounded p-2 mb-2"
+                             t-att-class="tok.problems.length ? 'border-danger' : ''">
+                            <span class="fw-bold font-monospace me-2"><t t-esc="tok.token"/></span>
+                            <t t-if="!tok.problems.length">
+                                <span t-esc="tok.stone"/>
+                                <span t-if="tok.grade">, grade <t t-esc="tok.grade"/></span>
+                                <span t-if="tok.hue">, hue <t t-esc="tok.hue"/></span>
+                                <span t-if="tok.implied_hue">, implied hue <t t-esc="tok.implied_hue"/></span>
+                                <span t-if="tok.shape">, shape <t t-esc="tok.shape"/></span>
+                            </t>
+                            <div t-foreach="tok.problems" t-as="p" t-key="p_index"
+                                 class="text-danger small"><t t-esc="p"/></div>
+                        </div>
+
+                        <t t-foreach="['stones','grades','hues','shapes']" t-as="axis" t-key="axis">
+                            <div t-if="(state.read.matches[axis] || []).length" class="mb-2">
+                                <div class="small fw-semibold text-capitalize"><t t-esc="axis"/></div>
+                                <div t-foreach="state.read.matches[axis]" t-as="row" t-key="row_index" class="small">
+                                    <span class="font-monospace fw-bold me-1"><t t-esc="row[0]"/></span>
+                                    <t t-esc="row[1]"/>
+                                </div>
+                            </div>
+                        </t>
+                        <div t-if="!state.read.tokens.length and !['stones','grades','hues','shapes'].some(a => (state.read.matches[a] || []).length)"
+                             class="text-muted fst-italic">No match.</div>
+                    </t>
+                    <div t-else="" class="text-muted small fst-italic">
+                        Type a code to decompose it, or a name to find its code.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

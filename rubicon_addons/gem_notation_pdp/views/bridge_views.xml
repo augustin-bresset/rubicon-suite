@@ -53,4 +53,17 @@
     <menuitem id="menu_notation_shade_map" name="Shade Mappings"
               parent="gem_notation.menu_notation_root"
               action="action_notation_shade_map" sequence="60"/>
+
+    <!-- The transactional dialog: verify a written code against a real
+         product. The reference workspace is the full page in the core. -->
+    <record id="action_verify_product" model="ir.actions.act_window">
+        <field name="name">Verify a Product</field>
+        <field name="res_model">gem.notation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_mode': 'product'}</field>
+    </record>
+    <menuitem id="menu_verify_product" name="Verify a Product"
+              parent="gem_notation.menu_notation_root"
+              action="action_verify_product" sequence="15"/>
 </odoo>

@@ -98,6 +98,19 @@ class TestGrammar(TransactionCase):
         self.assertIn('Code: ZA7\n', wizard.result + '\n')
         self.assertIn('Omitted', wizard.result)
 
+    def test_ui_endpoints_are_json_safe(self):
+        boot = self.service.ui_bootstrap()
+        self.assertTrue(any(s['code'] == 'ZA' for s in boot['stones']))
+        stone_row = next(s for s in boot['stones'] if s['code'] == 'ZB')
+        self.assertEqual(stone_row['implied_hue_id'], self.hue_blue.id)
+        read = self.service.ui_read('ZA7ZP+ZB9Z')
+        self.assertEqual(read['tokens'][0]['stone'], 'Znt Plain')
+        self.assertEqual(read['tokens'][0]['grade'], 'Znt Light')
+        self.assertEqual(read['tokens'][0]['shape'], 'Znt Pear')
+        self.assertTrue(read['tokens'][1]['problems'])  # double colour
+        self.assertIn(('ZA', 'Znt Plain'),
+                      self.service.ui_read('Znt Plain')['matches']['stones'])
+
     def test_lookup_both_directions(self):
         found = self.service.lookup('Znt Plain')
         self.assertIn(('ZA', 'Znt Plain'), found['stones'])

@@ -3,8 +3,8 @@
     <!-- Own root: the notation serves Rubicon and Emasur alike, so it does
          not live under the PDP menu. -->
     <menuitem id="menu_notation_root" name="Notation" sequence="60"/>
-    <menuitem id="menu_notation_wizard" name="Transcribe &amp; Verify"
-              parent="menu_notation_root" action="action_notation_wizard"
+    <menuitem id="menu_notation_workspace" name="Workspace"
+              parent="menu_notation_root" action="action_notation_workspace"
               sequence="10"/>
     <menuitem id="menu_notation_stone" name="Articles"
               parent="menu_notation_root" action="action_notation_stone"

@@ -183,6 +183,55 @@ class NotationService(models.AbstractModel):
         return {'code': '+'.join(self.order_tokens(entries)),
                 'problems': problems}
 
+    # ----------------------------------------------- UI (workspace) support
+
+    @api.model
+    def ui_bootstrap(self):
+        """The four dictionaries as plain JSON for the workspace page."""
+        def rows(model, extra=()):
+            result = []
+            for record in self.env[model].search([]):
+                row = {'id': record.id, 'code': record.code,
+                       'name': record.name}
+                for field in extra:
+                    row[field] = getattr(record, field).id or False
+                result.append(row)
+            return result
+        return {
+            'stones': rows('gem.notation.stone',
+                           ('implied_hue_id', 'default_grade_id',
+                            'default_hue_id', 'default_shape_id')),
+            'grades': rows('gem.notation.grade'),
+            'hues': rows('gem.notation.hue'),
+            'shapes': rows('gem.notation.shape'),
+        }
+
+    @api.model
+    def ui_read(self, text):
+        """Read a colour code and search the dictionaries, JSON-safe.
+
+        Returns ``{'tokens': [...], 'matches': {...}}`` — one entry per
+        ``+``-separated token (decomposition or problems), plus the
+        name/code matches across every axis.
+        """
+        text = (text or '').strip()
+        tokens = []
+        for part in [p for p in text.upper().split('+') if p]:
+            parsed = self.parse_token(part)
+            article = parsed['article']
+            shape = parsed['shape'] or (article and article.default_shape_id)
+            tokens.append({
+                'token': parsed['token'],
+                'stone': article.name if article else False,
+                'grade': parsed['grade'].name if parsed['grade'] else False,
+                'hue': parsed['hue'].name if parsed['hue'] else False,
+                'implied_hue': (article.implied_hue_id.name
+                                if article and article.implied_hue_id else False),
+                'shape': shape.name if shape else False,
+                'problems': parsed['problems'],
+            })
+        return {'tokens': tokens, 'matches': self.lookup(text)}
+
     # ------------------------------------------------------ reverse lookup
 
     @api.model
