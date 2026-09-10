@@ -820,14 +820,52 @@ export class PdpWorkspace extends Component {
         return candidate;
     }
 
+    suggestCodeForCategory(categoryId) {
+        // Necklace (N) -> N + the number after the last existing N-model,
+        // same digit width, letter-suffixed variants (N123C) counted too.
+        const category = this.productCategories.find(
+            (c) => c.id === parseInt(categoryId));
+        if (!category || !category.code) return '';
+        const prefix = category.code.toUpperCase();
+        const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = new RegExp('^' + escaped + '(\\d+)[A-Z]*$');
+        let maxNumber = 0;
+        let width = 3;
+        for (const model of this.state.models) {
+            const match = pattern.exec((model.code || '').toUpperCase());
+            if (match && parseInt(match[1]) >= maxNumber) {
+                maxNumber = parseInt(match[1]);
+                width = match[1].length;
+            }
+        }
+        const taken = new Set(this.state.models.map(
+            (m) => (m.code || '').toUpperCase()));
+        let number = maxNumber;
+        let candidate;
+        do {
+            number += 1;
+            candidate = prefix + String(number).padStart(width, '0');
+        } while (taken.has(candidate));
+        return candidate;
+    }
+
+    onNewModelCategoryChange(ev) {
+        this.state.newModel.category_id = ev.target.value;
+        const suggested = this.suggestCodeForCategory(ev.target.value);
+        if (suggested) {
+            this.state.newModel.code = suggested;
+        }
+    }
+
     openNewModel() {
         const active = this.activeModel;
         const categoryId = active && active.category_id
             ? (Array.isArray(active.category_id)
                 ? active.category_id[0] : active.category_id) : '';
         this.state.newModel = {
-            code: this.suggestNextModelCode(),
-            category_id: categoryId ? String(categoryId) : '',
+            code: (categoryId && this.suggestCodeForCategory(categoryId))
+                || this.suggestNextModelCode(),
+            category_id: categoryId ? '' + categoryId : '',
             drawing: '', quotation: '',
         };
         this.state.showNewModel = true;

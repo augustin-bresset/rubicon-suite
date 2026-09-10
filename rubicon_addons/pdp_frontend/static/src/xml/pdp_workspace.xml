@@ -248,7 +248,7 @@
                             <div class="mb-2">
                                 <label class="form-label small fw-semibold mb-1">Category</label>
                                 <select class="form-select form-select-sm"
-                                        t-on-change="(ev) => { this.state.newModel.category_id = ev.target.value; }">
+                                        t-on-change="(ev) => this.onNewModelCategoryChange(ev)">
                                     <option value="">—</option>
                                     <t t-foreach="productCategories" t-as="pc" t-key="pc.id">
                                         <option t-att-value="pc.id"
