@@ -103,6 +103,32 @@ class NotationServicePdp(models.AbstractModel):
         return {'ok': not problems, 'expected': expected['code'],
                 'given': given, 'problems': problems}
 
+    # ------------------------------------------- correspondence health
+
+    @api.model
+    def action_check_correspondence(self):
+        """Gaps in the notation<->PDP correspondence; all zeros = every
+        legacy record still resolves in the new notation."""
+        queries = {
+            'types_without_article': """
+                SELECT count(*) FROM pdp_stone_type t
+                WHERE NOT EXISTS (SELECT 1 FROM gem_notation_stone s
+                                  WHERE s.type_id = t.id)""",
+            'shades_unmapped': """
+                SELECT count(*) FROM pdp_stone_shade sh
+                WHERE NOT EXISTS (SELECT 1 FROM gem_notation_shade_map m
+                                  WHERE m.shade_id = sh.id)""",
+            'shapes_unlinked': """
+                SELECT count(*) FROM pdp_stone_shape sp
+                WHERE NOT EXISTS (SELECT 1 FROM gem_notation_shape s
+                                  WHERE s.shape_id = sp.id)""",
+        }
+        result = {}
+        for key, query in queries.items():
+            self.env.cr.execute(query)
+            result[key] = self.env.cr.fetchall()[0][0]
+        return result
+
     # --------------------------------------- dev-side code proposal (bulk)
 
     TONE_WORDS = ('light', 'medium', 'dark', 'darker', 'good', 'bad')
@@ -209,46 +235,77 @@ class NotationServicePdp(models.AbstractModel):
                           'default_shape_id': default_shape.id})
             counts['stones'] += 1
 
-        # Grades: the known legacy quality shades, mapped as they come.
+        # Grades: fixed mapping - colour depth first (A->1 ... AAAA->4),
+        # then the quality judgement scale used on precious stones
+        # (2 Good->5, 3 Medium->6, C Bad->7).
+        GRADE_MAP = [('A', '1'), ('AA', '2'), ('AAA', '3'), ('AAAA', '4'),
+                     ('2', '5'), ('3', '6'), ('C', '7')]
         if not Grade.search_count([]):
-            digit = 1
-            for shade in self.env['pdp.stone.shade'].search(
-                    [('code', 'in', ['A', 'AA', 'AAA', 'AAAA', '2', '3', 'C'])],
-                    order='code'):
-                grade = Grade.create({'code': str(digit), 'name': shade.shade})
+            for legacy, digit in GRADE_MAP:
+                shade = self.env['pdp.stone.shade'].search(
+                    [('code', '=', legacy)], limit=1)
+                if not shade:
+                    continue
+                words = (shade.shade or '').split()
+                label = ' '.join(words[1:]) if words and words[0].upper() == legacy \
+                    else (shade.shade or legacy)
+                grade = Grade.create({'code': digit, 'name': label or legacy})
                 if not Map.search([('shade_id', '=', shade.id)]):
                     Map.create({'shade_id': shade.id, 'grade_id': grade.id})
                 counts['grades'] += 1
-                digit += 1
 
-        # Every remaining shade gets a correspondence: hue, grade, or both.
-        grades = Grade.search([])
-
-        def grade_for_tone(word):
-            candidates = grades.filtered(lambda g: word in g.name.lower())
-            # prefer the letter quality scale (A/AA/...) over the numeric one
-            letter = candidates.filtered(lambda g: g.name[:1].isalpha())
-            return (letter or candidates)[:1]
-
+        # Every remaining shade decomposes into hue and/or grade. Grade
+        # information may appear as an explicit code word (Grey AAA) or as
+        # a tone word (Pink Light); species words never belong in a hue
+        # name (White Sapphire -> White).
+        GRADE_WORDS = {'a': 'A', 'aa': 'AA', 'aaa': 'AAA', 'aaaa': 'AAAA',
+                       '2': '2', '3': '3', 'c': 'C'}
+        TONE_TO_GRADE = {'light': 'A', 'medium': 'AA', 'dark': 'AAA',
+                         'darker': 'AAAA', 'good': '2', 'bad': 'C'}
+        grade_by_legacy = {
+            legacy: Grade.search([('code', '=', digit)], limit=1)
+            for legacy, digit in GRADE_MAP}
+        species_words = set()
+        for type_rec in self.env['pdp.stone.type'].search([]):
+            for word in (type_rec.name or '').lower().split():
+                if len(word) > 2 and word not in self.COLOUR_WORDS:
+                    species_words.add(word)
         mapped_shades = set(Map.search([]).mapped('shade_id').ids)
         for shade in self.env['pdp.stone.shade'].search([]):
             if shade.id in mapped_shades:
                 continue
+            # A shade whose CODE is itself a grade code maps directly -
+            # never through the tone words ('3 Medium' is the quality
+            # scale, not the AA colour depth).
+            direct = GRADE_WORDS.get((shade.code or '').lower())
+            if direct and grade_by_legacy.get(direct):
+                Map.create({'shade_id': shade.id,
+                            'grade_id': grade_by_legacy[direct].id})
+                counts['shade_maps'] += 1
+                continue
             tokens = (shade.shade or shade.code or '').split()
             if tokens and tokens[0].upper() == (shade.code or '').upper():
                 tokens = tokens[1:]     # drop the leading pseudo-code word
-            tone = next((t.lower() for t in tokens
-                         if t.lower() in self.TONE_WORDS
-                         and grade_for_tone(t.lower())), None)
-            grade = grade_for_tone(tone) if tone and len(tokens) > 1 else Grade
-            hue_words = [t for t in tokens
-                         if t.lower() not in ('color', 'colour')
-                         and not (grade and t.lower() in self.TONE_WORDS)]
-            hue_name = ' '.join(hue_words) or (shade.shade or shade.code)
-            hue = self._find_or_create_hue(hue_name, counts)
+            grade_code = None
+            hue_words = []
+            for token in tokens:
+                lowered = token.lower()
+                if grade_code is None and lowered in GRADE_WORDS:
+                    grade_code = GRADE_WORDS[lowered]
+                elif grade_code is None and lowered in TONE_TO_GRADE:
+                    grade_code = TONE_TO_GRADE[lowered]
+                elif lowered in ('color', 'colour') or lowered in species_words:
+                    continue
+                else:
+                    hue_words.append(token)
+            grade = grade_by_legacy.get(grade_code) if grade_code else None
+            hue_name = ' '.join(hue_words)
+            if not hue_name and not grade:
+                hue_name = shade.shade or shade.code
+            hue = self._find_or_create_hue(hue_name, counts) if hue_name else None
             Map.create({'shade_id': shade.id,
                         'grade_id': grade.id if grade else False,
-                        'hue_id': hue.id})
+                        'hue_id': hue.id if hue else False})
             counts['shade_maps'] += 1
 
         # Colour-bearing type names propose the article's implied hue.

@@ -15,6 +15,12 @@ alone; everything PDP-specific lives here.
     'depends': ['gem_notation', 'pdp_stone', 'pdp_product'],
     'data': [
         'security/ir.model.access.csv',
+        # The versioned notation<->PDP correspondence: article->stone type,
+        # notation shape->PDP shape, legacy shade->grade+hue. Git is the
+        # source of truth; reloading the module restores it identically.
+        'data/gem.notation.stone.csv',
+        'data/gem.notation.shape.csv',
+        'data/gem.notation.shade.map.csv',
         'views/bridge_views.xml',
     ],
     'installable': True,

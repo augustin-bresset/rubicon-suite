@@ -170,6 +170,9 @@ recompute-alt-codes:
 propose-notation:
 	@printf 'import pprint\npprint.pprint(env["gem.notation"].action_propose_codes())\nenv.cr.commit()\n' | $(ODOO_SHELL)
 
+check-notation:
+	@printf 'import pprint\npprint.pprint(env["gem.notation"].action_check_correspondence())\n' | $(ODOO_SHELL)
+
 restore-reference-csvs:
 	@git checkout -q -- $$(git ls-files 'rubicon_addons/*/data/*.csv') && \
 	  echo "→ tracked reference CSVs restored from git (business CSVs kept)"

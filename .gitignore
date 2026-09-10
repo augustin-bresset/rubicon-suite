@@ -103,6 +103,7 @@ meta/backups/
 !rubicon_addons/pdp_margin/data/pdp.margin.csv
 !rubicon_addons/pdp_margin/data/pdp.margin.part.csv
 !rubicon_addons/gem_notation/data/*.csv
+!rubicon_addons/gem_notation_pdp/data/*.csv
 !rubicon_addons/pdp_margin/data/pdp.margin.metal.csv
 !rubicon_addons/pdp_margin/data/pdp.margin.stone.csv
 !rubicon_addons/pdp_margin/data/pdp.margin.addon.csv

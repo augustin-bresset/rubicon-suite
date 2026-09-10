@@ -2,31 +2,31 @@ id,code,name,category_id:id,implied_hue_id:id,default_grade_id:id,default_hue_id
 stone_AA,AA,Amazonite,cat_H,"","","",shape_PC
 stone_AB,AB,Abalone,cat_H,"","","",shape_OV
 stone_AE,AE,Ametrine,cat_S,"","","",shape_SC
-stone_AG,AG,Agate,cat_H,"","",hue_6W,shape_OG
-stone_AK,AK,Akoya 1 Hole,cat_R,"","",hue_6W,shape_RD
+stone_AG,AG,Agate,cat_H,"","",hue_1W,shape_OG
+stone_AK,AK,Akoya 1 Hole,cat_R,"","",hue_1W,shape_RD
 stone_AL,AL,Alexandrite,cat_S,"","","",shape_RD
-stone_AM,AM,Amethyst,cat_S,"",grade_4,"",shape_RD
+stone_AM,AM,Amethyst,cat_S,"",grade_2,"",shape_RD
 stone_AO,AO,Akoya 2 Holes,cat_R,"","","",""
-stone_AP,AP,Apatite,cat_S,"","",hue_4G,shape_RD
-stone_AQ,AQ,Aquamarine,cat_S,"",grade_5,"",shape_RD
+stone_AP,AP,Apatite,cat_S,"","",hue_3G,shape_RD
+stone_AQ,AQ,Aquamarine,cat_S,"",grade_3,"",shape_RD
 stone_AU,AU,AQUAPRASE,cat_H,"","","",""
-stone_AV,AV,Aventurine,cat_H,"","",hue_4G,shape_OG
+stone_AV,AV,Aventurine,cat_H,"","",hue_3G,shape_OG
 stone_BA,BA,Black Diopside,cat_H,hue_1B,"",hue_6B,shape_RC
 stone_BC,BC,Black Tourmaline,cat_S,hue_1B,grade_7,"",shape_RC
 stone_BE,BE,Blue Agate,cat_H,hue_2B,"","",shape_AA
-stone_BL,BL,Blue Topaz,cat_S,hue_2B,grade_3,"",shape_RD
+stone_BL,BL,Blue Topaz,cat_S,hue_2B,grade_1,"",shape_RD
 stone_BO,BO,Bone,cat_H,"","","",shape_LK
 stone_BR,BR,Bronzite,cat_H,"","","",shape_DN
 stone_BU,BU,Blue Zircon,cat_S,hue_2B,"","",shape_RD
 stone_BW,BW,Brown Tourmaline,cat_S,hue_5B,"","",""
-stone_BY,BY,Beryl,cat_S,"",grade_3,hue_2Y,shape_OG
+stone_BY,BY,Beryl,cat_S,"",grade_1,hue_1Y,shape_OG
 stone_CA,CA,Calcite,cat_H,"","","",shape_BU
 stone_CC,CC,CERAMIC,cat_H,"","","",shape_CS
 stone_CE,CE,Came,cat_H,"","","",shape_OV
-stone_CG,CG,Cognac,cat_S,"",grade_3,"",shape_RD
+stone_CG,CG,Cognac,cat_S,"",grade_1,"",shape_RD
 stone_CH,CH,Chalcedony,cat_H,"","",hue_2B,shape_OG
-stone_CI,CI,Citrine,cat_S,"",grade_5,"",shape_RD
-stone_CM,CM,Champaign Quartz,cat_S,hue_6C,grade_3,"",shape_RD
+stone_CI,CI,Citrine,cat_S,"",grade_3,"",shape_RD
+stone_CM,CM,Champaign Quartz,cat_S,hue_6C,grade_1,"",shape_RD
 stone_CN,CN,CARNELIAN,cat_H,"","","",shape_BD
 stone_CO,CO,Coral,cat_H,"","",hue_5R,shape_RC
 stone_CR,CR,Chrysophase,cat_S,"","","",shape_BU
@@ -35,48 +35,48 @@ stone_CT,CT,Concrete,cat_H,"","","",""
 stone_CU,CU,Cubic,cat_S,"","","",shape_RW
 stone_CY,CY,Chrysoberyl,cat_S,"","","",shape_DY
 stone_DI,DI,Diamond,cat_D,"","",hue_2W,shape_RW
-stone_DO,DO,Diopside,cat_H,"","",hue_4G,shape_RD
+stone_DO,DO,Diopside,cat_H,"","",hue_3G,shape_RD
 stone_DR,DR,Dragon Eye,cat_H,"","","",shape_LK
 stone_DY,DY,Dyed Jade,cat_H,"","",hue_1L,shape_AS
 stone_EA,EA,Eagle Eye,cat_H,"","","",shape_BL
-stone_EM,EM,Emerald,cat_P,"",grade_1,"",shape_RD
+stone_EM,EM,Emerald,cat_P,"",grade_5,"",shape_RD
 stone_FA,FA,Fancy Toumaline,cat_S,"","","",shape_OG
 stone_FI,FI,Fire Opal,cat_S,"","","",shape_OV
 stone_FL,FL,Fluorite,cat_S,"","","",""
-stone_GA,GA,Garnet,cat_S,"","",hue_4M,shape_RD
-stone_GE,GE,Green Tourmaline,cat_S,hue_4G,grade_5,hue_3C,shape_RD
-stone_GR,GR,GREEN QUARTZ,cat_S,hue_4G,grade_1,"",shape_RD
+stone_GA,GA,Garnet,cat_S,"","",hue_3M,shape_RD
+stone_GE,GE,Green Tourmaline,cat_S,hue_3G,grade_3,hue_3C,shape_RD
+stone_GR,GR,GREEN QUARTZ,cat_S,hue_3G,grade_5,"",shape_RD
 stone_HE,HE,Hematite,cat_H,"","","",shape_AM
-stone_IO,IO,Iolite,cat_S,"",grade_3,"",shape_RD
+stone_IO,IO,Iolite,cat_S,"",grade_1,"",shape_RD
 stone_JA,JA,Jade,cat_H,"","",hue_1B,shape_AA
 stone_JE,JE,Jet,cat_H,"","","",shape_DY
 stone_JS,JS,JASPER,cat_H,"","",hue_5R,shape_DJ
 stone_KU,KU,Kunzite,cat_S,"","","",shape_RD
 stone_KY,KY,Kyanite,cat_S,"","","",shape_RD
-stone_LA,LA,Lapis,cat_H,"","",hue_2G,shape_OG
+stone_LA,LA,Lapis,cat_H,"",grade_5,"",shape_OG
 stone_LB,LB,Labradorite,cat_H,"","","",shape_BD
-stone_LE,LE,Lemon Quartz,cat_S,hue_4L,grade_3,"",shape_RD
-stone_MA,MA,Malachite,cat_H,"","",hue_2G,shape_RT
+stone_LE,LE,Lemon Quartz,cat_S,hue_4L,grade_1,"",shape_RD
+stone_MA,MA,Malachite,cat_H,"",grade_5,"",shape_RT
 stone_MB,MB,Mabe,cat_R,"","","",shape_RD
 stone_MI,MI,Moissanite,cat_D,"","","",shape_RW
 stone_MN,MN,Mandarin Garnet,cat_S,"","","",shape_SQ
 stone_MO,MO,Moon Stone,cat_H,"","",hue_1R,shape_RD
-stone_MR,MR,Morganite,cat_S,"",grade_4,"",shape_RD
+stone_MR,MR,Morganite,cat_S,"",grade_2,"",shape_RD
 stone_MS,MS,Miscellanous,cat_S,"","","",""
-stone_MT,MT,Mother of Pearl,cat_H,"","",hue_6W,shape_PC
-stone_NE,NE,Nephrite,cat_H,"","",hue_4G,shape_OG
+stone_MT,MT,Mother of Pearl,cat_H,"","",hue_1W,shape_PC
+stone_NE,NE,Nephrite,cat_H,"","",hue_3G,shape_OG
 stone_OB,OB,Obsidian,cat_H,"","","",""
 stone_OL,OL,Olive Quartz,cat_S,hue_3O,"","",shape_AR
-stone_ON,ON,Onyx,cat_H,"","",hue_6W,shape_MI
+stone_ON,ON,Onyx,cat_H,"","",hue_1W,shape_MI
 stone_OP,OP,Opal,cat_S,"","",hue_4P,shape_RC
-stone_PA,PA,Pearl,cat_R,"","",hue_6W,shape_RD
+stone_PA,PA,Pearl,cat_R,"","",hue_1W,shape_RD
 stone_PB,PB,Paraiba,cat_S,"","","",shape_RD
-stone_PE,PE,Peridot,cat_S,"",grade_5,"",shape_RD
-stone_PH,PH,Pearl 1 Hole,cat_R,"","",hue_6W,shape_RD
+stone_PE,PE,Peridot,cat_S,"",grade_3,"",shape_RD
+stone_PH,PH,Pearl 1 Hole,cat_R,"","",hue_1W,shape_RD
 stone_PI,PI,Pink Tourmaline,cat_S,hue_4P,grade_7,"",shape_RD
-stone_PL,PL,Pearl 2 Holes,cat_R,"","",hue_6W,shape_RD
+stone_PL,PL,Pearl 2 Holes,cat_R,"","",hue_1W,shape_RD
 stone_PN,PN,Pink Quartz,cat_S,hue_4P,"",hue_4C,shape_RD
-stone_PO,PO,Porcelain,cat_S,"","",hue_6W,shape_DG
+stone_PO,PO,Porcelain,cat_S,"","",hue_1W,shape_DG
 stone_PR,PR,PREHNITE,cat_H,"","",hue_2M,shape_OG
 stone_PU,PU,Pearl Button,cat_R,"","","",shape_RD
 stone_QU,QU,Qubic,cat_S,"","","",""
@@ -86,28 +86,28 @@ stone_RD,RD,Rhodochrosite,cat_H,"","","",shape_SC
 stone_RE,RE,Real Turquoise,cat_H,"","",hue_2B,shape_OG
 stone_RH,RH,Rhodolite,cat_S,"",grade_7,"",shape_RD
 stone_RO,RO,Rose de France,cat_S,"","","",shape_RD
-stone_RT,RT,Rutile Quartz,cat_S,"","",hue_3G,shape_OG
-stone_RU,RU,Ruby,cat_P,"",grade_1,"",shape_RD
-stone_SA,SA,Sapphire,cat_P,"",grade_3,hue_4P,shape_RD
+stone_RT,RT,Rutile Quartz,cat_S,"","",hue_2G,shape_OG
+stone_RU,RU,Ruby,cat_P,"",grade_5,"",shape_RD
+stone_SA,SA,Sapphire,cat_P,"",grade_1,hue_4P,shape_RD
 stone_SB,SB,Sea Bamboo,cat_H,"","","",shape_AA
-stone_SE,SE,Spessartite,cat_S,"","",hue_3M,shape_RD
+stone_SE,SE,Spessartite,cat_S,"",grade_2,"",shape_RD
 stone_SH,SH,Sphalerite,cat_S,"","","",""
 stone_SI,SI,Spinel,cat_S,"","",hue_1B,shape_RD
 stone_SL,SL,Silver,cat_H,"","","",""
-stone_SM,SM,Smokey Quartz,cat_S,hue_1Z,grade_3,"",shape_RD
-stone_SP,SP,Sapphire Kanchana,cat_P,"",grade_3,hue_1K,shape_OG
-stone_ST,ST,Stainless,cat_H,"","",hue_6W,shape_MI
+stone_SM,SM,Smokey Quartz,cat_S,hue_1X,grade_1,"",shape_RD
+stone_SP,SP,Sapphire Kanchana,cat_P,"",grade_1,hue_1D,shape_OG
+stone_ST,ST,Stainless,cat_H,"","",hue_1W,shape_MI
 stone_SU,SU,Sunstone,cat_H,"","","",""
 stone_SY,SY,Synthetic,cat_S,"","",hue_4P,shape_OT
-stone_TA,TA,Tanzanite,cat_P,"",grade_5,"",shape_RD
+stone_TA,TA,Tanzanite,cat_P,"",grade_3,"",shape_RD
 stone_TH,TH,Tahiti Pearl,cat_R,"","",hue_2A,shape_RD
 stone_TI,TI,Tiger Eye,cat_H,"",grade_7,"",shape_RC
-stone_TO,TO,Topaz,cat_S,"","",hue_6W,shape_OV
+stone_TO,TO,Topaz,cat_S,"","",hue_1W,shape_OV
 stone_TR,TR,Tourmaline,cat_S,"","",hue_2P,shape_RD
-stone_TS,TS,Tsavorite,cat_P,"",grade_3,"",shape_RD
+stone_TS,TS,Tsavorite,cat_P,"",grade_1,"",shape_RD
 stone_TU,TU,Turquoise,cat_H,"","",hue_2B,shape_RC
 stone_UV,UV,Uvite,cat_S,"","","",""
-stone_WH,WH,White Topaz,cat_S,hue_6W,"","",shape_RD
-stone_WI,WI,White Quartz,cat_H,hue_6W,"",hue_2M,shape_DH
+stone_WH,WH,White Topaz,cat_S,hue_1W,"","",shape_RD
+stone_WI,WI,White Quartz,cat_H,hue_1W,"",hue_2M,shape_DH
 stone_WO,WO,Wood,cat_H,"","",hue_1B,shape_RD
-stone_ZI,ZI,Zircon,cat_S,"","",hue_6W,shape_RD
+stone_ZI,ZI,Zircon,cat_S,"","",hue_1W,shape_RD

@@ -1,8 +1,8 @@
 id,code,name
-grade_1,1,2 Good
-grade_2,2,3 Medium
-grade_3,3,A Light Color
-grade_4,4,AA Medium Color
-grade_5,5,AAA Dark Color
-grade_6,6,AAAA Darker Color
-grade_7,7,C Bad
+grade_1,1,Light Color
+grade_2,2,Medium Color
+grade_3,3,Dark Color
+grade_4,4,Darker Color
+grade_5,5,Good
+grade_6,6,Medium
+grade_7,7,Bad

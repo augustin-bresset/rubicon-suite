@@ -2,34 +2,33 @@ id,code,name
 hue_1A,1A,Akoya
 hue_1B,1B,Black
 hue_1C,1C,Canary
-hue_1D,1D,Dts
+hue_1D,1D,Dull
 hue_1E,1E,Ebony
-hue_1F,1F,First Fire
+hue_1F,1F,First
 hue_1G,1G,Grey/Blue
-hue_1H,1H,Whiskey
+hue_1H,1H,White I1
 hue_1I,1I,Ice Ceylan
 hue_1J,1J,Jadeite
-hue_1K,1K,Kanchana Dull
+hue_1K,1K,White I2
 hue_1L,1L,Lavender
 hue_1M,1M,Medium/Austr.
 hue_1N,1N,Nats
 hue_1O,1O,Open Ceylon
 hue_1P,1P,Padparasha
-hue_1Q,1Q,White I1
+hue_1Q,1Q,White I3
 hue_1R,1R,RAINBOW
 hue_1S,1S,SPECIAL DIA
 hue_1T,1T,TLB
-hue_1U,1U,White I2
+hue_1U,1U,Wang Yeung
 hue_1V,1V,VIOLET
-hue_1W,1W,White Sapphire
-hue_1X,1X,White I3
-hue_1Y,1Y,Wang Yeung
-hue_1Z,1Z,Smokey
+hue_1W,1W,White
+hue_1X,1X,Smokey
+hue_1Y,1Y,Yellow
 hue_2A,2A,Aubergine
 hue_2B,2B,Blue
 hue_2C,2C,Chrome deep
-hue_2G,2G,Good
-hue_2K,2K,Kanchana Fire
+hue_2D,2D,Dts
+hue_2G,2G,Gold
 hue_2L,2L,Lime
 hue_2M,2M,Milky
 hue_2O,2O,Orange
@@ -38,13 +37,13 @@ hue_2R,2R,Reconstructed
 hue_2S,2S,Sand
 hue_2T,2T,TTLB
 hue_2W,2W,White1 = Si-P1
-hue_2Y,2Y,Yellow
+hue_2Y,2Y,YELLOW MEDIUM
 hue_3A,3A,Australian Blue Blue
 hue_3B,3B,Blood
 hue_3C,3C,Chrome
-hue_3G,3G,Gold
+hue_3G,3G,Green
 hue_3L,3L,Lingt PL Pink
-hue_3M,3M,medium
+hue_3M,3M,Malaya
 hue_3O,3O,Olive
 hue_3P,3P,Peacock
 hue_3R,3R,Real
@@ -54,9 +53,9 @@ hue_3W,3W,White2 = VS
 hue_4A,4A,Australian Blue Black
 hue_4B,4B,Blue Star
 hue_4C,4C,CLOUDY
-hue_4G,4G,Green
+hue_4G,4G,Grey
 hue_4L,4L,Lemon
-hue_4M,4M,Malaya
+hue_4M,4M,Mint
 hue_4P,4P,Pink
 hue_4R,4R,RECON
 hue_4S,4S,Silver
@@ -65,28 +64,25 @@ hue_4W,4W,White3 = VVS
 hue_5A,5A,Australian Blue Green
 hue_5B,5B,Brown
 hue_5C,5C,Charcoal
-hue_5G,5G,Grey
-hue_5M,5M,Mint
-hue_5P,5P,PURPLE
+hue_5M,5M,Multi
+hue_5P,5P,PINK MEDIUM
 hue_5R,5R,Red
 hue_5S,5S,Smocky
 hue_5T,5T,Teal
 hue_5W,5W,W.A
 hue_6B,6B,Black Star
 hue_6C,6C,Champaign
-hue_6G,6G,Grey A
-hue_6M,6M,Multi
+hue_6P,6P,PURPLE
 hue_6R,6R,Resin
 hue_6S,6S,Special
-hue_6W,6W,White
+hue_6W,6W,White B
 hue_7B,7B,Ballou
 hue_7C,7C,Ceylon
-hue_7G,7G,Grey AA
 hue_7R,7R,Root
 hue_7S,7S,Star
-hue_7W,7W,White B
-hue_8G,8G,Grey AAA
-hue_8S,8S,South Seas Pearl
-hue_8W,8W,White Cat Eye
+hue_7W,7W,White Cat
+hue_8C,8C,Ceylon Medium
+hue_8S,8S,South Seas
+hue_8W,8W,White D
 hue_9S,9S,Stabilized
-hue_9W,9W,White D
+hue_9W,9W,Whiskey
