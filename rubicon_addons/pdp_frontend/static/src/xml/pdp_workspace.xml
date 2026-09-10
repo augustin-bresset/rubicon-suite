@@ -26,6 +26,7 @@
                         </t>
                     </div>
                     <button class="btn btn-sm btn-outline-secondary" t-on-click="() => this.openModelList()">List</button>
+                    <button class="btn btn-sm btn-outline-success" t-on-click="() => this.openNewModel()">New Model</button>
                     <button class="btn btn-sm btn-outline-secondary" t-att-title="'Displayed code system — searching always matches every code'"
                             t-on-click="() => this.toggleNotation()"><t t-esc="notationLabel"/></button>
                     <div class="position-relative">
@@ -226,6 +227,58 @@
                         </t>
                     </div>
                 </div>
+
+                <!-- New Model Modal -->
+                <t t-if="state.showNewModel">
+                    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                         style="background: rgba(0,0,0,0.5); z-index: 1050;"
+                         t-on-click.self="() => { this.state.showNewModel = false; }">
+                        <div class="bg-white rounded shadow-lg p-3" style="min-width: 360px;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">New Model</span>
+                                <button type="button" class="btn-close" t-on-click="() => { this.state.showNewModel = false; }"/>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold mb-1">Code</label>
+                                <input type="text" class="form-control form-control-sm"
+                                       t-att-value="state.newModel.code"
+                                       t-on-input="(ev) => { this.state.newModel.code = ev.target.value; }"
+                                       placeholder="e.g. B013"/>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold mb-1">Category</label>
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => { this.state.newModel.category_id = ev.target.value; }">
+                                    <option value="">—</option>
+                                    <t t-foreach="productCategories" t-as="pc" t-key="pc.id">
+                                        <option t-att-value="pc.id"
+                                                t-att-selected="String(pc.id) === state.newModel.category_id">
+                                            <t t-esc="pc.code"/> — <t t-esc="pc.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="d-flex gap-2 mb-3">
+                                <div class="flex-fill">
+                                    <label class="form-label small fw-semibold mb-1">Drawing#</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           t-att-value="state.newModel.drawing"
+                                           t-on-input="(ev) => { this.state.newModel.drawing = ev.target.value; }"/>
+                                </div>
+                                <div class="flex-fill">
+                                    <label class="form-label small fw-semibold mb-1">Quotation#</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           t-att-value="state.newModel.quotation"
+                                           t-on-input="(ev) => { this.state.newModel.quotation = ev.target.value; }"/>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn btn-sm btn-secondary" t-on-click="() => { this.state.showNewModel = false; }">Cancel</button>
+                                <button class="btn btn-sm btn-primary" t-on-click="() => this.createModel()">Create</button>
+                            </div>
+                        </div>
+                    </div>
+                </t>
 
                 <!-- Model List Modal -->
                 <t t-if="state.showModelList">
@@ -573,15 +626,38 @@
                                                    t-on-change="() => this.setCenterStone(sr._key)"
                                                    title="Center stone"/>
                                         </td>
-                                        <td t-on-click.stop="">
+                                        <td t-on-click.stop="" class="position-relative">
                                             <input type="text"
                                                    t-attf-class="form-control form-control-sm p-0 text-center {{ !sr._stoneValid and sr._stoneCode ? 'border-danger' : '' }}"
                                                    style="font-size:11px; min-width:100px;"
                                                    t-att-value="sr._stoneValid and sr._stoneTypeName ? sr._stoneTypeName : sr._stoneCode"
-                                                   t-on-focus="(ev) => { ev.target.value = sr._stoneCode; ev.target.select(); }"
-                                                   t-on-blur="(ev) => this.validateStoneCode(sr._key, ev.target.value)"
+                                                   t-on-focus="(ev) => { ev.target.select(); this.openStoneCombo(sr._key, ''); }"
+                                                   t-on-input="(ev) => { this.state.stoneCombo.query = ev.target.value; this.filterStoneCombo(); }"
+                                                   t-on-keydown="(ev) => this.onStoneComboKeydown(sr._key, ev)"
+                                                   t-on-blur="(ev) => this.onStoneComboBlur(sr._key, ev)"
                                                    t-att-title="sr._stoneCode"
-                                                   placeholder="Code..."/>
+                                                   placeholder="Search stone..."/>
+                                            <t t-if="state.stoneCombo.key === sr._key">
+                                                <div class="position-absolute bg-white border rounded shadow-sm text-start"
+                                                     style="top:100%; left:0; z-index:1060; min-width:360px; max-height:260px; overflow-y:auto; font-size:11px;">
+                                                    <t t-foreach="state.stoneCombo.results" t-as="st" t-key="st.id">
+                                                        <div class="px-2 py-1 border-bottom" style="cursor:pointer;"
+                                                             t-on-mousedown.prevent="() => this.pickStone(sr._key, st)">
+                                                            <span class="fw-bold"><t t-esc="st.label"/></span>
+                                                            <span class="text-muted"> — <t t-esc="st.code"/></span>
+                                                        </div>
+                                                    </t>
+                                                    <div t-if="state.stoneCombo.results.length === 0 and state.stoneCombo.unpriced > 0"
+                                                         class="px-2 py-2 text-danger" style="max-width:360px; white-space:normal;">
+                                                        <t t-esc="state.stoneCombo.unpriced"/> matching stone(s) have no unit price —
+                                                        set it in Manage → Stones → Unit Costs first.
+                                                    </div>
+                                                    <div t-if="state.stoneCombo.results.length === 0 and state.stoneCombo.unpriced === 0"
+                                                         class="px-2 py-2 text-muted">No stone matches.</div>
+                                                    <div t-if="state.stoneCombo.results.length === 30"
+                                                         class="px-2 py-1 text-muted fst-italic">Type to narrow down…</div>
+                                                </div>
+                                            </t>
                                         </td>
                                         <td t-on-click.stop="">
                                             <select class="form-select form-select-sm p-0" style="font-size:11px;"

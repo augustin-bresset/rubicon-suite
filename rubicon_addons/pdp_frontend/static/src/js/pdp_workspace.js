@@ -120,6 +120,13 @@ export class PdpWorkspace extends Component {
             suggestedColors: "",
             suggestedCode: "",
 
+            // New model modal
+            showNewModel: false,
+            newModel: { code: "", category_id: "", drawing: "", quotation: "" },
+
+            // Stone picker combo (one open at a time, keyed by row)
+            stoneCombo: { key: null, query: "", results: [], unpriced: 0 },
+
             // Labor tab
             laborModelCosts: [],
             laborProductCosts: [],
@@ -181,6 +188,8 @@ export class PdpWorkspace extends Component {
                 this.orm.searchRead("pdp.stone.type", [], ["id", "code", "name", "category_id"], { order: "name ASC" }),
                 this.orm.searchRead("pdp.stone.setting.type", [], ["id", "name", "cost"], { order: "cost ASC" }),
             ]);
+            this.productCategories = await this.orm.searchRead(
+                "pdp.product.category", [], ["id", "code", "name"], { order: "code ASC" });
 
             this.state.models = models;
             this.state.margins = margins;
@@ -783,6 +792,180 @@ export class PdpWorkspace extends Component {
     setTab(tabName) {
         this.state.activeTab = tabName;
         this._saveNavState();
+        if (tabName === 'stones') {
+            this._ensureStonesCatalog();
+        }
+    }
+
+    // ==========================================
+    // New Model
+    // ==========================================
+
+    suggestNextModelCode() {
+        // Audit flow: take the reference model's code and increment its
+        // number (AA(XXX+1)B), skipping codes already taken.
+        const base = this.activeModel?.code
+            || this.state.models[this.state.models.length - 1]?.code || '';
+        const match = /^([A-Za-z]+)(\d+)(.*)$/.exec(base);
+        if (!match) return '';
+        const taken = new Set(this.state.models.map(
+            (m) => (m.code || '').toUpperCase()));
+        let number = parseInt(match[2]);
+        let candidate;
+        do {
+            number += 1;
+            candidate = match[1]
+                + String(number).padStart(match[2].length, '0') + match[3];
+        } while (taken.has(candidate.toUpperCase()));
+        return candidate;
+    }
+
+    openNewModel() {
+        const active = this.activeModel;
+        const categoryId = active && active.category_id
+            ? (Array.isArray(active.category_id)
+                ? active.category_id[0] : active.category_id) : '';
+        this.state.newModel = {
+            code: this.suggestNextModelCode(),
+            category_id: categoryId ? String(categoryId) : '',
+            drawing: '', quotation: '',
+        };
+        this.state.showNewModel = true;
+    }
+
+    async createModel() {
+        const form = this.state.newModel;
+        const code = (form.code || '').trim().toUpperCase();
+        if (!code) {
+            this.notification.add("Enter a model code.", { type: 'warning' });
+            return;
+        }
+        if (this.state.models.some(
+                (m) => (m.code || '').toUpperCase() === code)) {
+            this.notification.add(`Model "${code}" already exists.`,
+                                  { type: 'warning' });
+            return;
+        }
+        try {
+            const created = await this.orm.create("pdp.product.model", [{
+                code,
+                category_id: form.category_id
+                    ? parseInt(form.category_id) : false,
+                drawing: (form.drawing || '').trim() || false,
+                quotation: (form.quotation || '').trim() || false,
+            }]);
+            const modelId = Array.isArray(created) ? created[0] : created;
+            const [record] = await this.orm.searchRead(
+                "pdp.product.model", [["id", "=", modelId]],
+                ["id", "code", "alt_code", "drawing", "quotation", "category_id"]);
+            this.state.models.push(record);
+            this.state.models.sort(
+                (a, b) => (a.code || '').localeCompare(b.code || ''));
+            this.state.showNewModel = false;
+            await this.selectModelFromSearch(record);
+            this.notification.add(
+                `Model ${code} created — add its first product with New or Make Blank.`,
+                { type: 'success' });
+        } catch (error) {
+            this.notification.add(
+                `Could not create the model: ${error.data?.message || error}`,
+                { type: 'danger' });
+        }
+    }
+
+    // ==========================================
+    // Stone picker (searchable, priced stones only)
+    // ==========================================
+
+    async _ensureStonesCatalog() {
+        if (this._stonesCatalog) return;
+        this._stonesCatalog = [];
+        const rows = await this.orm.searchRead(
+            "pdp.stone", [],
+            ["id", "code", "cost", "type_id", "shade_id", "shape_id", "size_id"]);
+        const nameOf = (list, field, ref) => {
+            const id = Array.isArray(ref) ? ref[0] : ref;
+            return id ? (list.find((x) => x.id === id)?.[field] || '') : '';
+        };
+        this._stonesCatalog = rows.map((s) => {
+            const label = [
+                nameOf(this.stoneTypes, 'name', s.type_id),
+                nameOf(this.stoneShades, 'shade', s.shade_id),
+                nameOf(this.stoneShapes, 'shape', s.shape_id),
+                nameOf(this.stoneSizes, 'name', s.size_id),
+            ].filter(Boolean).join(' ');
+            return { ...s, label,
+                     _search: this._norm(`${label} ${s.code}`) };
+        });
+    }
+
+    _norm(text) {
+        return (text || '').toLowerCase().normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    async openStoneCombo(key, query) {
+        await this._ensureStonesCatalog();
+        this.state.stoneCombo.key = key;
+        this.state.stoneCombo.query = query || '';
+        this.filterStoneCombo();
+    }
+
+    filterStoneCombo() {
+        const words = this._norm(this.state.stoneCombo.query)
+            .split(/\s+/).filter(Boolean);
+        const matches = (this._stonesCatalog || []).filter(
+            (s) => words.every((w) => s._search.includes(w)));
+        // Only priced stones are offered: an unpriced stone would silently
+        // produce a costless line.
+        this.state.stoneCombo.results =
+            matches.filter((s) => s.cost > 0).slice(0, 30);
+        this.state.stoneCombo.unpriced =
+            matches.filter((s) => !(s.cost > 0)).length;
+    }
+
+    async pickStone(key, stone) {
+        this.closeStoneCombo();
+        await this.validateStoneCode(key, stone.code);
+    }
+
+    closeStoneCombo() {
+        this.state.stoneCombo.key = null;
+        this.state.stoneCombo.results = [];
+        this.state.stoneCombo.unpriced = 0;
+    }
+
+    onStoneComboKeydown(key, ev) {
+        if (ev.key === 'Escape') {
+            this.closeStoneCombo();
+        } else if (ev.key === 'Enter') {
+            const first = this.state.stoneCombo.results[0];
+            if (this.state.stoneCombo.key === key && first) {
+                ev.preventDefault();
+                this.pickStone(key, first);
+            }
+        }
+    }
+
+    onStoneComboBlur(key, ev) {
+        // No scary "not found": picking happens on mousedown, so a blur
+        // just closes the list and restores the row's display - unless
+        // the typed text is exactly a stone code, which still validates.
+        const typed = (ev.target.value || '').trim().toUpperCase();
+        setTimeout(() => {
+            const wasOpen = this.state.stoneCombo.key === key;
+            this.closeStoneCombo();
+            if (!wasOpen) return;
+            const row = this.state.stoneRows.find((r) => r._key === key);
+            if (!row) return;
+            if (!typed) {
+                this.validateStoneCode(key, '');
+            } else if (typed !== row._stoneCode
+                       && (this._stonesCatalog || []).some(
+                           (s) => s.code.toUpperCase() === typed)) {
+                this.validateStoneCode(key, typed);
+            }
+        }, 150);
     }
 
     async onMarginChange(ev) {
