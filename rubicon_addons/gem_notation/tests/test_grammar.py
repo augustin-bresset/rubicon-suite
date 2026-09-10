@@ -2,7 +2,7 @@ from odoo.tests.common import TransactionCase
 
 
 class TestGrammar(TransactionCase):
-    """Grammar PP[G][BB][EE]: build, parse, order — pure notation records."""
+    """Grammar PP[G][HH][SS]: build, parse, order — pure notation records."""
 
     @classmethod
     def setUpClass(cls):

@@ -8,7 +8,7 @@ TWO_LETTERS = re.compile(r'^[A-Z]{2}$')
 class NotationService(models.AbstractModel):
     """Grammar engine of the notation: parse, build, order, look up.
 
-    A token reads ``PP[G][BB][EE]`` — article (2 letters), grade (1 digit),
+    A token reads ``PP[G][HH][SS]`` — article (2 letters), grade (1 digit),
     hue (digit+letter), shape (2 letters) — blocks omitted when they match
     the article's defaults. The block widths and character classes make
     every token parse without separators: after the article, a candidate
@@ -72,7 +72,7 @@ class NotationService(models.AbstractModel):
         splits = self._split_rest(token[2:])
         if len(splits) != 1:
             result['problems'].append(
-                f"'{token}': not a valid PP[G][BB][EE] token")
+                f"'{token}': not a valid PP[G][HH][SS] token")
             return result
         grade_code, hue_code, shape_code = splits[0]
 

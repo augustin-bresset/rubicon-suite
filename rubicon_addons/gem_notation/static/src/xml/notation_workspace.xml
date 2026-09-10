@@ -7,7 +7,7 @@
             <!-- Header -->
             <div class="d-flex align-items-center gap-3 px-4 py-2 bg-white border-bottom">
                 <h4 class="mb-0">Gemstone Notation</h4>
-                <span class="text-muted small">PP [G] [BB] [EE] — stone, grade, hue, shape; defaults omitted</span>
+                <span class="text-muted small">PP [G] [HH] [SS] — stone, grade, hue, shape; defaults omitted</span>
                 <span class="flex-grow-1"/>
                 <div class="btn-group btn-group-sm">
                     <button class="btn btn-light border" t-on-click="() => this.openDictionary('gem_notation.action_notation_stone')">Stones</button>

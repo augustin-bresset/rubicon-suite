@@ -13,15 +13,15 @@ company data, and knows nothing about any particular product database
 A token describes one stone in four blocks, three of them optional:
 
 ```
-PP [G] [BB] [EE]
+PP [G] [HH] [SS]
 ```
 
 | Block | Width | Character class | Meaning |
 |-------|-------|-----------------|---------|
 | `PP`  | 2     | letters          | stone identity |
 | `G`   | 1     | digit            | quality grade |
-| `BB`  | 2     | digit **then** letter | hue |
-| `EE`  | 2     | letters          | cutting shape |
+| `HH`  | 2     | digit **then** letter | hue |
+| `SS`  | 2     | letters          | cutting shape |
 
 Examples (with an illustrative dictionary):
 

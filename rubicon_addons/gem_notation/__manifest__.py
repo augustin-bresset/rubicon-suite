@@ -10,7 +10,7 @@ grades, hues and shapes with their codes, and the rule producing the
 colour code of a finished product from its stones. Selecting a stone's
 components gives its code and a code reads back into its components.
 
-Token grammar PP[G][BB][EE]: stone (2 letters), grade (1 digit), hue
+Token grammar PP[G][HH][SS]: stone (2 letters), grade (1 digit), hue
 (digit + letter), shape (2 letters); blocks are omitted when they match
 the stone's defaults — determined from occurrence counts in the actual
 stone history — and every token parses without separators. See README.md
