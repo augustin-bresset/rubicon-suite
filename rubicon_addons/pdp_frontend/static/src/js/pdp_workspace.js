@@ -961,7 +961,16 @@ export class PdpWorkspace extends Component {
         this.state.stoneCombo.query = query || '';
         this.state.stoneCombo.loading = !this._stonesCatalog;
         this.filterStoneCombo();
-        await this._ensureStonesCatalog();
+        try {
+            await this._ensureStonesCatalog();
+        } catch (error) {
+            this._stonesCatalogPromise = null;
+            this.state.stoneCombo.loading = false;
+            this.notification.add(
+                `Could not load the stone catalogue: ${error.data?.message || error}`,
+                { type: 'danger' });
+            return;
+        }
         this.state.stoneCombo.loading = false;
         if (this.state.stoneCombo.key === key) {
             this.filterStoneCombo();
