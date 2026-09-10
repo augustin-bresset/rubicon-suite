@@ -628,72 +628,65 @@
                                         </td>
                                         <td t-on-click.stop="" class="position-relative">
                                             <input type="text"
-                                                   t-attf-class="form-control form-control-sm p-0 text-center {{ !sr._stoneValid and sr._stoneCode ? 'border-danger' : '' }}"
-                                                   style="font-size:11px; min-width:100px;"
-                                                   t-att-value="state.stoneCombo.key === sr._key ? state.stoneCombo.query : (sr._stoneValid and sr._stoneTypeName ? sr._stoneTypeName : sr._stoneCode)"
-                                                   t-on-focus="() => this.openStoneCombo(sr._key, '')"
-                                                   t-on-input="(ev) => { this.state.stoneCombo.query = ev.target.value; this.filterStoneCombo(); }"
-                                                   t-on-keydown="(ev) => this.onStoneComboKeydown(sr._key, ev)"
-                                                   t-on-blur="(ev) => this.onStoneComboBlur(sr._key, ev)"
-                                                   t-att-title="sr._stoneCode"
-                                                   placeholder="Search stone..."/>
+                                                   t-attf-class="form-control form-control-sm p-0 text-center {{ sr._typeId and !sr._stoneValid ? 'border-warning' : '' }}"
+                                                   style="font-size:11px; min-width:110px;"
+                                                   t-att-value="state.stoneCombo.key === sr._key ? state.stoneCombo.query : (sr._typeName || sr._stoneTypeName)"
+                                                   t-on-focus="() => this.openTypeCombo(sr._key)"
+                                                   t-on-input="(ev) => { this.state.stoneCombo.query = ev.target.value; this.filterTypeCombo(); }"
+                                                   t-on-keydown="(ev) => this.onTypeComboKeydown(sr._key, ev)"
+                                                   t-on-blur="() => this.onTypeComboBlur(sr._key)"
+                                                   t-att-title="sr._stoneCode || 'Pick a stone type, then narrow with Shade / Shape / Size'"
+                                                   placeholder="Stone type..."/>
                                             <t t-if="state.stoneCombo.key === sr._key">
                                                 <div class="position-absolute bg-white border rounded shadow-sm text-start"
-                                                     style="top:100%; left:0; z-index:1060; min-width:360px; max-height:260px; overflow-y:auto; font-size:11px;">
-                                                    <t t-foreach="state.stoneCombo.results" t-as="st" t-key="st.id">
+                                                     style="top:100%; left:0; z-index:1060; min-width:240px; max-height:260px; overflow-y:auto; font-size:11px;">
+                                                    <div t-if="state.stoneCombo.loading" class="px-2 py-2 text-muted fst-italic">
+                                                        Loading stones…
+                                                    </div>
+                                                    <t t-foreach="state.stoneCombo.results" t-as="ty" t-key="ty.id">
                                                         <div class="px-2 py-1 border-bottom" style="cursor:pointer;"
-                                                             t-on-mousedown.prevent="() => this.pickStone(sr._key, st)">
-                                                            <span class="fw-bold"><t t-esc="st.label"/></span>
-                                                            <span class="text-muted"> — <t t-esc="st.code"/></span>
+                                                             t-on-mousedown.prevent="() => this.pickStoneType(sr._key, ty)">
+                                                            <span class="fw-bold"><t t-esc="ty.name"/></span>
+                                                            <span class="text-muted"> — <t t-esc="ty.code"/></span>
                                                         </div>
                                                     </t>
-                                                    <div t-if="state.stoneCombo.loading" class="px-2 py-2 text-muted fst-italic">
-                                                        Loading the stone catalogue…
-                                                    </div>
-                                                    <div t-if="!state.stoneCombo.loading and state.stoneCombo.results.length === 0 and state.stoneCombo.unpriced > 0"
-                                                         class="px-2 py-2 text-danger" style="max-width:360px; white-space:normal;">
-                                                        <t t-esc="state.stoneCombo.unpriced"/> matching stone(s) have no unit price —
-                                                        set it in Manage → Stones → Unit Costs first.
-                                                    </div>
-                                                    <div t-if="!state.stoneCombo.loading and state.stoneCombo.results.length === 0 and state.stoneCombo.unpriced === 0"
-                                                         class="px-2 py-2 text-muted">No stone matches.</div>
-                                                    <div t-if="state.stoneCombo.results.length === 30"
-                                                         class="px-2 py-1 text-muted fst-italic">Type to narrow down…</div>
+                                                    <div t-if="!state.stoneCombo.loading and state.stoneCombo.results.length === 0"
+                                                         class="px-2 py-2 text-muted">No priced stone type matches.</div>
                                                 </div>
                                             </t>
                                         </td>
                                         <td t-on-click.stop="">
                                             <select class="form-select form-select-sm p-0" style="font-size:11px;"
-                                                    t-on-change="(ev) => this.onStoneAttrChange(sr._key, 'shade_id', ev.target.value)">
+                                                    t-att-disabled="!sr._typeId"
+                                                    t-on-change="(ev) => this.onStoneAxisChange(sr._key, 'shade', ev.target.value)">
                                                 <option value="">—</option>
-                                                <t t-foreach="this.stoneShades" t-as="sh" t-key="sh.id">
-                                                    <option t-att-value="sh.id"
-                                                            t-att-selected="sh.id === (sr._stoneDetail and Array.isArray(sr._stoneDetail.shade_id) ? sr._stoneDetail.shade_id[0] : 0)">
-                                                        <t t-esc="sh.shade"/>
+                                                <t t-foreach="stoneAxisOptions(sr, 'shade')" t-as="opt" t-key="opt.id">
+                                                    <option t-att-value="opt.id" t-att-selected="opt.id === sr._shadeId">
+                                                        <t t-esc="opt.label"/>
                                                     </option>
                                                 </t>
                                             </select>
                                         </td>
                                         <td t-on-click.stop="">
                                             <select class="form-select form-select-sm p-0" style="font-size:11px;"
-                                                    t-on-change="(ev) => this.onStoneAttrChange(sr._key, 'shape_id', ev.target.value)">
+                                                    t-att-disabled="!sr._typeId"
+                                                    t-on-change="(ev) => this.onStoneAxisChange(sr._key, 'shape', ev.target.value)">
                                                 <option value="">—</option>
-                                                <t t-foreach="this.stoneShapes" t-as="shp" t-key="shp.id">
-                                                    <option t-att-value="shp.id"
-                                                            t-att-selected="shp.id === (sr._stoneDetail and Array.isArray(sr._stoneDetail.shape_id) ? sr._stoneDetail.shape_id[0] : 0)">
-                                                        <t t-esc="shp.shape"/>
+                                                <t t-foreach="stoneAxisOptions(sr, 'shape')" t-as="opt" t-key="opt.id">
+                                                    <option t-att-value="opt.id" t-att-selected="opt.id === sr._shapeId">
+                                                        <t t-esc="opt.label"/>
                                                     </option>
                                                 </t>
                                             </select>
                                         </td>
                                         <td t-on-click.stop="">
                                             <select class="form-select form-select-sm p-0" style="font-size:11px;"
-                                                    t-on-change="(ev) => this.onStoneAttrChange(sr._key, 'size_id', ev.target.value)">
+                                                    t-att-disabled="!sr._typeId"
+                                                    t-on-change="(ev) => this.onStoneAxisChange(sr._key, 'size', ev.target.value)">
                                                 <option value="">—</option>
-                                                <t t-foreach="this.stoneSizes" t-as="sz" t-key="sz.id">
-                                                    <option t-att-value="sz.id"
-                                                            t-att-selected="sz.id === (sr._stoneDetail and Array.isArray(sr._stoneDetail.size_id) ? sr._stoneDetail.size_id[0] : 0)">
-                                                        <t t-esc="sz.name"/>
+                                                <t t-foreach="stoneAxisOptions(sr, 'size')" t-as="opt" t-key="opt.id">
+                                                    <option t-att-value="opt.id" t-att-selected="opt.id === sr._sizeId">
+                                                        <t t-esc="opt.label"/>
                                                     </option>
                                                 </t>
                                             </select>
@@ -708,8 +701,10 @@
                                                    t-att-value="sr.weight"
                                                    t-on-change="(ev) => this.setStoneField(sr._key, 'weight', ev.target.value)"/>
                                         </td>
-                                        <td class="text-end text-muted small align-middle">
-                                            <t t-esc="sr._stoneDetail ? sr._stoneDetail.cost : ''"/>
+                                        <td class="text-end text-muted small align-middle"
+                                            t-att-title="sr._stoneChoices > 1 ? sr._stoneChoices + ' stones match — narrow with Shade / Shape / Size' : sr._stoneCode">
+                                            <t t-if="sr._stoneDetail"><t t-esc="sr._stoneDetail.cost"/></t>
+                                            <t t-elif="sr._stoneChoices > 1"><span class="text-warning"><t t-esc="sr._stoneChoices"/>…</span></t>
                                         </td>
                                         <td class="text-muted small align-middle">
                                             <t t-esc="sr._stoneDetail and Array.isArray(sr._stoneDetail.currency_id) ? sr._stoneDetail.currency_id[1] : ''"/>
