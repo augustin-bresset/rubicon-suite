@@ -252,7 +252,7 @@
                                     <option value="">—</option>
                                     <t t-foreach="productCategories" t-as="pc" t-key="pc.id">
                                         <option t-att-value="pc.id"
-                                                t-att-selected="String(pc.id) === state.newModel.category_id">
+                                                t-att-selected="pc.id == state.newModel.category_id">
                                             <t t-esc="pc.code"/> — <t t-esc="pc.name"/>
                                         </option>
                                     </t>
