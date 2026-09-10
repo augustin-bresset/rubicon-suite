@@ -482,6 +482,1349 @@ export class PdpWorkspace extends Component {
         this._refreshSuggestedCode();
     }
 
+    getStoneType(stone_type_id_val) {
+        const id = Array.isArray(stone_type_id_val) ? stone_type_id_val[0] : stone_type_id_val;
+        if (!id) return null;
+        return this.stoneTypes.find(t => t.id === id) || null;
+    }
+
+    _resetDeletedLists() {
+        this._deletedStoneIds = [];
+        this._deletedMetalIds = [];
+        this._deletedLaborModelIds = [];
+        this._deletedLaborProductIds = [];
+        this._deletedAddonCostIds = [];
+        this._deletedPartIds = [];
+        this._currentCompId = null;
+    }
+
+    // ==========================================
+    // Event Handlers
+    // ==========================================
+
+    onProductSearchInput(ev) {
+        const q = ev.target.value;
+        this.state.productSearch = q;
+        if (!q) {
+            this.state.productSearchResults = [];
+            this.state.productFilter = '';
+            return;
+        }
+        const ql = q.toLowerCase();
+        this.state.productSearchResults = this.state.products.filter(
+            p => this.matchesCode(p, q)).slice(0, 50);
+    }
+
+    onProductSearchKeydown(ev) {
+        if (ev.key === 'Enter') {
+            this.state.productFilter = this.state.productSearch;
+            this.state.productSearchResults = [];
+        } else if (ev.key === 'Escape') {
+            this.state.productSearch = '';
+            this.state.productFilter = '';
+            this.state.productSearchResults = [];
+        }
+    }
+
+    selectProductFromSearch(product) {
+        this.state.productSearch = product.code;
+        this.state.productFilter = product.code;
+        this.state.productSearchResults = [];
+        this.selectProduct(product.id);
+    }
+
+    openModelList() {
+        this.state.modelListFilter = { code: '', drawing: '', quotation: '' };
+        this.state.showModelList = true;
+    }
+
+    onModelListKeydown(field, ev) {
+        if (ev.key === 'Enter') {
+            this.state.modelListFilter[field] = ev.target.value;
+        }
+    }
+
+    closeModelList() {
+        this.state.showModelList = false;
+    }
+
+    selectModelFromList(modelId) {
+        this.state.showModelList = false;
+        this.selectModel(modelId);
+    }
+
+    // ── Model typeahead (replaces a 13k-option select) ──────────────────
+
+    onModelSearchInput(ev) {
+        const q = (ev.target.value || "").trim();
+        this.state.modelSearch = ev.target.value;
+        if (!q) {
+            this.state.modelSearchResults = [];
+            return;
+        }
+        const ql = q.toLowerCase();
+        this.state.modelSearchResults = this.state.models
+            .filter(m => this.matchesCode(m, ql))
+            .slice(0, 50);
+    }
+
+    async onModelSearchKeydown(ev) {
+        if (ev.key === "Enter") {
+            const q = (this.state.modelSearch || "").trim().toLowerCase();
+            const exact = this.state.models.find(
+                m => (m.code || "").toLowerCase() === q ||
+                     (m.alt_code || "").toLowerCase() === q);
+            const pick = exact || this.state.modelSearchResults[0];
+            if (pick) {
+                await this.selectModelFromSearch(pick);
+            }
+        } else if (ev.key === "Escape") {
+            this.state.modelSearchResults = [];
+            const active = this.activeModel;
+            this.state.modelSearch = active ? this.codeOf(active) : "";
+        }
+    }
+
+    async selectModelFromSearch(model) {
+        this.state.modelSearch = this.codeOf(model);
+        this.state.modelSearchResults = [];
+        await this.selectModel(model.id);
+    }
+
+    setImageMode(mode) {
+        this.state.imageMode = mode;
+    }
+
+    onBottomSplitterMouseDown(ev) {
+        ev.preventDefault();
+        const workspace = ev.target.closest('.pdp-workspace');
+        const bottomPane = workspace.querySelector('.pdp-bottom-pane');
+        const startY = ev.clientY;
+        const startHeight = bottomPane.getBoundingClientRect().height;
+        const maxHeight = workspace.getBoundingClientRect().height - 100;
+        const onMouseMove = (e) => {
+            const newHeight = Math.max(80, Math.min(maxHeight, startHeight + (startY - e.clientY)));
+            bottomPane.style.height = newHeight + 'px';
+        };
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }
+
+    openFullScreenImage() {
+        this.state.showFullScreenImage = true;
+    }
+
+    closeFullScreenImage() {
+        this.state.showFullScreenImage = false;
+    }
+
+    async onDrawingChange(ev) {
+        if (!this.activeModel) return;
+        const val = ev.target.value;
+        this.activeModel.drawing = val;
+        try {
+            await this.orm.write("pdp.product.model", [this.activeModel.id], { drawing: val });
+        } catch (e) {
+            this.notification.add("Error saving Drawing#: " + e.message, { type: "danger" });
+        }
+    }
+
+    async onQuotationChange(ev) {
+        if (!this.activeModel) return;
+        const val = ev.target.value;
+        this.activeModel.quotation = val;
+        try {
+            await this.orm.write("pdp.product.model", [this.activeModel.id], { quotation: val });
+        } catch (e) {
+            this.notification.add("Error saving Quotation#: " + e.message, { type: "danger" });
+        }
+    }
+
+    async onPurityChange(ev) {
+        this.state.selectedPurityId = parseInt(ev.target.value) || null;
+        await this.recalculatePrice();
+    }
+
+    async onConvMetalChange(ev) {
+        this.state.selectedConvMetal = ev.target.value || null;
+        // Reset purity when switching conv metal so it doesn't carry over an incompatible value
+        this.state.selectedPurityId = null;
+        await this.recalculatePrice();
+    }
+
+    // ==========================================
+    // Model Selection
+    // ==========================================
+
+    async selectModel(modelId) {
+        this.state.selectedModelId = parseInt(modelId);
+        const active = this.state.models.find(m => m.id === this.state.selectedModelId);
+        this.state.modelSearch = active ? this.codeOf(active) : '';
+        this.state.modelSearchResults = [];
+        this.state.productSearch = '';
+        this.state.productSearchResults = [];
+        this.state.productFilter = '';
+        this._resetDeletedLists();
+        this.state.isDirty = false;
+        try {
+            this.state.products = await this.orm.searchRead(
+                "pdp.product",
+                [["model_id", "=", this.state.selectedModelId]],
+                ["id", "code", "create_date", "in_collection", "category_id", "metal", "active", "remark", "alt_code", "legacy_code"]
+            );
+
+            await Promise.all([
+                this.fetchModelPicture(),
+                this.fetchModelMetals(),
+                this.fetchModelLabor(),
+                this.fetchMatchingModels(),
+            ]);
+
+            await this.fetchWhereUsed();
+
+            if (this.state.products.length > 0) {
+                await this.selectProduct(this.state.products[0].id);
+            } else {
+                this.clearProductState();
+            }
+        } catch (e) {
+            console.error("Failed fetching model data", e);
+        }
+    }
+
+    // ==========================================
+    // Product Selection
+    // ==========================================
+
+    async selectProduct(productId) {
+        this.state.selectedProductId = parseInt(productId);
+        // Set default purity from the model metal entry matching this product's metal version
+        const product = this.state.products.find(p => p.id === this.state.selectedProductId);
+        if (product?.metal) {
+            const mw = this.state.metalWeights.find(m => m.metal_version === product.metal);
+            if (mw) {
+                const pid = Array.isArray(mw.purity_id) ? mw.purity_id[0] : mw.purity_id;
+                if (pid) this.state.selectedPurityId = pid;
+            }
+        }
+        try {
+            // fetchModelPicture must finish first: it populates allPictures,
+            // which fetchProductPicture reads to decide what to display.
+            await this.fetchModelPicture();
+            await Promise.all([
+                this.fetchProductPicture(productId),
+                this.fetchProductStones(),
+                this.fetchProductParts(),
+                this.fetchProductLabor(),
+                this.fetchAddonCosts(),
+            ]);
+            await this.recalculatePrice();
+            this._saveNavState();
+        } catch (e) {
+            console.error("Error fetching product details", e);
+        }
+    }
+
+    clearProductState() {
+        this.state.selectedProductId = null;
+        this.state.stoneOriginal = [];
+        this.state.stoneRecut = [];
+        this.state.stoneRows = [];
+        this.state.selectedStoneKey = null;
+        this.state.laborProductCosts = [];
+        this.state.addonCosts = [];
+        this.state.parts = [];
+        this.state.priceLines = [];
+        this.state.priceTotals = { cost: 0, margin: 0, price: 0 };
+        this._currentCompId = null;
+        this._deletedStoneIds = [];
+    }
+
+    setTab(tabName) {
+        this.state.activeTab = tabName;
+        this._saveNavState();
+        if (tabName === 'stones') {
+            this._ensureStonesCatalog();
+        }
+    }
+
+    // ==========================================
+    // New Model
+    // ==========================================
+
+    suggestNextModelCode() {
+        // Audit flow: take the reference model's code and increment its
+        // number (AA(XXX+1)B), skipping codes already taken.
+        const base = this.activeModel?.code
+            || this.state.models[this.state.models.length - 1]?.code || '';
+        const match = /^([A-Za-z]+)(\d+)(.*)$/.exec(base);
+        if (!match) return '';
+        const taken = new Set(this.state.models.map(
+            (m) => (m.code || '').toUpperCase()));
+        let number = parseInt(match[2]);
+        let candidate;
+        do {
+            number += 1;
+            candidate = match[1]
+                + String(number).padStart(match[2].length, '0') + match[3];
+        } while (taken.has(candidate.toUpperCase()));
+        return candidate;
+    }
+
+    suggestCodeForCategory(categoryId) {
+        // Necklace (N) -> N + the number after the last existing N-model,
+        // same digit width, letter-suffixed variants (N123C) counted too.
+        const category = this.productCategories.find(
+            (c) => c.id === parseInt(categoryId));
+        if (!category || !category.code) return '';
+        const prefix = category.code.toUpperCase();
+        const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = new RegExp('^' + escaped + '(\\d+)[A-Z]*$');
+        let maxNumber = 0;
+        let width = 3;
+        for (const model of this.state.models) {
+            const match = pattern.exec((model.code || '').toUpperCase());
+            if (match && parseInt(match[1]) >= maxNumber) {
+                maxNumber = parseInt(match[1]);
+                width = match[1].length;
+            }
+        }
+        const taken = new Set(this.state.models.map(
+            (m) => (m.code || '').toUpperCase()));
+        let number = maxNumber;
+        let candidate;
+        do {
+            number += 1;
+            candidate = prefix + String(number).padStart(width, '0');
+        } while (taken.has(candidate));
+        return candidate;
+    }
+
+    onNewModelCategoryChange(ev) {
+        this.state.newModel.category_id = ev.target.value;
+        const suggested = this.suggestCodeForCategory(ev.target.value);
+        if (suggested) {
+            this.state.newModel.code = suggested;
+        }
+    }
+
+    openNewModel() {
+        const active = this.activeModel;
+        const categoryId = active && active.category_id
+            ? (Array.isArray(active.category_id)
+                ? active.category_id[0] : active.category_id) : '';
+        this.state.newModel = {
+            code: (categoryId && this.suggestCodeForCategory(categoryId))
+                || this.suggestNextModelCode(),
+            category_id: categoryId ? '' + categoryId : '',
+            drawing: '', quotation: '',
+        };
+        this.state.showNewModel = true;
+    }
+
+    async createModel() {
+        const form = this.state.newModel;
+        const code = (form.code || '').trim().toUpperCase();
+        if (!code) {
+            this.notification.add("Enter a model code.", { type: 'warning' });
+            return;
+        }
+        if (this.state.models.some(
+                (m) => (m.code || '').toUpperCase() === code)) {
+            this.notification.add(`Model "${code}" already exists.`,
+                                  { type: 'warning' });
+            return;
+        }
+        try {
+            const created = await this.orm.create("pdp.product.model", [{
+                code,
+                category_id: form.category_id
+                    ? parseInt(form.category_id) : false,
+                drawing: (form.drawing || '').trim() || false,
+                quotation: (form.quotation || '').trim() || false,
+            }]);
+            const modelId = Array.isArray(created) ? created[0] : created;
+            const [record] = await this.orm.searchRead(
+                "pdp.product.model", [["id", "=", modelId]],
+                ["id", "code", "alt_code", "drawing", "quotation", "category_id"]);
+            this.state.models.push(record);
+            this.state.models.sort(
+                (a, b) => (a.code || '').localeCompare(b.code || ''));
+            this.state.showNewModel = false;
+            await this.selectModelFromSearch(record);
+            this.notification.add(
+                `Model ${code} created — add its first product with New or Make Blank.`,
+                { type: 'success' });
+        } catch (error) {
+            this.notification.add(
+                `Could not create the model: ${error.data?.message || error}`,
+                { type: 'danger' });
+        }
+    }
+
+    // ==========================================
+    // Stone entry: pick the TYPE, then narrow by the axes that exist
+    // ==========================================
+    // Choosing one variant among ~14.5k rows was unusable: the concrete
+    // pdp.stone is now RESOLVED from a type plus the shade/shape/size
+    // combinations that actually exist for it (and carry a price).
+
+    _ensureStonesCatalog() {
+        if (!this._stonesCatalogPromise) {
+            this._stonesCatalogPromise = (async () => {
+                const rows = await this.orm.searchRead(
+                    "pdp.stone", [["cost", ">", 0]],
+                    ["id", "code", "cost", "type_id", "shade_id",
+                     "shape_id", "size_id"]);
+                const idOf = (ref) => (Array.isArray(ref) ? ref[0] : ref) || 0;
+                this._stonesCatalog = rows.map((row) => ({
+                    id: row.id, code: row.code, cost: row.cost,
+                    type: idOf(row.type_id), shade: idOf(row.shade_id),
+                    shape: idOf(row.shape_id), size: idOf(row.size_id),
+                }));
+                const types = new Set(this._stonesCatalog.map((s) => s.type));
+                this.pricedTypes = this.stoneTypes.filter((t) => types.has(t.id));
+            })();
+        }
+        return this._stonesCatalogPromise;
+    }
+
+    _norm(text) {
+        return (text || '').toLowerCase().normalize('NFD')
+            .replace(/[̀-ͯ]/g, '');
+    }
+
+    // Candidates for a row: priced stones of its type, narrowed by the
+    // axes already chosen. `ignore` lets an axis list its own options.
+    _stoneCandidates(row, ignore) {
+        if (!row || !row._typeId) return [];
+        return (this._stonesCatalog || []).filter((s) =>
+            s.type === row._typeId
+            && (ignore === 'shade' || !row._shadeId || s.shade === row._shadeId)
+            && (ignore === 'shape' || !row._shapeId || s.shape === row._shapeId)
+            && (ignore === 'size' || !row._sizeId || s.size === row._sizeId));
+    }
+
+    stoneAxisOptions(row, axis) {
+        const list = { shade: this.stoneShades, shape: this.stoneShapes,
+                       size: this.stoneSizes }[axis];
+        const label = { shade: 'shade', shape: 'shape', size: 'name' }[axis];
+        const ids = new Set(this._stoneCandidates(row, axis).map((s) => s[axis]));
+        return (list || []).filter((item) => ids.has(item.id))
+            .map((item) => ({ id: item.id, label: item[label] }));
+    }
+
+    async openTypeCombo(key) {
+        this.state.stoneCombo.key = key;
+        this.state.stoneCombo.query = '';
+        this.state.stoneCombo.loading = !this._stonesCatalog;
+        this.filterTypeCombo();
+        try {
+            await this._ensureStonesCatalog();
+        } catch (error) {
+            this._stonesCatalogPromise = null;
+            this.state.stoneCombo.loading = false;
+            this.notification.add(
+                `Could not load the stone catalogue: ${error.data?.message || error}`,
+                { type: 'danger' });
+            return;
+        }
+        this.state.stoneCombo.loading = false;
+        if (this.state.stoneCombo.key === key) this.filterTypeCombo();
+    }
+
+    filterTypeCombo() {
+        const query = this._norm(this.state.stoneCombo.query).trim();
+        const scored = [];
+        for (const type of (this.pricedTypes || [])) {
+            const name = this._norm(type.name);
+            const code = this._norm(type.code);
+            let score = null;
+            if (!query) score = 5;
+            else if (code === query) score = 0;
+            else if (name === query) score = 1;
+            else if (name.startsWith(query)) score = 2;
+            else if (name.split(/[^a-z0-9]+/).some((w) => w.startsWith(query))) score = 3;
+            else if (name.includes(query) || code.includes(query)) score = 4;
+            if (score !== null) scored.push([score, type]);
+        }
+        scored.sort((a, b) => a[0] - b[0] || a[1].name.localeCompare(b[1].name));
+        this.state.stoneCombo.results = scored.map((e) => e[1]).slice(0, 40);
+    }
+
+    closeStoneCombo() {
+        this.state.stoneCombo.key = null;
+        this.state.stoneCombo.results = [];
+    }
+
+    onTypeComboKeydown(key, ev) {
+        if (ev.key === 'Escape') {
+            this.closeStoneCombo();
+        } else if (ev.key === 'Enter') {
+            ev.preventDefault();
+            const first = this.state.stoneCombo.results[0];
+            if (this.state.stoneCombo.key === key && first) {
+                this.pickStoneType(key, first);
+            }
+        }
+    }
+
+    onTypeComboBlur(key) {
+        setTimeout(() => {
+            if (this.state.stoneCombo.key === key) this.closeStoneCombo();
+        }, 150);
+    }
+
+    async pickStoneType(key, type) {
+        const row = this.state.stoneRows.find((r) => r._key === key);
+        if (!row) return;
+        this.closeStoneCombo();
+        row._typeId = type.id;
+        row._typeName = type.name;
+        row._shadeId = false;
+        row._shapeId = false;
+        row._sizeId = false;
+        row._dirty = true;
+        this.state.isDirty = true;
+        await this._resolveStone(row);
+    }
+
+    async onStoneAxisChange(key, axis, value) {
+        const row = this.state.stoneRows.find((r) => r._key === key);
+        if (!row) return;
+        row[{ shade: '_shadeId', shape: '_shapeId', size: '_sizeId' }[axis]] =
+            parseInt(value) || false;
+        row._dirty = true;
+        this.state.isDirty = true;
+        await this._resolveStone(row);
+    }
+
+    // One candidate left -> that is the stone; several -> wait for more
+    // narrowing; none -> the combination does not exist (or has no price).
+    async _resolveStone(row) {
+        const candidates = this._stoneCandidates(row, null);
+        row._stoneChoices = candidates.length;
+        if (candidates.length === 1) {
+            await this._applyStone(row, candidates[0]);
+        } else {
+            row.stone_id = false;
+            row._stoneValid = false;
+            row._stoneDetail = null;
+            row._stoneCode = '';
+            if (candidates.length === 0 && row._typeId) {
+                this.notification.add(
+                    "No priced stone exists with this combination — "
+                    + "check it in Manage → Stones (Unit Costs).",
+                    { type: 'warning' });
+            }
+        }
+        this._refreshSuggestedCode();
+    }
+
+    async _applyStone(row, candidate) {
+        const [detail] = await this.orm.read(
+            "pdp.stone", [candidate.id],
+            ["id", "code", "type_id", "shape_id", "shade_id", "size_id",
+             "cost", "currency_id"]);
+        row.stone_id = [detail.id, detail.code];
+        row._stoneCode = detail.code;
+        row._stoneValid = true;
+        row._stoneDetail = detail;
+        row._stoneTypeName = this._getStoneTypeName(detail);
+        const idOf = (ref) => (Array.isArray(ref) ? ref[0] : ref) || false;
+        row._typeId = idOf(detail.type_id);
+        row._shadeId = idOf(detail.shade_id);
+        row._shapeId = idOf(detail.shape_id);
+        row._sizeId = idOf(detail.size_id);
+        try {
+            const weights = await this.orm.searchRead(
+                "pdp.stone.weight",
+                [["type_id", "=", row._typeId],
+                 ["shape_id", "=", row._shapeId || false],
+                 ["shade_id", "=", row._shadeId || false],
+                 ["size_id", "=", row._sizeId || false]],
+                ["weight"], { limit: 1 });
+            if (weights.length && weights[0].weight) {
+                row.weight = weights[0].weight.toString().replace('.', ',');
+            }
+        } catch (error) {
+            console.warn("Could not fetch stone weight:", error);
+        }
+    }
+
+    async onMarginChange(ev) {
+        if (ev.target.value) {
+            this.state.selectedMarginId = parseInt(ev.target.value);
+            await this.recalculatePrice();
+        }
+    }
+
+    async onCurrencyChange(ev) {
+        if (ev.target.value) {
+            this.state.selectedCurrencyId = parseInt(ev.target.value);
+            const curr = this.state.currencies.find(c => c.id === this.state.selectedCurrencyId);
+            if (curr) {
+                this.state.currencySymbol = curr.symbol;
+                this.state.usRate = curr.rate || 1.0;
+            }
+            await this.recalculatePrice();
+        }
+    }
+
+    openCurrencyRates() {
+        this._saveNavState();
+        this.action.doAction('pdp_base.action_pdp_currency_setting');
+    }
+
+// ==========================================
+    // Data Fetching
+    // ==========================================
+
+    async fetchModelPicture() {
+        try {
+            const modelId   = this.state.selectedModelId;
+            const productId = this.state.selectedProductId ? parseInt(this.state.selectedProductId) : null;
+
+            // Model-scoped photos visible from any product of this model
+            const modelDomain = ["&", ["scope", "=", "model"], ["product_ids.model_id", "=", modelId]];
+
+            // Product-scoped photos only for the currently selected product
+            const productDomain = productId
+                ? ["&", ["scope", "=", "product"], ["product_ids", "in", [productId]]]
+                : null;
+
+            const domain = productDomain ? ["|", ...modelDomain, ...productDomain] : modelDomain;
+
+            const pics = await this.orm.searchRead(
+                "pdp.picture",
+                domain,
+                ["id", "filename", "product_ids", "scope"],
+            );
+            this.state.allPictures = pics;
+            if (!pics.some(p => p.id === this.state.pictureId)) {
+                const display = pics.find(p => p.scope === "model") || pics[0] || null;
+                this.state.pictureId  = display ? display.id : null;
+                this.state.pictureUrl = display ? `/web/image/pdp.picture/${display.id}/image_1920` : null;
+                this.state.drawingUrl = display ? `/web/image/pdp.picture/${display.id}/drawing_1920` : null;
+            }
+        } catch (e) {
+            this.state.pictureId = null;
+            this.state.pictureUrl = null;
+            this.state.drawingUrl = null;
+            this.state.allPictures = [];
+        }
+    }
+
+    /** Prioritise a product-scoped picture; fall back to a model-scoped thumbnail. */
+    async fetchProductPicture(productId) {
+        try {
+            const pid = parseInt(productId);
+            const inList = p => Array.isArray(p.product_ids) && p.product_ids.includes(pid);
+
+            // 1. Product-specific (scope='product', explicitly linked to this product)
+            const productPic = this.state.allPictures.find(p => p.scope === "product" && inList(p));
+            if (productPic) {
+                this.state.productPictureId = productPic.id;
+                this.state.pictureId  = productPic.id;
+                this.state.pictureUrl = `/web/image/pdp.picture/${productPic.id}/image_1920`;
+                this.state.drawingUrl = `/web/image/pdp.picture/${productPic.id}/drawing_1920`;
+                return;
+            }
+
+            // 2. Model thumbnail fallback (scope='model', linked to all products of model)
+            this.state.productPictureId = null;
+            const modelPic = this.state.allPictures.find(p => p.scope === "model" && inList(p));
+            if (modelPic) {
+                this.state.pictureId  = modelPic.id;
+                this.state.pictureUrl = `/web/image/pdp.picture/${modelPic.id}/image_1920`;
+                this.state.drawingUrl = `/web/image/pdp.picture/${modelPic.id}/drawing_1920`;
+            } else {
+                // This product has no picture at all
+                this.state.pictureId  = null;
+                this.state.pictureUrl = null;
+                this.state.drawingUrl = null;
+            }
+        } catch (e) {
+            this.state.productPictureId = null;
+        }
+    }
+
+    /** Make a picture the active display (called from the picture manager). */
+    setActivePicture(picId) {
+        this.state.pictureId  = picId;
+        this.state.pictureUrl = `/web/image/pdp.picture/${picId}/image_1920`;
+        this.state.drawingUrl = `/web/image/pdp.picture/${picId}/drawing_1920`;
+        const pid = this.state.selectedProductId ? parseInt(this.state.selectedProductId) : null;
+        const pic = this.state.allPictures.find(p => p.id === picId);
+        this.state.productPictureId =
+            (pid && pic?.scope === "product" && pic?.product_ids?.includes(pid)) ? picId : null;
+    }
+
+    /**
+     * @param {string} field  - 'image_1920' or 'drawing_1920'
+     * @param {string} scope  - 'model' | 'product'
+     */
+    triggerImageUpload(field, scope) {
+        const input = document.getElementById(`pdp-upload-${field}-${scope}`);
+        if (input) input.click();
+    }
+
+    async onImageFileSelected(ev, field, scope) {
+        const file = ev.target.files[0];
+        if (!file) return;
+        ev.target.value = "";   // reset so the same file can be re-selected later
+        try {
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload  = (e) => resolve(e.target.result.split(",")[1]);
+                reader.onerror = (e) => reject(new Error("FileReader error: " + e.target.error));
+                reader.readAsDataURL(file);
+            });
+
+            const filenameField = field === "image_1920" ? "filename" : "drawing_filename";
+            const productId = this.state.selectedProductId;
+            let newId;
+
+            if (scope === "product") {
+                const pid = parseInt(productId);
+                // Drawing on an existing product picture → add drawing to it
+                if (field === "drawing_1920" && this.state.productPictureId) {
+                    await this.orm.write("pdp.picture", [this.state.productPictureId], {
+                        drawing_1920: base64,
+                        drawing_filename: file.name,
+                    });
+                    newId = this.state.productPictureId;
+                } else {
+                    [newId] = await this.orm.create("pdp.picture", [{
+                        scope: "product",
+                        product_ids: [[4, pid]],
+                        [field]: base64,
+                        [filenameField]: file.name,
+                    }]);
+                    this.state.productPictureId = newId;
+                }
+            } else {
+                // scope='model' — thumbnail shared across all products of this model
+                const modelProducts = await this.orm.searchRead(
+                    "pdp.product",
+                    [["model_id", "=", this.state.selectedModelId]],
+                    ["id"]
+                );
+                if (!modelProducts.length) {
+                    this.notification.add(
+                        "Add a product to this model before uploading a photo.",
+                        { type: "warning" }
+                    );
+                    return;
+                }
+                const existingModelPic = this.state.allPictures.find(p => p.scope === "model");
+                if (field === "drawing_1920" && existingModelPic) {
+                    await this.orm.write("pdp.picture", [existingModelPic.id], {
+                        drawing_1920: base64,
+                        drawing_filename: file.name,
+                    });
+                    newId = existingModelPic.id;
+                } else {
+                    [newId] = await this.orm.create("pdp.picture", [{
+                        scope: "model",
+                        product_ids: modelProducts.map(p => [4, p.id]),
+                        [field]: base64,
+                        [filenameField]: file.name,
+                    }]);
+                }
+            }
+
+            this.state.pictureId = newId;
+            if (field === "image_1920") {
+                this.state.pictureUrl = `/web/image/pdp.picture/${newId}/image_1920`;
+            } else {
+                this.state.drawingUrl = `/web/image/pdp.picture/${newId}/drawing_1920`;
+            }
+            await this.fetchModelPicture();
+        } catch (err) {
+            this.notification.add(
+                err?.data?.message || err?.message || "Failed to upload image",
+                { type: "danger" }
+            );
+        }
+    }
+
+    async deletePictureField(field) {
+        if (!this.state.pictureId) return;
+        const productId = this.state.selectedProductId;
+        const picId     = this.state.pictureId;
+        const pid       = productId ? parseInt(productId) : null;
+        const pic       = this.state.allPictures.find(p => p.id === picId);
+        const isProductPic = !!(pid && pic?.scope === "product" && pic?.product_ids?.includes(pid));
+
+        if (isProductPic && pid) {
+            // Remove the M2M link for this product; auto-delete if no links remain
+            await this.orm.write("pdp.picture", [picId], { product_ids: [[3, pid]] });
+            const remaining = await this.orm.read("pdp.picture", [picId], ["product_ids"]);
+            if (!remaining[0].product_ids.length) {
+                await this.orm.unlink("pdp.picture", [picId]);
+            }
+            this.state.productPictureId = null;
+        } else {
+            // Model-level picture — delete the field (or the whole record if no other field)
+            const isDrawing  = field === "drawing_1920";
+            const otherField = isDrawing ? "image_1920" : "drawing_1920";
+            const rec = await this.orm.read("pdp.picture", [picId], [otherField]);
+            if (rec[0][otherField]) {
+                await this.orm.write("pdp.picture", [picId], {
+                    [field]: false,
+                    [isDrawing ? "drawing_filename" : "filename"]: false,
+                });
+            } else {
+                await this.orm.unlink("pdp.picture", [picId]);
+            }
+        }
+        // Clear display immediately for instant feedback
+        this.state.pictureId = null;
+        this.state.pictureUrl = null;
+        this.state.drawingUrl = null;
+        await this.fetchModelPicture();
+        if (productId) await this.fetchProductPicture(parseInt(productId));
+    }
+
+    async deletePictureById(picId) {
+        const pic = this.state.allPictures.find(p => p.id === picId);
+        const pid = this.state.selectedProductId ? parseInt(this.state.selectedProductId) : null;
+
+        if (pic?.scope === "product" && pid) {
+            // Unlink from this product only; delete the record if no links remain
+            await this.orm.write("pdp.picture", [picId], { product_ids: [[3, pid]] });
+            const remaining = await this.orm.read("pdp.picture", [picId], ["product_ids"]);
+            if (!remaining[0]?.product_ids?.length) {
+                await this.orm.unlink("pdp.picture", [picId]);
+            }
+        } else {
+            await this.orm.unlink("pdp.picture", [picId]);
+        }
+
+        if (this.state.pictureId === picId) {
+            this.state.pictureId = null;
+            this.state.pictureUrl = null;
+            this.state.drawingUrl = null;
+            this.state.productPictureId = null;
+        }
+        await this.fetchModelPicture();
+        const productId = this.state.selectedProductId;
+        if (productId) await this.fetchProductPicture(parseInt(productId));
+        if (this.state.allPictures.length === 0) this.state.showPictureManager = false;
+    }
+
+    async fetchModelMetals() {
+        try {
+            const rows = await this.orm.searchRead(
+                "pdp.product.model.metal",
+                [["model_id", "=", this.state.selectedModelId]],
+                ["id", "metal_id", "purity_id", "weight", "metal_version"]
+            );
+            this.state.metalWeights = rows.map(r => ({ ...r, _key: r.id, _dirty: false }));
+        } catch (e) {
+            this.state.metalWeights = [];
+        }
+    }
+
+    async fetchModelLabor() {
+        try {
+            const rows = await this.orm.searchRead(
+                "pdp.labor.cost.model",
+                [["model_id", "=", this.state.selectedModelId]],
+                ["id", "labor_id", "metal", "cost", "currency_id"]
+            );
+            this.state.laborModelCosts = rows.map(r => ({ ...r, _key: r.id, _dirty: false }));
+        } catch (e) {
+            this.state.laborModelCosts = [];
+        }
+    }
+
+    async fetchMatchingModels() {
+        try {
+            const matches = await this.orm.searchRead(
+                "pdp.product.model.matching",
+                ["|", ["model_one_id", "=", this.state.selectedModelId], ["model_two_id", "=", this.state.selectedModelId]],
+                ["id", "model_one_id", "model_two_id"]
+            );
+
+            const matchedIds = matches.map(m =>
+                m.model_one_id[0] === this.state.selectedModelId
+                    ? m.model_two_id[0]
+                    : m.model_one_id[0]
+            );
+
+            if (matchedIds.length > 0) {
+                this.state.matchingModels = await this.orm.searchRead(
+                    "pdp.product.model",
+                    [["id", "in", matchedIds]],
+                    ["id", "code", "picture_id"]
+                );
+            } else {
+                this.state.matchingModels = [];
+            }
+        } catch (e) {
+            this.state.matchingModels = [];
+        }
+    }
+
+    async fetchWhereUsed() {
+        try {
+            if (!this.state.metalWeights.length) { this.state.whereUsedModels = []; return; }
+            const metalIds = [...new Set(
+                this.state.metalWeights.map(m => this.m2oId(m.metal_id)).filter(Boolean)
+            )];
+            if (!metalIds.length) { this.state.whereUsedModels = []; return; }
+            // Common metals (W, Y...) are used by almost every model: an
+            // unbounded query returned >10k rows on each model selection.
+            const usages = await this.orm.searchRead(
+                "pdp.product.model.metal",
+                [["metal_id", "in", metalIds], ["model_id", "!=", this.state.selectedModelId]],
+                ["model_id"],
+                { limit: 800 }
+            );
+            const seen = new Set();
+            this.state.whereUsedModels = usages.reduce((acc, u) => {
+                const mid = u.model_id[0];
+                if (!seen.has(mid)) { seen.add(mid); acc.push({ id: mid, code: u.model_id[1] }); }
+                return acc;
+            }, []);
+        } catch (e) {
+            this.state.whereUsedModels = [];
+        }
+    }
+
+    async fetchProductStones() {
+        try {
+            const productData = await this.orm.read("pdp.product", [this.state.selectedProductId], ["stone_composition_id"]);
+            const compId = productData[0]?.stone_composition_id?.[0] || null;
+            this._currentCompId = compId;
+            if (compId) {
+                const stones = await this.orm.searchRead(
+                    "pdp.product.stone", [["composition_id", "=", compId]],
+                    ["id", "line_num", "stone_id", "pieces", "weight", "reshaped_weight", "setting", "setting_type_id",
+                     "reshaped_shape_id", "reshaped_size_id", "is_center"]
+                );
+                // Batch-fetch stone details (type/shade/shape/size/cost/currency) in one query
+                const stoneIds = stones.filter(s => s.stone_id).map(s => Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id);
+                let detailMap = {};
+                if (stoneIds.length) {
+                    const details = await this.orm.read("pdp.stone", stoneIds, ["id", "code", "type_id", "shape_id", "shade_id", "size_id", "weight", "cost", "currency_id"]);
+                    // note: cost/currency_id already included above
+                    detailMap = Object.fromEntries(details.map(d => [d.id, d]));
+                }
+                this.state.stoneRows = stones.map(s => {
+                    const sid = Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id;
+                    const detail = sid ? (detailMap[sid] || null) : null;
+                    return {
+                        ...s, _key: s.id, _dirty: false,
+                        _stoneCode: detail ? detail.code : (Array.isArray(s.stone_id) ? s.stone_id[1] : ''),
+                        _stoneValid: !!sid,
+                        _stoneDetail: detail,
+                        _stoneTypeName: detail ? this._getStoneTypeName(detail) : '',
+                        _typeId: detail && detail.type_id
+                            ? (Array.isArray(detail.type_id) ? detail.type_id[0] : detail.type_id) : false,
+                        _shadeId: detail && detail.shade_id
+                            ? (Array.isArray(detail.shade_id) ? detail.shade_id[0] : detail.shade_id) : false,
+                        _shapeId: detail && detail.shape_id
+                            ? (Array.isArray(detail.shape_id) ? detail.shape_id[0] : detail.shape_id) : false,
+                        _sizeId: detail && detail.size_id
+                            ? (Array.isArray(detail.size_id) ? detail.size_id[0] : detail.size_id) : false,
+                        _stoneChoices: detail ? 1 : 0,
+                    };
+                });
+                // Helper: resolve display names from preloaded lookup arrays
+                const _typeName  = (d) => {
+                    const id = d?.type_id  ? (Array.isArray(d.type_id)  ? d.type_id[0]  : d.type_id)  : null;
+                    return id ? (this.stoneTypes.find(t => t.id === id)?.name  || '') : '';
+                };
+                const _shadeName = (d) => {
+                    const id = d?.shade_id ? (Array.isArray(d.shade_id) ? d.shade_id[0] : d.shade_id) : null;
+                    return id ? (this.stoneShades.find(s => s.id === id)?.shade || '') : '';
+                };
+                const _shapeName = (shapeField) => {
+                    const id = shapeField ? (Array.isArray(shapeField) ? shapeField[0] : shapeField) : null;
+                    return id ? (this.stoneShapes.find(s => s.id === id)?.shape || '') : '';
+                };
+
+                // Aggregate: group by (type, shade, shape), sum pieces + weight
+                const _aggregate = (rows) => {
+                    const map = new Map();
+                    for (const { key, type, shade, shape, pieces, weight } of rows) {
+                        if (!map.has(key)) map.set(key, { type, shade, shape, pieces: 0, weight: 0 });
+                        const g = map.get(key);
+                        g.pieces += pieces;
+                        g.weight += weight;
+                    }
+                    return Array.from(map.values());
+                };
+
+                this.state.stoneOriginal = _aggregate(stones.map(s => {
+                    const sid = Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id;
+                    const d = sid ? (detailMap[sid] || null) : null;
+                    const typeId  = d?.type_id  ? (Array.isArray(d.type_id)  ? d.type_id[0]  : d.type_id)  : 0;
+                    const shadeId = d?.shade_id ? (Array.isArray(d.shade_id) ? d.shade_id[0] : d.shade_id) : 0;
+                    const shapeId = d?.shape_id ? (Array.isArray(d.shape_id) ? d.shape_id[0] : d.shape_id) : 0;
+                    const pcs = s.pieces || 0;
+                    const unitWeight = s.weight || d?.weight || 0;
+                    return {
+                        key:    `${typeId}_${shadeId}_${shapeId}`,
+                        type:   _typeName(d),
+                        shade:  _shadeName(d),
+                        shape:  _shapeName(d?.shape_id),
+                        pieces: pcs,
+                        weight: unitWeight * pcs,
+                    };
+                }));
+
+                // Lookup reshaped stone weights from catalog (reshaped_weight is always 0 in DB).
+                // Keys: `${typeId}_${shadeId}_${shapeId}_${sizeId}` → weight per stone.
+                // We index both by reshaped shape and by original shape (fallback).
+                const reshapedWeightMap = new Map();
+                const reshapeSizeIds = [...new Set(
+                    stones
+                        .map(s => s.reshaped_size_id)
+                        .filter(id => id)
+                        .map(id => Array.isArray(id) ? id[0] : id)
+                )];
+                if (reshapeSizeIds.length) {
+                    // Also find slash-variant sizes: if reshaped size name = "3.8",
+                    // look for catalog sizes named "3.8/..." (e.g. "3.8/4.0").
+                    // slashToOriginal maps slash_size_id → original reshaped_size_id
+                    const slashToOriginal = new Map();
+                    for (const origSzId of reshapeSizeIds) {
+                        const origName = this.stoneSizes.find(s => s.id === origSzId)?.name;
+                        if (!origName) continue;
+                        const prefix = origName + '/';
+                        for (const sz of this.stoneSizes) {
+                            if (sz.name.startsWith(prefix)) {
+                                slashToOriginal.set(sz.id, origSzId);
+                            }
+                        }
+                    }
+
+                    const allSizeIds = [...new Set([...reshapeSizeIds, ...slashToOriginal.keys()])];
+                    const reshapedStones = await this.orm.searchRead(
+                        "pdp.stone",
+                        [["size_id", "in", allSizeIds]],
+                        ["id", "type_id", "shade_id", "shape_id", "size_id", "weight"]
+                    );
+                    for (const rs of reshapedStones) {
+                        const tId  = rs.type_id  ? (Array.isArray(rs.type_id)  ? rs.type_id[0]  : rs.type_id)  : 0;
+                        const shId = rs.shade_id ? (Array.isArray(rs.shade_id) ? rs.shade_id[0] : rs.shade_id) : 0;
+                        const spId = rs.shape_id ? (Array.isArray(rs.shape_id) ? rs.shape_id[0] : rs.shape_id) : 0;
+                        const rawSzId = rs.size_id ? (Array.isArray(rs.size_id) ? rs.size_id[0] : rs.size_id) : 0;
+                        // For slash-variant sizes, key by the original size id so lookups match
+                        const szId = slashToOriginal.get(rawSzId) ?? rawSzId;
+                        reshapedWeightMap.set(`${tId}_${shId}_${spId}_${szId}`, rs.weight || 0);
+                    }
+                }
+
+                this.state.stoneRecut = _aggregate(stones.map(s => {
+                    const sid = Array.isArray(s.stone_id) ? s.stone_id[0] : s.stone_id;
+                    const d = sid ? (detailMap[sid] || null) : null;
+                    const typeId      = d?.type_id  ? (Array.isArray(d.type_id)  ? d.type_id[0]  : d.type_id)  : 0;
+                    const shadeId     = d?.shade_id ? (Array.isArray(d.shade_id) ? d.shade_id[0] : d.shade_id) : 0;
+                    const origShapeId = d?.shape_id ? (Array.isArray(d.shape_id) ? d.shape_id[0] : d.shape_id) : 0;
+                    const reshapeShapeRaw = s.reshaped_shape_id;
+                    const reshapeShapeId  = reshapeShapeRaw
+                        ? (Array.isArray(reshapeShapeRaw) ? reshapeShapeRaw[0] : reshapeShapeRaw)
+                        : origShapeId;
+                    const sizeRaw  = s.reshaped_size_id;
+                    const sizeId   = sizeRaw ? (Array.isArray(sizeRaw) ? sizeRaw[0] : sizeRaw) : 0;
+                    const pcs = s.pieces || 0;
+
+                    let unitWeight;
+                    const reshapedWeightVal = parseFloat(s.reshaped_weight) || 0;
+                    if (reshapedWeightVal > 0) {
+                        // Explicit new weight stored on the line — highest priority
+                        unitWeight = reshapedWeightVal;
+                    } else if (sizeId) {
+                        // 1. Exact match: reshaped shape + reshaped size
+                        const keyExact = `${typeId}_${shadeId}_${reshapeShapeId}_${sizeId}`;
+                        // 2. Fallback: original shape + reshaped size (when catalog has no bufftop/cabochon entry)
+                        const keyFallback = `${typeId}_${shadeId}_${origShapeId}_${sizeId}`;
+                        unitWeight = reshapedWeightMap.get(keyExact)
+                            ?? reshapedWeightMap.get(keyFallback)
+                            ?? (s.weight || d?.weight || 0);
+                    } else {
+                        unitWeight = s.weight || d?.weight || 0;
+                    }
+
+                    return {
+                        // Group by ORIGINAL type+shade+shape (same groups as stoneOriginal)
+                        key:    `${typeId}_${shadeId}_${origShapeId}`,
+                        type:   _typeName(d),
+                        shade:  _shadeName(d),
+                        shape:  _shapeName(d?.shape_id),
+                        pieces: pcs,
+                        weight: unitWeight * pcs,
+                    };
+                }));
+            } else {
+                this.state.stoneRows = [];
+                this.state.stoneOriginal = [];
+                this.state.stoneRecut = [];
+            }
+        } catch (e) {
+            this.state.stoneRows = [];
+            this.state.stoneOriginal = [];
+            this.state.stoneRecut = [];
+        }
+        this._refreshSuggestedCode();
+    }
+
+    async fetchProductParts() {
+        try {
+            const rows = await this.orm.searchRead(
+                "pdp.product.part", [["product_id", "=", this.state.selectedProductId]],
+                ["id", "part_id", "quantity"]
+            );
+            this.state.parts = rows.map(r => ({ ...r, _key: r.id, _dirty: false }));
+        } catch (e) {
+            this.state.parts = [];
+        }
+    }
+
+    async fetchProductLabor() {
+        try {
+            const rows = await this.orm.searchRead(
+                "pdp.labor.cost.product", [["product_id", "=", this.state.selectedProductId]],
+                ["id", "labor_id", "cost", "currency_id"]
+            );
+            this.state.laborProductCosts = rows.map(r => ({ ...r, _key: r.id, _dirty: false }));
+        } catch (e) {
+            this.state.laborProductCosts = [];
+        }
+    }
+
+    async fetchAddonCosts() {
+        try {
+            const rows = await this.orm.searchRead(
+                "pdp.addon.cost", [["product_id", "=", this.state.selectedProductId]],
+                ["id", "addon_id", "cost", "currency_id"]
+            );
+            this.state.addonCosts = rows.map(r => ({ ...r, _key: r.id, _dirty: false }));
+        } catch (e) {
+            this.state.addonCosts = [];
+        }
+    }
+
+    // ==========================================
+    // Metal CRUD (model level)
+    // ==========================================
+
+    addMetal() {
+        this.state.metalWeights.push({
+            id: null, _key: -Date.now(), _dirty: true,
+            metal_id: this.allMetals.length > 0 ? [this.allMetals[0].id, this.allMetals[0].code] : false,
+            purity_id: this.purities.length > 0 ? [this.purities[0].id, this.purities[0].code] : false,
+            weight: 0, metal_version: 'W',
+        });
+        this.state.isDirty = true;
+    }
+
+    removeMetal(key) {
+        const idx = this.state.metalWeights.findIndex(r => r._key === key);
+        if (idx === -1) return;
+        const row = this.state.metalWeights[idx];
+        if (row.id) this._deletedMetalIds.push(row.id);
+        this.state.metalWeights.splice(idx, 1);
+        this.state.isDirty = true;
+    }
+
+    setMetalField(key, field, value) {
+        const row = this.state.metalWeights.find(r => r._key === key);
+        if (!row) return;
+        if (field === 'weight') row[field] = parseFloat(value) || 0;
+        else if (field === 'metal_id' || field === 'purity_id') row[field] = parseInt(value) || false;
+        else row[field] = value;
+        row._dirty = true;
+        this.state.isDirty = true;
+    }
+
+    // ==========================================
+    // Labor Model CRUD
+    // ==========================================
+
+    addLaborModel() {
+        this.state.laborModelCosts.push({
+            id: null, _key: -Date.now(), _dirty: true,
+            labor_id: this.laborTypes.length > 0 ? [this.laborTypes[0].id, this.laborTypes[0].code] : false,
+            metal: 'W', cost: 0,
+            currency_id: this.defaultLaborCurrencyId ? [this.defaultLaborCurrencyId, ''] : false,
+        });
+        this.state.isDirty = true;
+    }
+
+    removeLaborModel(key) {
+        const idx = this.state.laborModelCosts.findIndex(r => r._key === key);
+        if (idx === -1) return;
+        const row = this.state.laborModelCosts[idx];
+        if (row.id) this._deletedLaborModelIds.push(row.id);
+        this.state.laborModelCosts.splice(idx, 1);
+        this.state.isDirty = true;
+    }
+
+    setLaborModelField(key, field, value) {
+        const row = this.state.laborModelCosts.find(r => r._key === key);
+        if (!row) return;
+        if (field === 'cost') row[field] = parseFloat(value) || 0;
+        else if (field === 'labor_id' || field === 'currency_id') row[field] = parseInt(value) || false;
+        else row[field] = value;
+        row._dirty = true;
+        this.state.isDirty = true;
+    }
+
+    // ==========================================
+    // Labor Product CRUD
+    // ==========================================
+
+    addLaborProduct() {
+        this.state.laborProductCosts.push({
+            id: null, _key: -Date.now(), _dirty: true,
+            labor_id: this.laborTypes.length > 0 ? [this.laborTypes[0].id, this.laborTypes[0].code] : false,
+            cost: 0,
+            currency_id: this.defaultLaborCurrencyId ? [this.defaultLaborCurrencyId, ''] : false,
+        });
+        this.state.isDirty = true;
+    }
+
+    removeLaborProduct(key) {
+        const idx = this.state.laborProductCosts.findIndex(r => r._key === key);
+        if (idx === -1) return;
+        const row = this.state.laborProductCosts[idx];
+        if (row.id) this._deletedLaborProductIds.push(row.id);
+        this.state.laborProductCosts.splice(idx, 1);
+        this.state.isDirty = true;
+    }
+
+    setLaborProductField(key, field, value) {
+        const row = this.state.laborProductCosts.find(r => r._key === key);
+        if (!row) return;
+        if (field === 'cost') row[field] = parseFloat(value) || 0;
+        else if (field === 'labor_id' || field === 'currency_id') row[field] = parseInt(value) || false;
+        else row[field] = value;
+        row._dirty = true;
+        this.state.isDirty = true;
+    }
+
+    // ==========================================
+    // Addon Cost CRUD (Misc)
+    // ==========================================
+
+    addAddonCost() {
+        this.state.addonCosts.push({
+            id: null, _key: -Date.now(), _dirty: true,
+            addon_id: this.addonTypes.length > 0 ? [this.addonTypes[0].id, this.addonTypes[0].code] : false,
+            cost: 0,
+            currency_id: this.defaultLaborCurrencyId ? [this.defaultLaborCurrencyId, ''] : false,
+        });
+        this.state.isDirty = true;
+    }
+
+    removeAddonCost(key) {
+        const idx = this.state.addonCosts.findIndex(r => r._key === key);
+        if (idx === -1) return;
+        const row = this.state.addonCosts[idx];
+        if (row.id) this._deletedAddonCostIds.push(row.id);
+        this.state.addonCosts.splice(idx, 1);
+        this.state.isDirty = true;
+    }
+
+    setAddonCostField(key, field, value) {
+        const row = this.state.addonCosts.find(r => r._key === key);
+        if (!row) return;
+        if (field === 'cost') row[field] = parseFloat(value) || 0;
+        else if (field === 'addon_id' || field === 'currency_id') row[field] = parseInt(value) || false;
+        else row[field] = value;
+        row._dirty = true;
+        this.state.isDirty = true;
+    }
+
+    // ==========================================
+    // Parts CRUD (product level)
+    // ==========================================
+
+    addPart() {
+        this.state.parts.push({
+            id: null, _key: -Date.now(), _dirty: true,
+            part_id: this.allParts.length > 0 ? [this.allParts[0].id, this.allParts[0].code] : false,
+            quantity: 1,
+        });
+        this.state.isDirty = true;
+    }
+
+    removePart(key) {
+        const idx = this.state.parts.findIndex(r => r._key === key);
+        if (idx === -1) return;
+        const row = this.state.parts[idx];
+        if (row.id) this._deletedPartIds.push(row.id);
+        this.state.parts.splice(idx, 1);
+        this.state.isDirty = true;
+    }
+
+    setPartField(key, field, value) {
+        const row = this.state.parts.find(r => r._key === key);
+        if (!row) return;
+        if (field === 'quantity') row[field] = parseFloat(value) || 0;
+        else if (field === 'part_id') row[field] = parseInt(value) || false;
+        else row[field] = value;
+        row._dirty = true;
+        this.state.isDirty = true;
+    }
+
+    // ==========================================
+    // Stones CRUD
+    // ==========================================
+
+    addStone() {
+        const key = -Date.now();
+        this.state.stoneRows.push({
+            id: null, _key: key, _dirty: true,
+            line_num: '', stone_id: false, _stoneCode: '', _stoneValid: false, _stoneDetail: null, _stoneTypeName: '',
+            _typeId: false, _typeName: '', _shadeId: false, _shapeId: false, _sizeId: false, _stoneChoices: 0,
+            pieces: 1, weight: '0', reshaped_weight: 0, setting: 0, setting_type_id: false,
+            reshaped_shape_id: false, reshaped_size_id: false, is_center: false,
+        });
+        this.state.selectedStoneKey = key;
+        this.state.isDirty = true;
+        this._refreshSuggestedCode();
+    }
+
+    selectStoneRow(key) {
+        this.state.selectedStoneKey = this.state.selectedStoneKey === key ? null : key;
+    }
+
+    _saveNavState() {
+        _workspaceNav = {
+            selectedModelId: this.state.selectedModelId,
+            selectedProductId: this.state.selectedProductId,
+            activeTab: this.state.activeTab,
+            selectedMarginId: this.state.selectedMarginId,
+            selectedCurrencyId: this.state.selectedCurrencyId,
+        };
+    }
+
+    goToManage(actionTag) {
+        this._saveNavState();
+        this.action.doAction({ type: 'ir.actions.client', tag: actionTag });
+    }
+
+    removeStone(key) {
+        const idx = this.state.stoneRows.findIndex(r => r._key === key);
+        if (idx === -1) return;
+        const row = this.state.stoneRows[idx];
+        if (row.id) this._deletedStoneIds.push(row.id);
+        this.state.stoneRows.splice(idx, 1);
+        this.state.isDirty = true;
+        this._refreshSuggestedCode();
+    }
+
     setCenterStone(key) {
         const target = this.state.stoneRows.find(r => r._key === key);
         if (!target) return;
