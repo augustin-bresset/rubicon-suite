@@ -647,12 +647,15 @@
                                                             <span class="text-muted"> — <t t-esc="st.code"/></span>
                                                         </div>
                                                     </t>
-                                                    <div t-if="state.stoneCombo.results.length === 0 and state.stoneCombo.unpriced > 0"
+                                                    <div t-if="state.stoneCombo.loading" class="px-2 py-2 text-muted fst-italic">
+                                                        Loading the stone catalogue…
+                                                    </div>
+                                                    <div t-if="!state.stoneCombo.loading and state.stoneCombo.results.length === 0 and state.stoneCombo.unpriced > 0"
                                                          class="px-2 py-2 text-danger" style="max-width:360px; white-space:normal;">
                                                         <t t-esc="state.stoneCombo.unpriced"/> matching stone(s) have no unit price —
                                                         set it in Manage → Stones → Unit Costs first.
                                                     </div>
-                                                    <div t-if="state.stoneCombo.results.length === 0 and state.stoneCombo.unpriced === 0"
+                                                    <div t-if="!state.stoneCombo.loading and state.stoneCombo.results.length === 0 and state.stoneCombo.unpriced === 0"
                                                          class="px-2 py-2 text-muted">No stone matches.</div>
                                                     <div t-if="state.stoneCombo.results.length === 30"
                                                          class="px-2 py-1 text-muted fst-italic">Type to narrow down…</div>

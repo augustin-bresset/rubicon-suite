@@ -125,7 +125,8 @@ export class PdpWorkspace extends Component {
             newModel: { code: "", category_id: "", drawing: "", quotation: "" },
 
             // Stone picker combo (one open at a time, keyed by row)
-            stoneCombo: { key: null, query: "", results: [], unpriced: 0 },
+            stoneCombo: { key: null, query: "", results: [], unpriced: 0,
+                          loading: false },
 
             // Labor tab
             laborModelCosts: [],
@@ -915,26 +916,39 @@ export class PdpWorkspace extends Component {
     // Stone picker (searchable, priced stones only)
     // ==========================================
 
-    async _ensureStonesCatalog() {
-        if (this._stonesCatalog) return;
-        this._stonesCatalog = [];
-        const rows = await this.orm.searchRead(
-            "pdp.stone", [],
-            ["id", "code", "cost", "type_id", "shade_id", "shape_id", "size_id"]);
-        const nameOf = (list, field, ref) => {
-            const id = Array.isArray(ref) ? ref[0] : ref;
-            return id ? (list.find((x) => x.id === id)?.[field] || '') : '';
-        };
-        this._stonesCatalog = rows.map((s) => {
-            const label = [
-                nameOf(this.stoneTypes, 'name', s.type_id),
-                nameOf(this.stoneShades, 'shade', s.shade_id),
-                nameOf(this.stoneShapes, 'shape', s.shape_id),
-                nameOf(this.stoneSizes, 'name', s.size_id),
-            ].filter(Boolean).join(' ');
-            return { ...s, label,
-                     _search: this._norm(`${label} ${s.code}`) };
-        });
+    _ensureStonesCatalog() {
+        // One load, cached as a PROMISE: concurrent callers (tab opening,
+        // first focus) all await the same request instead of racing on a
+        // half-built array. Filtering is then purely client-side.
+        if (!this._stonesCatalogPromise) {
+            this._stonesCatalogPromise = (async () => {
+                const rows = await this.orm.searchRead(
+                    "pdp.stone", [],
+                    ["id", "code", "cost", "type_id", "shade_id",
+                     "shape_id", "size_id"]);
+                const index = (list, field) => {
+                    const map = new Map();
+                    for (const item of list) map.set(item.id, item[field]);
+                    return map;
+                };
+                const types = index(this.stoneTypes, 'name');
+                const shades = index(this.stoneShades, 'shade');
+                const shapes = index(this.stoneShapes, 'shape');
+                const sizes = index(this.stoneSizes, 'name');
+                const idOf = (ref) => (Array.isArray(ref) ? ref[0] : ref) || 0;
+                this._stonesCatalog = rows.map((s) => {
+                    const label = [
+                        types.get(idOf(s.type_id)),
+                        shades.get(idOf(s.shade_id)),
+                        shapes.get(idOf(s.shape_id)),
+                        sizes.get(idOf(s.size_id)),
+                    ].filter(Boolean).join(' ');
+                    return { ...s, label,
+                             _search: this._norm(`${label} ${s.code}`) };
+                });
+            })();
+        }
+        return this._stonesCatalogPromise;
     }
 
     _norm(text) {
@@ -943,10 +957,15 @@ export class PdpWorkspace extends Component {
     }
 
     async openStoneCombo(key, query) {
-        await this._ensureStonesCatalog();
         this.state.stoneCombo.key = key;
         this.state.stoneCombo.query = query || '';
+        this.state.stoneCombo.loading = !this._stonesCatalog;
         this.filterStoneCombo();
+        await this._ensureStonesCatalog();
+        this.state.stoneCombo.loading = false;
+        if (this.state.stoneCombo.key === key) {
+            this.filterStoneCombo();
+        }
     }
 
     filterStoneCombo() {
