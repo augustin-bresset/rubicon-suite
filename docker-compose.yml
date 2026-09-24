@@ -15,7 +15,13 @@ services:
         max-file: "3"
 
   odoo:
-    image: odoo:18.0
+    # odoo:18.0 plus Chrome and websocket-client for the browser tours
+    # (make test-tours). Rebuild after changing requirements.txt:
+    #   docker compose up -d --build odoo
+    build:
+      context: .
+      dockerfile: ops/docker/odoo/Dockerfile
+    image: rubicon-odoo:dev
     env_file: .env
     depends_on:
       - db

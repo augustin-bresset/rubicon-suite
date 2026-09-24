@@ -272,13 +272,15 @@ backup-help:
 
 # --- Tours / Tests ---
 
+# rubicon_emasur: the PDP workspace calls its notation API (emasur.code.mixin,
+# alt_code) although pdp_frontend does not declare the dependency.
 test-db-init:
 	@echo "→ Dropping test DB $(TEST_DB) (if exists)…"
 	docker compose exec -T db psql -U $(DB_USER) -d postgres \
 	  -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='$(TEST_DB)';" \
 	  -c "DROP DATABASE IF EXISTS $(TEST_DB);"
 	@echo "→ Installing modules into $(TEST_DB)…"
-	$(ODOO_TEST) -i rubicon_env,$(PDP_MODULES) --without-demo=all --stop-after-init --workers=0
+	$(ODOO_TEST) -i rubicon_env,$(PDP_MODULES),rubicon_emasur --without-demo=all --stop-after-init --workers=0
 
 test-tours:
 	$(ODOO_TEST) -u pdp_frontend \

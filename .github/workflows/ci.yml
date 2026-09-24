@@ -27,10 +27,6 @@ jobs:
   odoo-tests:
     name: Odoo module tests
     runs-on: ubuntu-latest
-    container:
-      image: odoo:18.0
-      # The image's default user (odoo) cannot write the runner's workspace.
-      options: --user root
     services:
       db:
         image: postgres:16
@@ -38,6 +34,8 @@ jobs:
           POSTGRES_USER: odoo
           POSTGRES_PASSWORD: odoo
           POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -48,6 +46,10 @@ jobs:
       MODULES: rubicon_env,rubicon_uom,pdp_frontend,gem_notation_pdp,pdp_metal_market,sis_frontend,sis_analysis,rubicon_storage,latex_pdf,rubicon_import,rubicon_audit,rubicon_alert,rubicon_emasur,pcs_simulator,ps_utilities,sis_report
     steps:
       - uses: actions/checkout@v4
+      - name: Build the test image
+        # odoo:18.0 plus Chrome and websocket-client: without them the browser
+        # tours (pdp_frontend TestPdpTours) skip instead of running.
+        run: docker build -f ops/docker/odoo/Dockerfile -t rubicon-odoo:ci .
       - name: Install modules and run their tests
         run: |
           # --test-tags limits the run to our modules (every one that ships a
@@ -55,15 +57,34 @@ jobs:
           # --test-enable would otherwise also run Odoo's own base/web suites.
           tags=$(for d in rubicon_addons/*/tests; do printf '/%s,' "$(basename "$(dirname "$d")")"; done)
           tags=${tags%,}
-          odoo --db_host=db --db_port=5432 --db_user=odoo --db_password=odoo \
-            --addons-path="$GITHUB_WORKSPACE/rubicon_addons,/usr/lib/python3/dist-packages/odoo/addons" \
+          # Tour screenshots land in /tmp/odoo_tests; the image runs as odoo.
+          mkdir -m 777 "$RUNNER_TEMP/odoo_tests"
+          # The tour logger stays at INFO so a skipped tour shows in the log.
+          docker run --rm --network host \
+            -v "$GITHUB_WORKSPACE/rubicon_addons:/mnt/extra-addons:ro" \
+            -v "$RUNNER_TEMP/odoo_tests:/tmp/odoo_tests" \
+            --entrypoint odoo rubicon-odoo:ci \
+            --db_host=localhost --db_port=5432 --db_user=odoo --db_password=odoo \
+            --addons-path=/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons \
             --data-dir=/tmp/odoo-data \
             -d ci -i "$MODULES" --without-demo=all \
             --test-enable --test-tags "$tags" \
             --stop-after-init --workers=0 --max-cron-threads=0 \
-            --log-level=warn 2>&1 | tee odoo-test.log
+            --log-level=warn \
+            --log-handler=odoo.addons.pdp_frontend.tests.test_tours:INFO 2>&1 | tee odoo-test.log
           # Odoo exits 0 even when tests fail; judge from the log.
           grep -E "odoo.tests.stats" odoo-test.log || true
           if grep -qE " (ERROR|CRITICAL) | At least one test failed" odoo-test.log; then
             echo "::error::Odoo reported errors or failing tests (see log above)"; exit 1
           fi
+          # A tour that cannot start Chrome is skipped, not failed.
+          if grep -qE "skipped TestPdpTours" odoo-test.log; then
+            echo "::error::Browser tours were skipped (see log above)"; exit 1
+          fi
+      - name: Upload tour screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tour-screenshots
+          path: ${{ runner.temp }}/odoo_tests
+          if-no-files-found: ignore
