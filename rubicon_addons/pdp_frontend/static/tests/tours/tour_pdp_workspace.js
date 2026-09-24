@@ -5,8 +5,9 @@
  *   Labor tab: add a model-level labor cost row
  *   Save all
  *
- * Tour 6: pdp_tour_workspace_invalid_stone — Invalid stone code warning
- *   Navigate to workspace → Stones tab → enter invalid code → blur → verify warning
+ * Tour 6: pdp_tour_workspace_stone_picker — Stone entry by type
+ *   Stones tab → add a line → an unknown type finds nothing → the tour type
+ *   (one priced stone) keeps what was typed, then resolves to that stone
  *
  * Tour 7: pdp_tour_margin_create — Margin creation via Manage > Margins
  *   Create margin TOUR-MAR-01 → verify in list
@@ -45,11 +46,13 @@ function goToPdpManage(subMenuXmlId) {
     ];
 }
 
+/** Type the model code in the top-bar typeahead; Enter picks the exact match. */
 function selectModel(code) {
-    return [{
-        trigger: ".pdp-workspace .shadow-sm .form-select",
-        run: `selectByLabel ${code}`,
-    }];
+    return [
+        { trigger: ".pdp-workspace input[placeholder='Model code...']", run: `edit ${code}` },
+        { trigger: ".pdp-workspace input[placeholder='Model code...']", run: "press Enter" },
+        { trigger: ".pdp-workspace .border-end.overflow-auto tbody tr td:not([colspan])" },
+    ];
 }
 
 /** Click the first (only) product row in the products table. */
@@ -121,9 +124,11 @@ registry.category("web_tour.tours").add("pdp_tour_workspace_nav", {
     ],
 });
 
-// ── Tour 6: Invalid Stone Warning ─────────────────────────────────────────────
+// ── Tour 6: Stone Picker ──────────────────────────────────────────────────────
 
-registry.category("web_tour.tours").add("pdp_tour_workspace_invalid_stone", {
+const STONE_INPUT = ".pdp-workspace input[placeholder='Stone type...']";
+
+registry.category("web_tour.tours").add("pdp_tour_workspace_stone_picker", {
     url: "/web",
     steps: () => [
         ...goToPdpRoot(),
@@ -132,17 +137,26 @@ registry.category("web_tour.tours").add("pdp_tour_workspace_invalid_stone", {
 
         clickWorkspaceTab("Stones"),
 
-        // Add a new stone row
-        { trigger: ".pdp-workspace .btn-outline-success", run: "click" },
+        // Add a new stone line (the only "+ Add" of the Stones tab)
+        { trigger: ".pdp-workspace .tab-content .btn-outline-success", run: "click" },
 
-        // Type an invalid stone code
-        { trigger: ".pdp-workspace input[placeholder='Code...']", run: "edit INVALID-STONE-XXXX" },
+        // An unknown type matches no priced stone
+        { trigger: STONE_INPUT, run: "edit Zzqx" },
+        { trigger: ".pdp-workspace .tab-content div:contains(No priced stone type matches)" },
 
-        // Blur triggers validateStoneCode (async ORM lookup)
-        { trigger: ".pdp-workspace input[placeholder='Code...']", run: "press Tab" },
+        // The tour type is offered; what was typed survives the re-render
+        { trigger: STONE_INPUT, run: "edit Tour Stone" },
+        {
+            trigger: ".pdp-workspace .tab-content span.fw-bold:contains(Tour Stone)",
+            run() {
+                const value = document.querySelector(STONE_INPUT).value;
+                if (value !== "Tour Stone") throw new Error(`Stone input reads "${value}"`);
+            },
+        },
+        { trigger: ".pdp-workspace .tab-content span.fw-bold:contains(Tour Stone)", run: "click" },
 
-        // Warning notification
-        { trigger: ".o_notification" },
+        // Its single priced stone is resolved: the line carries the stone code
+        { trigger: `${STONE_INPUT}[title='TOUR-STN-01']` },
     ],
 });
 
@@ -158,7 +172,7 @@ registry.category("web_tour.tours").add("pdp_tour_picture_manage", {
         // Placeholder "+" button appears when no picture exists
         {
             trigger: ".pdp-workspace .btn-outline-secondary.rounded-circle",
-            run() { injectPhoto("pdp-upload-image_1920"); },
+            run() { injectPhoto("pdp-upload-image_1920-model"); },
         },
 
         // Image is now displayed

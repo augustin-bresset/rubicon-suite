@@ -1,7 +1,9 @@
 """
 Odoo tour tests for pdp_frontend.
 
-Uses a dedicated test database (rubicon_test).
+Uses a dedicated test database (rubicon_test). The tours need Chrome and
+websocket-client, which the rubicon-odoo image (ops/docker/odoo) adds to
+odoo:18.0; without them every tour is skipped, and CI fails on that.
 
 Create the test DB once:
     make test-db-init
@@ -47,6 +49,18 @@ class TestPdpTours(HttpCase):
             env["pdp.currency.setting"].create(
                 {"currency_id": usd.id, "rate": 1.0, "sequence": 1}
             )
+
+        # Stone picker tour: a type with exactly one priced stone, so picking
+        # the type resolves the line without narrowing shade/shape/size.
+        stone_type = env["pdp.stone.type"].create({"code": "TOURSTN", "name": "Tour Stone"})
+        env["pdp.stone"].create({
+            "code": "TOUR-STN-01",
+            "type_id": stone_type.id,
+            "shape_id": env["pdp.stone.shape"].create({"code": "TSH", "shape": "Tour Shape"}).id,
+            "size_id": env["pdp.stone.size"].create({"name": "1X1"}).id,
+            "cost": 10.0,
+            "currency_id": usd.id,
+        })
 
         # ── Picture tours (Tours 9 & 10) — separate model/product with 2 photos ─
         # Using a dedicated model so Tours 8 (upload from scratch) still sees an
@@ -95,9 +109,9 @@ class TestPdpTours(HttpCase):
         """Select model/product, switch tabs, add a labor cost, save."""
         self.start_tour("/web", "pdp_tour_workspace_nav", login="admin")
 
-    def test_tour_workspace_invalid_stone(self):
-        """Enter an invalid stone code and verify the warning notification."""
-        self.start_tour("/web", "pdp_tour_workspace_invalid_stone", login="admin")
+    def test_tour_workspace_stone_picker(self):
+        """Unknown stone type finds nothing; the tour type resolves its stone."""
+        self.start_tour("/web", "pdp_tour_workspace_stone_picker", login="admin")
 
     def test_tour_margin_create(self):
         """Create a new margin via Manage > Margins and verify it in the list."""

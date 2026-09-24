@@ -36,6 +36,25 @@ function clickTab(text) {
     };
 }
 
+/** Type into the last row of the manage table whose header has a column
+ *  titled headerText. Panels share their layout classes (the page root is a
+ *  .d-flex.flex-column too), so a table is only reliably told apart by its
+ *  columns. */
+function editLastRow(headerText, placeholder, value) {
+    return {
+        trigger: ".pdp-manage-table thead th",
+        run: () => {
+            const table = [...document.querySelectorAll(".pdp-manage-table")].find(
+                (t) => [...t.querySelectorAll("thead th")].some((th) => th.textContent.trim().startsWith(headerText))
+            );
+            const input = table?.querySelector(`tbody tr:last-child input[placeholder='${placeholder}']`);
+            if (!input) throw new Error(`No '${placeholder}' input in the table with a '${headerText}' column`);
+            input.value = value;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        },
+    };
+}
+
 /** Click "Add" (btn-secondary) in a panel identified by its heading text.
  *  Matches headings that START WITH headingText (tolerates appended filter info). */
 function clickPanelAdd(headingText) {
@@ -114,14 +133,8 @@ registry.category("web_tour.tours").add("pdp_tour_stone_manage", {
         clickPanelAdd("Stone Types"),
 
         // Only TTYP row visible (filteredTypes = types assigned to TCAT = just TTYP)
-        {
-            trigger: ".d-flex.flex-column:not(.border-bottom) .pdp-manage-table tbody tr:last-child input[placeholder='Code']",
-            run: "edit TTYP",
-        },
-        {
-            trigger: ".d-flex.flex-column:not(.border-bottom) .pdp-manage-table tbody tr:last-child input[placeholder='Name']",
-            run: "edit Tour Type",
-        },
+        editLastRow("Density", "Code", "TTYP"),
+        editLastRow("Density", "Name", "Tour Type"),
         // Category select already pre-assigned to TCAT (by addType); no need to change it.
 
         // Save cats & types together
@@ -185,10 +198,8 @@ registry.category("web_tour.tours").add("pdp_tour_stone_manage", {
                 );
                 const typeSelect = selects[0];
                 if (!typeSelect) throw new Error("Type filter select not found");
-                const allOpts = [...typeSelect.options].map(o => o.text.trim());
-                console.log("[DEBUG step32] opts count:", allOpts.length, "T-codes:", allOpts.filter(t => /^\[T/.test(t)));
                 const opt = [...typeSelect.options].find(o => o.text.includes("TTYP"));
-                if (!opt) throw new Error("TTYP option not found in type filter. T-options: " + allOpts.filter(t => /^\[T/.test(t)).join("|"));
+                if (!opt) throw new Error("TTYP option not found in type filter");
                 typeSelect.value = opt.value;
                 typeSelect.dispatchEvent(new Event("change", { bubbles: true }));
             },
